@@ -414,8 +414,8 @@ class Game {
 
         // Configuración avanzada de cámara RTS
         this.cameraConfig = {
-            baseSpeed: 1500,      // Píxeles por segundo (teclado)
-            edgeSpeed: 2500,      // Velocidad máxima en bordes
+            baseSpeed: 800,      // Píxeles por segundo (teclado)
+            edgeSpeed: 1200,      // Velocidad máxima en bordes
             edgeThreshold: 30,   // Margen en píxeles para activar scroll
             smoothness: 0.1      // Factor de suavizado (lerp)
         };
@@ -985,7 +985,7 @@ class Game {
     updateCamera(deltaTime) {
         let dx = 0;
         let dy = 0;
-        const dt = deltaTime / 1000; // Convertir a segundos
+        const dt = deltaTime; // Ya viene en segundos desde gameLoop
 
         // 1. Panning por teclado (WASD / Flechas)
         const keys = this.keysPressed;

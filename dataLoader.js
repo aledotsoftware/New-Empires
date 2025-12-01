@@ -71,8 +71,8 @@ class DataLoader {
      * Carga todas las civilizaciones disponibles
      */
     async loadAllCivilizations() {
-        // Lista de civilizaciones disponibles (esto podría venir de un index.json)
-        const availableCivs = ['mongols', 'mesopotamia'];
+        // Lista de civilizaciones disponibles
+        const availableCivs = ['mongols', 'mesopotamia', 'romans', 'vikings', 'argentinians'];
 
         const promises = availableCivs.map(civId => this.loadCivilization(civId));
         await Promise.all(promises);

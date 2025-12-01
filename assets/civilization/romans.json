@@ -1,0 +1,94 @@
+{
+    "civilizationId": "romans",
+    "name": "Imperio Romano",
+    "description": "Maestros de la construcción y la ingeniería. Sus edificios son más resistentes y se construyen más rápido.",
+    "icon": "🏛️",
+    "iconEmoji": "🦅",
+    "color": "#c53030",
+    "primaryColor": "#8b0000",
+    "secondaryColor": "#ffd700",
+    "bonuses": {
+        "buildSpeed": 1.25,
+        "buildingHp": 1.3,
+        "infantryAttack": 1.1,
+        "startingResources": {
+            "wood": 0,
+            "food": 0,
+            "gold": 0,
+            "stone": 50
+        }
+    },
+    "unitOverrides": {
+        "villager": {
+            "name": "Ciudadano Romano",
+            "icon": "👨‍🌾",
+            "gatherBonus": 1.0
+        },
+        "warrior": {
+            "name": "Legionario",
+            "icon": "🛡️",
+            "attack": 12,
+            "hp": 110,
+            "speed": 45
+        },
+        "archer": {
+            "name": "Arquero Romano",
+            "icon": "🏹",
+            "attack": 8,
+            "hp": 60,
+            "speed": 50
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Foro Romano",
+            "icon": "🏛️",
+            "description": "Centro administrativo del imperio romano"
+        },
+        "house": {
+            "name": "Domus",
+            "icon": "🏠",
+            "description": "Vivienda romana típica"
+        },
+        "barracks": {
+            "name": "Castra",
+            "icon": "⚔️",
+            "description": "Campamento militar romano"
+        }
+    },
+    "uniqueUnit": {
+        "id": "centurion",
+        "name": "Centurión",
+        "icon": "🗡️",
+        "baseUnit": "warrior",
+        "age": 19,
+        "bonuses": {
+            "attackDamage": 1.25,
+            "maxHp": 1.36,
+            "speed": 1.11
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "romanEngineering",
+            "name": "Ingeniería Romana",
+            "icon": "🏗️",
+            "category": "ARCHITECTURE",
+            "age": 20,
+            "description": "Técnicas avanzadas de construcción romana con arcos y acueductos.",
+            "cost": {
+                "wood": 200,
+                "stone": 200
+            },
+            "researchTime": 45,
+            "building": "townCenter",
+            "prerequisites": [
+                "stoneMasonry"
+            ],
+            "effects": {
+                "buildingHp": 1.2,
+                "buildSpeed": 1.15
+            }
+        }
+    ]
+}

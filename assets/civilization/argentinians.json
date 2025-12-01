@@ -1,0 +1,95 @@
+{
+    "civilizationId": "argentinians",
+    "name": "Imperio Argentino",
+    "description": "Nación orgullosa con gran capacidad agrícola y unidades de caballería superiores.",
+    "icon": "🌞",
+    "iconEmoji": "☀️",
+    "color": "#75aadb",
+    "primaryColor": "#75aadb",
+    "secondaryColor": "#ffffff",
+    "bonuses": {
+        "buildSpeed": 1.1,
+        "gatherSpeed": 1.15,
+        "cavalryAttack": 1.2,
+        "startingResources": {
+            "wood": 0,
+            "food": 100,
+            "gold": 0,
+            "stone": 0
+        }
+    },
+    "unitOverrides": {
+        "villager": {
+            "name": "Gaucho",
+            "icon": "🧉",
+            "gatherBonus": 1.2
+        },
+        "warrior": {
+            "name": "Miliciano",
+            "icon": "🗡️",
+            "attack": 12,
+            "hp": 110,
+            "speed": 45
+        },
+        "archer": {
+            "name": "Cazador",
+            "icon": "🏹",
+            "attack": 8,
+            "hp": 60,
+            "speed": 50
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Cabildo",
+            "icon": "🏛️",
+            "description": "Centro administrativo colonial argentino"
+        },
+        "house": {
+            "name": "Rancho",
+            "icon": "🏠",
+            "description": "Vivienda de las pampas"
+        },
+        "barracks": {
+            "name": "Fortín",
+            "icon": "⚔️",
+            "description": "Fortaleza fronteriza argentina"
+        }
+    },
+    "uniqueUnit": {
+        "id": "granadero",
+        "name": "Granadero a Caballo",
+        "icon": "🐎",
+        "baseUnit": "warrior",
+        "age": 19,
+        "bonuses": {
+            "attackDamage": 1.33,
+            "maxHp": 1.45,
+            "speed": 1.44,
+            "attackSpeed": 1.2
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "pampasDomination",
+            "name": "Dominio de las Pampas",
+            "icon": "🌾",
+            "category": "ECONOMY",
+            "age": 18,
+            "description": "Maestría en la agricultura y ganadería de las vastas llanuras.",
+            "cost": {
+                "food": 300,
+                "wood": 150
+            },
+            "researchTime": 50,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "gatherRates": {
+                    "food": 1.3
+                },
+                "villagerMaxHp": 15
+            }
+        }
+    ]
+}

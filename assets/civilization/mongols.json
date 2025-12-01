@@ -3,6 +3,7 @@
     "name": "Mongoles",
     "description": "Civilización nómada de las estepas",
     "icon": "🏇",
+    "iconEmoji": "🏹",
     "color": "#8B4513",
     "bonuses": {
         "unitSpeed": 1.15,

@@ -1,94 +1,8 @@
-{
-  "civilizations": {
-    "romans": {
-      "id": "romans",
-      "name": "Imperio Romano",
-      "nameShort": "Romanos",
-      "icon": "🏛️",
-      "color": "#c53030",
-      "primaryColor": "#8b0000",
-      "secondaryColor": "#ffd700",
-      "description": "Maestros de la construcción y la ingeniería. Sus edificios son más resistentes y se construyen más rápido.",
-      "lore": "El poderoso Imperio Romano conquistó gran parte del mundo conocido con su disciplina militar y arquitectura superior.",
-      
-      "bonuses": {
-        "buildSpeed": 1.25,
-        "buildingHp": 1.3,
-        "infantryAttack": 1.1,
-        "startingResources": {
-          "wood": 0,
-          "food": 0,
-          "gold": 0,
-          "stone": 50
-        }
-      },
-      
-      "units": {
-        "villager": {
-          "name": "Ciudadano Romano",
-          "icon": "👨‍🌾",
-          "gatherBonus": 1.0
-        },
-        "warrior": {
-          "name": "Legionario",
-          "icon": "🛡️",
-          "attack": 12,
-          "hp": 110,
-          "speed": 45
-        },
-        "archer": {
-          "name": "Arquero Romano",
-          "icon": "🏹",
-          "attack": 8,
-          "hp": 60,
-          "speed": 50
-        }
-      },
-      
-      "buildings": {
-        "townCenter": {
-          "name": "Foro Romano",
-          "icon": "🏛️"
-        },
-        "house": {
-          "name": "Domus",
-          "icon": "🏠"
-        },
-        "barracks": {
-          "name": "Castra",
-          "icon": "⚔️"
-        }
-      },
-      
-      "uniqueUnit": {
-        "id": "centurion",
-        "name": "Centurión",
-        "icon": "🗡️",
-        "description": "Guerrero de élite con alta resistencia y daño",
-        "cost": {
-          "food": 80,
-          "gold": 40
-        },
-        "stats": {
-          "hp": 150,
-          "attack": 15,
-          "speed": 50,
-          "attackSpeed": 1.3
-        }
-      }
-    },
-    
-    "vikings": {
-      "id": "vikings",
-      "name": "Reino Vikingo",
-      "nameShort": "Vikings",
-      "icon": "⚔️",
       "color": "#2b6cb0",
       "primaryColor": "#1e3a5f",
       "secondaryColor": "#4a90e2",
       "description": "Guerreros feroces del norte. Sus unidades son más rápidas y tienen mayor capacidad de ataque.",
       "lore": "Los temidos guerreros nórdicos, conocidos por su ferocidad en batalla y habilidades de navegación.",
-      
       "bonuses": {
         "unitSpeed": 1.15,
         "unitAttack": 1.15,
@@ -100,7 +14,6 @@
           "stone": 0
         }
       },
-      
       "units": {
         "villager": {
           "name": "Aldeano Vikingo",
@@ -122,7 +35,6 @@
           "speed": 55
         }
       },
-      
       "buildings": {
         "townCenter": {
           "name": "Gran Salón",
@@ -137,7 +49,6 @@
           "icon": "⚔️"
         }
       },
-      
       "uniqueUnit": {
         "id": "jarl",
         "name": "Jarl",

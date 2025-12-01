@@ -81,7 +81,83 @@ const CIVILIZATIONS_DATA = {
             }
         }
     },
+    "argentinians": {
+        "id": "argentinians",
+        "name": "Imperio Argentino",
+        "nameShort": "Argentinos",
+        "icon": "🏛️",
+        "color": "#c53030",
+        "primaryColor": "#8b0000",
+        "secondaryColor": "#ffd700",
+        "description": "Maestros de la construcción y la ingeniería. Sus edificios son más resistentes y se construyen más rápido.",
+        "lore": "El poderoso Imperio Romano conquistó gran parte del mundo conocido con su disciplina militar y arquitectura superior.",
 
+        "bonuses": {
+            "buildSpeed": 1.25,
+            "buildingHp": 1.3,
+            "infantryAttack": 1.1,
+            "startingResources": {
+                "wood": 0,
+                "food": 0,
+                "gold": 0,
+                "stone": 50
+            }
+        },
+
+        "units": {
+            "villager": {
+                "name": "Argento",
+                "icon": "👨‍🌾",
+                "gatherBonus": 1.0
+            },
+            "warrior": {
+                "name": "Miliciano Criollo",
+                "icon": "🛡️",
+                "attack": 12,
+                "hp": 110,
+                "speed": 45
+            },
+            "archer": {
+                "name": "Ballestero Patagónico",
+                "icon": "🏹",
+                "attack": 8,
+                "hp": 60,
+                "speed": 50
+            }
+        },
+
+        "buildings": {
+            "townCenter": {
+                "name": "Cabildo",
+                "icon": "🏛️"
+            },
+            "house": {
+                "name": "Rancho",
+                "icon": "🏠"
+            },
+            "barracks": {
+                "name": "Fortín",
+                "icon": "⚔️"
+            }
+        },
+
+        "uniqueUnit": {
+            "id": "granaderoCaballo",
+            "name": "Granadero a Caballo",
+            "icon": "�",
+            "description": "Granadero a Caballo de élite con alta resistencia y daño, capaz de atacar a caballo. Su velocidad de ataque es más rápida que la de los guerreros. Su velocidad de movimiento es más rápida que la de los guerreros.",
+            "cost": {
+                "food": 80,
+                "gold": 40
+            },
+            "stats": {
+                "hp": 150,
+                "attack": 15,
+                "speed": 50,
+                "attackSpeed": 1.3
+            }
+        }
+    },
     "vikings": {
         "id": "vikings",
         "name": "Reino Vikingo",
@@ -169,16 +245,48 @@ class CivilizationManager {
 
     async loadCivilizations() {
         try {
-            console.log('📂 Intentando cargar civilizations.json...');
-            const response = await fetch('civilizations.json');
-            if (!response.ok) throw new Error('No se pudo leer el archivo');
+            console.log('📂 Cargando civilizaciones desde dataLoader...');
 
-            const data = await response.json();
-            this.civilizations = data.civilizations;
-            console.log('✅ ÉXITO: Civilizaciones cargadas desde civilizations.json');
-            console.log('📋 Civs disponibles:', Object.keys(this.civilizations));
+            // Esperar a que dataLoader esté listo si no lo está
+            if (!dataLoader.isLoaded()) {
+                console.log('⏳ Esperando a que dataLoader inicialice...');
+                await dataLoader.initialize();
+            }
+
+            // Obtener civilizaciones desde dataLoader
+            const loadedCivs = dataLoader.getAllCivilizations();
+
+            if (loadedCivs && loadedCivs.length > 0) {
+                // Convertir array a objeto con civilizationId como clave
+                this.civilizations = {};
+                loadedCivs.forEach(civ => {
+                    const civId = civ.civilizationId || civ.id;
+
+                    // Transformar formato de dataLoader a formato de civilizationManager
+                    this.civilizations[civId] = {
+                        id: civId,
+                        name: civ.name,
+                        nameShort: civ.name,
+                        icon: civ.icon,
+                        color: civ.color,
+                        primaryColor: civ.color,
+                        secondaryColor: civ.secondaryColor || civ.color,
+                        description: civ.description,
+                        lore: civ.description,
+                        bonuses: civ.bonuses || {},
+                        units: civ.unitOverrides || {},
+                        buildings: civ.buildingOverrides || {},
+                        uniqueUnit: civ.uniqueUnit || null
+                    };
+                });
+
+                console.log('✅ ÉXITO: Civilizaciones cargadas desde assets/civilization/');
+                console.log('📋 Civs disponibles:', Object.keys(this.civilizations));
+            } else {
+                throw new Error('No se encontraron civilizaciones en dataLoader');
+            }
         } catch (error) {
-            console.warn('⚠️ AVISO: Usando configuración interna (El archivo JSON no se pudo cargar por CORS o no existe).');
+            console.warn('⚠️ AVISO: Usando configuración interna (fallback):', error.message);
             this.civilizations = CIVILIZATIONS_DATA;
         }
         this.loaded = true;

@@ -1,6 +1,64 @@
 // ==========================================
 // CONFIGURACIÓN DEL JUEGO
 // ==========================================
+const TILE_SIZE = 32; // Tamaño de celda en píxeles
+
+class GridMap {
+    constructor(width, height, tileSize) {
+        this.width = width;
+        this.height = height;
+        this.tileSize = tileSize;
+        this.cols = Math.ceil(width / tileSize);
+        this.rows = Math.ceil(height / tileSize);
+        this.grid = new Array(this.cols * this.rows).fill(null);
+    }
+
+    getIndex(col, row) {
+        return row * this.cols + col;
+    }
+
+    isAreaFree(startCol, startRow, widthTiles, heightTiles) {
+        for (let r = startRow; r < startRow + heightTiles; r++) {
+            for (let c = startCol; c < startCol + widthTiles; c++) {
+                if (c < 0 || c >= this.cols || r < 0 || r >= this.rows) return false;
+                if (this.grid[this.getIndex(c, r)] !== null) return false;
+            }
+        }
+        return true;
+    }
+
+    occupyArea(startCol, startRow, widthTiles, heightTiles, entity) {
+        for (let r = startRow; r < startRow + heightTiles; r++) {
+            for (let c = startCol; c < startCol + widthTiles; c++) {
+                if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
+                    this.grid[this.getIndex(c, r)] = entity;
+                }
+            }
+        }
+    }
+
+    freeArea(startCol, startRow, widthTiles, heightTiles) {
+        for (let r = startRow; r < startRow + heightTiles; r++) {
+            for (let c = startCol; c < startCol + widthTiles; c++) {
+                if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
+                    this.grid[this.getIndex(c, r)] = null;
+                }
+            }
+        }
+    }
+
+    snapToGrid(x, y) {
+        const col = Math.floor(x / this.tileSize);
+        const row = Math.floor(y / this.tileSize);
+        return {
+            x: col * this.tileSize,
+            y: row * this.tileSize,
+            col,
+            row
+        };
+    }
+}
+
 const CONFIG = {
     CANVAS_WIDTH: 2000,
     CANVAS_HEIGHT: 1500,
@@ -15,6 +73,14 @@ const CONFIG = {
     STARTING_POPULATION: 3,
     STARTING_MAX_POPULATION: 5,
     HOUSE_POPULATION_INCREASE: 5,
+
+    // Tamaños de edificios (en tiles)
+    BUILDING_SIZES: {
+        house: { width: 3, height: 3 },
+        barracks: { width: 4, height: 4 },
+        townCenter: { width: 5, height: 5 },
+        storage: { width: 2, height: 2 }
+    },
 
     // Costos de construcción
     COSTS: {
@@ -160,6 +226,9 @@ class Game {
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
         this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+
+        // SISTEMA DE GRID (Cuadrícula de construcción y colisiones)
+        this.gridMap = new GridMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
 
         // SISTEMA DE TECNOLOGÍAS
         this.techManager = new TechManager(this);
@@ -460,6 +529,16 @@ class Game {
     placeBuilding() {
         if (!this.buildMode) return;
 
+        // Calcular posición en grid
+        const snap = this.gridMap.snapToGrid(this.mouse.worldX, this.mouse.worldY);
+        const size = CONFIG.BUILDING_SIZES[this.buildMode];
+
+        // Verificar si el área está libre
+        if (!this.gridMap.isAreaFree(snap.col, snap.row, size.width, size.height)) {
+            this.showNotification('No se puede construir aquí: Espacio ocupado', 'error');
+            return;
+        }
+
         const cost = CONFIG.COSTS[this.buildMode];
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
@@ -471,25 +550,41 @@ class Game {
             this.resources[resource] -= amount;
         }
 
+        // Calcular centro del edificio basado en tiles
+        const centerX = snap.x + (size.width * TILE_SIZE) / 2;
+        const centerY = snap.y + (size.height * TILE_SIZE) / 2;
+
         // Crear edificio
         let building;
         switch (this.buildMode) {
             case 'house':
-                building = new House(this.mouse.worldX, this.mouse.worldY, 'player');
+                building = new House(centerX, centerY, 'player');
                 this.maxPopulation += CONFIG.HOUSE_POPULATION_INCREASE;
                 break;
             case 'barracks':
-                building = new Barracks(this.mouse.worldX, this.mouse.worldY, 'player');
+                building = new Barracks(centerX, centerY, 'player');
                 break;
             case 'townCenter':
-                building = new TownCenter(this.mouse.worldX, this.mouse.worldY, 'player');
+                building = new TownCenter(centerX, centerY, 'player');
                 break;
             case 'storage':
-                building = new Storage(this.mouse.worldX, this.mouse.worldY, 'player');
+                building = new Storage(centerX, centerY, 'player');
                 break;
         }
 
         if (building) {
+            // Asignar propiedades de grid
+            building.widthTiles = size.width;
+            building.heightTiles = size.height;
+            building.gridCol = snap.col;
+            building.gridRow = snap.row;
+
+            // Ajustar tamaño visual para que coincida con el grid (opcional, pero recomendado)
+            // building.size = Math.max(size.width, size.height) * TILE_SIZE / 2; 
+
+            // Ocupar grid
+            this.gridMap.occupyArea(snap.col, snap.row, size.width, size.height, building);
+
             // Aplicar bonificaciones de civilización
             civilizationManager.applyBuildingBonuses(building, this.civilizationId);
 
@@ -741,44 +836,54 @@ class Game {
     }
 
     drawBuildGhost() {
-        const screenX = this.mouse.worldX - this.camera.x;
-        const screenY = this.mouse.worldY - this.camera.y;
+        const snap = this.gridMap.snapToGrid(this.mouse.worldX, this.mouse.worldY);
+        const size = CONFIG.BUILDING_SIZES[this.buildMode];
 
-        let size = 40;
-        let icon = '🏗️';
+        const screenX = snap.x - this.camera.x;
+        const screenY = snap.y - this.camera.y;
+        const width = size.width * TILE_SIZE;
+        const height = size.height * TILE_SIZE;
 
-        switch (this.buildMode) {
-            case 'house':
-                icon = '🏠';
-                size = 30;
-                break;
-            case 'barracks':
-                icon = '⚔️';
-                size = 50;
-                break;
-            case 'townCenter':
-                icon = '🏰';
-                size = 60;
-                break;
-            case 'storage':
-                icon = '📦';
-                size = 40;
-                break;
-        }
+        const isFree = this.gridMap.isAreaFree(snap.col, snap.row, size.width, size.height);
 
-        this.ctx.fillStyle = 'rgba(212, 175, 55, 0.3)';
-        this.ctx.strokeStyle = '#d4af37';
+        // Color basado en si es construible
+        this.ctx.fillStyle = isFree ? 'rgba(72, 187, 120, 0.4)' : 'rgba(197, 48, 48, 0.4)';
+        this.ctx.strokeStyle = isFree ? '#48bb78' : '#c53030';
         this.ctx.lineWidth = 2;
 
-        this.ctx.beginPath();
-        this.ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
-        this.ctx.fill();
-        this.ctx.stroke();
+        // Dibujar rectángulo del edificio
+        this.ctx.fillRect(screenX, screenY, width, height);
+        this.ctx.strokeRect(screenX, screenY, width, height);
 
-        this.ctx.font = `${size}px Arial`;
+        // Dibujar icono centrado
+        let icon = '🏗️';
+        switch (this.buildMode) {
+            case 'house': icon = '🏠'; break;
+            case 'barracks': icon = '⚔️'; break;
+            case 'townCenter': icon = '🏰'; break;
+            case 'storage': icon = '📦'; break;
+        }
+
+        const fontSize = Math.min(width, height) * 0.6;
+        this.ctx.font = `${fontSize}px Arial`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(icon, screenX, screenY);
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.fillText(icon, screenX + width / 2, screenY + height / 2);
+
+        // Dibujar grid local para referencia visual
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        for (let i = 1; i < size.width; i++) {
+            this.ctx.moveTo(screenX + i * TILE_SIZE, screenY);
+            this.ctx.lineTo(screenX + i * TILE_SIZE, screenY + height);
+        }
+        for (let i = 1; i < size.height; i++) {
+            this.ctx.moveTo(screenX, screenY + i * TILE_SIZE);
+            this.ctx.lineTo(screenX + width, screenY + i * TILE_SIZE);
+        }
+        this.ctx.stroke();
     }
 
     renderMinimap() {
@@ -1199,7 +1304,7 @@ class Unit extends Entity {
             if (this.attackTarget.isDead) {
                 this.attackTarget = null;
             } else {
-                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime);
+                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game);
                 this.tryAttack(this.attackTarget, deltaTime);
             }
         }
@@ -1207,12 +1312,12 @@ class Unit extends Entity {
             if (this.gatherTarget.amount <= 0) {
                 this.gatherTarget = null;
             } else {
-                this.moveTowardsTarget(this.gatherTarget.x, this.gatherTarget.y, deltaTime);
+                this.moveTowardsTarget(this.gatherTarget.x, this.gatherTarget.y, deltaTime, game);
                 this.tryGather(this.gatherTarget, deltaTime, game);
             }
         }
         else if (this.targetX !== null) {
-            this.moveTowardsTarget(this.targetX, this.targetY, deltaTime);
+            this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game);
             const dist = Math.hypot(this.x - this.targetX, this.y - this.targetY);
             if (dist < 10) {
                 this.targetX = null;
@@ -1242,14 +1347,46 @@ class Unit extends Entity {
         }
     }
 
-    moveTowardsTarget(targetX, targetY, deltaTime) {
+    moveTowardsTarget(targetX, targetY, deltaTime, game) {
         const dx = targetX - this.x;
         const dy = targetY - this.y;
         const dist = Math.hypot(dx, dy);
 
         if (dist > 5) {
-            const moveX = (dx / dist) * this.speed * deltaTime;
-            const moveY = (dy / dist) * this.speed * deltaTime;
+            let moveX = (dx / dist) * this.speed * deltaTime;
+            let moveY = (dy / dist) * this.speed * deltaTime;
+
+            // Colisiones con edificios (GridMap)
+            if (game && game.gridMap) {
+                // Verificar nueva posición propuesta
+                const nextX = this.x + moveX;
+                const nextY = this.y + moveY;
+
+                const snap = game.gridMap.snapToGrid(nextX, nextY);
+                const cellIndex = game.gridMap.getIndex(snap.col, snap.row);
+
+                // Si el índice es válido y hay algo en la celda
+                if (cellIndex >= 0 && cellIndex < game.gridMap.grid.length) {
+                    const content = game.gridMap.grid[cellIndex];
+
+                    if (content && content.isBuilding) {
+                        // Colisión simple: Intentar deslizarse
+                        // Verificar movimiento solo en X
+                        const snapX = game.gridMap.snapToGrid(this.x + moveX, this.y);
+                        const contentX = game.gridMap.grid[game.gridMap.getIndex(snapX.col, snapX.row)];
+                        if (contentX && contentX.isBuilding) {
+                            moveX = 0;
+                        }
+
+                        // Verificar movimiento solo en Y
+                        const snapY = game.gridMap.snapToGrid(this.x, this.y + moveY);
+                        const contentY = game.gridMap.grid[game.gridMap.getIndex(snapY.col, snapY.row)];
+                        if (contentY && contentY.isBuilding) {
+                            moveY = 0;
+                        }
+                    }
+                }
+            }
 
             this.x += moveX;
             this.y += moveY;
@@ -1622,8 +1759,11 @@ window.addEventListener('DOMContentLoaded', async () => {
             if (civ.bonuses.gatherSpeed > 1) bonusesHtml += `<li>Recolección +${Math.round((civ.bonuses.gatherSpeed - 1) * 100)}% rápida</li>`;
             bonusesHtml += '</ul>';
 
+            // Usar iconEmoji si está disponible, sino usar icon normal
+            const displayIcon = civ.iconEmoji || civ.icon;
+
             card.innerHTML = `
-                <div class="civ-icon">${civ.icon}</div>
+                <div class="civ-icon-large">${displayIcon}</div>
                 <h3>${civ.name}</h3>
                 <p>${civ.description}</p>
                 <div class="civ-bonuses">

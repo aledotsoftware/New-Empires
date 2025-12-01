@@ -1,0 +1,95 @@
+{
+    "civilizationId": "vikings",
+    "name": "Reino Vikingo",
+    "description": "Guerreros feroces del norte. Sus unidades son más rápidas y tienen mayor capacidad de ataque.",
+    "icon": "⚔️",
+    "iconEmoji": "⛵",
+    "color": "#2b6cb0",
+    "primaryColor": "#1e3a5f",
+    "secondaryColor": "#4a90e2",
+    "bonuses": {
+        "unitSpeed": 1.15,
+        "unitAttack": 1.15,
+        "gatherSpeed": 1.1,
+        "startingResources": {
+            "wood": 50,
+            "food": 50,
+            "gold": 0,
+            "stone": 0
+        }
+    },
+    "unitOverrides": {
+        "villager": {
+            "name": "Aldeano Vikingo",
+            "icon": "🧔",
+            "gatherBonus": 1.1
+        },
+        "warrior": {
+            "name": "Berserker",
+            "icon": "🪓",
+            "attack": 14,
+            "hp": 100,
+            "speed": 60
+        },
+        "archer": {
+            "name": "Arquero Nórdico",
+            "icon": "🏹",
+            "attack": 10,
+            "hp": 55,
+            "speed": 55
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Gran Salón",
+            "icon": "🏰",
+            "description": "Salón de reunión vikingo"
+        },
+        "house": {
+            "name": "Cabaña Vikinga",
+            "icon": "🛖",
+            "description": "Vivienda nórdica resistente"
+        },
+        "barracks": {
+            "name": "Campo de Guerra",
+            "icon": "⚔️",
+            "description": "Área de entrenamiento de guerreros vikingos"
+        }
+    },
+    "uniqueUnit": {
+        "id": "jarl",
+        "name": "Jarl",
+        "icon": "👑",
+        "baseUnit": "warrior",
+        "age": 19,
+        "bonuses": {
+            "attackDamage": 1.29,
+            "maxHp": 1.2,
+            "speed": 1.44,
+            "attackSpeed": 1.5
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "vikingRaids",
+            "name": "Incursiones Vikingas",
+            "icon": "⛵",
+            "category": "MILITARY",
+            "age": 19,
+            "description": "Tácticas de saqueo y ataque rápido perfeccionadas por los vikingos.",
+            "cost": {
+                "food": 250,
+                "gold": 150
+            },
+            "researchTime": 40,
+            "building": "barracks",
+            "prerequisites": [],
+            "effects": {
+                "unitSpeed": 1.1,
+                "gatherRates": {
+                    "gold": 1.25
+                }
+            }
+        }
+    ]
+}

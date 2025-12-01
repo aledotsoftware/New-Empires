@@ -3,6 +3,7 @@
     "name": "Mesopotamia",
     "description": "Cuna de la civilización entre los ríos Tigris y Éufrates",
     "icon": "🏛️",
+    "iconEmoji": "🗼",
     "color": "#D4A574",
     "bonuses": {
         "buildSpeed": 1.20,

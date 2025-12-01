@@ -83,6 +83,26 @@
             ]
         },
         {
+            "id": "storageWood",
+            "baseName": "Depósito de Madera",
+            "baseIcon": "📦",
+            "baseDescription": "Almacena recursos y permite investigar tecnologías económicas.",
+            "type": "economy",
+            "cost": {
+                "wood": 100,
+                "stone": 50
+            },
+            "buildTime": 20,
+            "maxHp": 800,
+            "size": 40,
+            "populationProvided": 0,
+            "availableFromAge": 1,
+            "canProduce": [],
+            "canResearch": [
+                "economicTechnologies"
+            ]
+        },
+        {
             "id": "market",
             "baseName": "Mercado",
             "baseIcon": "🏪",

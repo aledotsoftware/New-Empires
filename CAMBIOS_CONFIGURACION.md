@@ -112,12 +112,40 @@ function toggleGrid() {
 
 ## Cambios en `index.html`
 
-### Cambio 5: Actualizar modal de configuración
-**Ubicación:** Dentro del div `#settingsScreen` (aproximadamente línea 65-100)
+### Cambio 5: Agregar botón de configuración durante la partida
+**Ubicación:** Aproximadamente línea 150, dentro del div `.top-panel`
 
-**Buscar el botón de restaurar valores** (que dice "🔄 Restaurar Valores Predeterminados")
+**Buscar:**
+```html
+            </div>
+            <div class="game-time">
+                <span class="time-icon">⏱️</span>
+                <span id="gameTime">00:00</span>
+            </div>
+        </div>
+```
 
-**Inmediatamente después de ese botón, agregar:**
+**Reemplazar con:**
+```html
+            </div>
+            <div class="game-time">
+                <span class="time-icon">⏱️</span>
+                <span id="gameTime">00:00</span>
+            </div>
+            <button class="btn-secondary" onclick="showSettings()" style="margin-left: 15px; padding: 8px 16px; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.5);">
+                ⚙️ Config
+            </button>
+        </div>
+```
+
+---
+
+### Cambio 6: Actualizar modal de configuración
+**Ubicación:** Dentro del div `#settingsScreen` (busca donde dice "🔄 Restaurar Valores Predeterminados")
+
+**Buscar el cierre del modal de configuración o el botón de cerrar**
+
+**Inmediatamente después de `<button onclick="hideSettings()">Cerrar</button>`, agregar:**
 ```html
                         
                         <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">

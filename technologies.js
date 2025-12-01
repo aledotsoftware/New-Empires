@@ -1,51 +1,73 @@
-// ============= EDADES HISTÓRICAS =============
-// 30 períodos de 500 años desde 13.000-12.500 a.C. hasta 1500-2000 d.C.
+// ============= EDADES HISTÓRICAS Y TECNOLOGÍAS =============
+// Este archivo ahora usa DataLoader para cargar datos desde JSON
+// Mantiene variables globales para compatibilidad con código existente
 
-const AGES = {
-    1: { id: 1, name: 'Paleolítico Superior Inicial', period: '13.000-12.500 a.C.', era: 'Prehistoria' },
-    2: { id: 2, name: 'Paleolítico Superior Final', period: '12.500-12.000 a.C.', era: 'Prehistoria' },
-    3: { id: 3, name: 'Mesolítico Temprano', period: '12.000-11.500 a.C.', era: 'Prehistoria' },
-    4: { id: 4, name: 'Mesolítico', period: '11.500-11.000 a.C.', era: 'Prehistoria' },
-    5: { id: 5, name: 'Revolución Neolítica Inicial', period: '11.000-10.500 a.C.', era: 'Prehistoria' },
-    6: { id: 6, name: 'Neolítico Temprano', period: '10.500-10.000 a.C.', era: 'Prehistoria' },
-    7: { id: 7, name: 'Neolítico Medio', period: '10.000-9.500 a.C.', era: 'Prehistoria' },
-    8: { id: 8, name: 'Neolítico Avanzado', period: '9.500-9.000 a.C.', era: 'Prehistoria' },
-    9: { id: 9, name: 'Primeras Aldeas', period: '9.000-8.500 a.C.', era: 'Prehistoria' },
-    10: { id: 10, name: 'Proto-Civilización', period: '8.500-8.000 a.C.', era: 'Prehistoria' },
-    11: { id: 11, name: 'Edad del Cobre Inicial', period: '8.000-7.500 a.C.', era: 'Prehistoria' },
-    12: { id: 12, name: 'Edad del Cobre', period: '7.500-7.000 a.C.', era: 'Prehistoria' },
-    13: { id: 13, name: 'Calcolítico', period: '7.000-6.500 a.C.', era: 'Prehistoria' },
-    14: { id: 14, name: 'Primeras Ciudades', period: '6.500-6.000 a.C.', era: 'Prehistoria' },
-    15: { id: 15, name: 'Proto-Escritura', period: '6.000-5.500 a.C.', era: 'Prehistoria' },
-    16: { id: 16, name: 'Edad del Bronce Inicial', period: '5.500-5.000 a.C.', era: 'Edad del Bronce' },
-    17: { id: 17, name: 'Bronce Temprano', period: '5.000-4.500 a.C.', era: 'Edad del Bronce' },
-    18: { id: 18, name: 'Bronce Medio I', period: '4.500-4.000 a.C.', era: 'Edad del Bronce' },
-    19: { id: 19, name: 'Bronce Medio II', period: '4.000-3.500 a.C.', era: 'Edad del Bronce' },
-    20: { id: 20, name: 'Bronce Tardío', period: '3.500-3.000 a.C.', era: 'Edad del Bronce' },
-    21: { id: 21, name: 'Grandes Imperios del Bronce', period: '3.000-2.500 a.C.', era: 'Edad del Bronce' },
-    22: { id: 22, name: 'Apogeo del Bronce', period: '2.500-2.000 a.C.', era: 'Edad del Bronce' },
-    23: { id: 23, name: 'Colapso del Bronce', period: '2.000-1.500 a.C.', era: 'Edad del Bronce' },
-    24: { id: 24, name: 'Edad del Hierro Inicial', period: '1.500-1.000 a.C.', era: 'Edad del Hierro' },
-    25: { id: 25, name: 'Hierro I', period: '1.000-500 a.C.', era: 'Edad del Hierro' },
-    26: { id: 26, name: 'Hierro II - Era Clásica', period: '500-1 a.C.', era: 'Edad Clásica' },
-    27: { id: 27, name: 'Era Romana', period: '1-500 d.C.', era: 'Edad Clásica' },
-    28: { id: 28, name: 'Alta Edad Media', period: '500-1000 d.C.', era: 'Edad Media' },
-    29: { id: 29, name: 'Baja Edad Media', period: '1000-1500 d.C.', era: 'Edad Media' },
-    30: { id: 30, name: 'Era Moderna Temprana', period: '1500-2000 d.C.', era: 'Edad Moderna' }
-};
+// Variables globales que se llenarán desde DataLoader
+// Variables globales que se llenarán desde DataLoader
+var AGES = {};
+var TECH_CATEGORIES = {};
+var TECHNOLOGIES = {};
 
-// Categorías de Tecnologías
-const TECH_CATEGORIES = {
-    ECONOMY: 'Economía',
-    MILITARY: 'Militar',
-    DEFENSE: 'Defensa',
-    TOOLS: 'Herramientas',
-    AGRICULTURE: 'Agricultura',
-    ARCHITECTURE: 'Arquitectura',
-    CULTURE: 'Cultura'
-};
+// Función para inicializar datos desde DataLoader
+async function initializeTechData() {
+    if (!dataLoader || !dataLoader.isLoaded()) {
+        console.warn('⚠️ DataLoader no disponible, usando datos por defecto');
+        // Fallback a datos hardcoded si DataLoader no está disponible
+        initializeFallbackData();
+        return false;
+    }
 
-const TECHNOLOGIES = {
+    try {
+        // Cargar edades desde DataLoader
+        AGES = dataLoader.getAllAges();
+
+        // Cargar categorías desde DataLoader
+        const categories = dataLoader.getCategories();
+        TECH_CATEGORIES = {};
+        for (const [key, value] of Object.entries(categories)) {
+            TECH_CATEGORIES[key] = value.name;
+        }
+
+        console.log('✅ Datos de tecnologías inicializados desde JSON');
+        return true;
+    } catch (error) {
+        console.error('❌ Error inicializando datos de tecnologías:', error);
+        initializeFallbackData();
+        return false;
+    }
+}
+
+// Datos de respaldo en caso de que DataLoader falle
+function initializeFallbackData() {
+    AGES = {
+        1: { id: 1, name: 'Paleolítico Superior Inicial', period: '13.000-12.500 a.C.', era: 'Prehistoria' },
+        2: { id: 2, name: 'Paleolítico Superior Final', period: '12.500-12.000 a.C.', era: 'Prehistoria' },
+        3: { id: 3, name: 'Mesolítico Temprano', period: '12.000-11.500 a.C.', era: 'Prehistoria' },
+        // ... (se pueden agregar más si es necesario)
+        30: { id: 30, name: 'Era Moderna Temprana', period: '1500-2000 d.C.', era: 'Edad Moderna' }
+    };
+
+    TECH_CATEGORIES = {
+        ECONOMY: 'Economía',
+        MILITARY: 'Militar',
+        DEFENSE: 'Defensa',
+        TOOLS: 'Herramientas',
+        AGRICULTURE: 'Agricultura',
+        ARCHITECTURE: 'Arquitectura',
+        CULTURE: 'Cultura'
+    };
+}
+
+
+
+// ========== TECNOLOGÍAS HARDCODED (FALLBACK) ==========
+// Estas se sobrescriben cuando DataLoader carga los JSON
+// Aseguramos que TECHNOLOGIES esté definido
+if (typeof TECHNOLOGIES === 'undefined') {
+    var TECHNOLOGIES = {};
+}
+
+Object.assign(TECHNOLOGIES, {
     // ========== PALEOLÍTICO SUPERIOR (13.000-12.000 a.C.) - EDADES 1-2 ==========
     flintKnapping: {
         id: 'flintKnapping',
@@ -886,7 +908,7 @@ const TECHNOLOGIES = {
             CONFIG.GATHER_RATES.gold *= 1.5;
         }
     }
-};
+});
 
 class TechManager {
     constructor(game) {
@@ -894,6 +916,48 @@ class TechManager {
         this.researchedTechs = new Set();
         this.researchQueue = []; // { techId, timer }
         this.currentAge = 1; // Edad actual de la civilización
+
+        // Cargar tecnologías específicas de la civilización desde DataLoader
+        this.loadCivilizationTechnologies();
+    }
+
+    /**
+     * Carga las tecnologías personalizadas para la civilización del jugador
+     */
+    loadCivilizationTechnologies() {
+        if (!dataLoader || !dataLoader.isLoaded()) {
+            console.warn('⚠️ DataLoader no disponible, usando tecnologías por defecto');
+            return;
+        }
+
+        const civId = this.game ? this.game.civilizationId : null;
+        if (!civId) {
+            console.warn('⚠️ No hay civilización seleccionada');
+            return;
+        }
+
+        try {
+            // Obtener tecnologías personalizadas para la civilización
+            const civTechs = dataLoader.getTechnologiesForCivilization(civId);
+
+            // Convertir array de tecnologías a objeto con id como clave
+            // para mantener compatibilidad con código existente
+            if (civTechs && civTechs.length > 0) {
+                const techsObject = {};
+                civTechs.forEach(tech => {
+                    techsObject[tech.id] = {
+                        ...tech,
+                        category: tech.category // Ya viene como string del JSON
+                    };
+                });
+
+                // Actualizar TECHNOLOGIES global solo con las de esta civilización
+                TECHNOLOGIES = techsObject;
+                console.log(`✅ Cargadas ${civTechs.length} tecnologías para ${civId}`);
+            }
+        } catch (error) {
+            console.error('❌ Error cargando tecnologías de civilización:', error);
+        }
     }
 
     canResearch(techId) {

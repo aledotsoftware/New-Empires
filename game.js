@@ -1557,10 +1557,25 @@ function gameLoop(currentTime) {
 // INICIALIZACIÓN
 // ==========================================
 window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Iniciar carga de assets en segundo plano
+    console.log('🚀 Iniciando carga de datos del juego...');
+
+    // 1. Inicializar DataLoader primero
+    try {
+        await dataLoader.initialize();
+        console.log('✅ DataLoader inicializado correctamente');
+
+        // Inicializar datos de tecnologías desde DataLoader
+        await initializeTechData();
+        console.log('✅ Datos de tecnologías cargados');
+    } catch (error) {
+        console.error('❌ Error inicializando datos:', error);
+        // Continuar con datos por defecto
+    }
+
+    // 2. Iniciar carga de assets en segundo plano
     assetLoader.loadAll();
 
-    // 2. Cargar civilizaciones (esperar a que estén listas para mostrar la selección)
+    // 3. Cargar civilizaciones (esperar a que estén listas para mostrar la selección)
     await civilizationManager.loadCivilizations();
 
     // Elementos de UI

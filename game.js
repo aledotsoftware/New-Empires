@@ -1036,7 +1036,7 @@ class Game {
     }
 
     drawGrid() {
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         this.ctx.lineWidth = 1;
 
         const gridSize = 100;
@@ -2439,7 +2439,7 @@ function backToMapSize() {
 // FUNCIÓN DE CONFIGURACIÓN - Toggle Grid
 // ==========================================
 function toggleGrid() {
-    if (window.game) {
+    if (game) {
         game.showGrid = !game.showGrid;
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
@@ -2454,7 +2454,7 @@ function showSettings() {
         modal.classList.remove('hidden');
         // Actualizar estado actual
         const toggleElement = document.getElementById('gridToggleValue');
-        if (toggleElement && window.game) {
+        if (toggleElement && game) {
             toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
         }
     }

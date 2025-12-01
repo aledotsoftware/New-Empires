@@ -2,24 +2,187 @@
 // SISTEMA DE CIVILIZACIONES
 // ==========================================
 
+// Configuración de civilizaciones (Incrustada para evitar problemas de CORS/Carga local)
+const CIVILIZATIONS_DATA = {
+    "romans": {
+        "id": "romans",
+        "name": "Imperio Romano",
+        "nameShort": "Romanos",
+        "icon": "🏛️",
+        "color": "#c53030",
+        "primaryColor": "#8b0000",
+        "secondaryColor": "#ffd700",
+        "description": "Maestros de la construcción y la ingeniería. Sus edificios son más resistentes y se construyen más rápido.",
+        "lore": "El poderoso Imperio Romano conquistó gran parte del mundo conocido con su disciplina militar y arquitectura superior.",
+
+        "bonuses": {
+            "buildSpeed": 1.25,
+            "buildingHp": 1.3,
+            "infantryAttack": 1.1,
+            "startingResources": {
+                "wood": 0,
+                "food": 0,
+                "gold": 0,
+                "stone": 50
+            }
+        },
+
+        "units": {
+            "villager": {
+                "name": "Ciudadano Romano",
+                "icon": "👨‍🌾",
+                "gatherBonus": 1.0
+            },
+            "warrior": {
+                "name": "Legionario",
+                "icon": "🛡️",
+                "attack": 12,
+                "hp": 110,
+                "speed": 45
+            },
+            "archer": {
+                "name": "Arquero Romano",
+                "icon": "🏹",
+                "attack": 8,
+                "hp": 60,
+                "speed": 50
+            }
+        },
+
+        "buildings": {
+            "townCenter": {
+                "name": "Foro Romano",
+                "icon": "🏛️"
+            },
+            "house": {
+                "name": "Domus",
+                "icon": "🏠"
+            },
+            "barracks": {
+                "name": "Castra",
+                "icon": "⚔️"
+            }
+        },
+
+        "uniqueUnit": {
+            "id": "centurion",
+            "name": "Centurión",
+            "icon": "🗡️",
+            "description": "Guerrero de élite con alta resistencia y daño",
+            "cost": {
+                "food": 80,
+                "gold": 40
+            },
+            "stats": {
+                "hp": 150,
+                "attack": 15,
+                "speed": 50,
+                "attackSpeed": 1.3
+            }
+        }
+    },
+
+    "vikings": {
+        "id": "vikings",
+        "name": "Reino Vikingo",
+        "nameShort": "Vikings",
+        "icon": "⚔️",
+        "color": "#2b6cb0",
+        "primaryColor": "#1e3a5f",
+        "secondaryColor": "#4a90e2",
+        "description": "Guerreros feroces del norte. Sus unidades son más rápidas y tienen mayor capacidad de ataque.",
+        "lore": "Los temidos guerreros nórdicos, conocidos por su ferocidad en batalla y habilidades de navegación.",
+
+        "bonuses": {
+            "unitSpeed": 1.15,
+            "unitAttack": 1.15,
+            "gatherSpeed": 1.1,
+            "startingResources": {
+                "wood": 50,
+                "food": 50,
+                "gold": 0,
+                "stone": 0
+            }
+        },
+
+        "units": {
+            "villager": {
+                "name": "Aldeano Vikingo",
+                "icon": "🧔",
+                "gatherBonus": 1.1
+            },
+            "warrior": {
+                "name": "Berserker",
+                "icon": "🪓",
+                "attack": 14,
+                "hp": 100,
+                "speed": 60
+            },
+            "archer": {
+                "name": "Arquero Nórdico",
+                "icon": "🏹",
+                "attack": 10,
+                "hp": 55,
+                "speed": 55
+            }
+        },
+
+        "buildings": {
+            "townCenter": {
+                "name": "Gran Salón",
+                "icon": "🏰"
+            },
+            "house": {
+                "name": "Cabaña Vikinga",
+                "icon": "🛖"
+            },
+            "barracks": {
+                "name": "Campo de Guerra",
+                "icon": "⚔️"
+            }
+        },
+
+        "uniqueUnit": {
+            "id": "jarl",
+            "name": "Jarl",
+            "icon": "👑",
+            "description": "Líder vikingo con alta velocidad y daño crítico",
+            "cost": {
+                "food": 70,
+                "gold": 50
+            },
+            "stats": {
+                "hp": 120,
+                "attack": 18,
+                "speed": 65,
+                "attackSpeed": 1.5
+            }
+        }
+    }
+};
+
 class CivilizationManager {
     constructor() {
-        this.civilizations = {};
+        this.civilizations = CIVILIZATIONS_DATA; // Datos por defecto (respaldo)
         this.loaded = false;
     }
 
     async loadCivilizations() {
         try {
+            console.log('📂 Intentando cargar civilizations.json...');
             const response = await fetch('civilizations.json');
+            if (!response.ok) throw new Error('No se pudo leer el archivo');
+
             const data = await response.json();
             this.civilizations = data.civilizations;
-            this.loaded = true;
-            console.log('✅ Civilizaciones cargadas:', Object.keys(this.civilizations));
-            return true;
+            console.log('✅ ÉXITO: Civilizaciones cargadas desde civilizations.json');
+            console.log('📋 Civs disponibles:', Object.keys(this.civilizations));
         } catch (error) {
-            console.error('❌ Error cargando civilizaciones:', error);
-            return false;
+            console.warn('⚠️ AVISO: Usando configuración interna (El archivo JSON no se pudo cargar por CORS o no existe).');
+            this.civilizations = CIVILIZATIONS_DATA;
         }
+        this.loaded = true;
+        return true;
     }
 
     getCivilization(civId) {
@@ -42,38 +205,51 @@ class CivilizationManager {
         const bonuses = civ.bonuses;
         const unitConfig = civ.units[unit.type];
 
+        console.groupCollapsed(`🛠️ Aplicando bonos de ${civ.name} a ${unit.type}`);
+
         // Aplicar bonificaciones generales
-        if (bonuses.unitSpeed) {
+        if (bonuses.unitSpeed && bonuses.unitSpeed !== 1) {
+            const oldSpeed = unit.speed;
             unit.speed *= bonuses.unitSpeed;
+            console.log(`⚡ Velocidad: ${oldSpeed} -> ${unit.speed.toFixed(1)} (+${Math.round((bonuses.unitSpeed - 1) * 100)}%)`);
         }
 
-        if (bonuses.unitAttack) {
+        if (bonuses.unitAttack && bonuses.unitAttack !== 1) {
+            const oldDmg = unit.attackDamage;
             unit.attackDamage *= bonuses.unitAttack;
+            console.log(`⚔️ Ataque: ${oldDmg} -> ${unit.attackDamage.toFixed(1)} (+${Math.round((bonuses.unitAttack - 1) * 100)}%)`);
         }
 
-        if (bonuses.infantryAttack && (unit.type === 'warrior')) {
+        if (bonuses.infantryAttack && (unit.type === 'warrior') && bonuses.infantryAttack !== 1) {
+            const oldDmg = unit.attackDamage;
             unit.attackDamage *= bonuses.infantryAttack;
+            console.log(`⚔️ Ataque Infantería: ${oldDmg} -> ${unit.attackDamage.toFixed(1)} (+${Math.round((bonuses.infantryAttack - 1) * 100)}%)`);
         }
 
         // Aplicar configuración específica de unidad
         if (unitConfig) {
-            unit.name = unitConfig.name || unit.name;
-            unit.icon = unitConfig.icon || unit.icon;
+            if (unitConfig.name) unit.name = unitConfig.name;
+            if (unitConfig.icon) unit.icon = unitConfig.icon;
 
             if (unitConfig.attack !== undefined) {
                 unit.attackDamage = unitConfig.attack;
+                console.log(`🎯 Ataque base modificado a ${unitConfig.attack}`);
             }
             if (unitConfig.hp !== undefined) {
                 unit.maxHp = unitConfig.hp;
                 unit.hp = unitConfig.hp;
+                console.log(`❤️ HP base modificado a ${unitConfig.hp}`);
             }
             if (unitConfig.speed !== undefined) {
                 unit.speed = unitConfig.speed;
+                console.log(`⚡ Velocidad base modificada a ${unitConfig.speed}`);
             }
             if (unitConfig.gatherBonus && bonuses.gatherSpeed) {
                 unit.gatherBonus = unitConfig.gatherBonus * bonuses.gatherSpeed;
+                console.log(`🌾 Bono recolección: ${unit.gatherBonus.toFixed(2)}`);
             }
         }
+        console.groupEnd();
 
         return unit;
     }
@@ -86,17 +262,22 @@ class CivilizationManager {
         const bonuses = civ.bonuses;
         const buildingConfig = civ.buildings[building.type];
 
+        console.groupCollapsed(`🏗️ Aplicando bonos de ${civ.name} a ${building.type}`);
+
         // Aplicar bonificaciones generales
-        if (bonuses.buildingHp) {
+        if (bonuses.buildingHp && bonuses.buildingHp !== 1) {
+            const oldHp = building.maxHp;
             building.maxHp *= bonuses.buildingHp;
             building.hp = building.maxHp;
+            console.log(`🧱 HP Edificio: ${oldHp} -> ${building.maxHp.toFixed(0)} (+${Math.round((bonuses.buildingHp - 1) * 100)}%)`);
         }
 
         // Aplicar configuración específica de edificio
         if (buildingConfig) {
-            building.name = buildingConfig.name || building.name;
-            building.icon = buildingConfig.icon || building.icon;
+            if (buildingConfig.name) building.name = buildingConfig.name;
+            if (buildingConfig.icon) building.icon = buildingConfig.icon;
         }
+        console.groupEnd();
 
         return building;
     }
@@ -107,13 +288,16 @@ class CivilizationManager {
         if (!civ || !civ.bonuses.startingResources) {
             return { wood: 0, food: 0, gold: 0, stone: 0 };
         }
+        console.log(`💰 Recursos iniciales extra para ${civ.name}:`, civ.bonuses.startingResources);
         return civ.bonuses.startingResources;
     }
 
     // Obtener velocidad de construcción
     getBuildSpeed(civId) {
         const civ = this.getCivilization(civId);
-        return civ && civ.bonuses.buildSpeed ? civ.bonuses.buildSpeed : 1.0;
+        const speed = civ && civ.bonuses.buildSpeed ? civ.bonuses.buildSpeed : 1.0;
+        if (speed !== 1.0) console.log(`🔨 Velocidad de construcción: x${speed}`);
+        return speed;
     }
 
     // Obtener color de equipo para civilización

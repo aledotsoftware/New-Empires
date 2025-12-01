@@ -12,34 +12,34 @@
     --primary-gold: #d4af37;
     --primary-gold-dark: #b8941f;
     --primary-gold-light: #f0d98d;
-    
+
     --secondary-bronze: #cd7f32;
     --accent-red: #c53030;
     --accent-blue: #2b6cb0;
-    
+
     /* Colores de Fondo */
     --bg-dark: #0f0f1a;
     --bg-card: #1a1a2e;
     --bg-panel: #16213e;
     --bg-hover: #0f3460;
-    
+
     /* Recursos */
     --wood-color: #8b4513;
     --food-color: #f0ad4e;
     --gold-color: #ffd700;
     --stone-color: #708090;
-    
+
     /* Texto */
     --text-primary: #ffffff;
     --text-secondary: #b0b0b0;
     --text-muted: #6b7280;
-    
+
     /* Bordes y Sombras */
     --border-radius: 12px;
     --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.3);
     --shadow-strong: 0 10px 25px rgba(0, 0, 0, 0.5);
     --glow-gold: 0 0 20px rgba(212, 175, 55, 0.3);
-    
+
     /* Fuentes */
     --font-title: 'Cinzel', serif;
     --font-body: 'Inter', sans-serif;
@@ -73,10 +73,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, 
-        #0a0a12 0%, 
-        #16213e 50%, 
-        #0f3460 100%);
+    background: linear-gradient(135deg,
+            #0a0a12 0%,
+            #16213e 50%,
+            #0f3460 100%);
     z-index: 1000;
 }
 
@@ -91,6 +91,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -120,6 +121,7 @@ body {
     from {
         filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
     }
+
     to {
         filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8));
     }
@@ -597,6 +599,7 @@ body {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -648,6 +651,7 @@ body {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -668,6 +672,7 @@ body {
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -861,15 +866,15 @@ body {
     .title-main {
         font-size: 3.5rem;
     }
-    
+
     .resources-panel {
         gap: 0.8rem;
     }
-    
+
     .resource-item {
         padding: 0.6rem 0.8rem;
     }
-    
+
     .selection-panel,
     .actions-panel {
         width: 250px;
@@ -880,15 +885,129 @@ body {
     .controls-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .selection-panel {
         bottom: 10px;
         left: 10px;
         width: calc(100% - 20px);
     }
-    
+
     .actions-panel,
     .minimap-container {
         display: none;
     }
+}
+
+/* ==========================================
+   SELECCIÓN DE CIVILIZACIÓN
+   ========================================== */
+.civ-selection-content {
+    max-width: 1000px !important;
+    width: 90%;
+}
+
+.civ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.civ-card {
+    background: rgba(26, 26, 46, 0.6);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 15px;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.civ-card:hover {
+    transform: translateY(-10px);
+    background: rgba(26, 26, 46, 0.8);
+    border-color: var(--primary-gold);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.civ-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: var(--civ-color, var(--primary-gold));
+}
+
+.civ-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+
+.civ-card h3 {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    color: var(--primary-gold);
+    margin-bottom: 0.5rem;
+}
+
+.civ-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.civ-bonuses {
+    text-align: left;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.civ-bonuses ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.civ-bonuses li {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.civ-bonuses li::before {
+    content: '✨';
+    font-size: 0.8rem;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--text-secondary);
+    color: var(--text-secondary);
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-title);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+    background: rgba(212, 175, 55, 0.1);
 }

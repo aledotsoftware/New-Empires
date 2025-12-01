@@ -59,9 +59,22 @@ class GridMap {
     }
 }
 
+// Tamaños de mapa (en tiles de 32px)
+const MAP_SIZES = {
+    tiny: { name: 'Pequeño', tiles: 120, width: 3840, height: 3840 },
+    small: { name: 'Chico', tiles: 144, width: 4608, height: 4608 },
+    medium: { name: 'Mediano', tiles: 168, width: 5376, height: 5376 },
+    normal: { name: 'Normal', tiles: 200, width: 6400, height: 6400 },
+    large: { name: 'Grande', tiles: 220, width: 7040, height: 7040 },
+    giant: { name: 'Gigante', tiles: 240, width: 7680, height: 7680 },
+    ludicrous: { name: 'Absurdo', tiles: 480, width: 15360, height: 15360 }
+};
+
 const CONFIG = {
-    CANVAS_WIDTH: 2000,
-    CANVAS_HEIGHT: 1500,
+    // Tamaño de mapa actual (se establece al iniciar el juego)
+    CANVAS_WIDTH: 6400,  // Normal por defecto
+    CANVAS_HEIGHT: 6400,
+    CURRENT_MAP_SIZE: 'normal',
 
     // Recursos iniciales
     STARTING_WOOD: 200,
@@ -1736,25 +1749,34 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Elementos de UI
     const startButton = document.getElementById('startButton');
     const startScreen = document.getElementById('startScreen');
+    const mapSizeScreen = document.getElementById('mapSizeScreen');
     const civSelectionScreen = document.getElementById('civSelectionScreen');
     const gameScreen = document.getElementById('gameScreen');
     const backToStartButton = document.getElementById('backToStartButton');
+    const backToMapSizeButton = document.getElementById('backToMapSizeButton');
 
     // Crear partículas de fondo
     createParticles();
 
-    // Click en "Comenzar Juego" -> Ir a selección de civ
+    // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
     startButton.addEventListener('click', () => {
         startScreen.classList.add('hidden');
-        civSelectionScreen.classList.remove('hidden');
-        renderCivSelection();
+        mapSizeScreen.classList.remove('hidden');
+        showMapSizeSelection();
     });
 
-    // Volver al inicio
+    // Volver al inicio desde selección de tamaño
     backToStartButton.addEventListener('click', () => {
-        civSelectionScreen.classList.add('hidden');
+        mapSizeScreen.classList.add('hidden');
         startScreen.classList.remove('hidden');
     });
+
+    // Volver a selección de tamaño desde selección de civ
+    if (backToMapSizeButton) {
+        backToMapSizeButton.addEventListener('click', () => {
+            backToMapSize();
+        });
+    }
 
     // Función para renderizar tarjetas de civilización
     function renderCivSelection() {
@@ -2032,4 +2054,53 @@ function createCompactTechCard(tech, techManager, categoryColor) {
 function getRomanNumeral(num) {
     const numerals = ['', 'I', 'II', 'III', 'IV', 'V'];
     return numerals[num] || num;
+}
+
+// Funciones para selección de tamaño de mapa
+function showMapSizeSelection() {
+    const mapSizeGrid = document.getElementById('mapSizeGrid');
+    if (!mapSizeGrid) return;
+
+    mapSizeGrid.innerHTML = '';
+
+    for (let [key, mapSize] of Object.entries(MAP_SIZES)) {
+        const card = document.createElement('div');
+        card.className = 'map-size-card';
+        card.setAttribute('data-size', key);
+
+        const isRecommended = key === 'normal';
+
+        card.innerHTML = `
+            <div class="map-size-icon">🗺️</div>
+            <div class="map-size-name">${mapSize.name}</div>
+            <div class="map-size-info">${mapSize.tiles}×${mapSize.tiles} tiles</div>
+            ${isRecommended ? '<div class="map-size-badge">Recomendado</div>' : ''}
+        `;
+
+        card.addEventListener('click', () => selectMapSize(key));
+        mapSizeGrid.appendChild(card);
+    }
+}
+
+function selectMapSize(sizeKey) {
+    const mapSize = MAP_SIZES[sizeKey];
+    if (!mapSize) return;
+
+    // Actualizar CONFIG
+    CONFIG.CANVAS_WIDTH = mapSize.width;
+    CONFIG.CANVAS_HEIGHT = mapSize.height;
+    CONFIG.CURRENT_MAP_SIZE = sizeKey;
+
+    // Ocultar pantalla de selección de tamaño
+    document.getElementById('mapSizeScreen').classList.add('hidden');
+
+    // Mostrar pantalla de selección de civilización
+    document.getElementById('civSelectionScreen').classList.remove('hidden');
+
+    console.log(`Mapa seleccionado: ${mapSize.name} (${mapSize.tiles}×${mapSize.tiles})`);
+}
+
+function backToMapSize() {
+    document.getElementById('civSelectionScreen').classList.add('hidden');
+    document.getElementById('mapSizeScreen').classList.remove('hidden');
 }

@@ -485,13 +485,31 @@ class Game {
             this.closeBuildMenu();
         }
 
-        // Space - Center on town center
-        if (e.key === ' ') {
+        // H o Space - Center on town center (ir al centro urbano)
+        if (e.key === 'h' || e.key === 'H' || e.key === ' ') {
             e.preventDefault();
             const tc = this.buildings.find(b => b.type === 'townCenter' && b.team === 'player');
             if (tc) {
                 this.camera.x = tc.x - this.viewWidth / 2;
                 this.camera.y = tc.y - this.viewHeight / 2;
+            }
+        }
+
+        // Atajos de teclado para construcción rápida (Q, W, E, R)
+        // Solo funciona cuando el menú de construcción está abierto
+        const buildMenu = document.getElementById('buildMenu');
+        if (buildMenu && !buildMenu.classList.contains('hidden')) {
+            const buildingMap = {
+                'q': 'house',
+                'w': 'barracks',
+                'e': 'townCenter',
+                'r': 'storage'
+            };
+
+            const key = e.key.toLowerCase();
+            if (buildingMap[key]) {
+                this.buildMode = buildingMap[key];
+                this.closeBuildMenu();
             }
         }
 

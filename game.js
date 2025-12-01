@@ -152,11 +152,20 @@ class Game {
         this.dragStart = { x: 0, y: 0 };
 
         // Modo de construcción
+        // Modo de construcción
         this.buildMode = null;
         this.buildGhost = null;
 
         this.setupEventListeners();
-        this.initializeGame(); this.updateUI();
+
+        // OPTIMIZACIÓN: Inicializar Spatial Grid
+        this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+
+        // SISTEMA DE TECNOLOGÍAS
+        this.techManager = new TechManager(this);
+
+        this.initializeGame();
+        this.updateUI();
     }
 
     resizeCanvas() {
@@ -553,6 +562,16 @@ class Game {
     update(deltaTime) {
         if (this.isPaused || this.isGameOver) return;
 
+        // Actualizar tecnologías
+        if (this.techManager) this.techManager.update(deltaTime);
+
+        // OPTIMIZACIÓN: Actualizar Spatial Grid
+        // Limpiar y reinsertar todas las entidades vivas
+        this.spatialGrid.clear();
+        for (let entity of this.entities) {
+            this.spatialGrid.add(entity);
+        }
+
         // Actualizar todas las entidades
         for (let entity of this.entities) {
             entity.update(deltaTime, this);
@@ -939,6 +958,29 @@ class Game {
                 </div>
             `;
         }
+
+        // Añadir tecnologías disponibles
+        if (this.techManager) {
+            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+            for (let tech of availableTechs) {
+                const canAfford = this.techManager.canResearch(tech.id);
+                let costString = '';
+                for (let [res, amount] of Object.entries(tech.cost)) {
+                    const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                    costString += `${icon}${amount} `;
+                }
+
+                grid.innerHTML += `
+                    <div class="action-button ${!canAfford ? 'disabled' : ''}" 
+                         onclick="if(this.classList.contains('disabled')) return; game.techManager.startResearch('${tech.id}')"
+                         title="${tech.description}">
+                        <div class="action-icon">${tech.icon || '🔬'}</div>
+                        <div class="action-name">${tech.name}</div>
+                        <div class="action-cost">${costString}</div>
+                    </div>
+                `;
+            }
+        }
     }
 
     showNotification(message, type = 'info') {
@@ -966,6 +1008,63 @@ class Game {
 }
 
 // ==========================================
+// OPTIMIZACIÓN: SPATIAL GRID
+// ==========================================
+class SpatialGrid {
+    constructor(width, height, cellSize) {
+        this.cellSize = cellSize;
+        this.cols = Math.ceil(width / cellSize);
+        this.rows = Math.ceil(height / cellSize);
+        this.buckets = new Map();
+    }
+
+    clear() {
+        this.buckets.clear();
+    }
+
+    add(entity) {
+        const key = this.getKey(entity.x, entity.y);
+        if (!this.buckets.has(key)) {
+            this.buckets.set(key, []);
+        }
+        this.buckets.get(key).push(entity);
+    }
+
+    getKey(x, y) {
+        const col = Math.floor(x / this.cellSize);
+        const row = Math.floor(y / this.cellSize);
+        return `${col},${row}`;
+    }
+
+    // Devuelve entidades en las celdas cercanas
+    query(x, y, radius) {
+        const found = [];
+        const cellRadius = Math.ceil(radius / this.cellSize);
+
+        const centerCol = Math.floor(x / this.cellSize);
+        const centerRow = Math.floor(y / this.cellSize);
+
+        const minCol = Math.max(0, centerCol - cellRadius);
+        const maxCol = Math.min(this.cols - 1, centerCol + cellRadius);
+        const minRow = Math.max(0, centerRow - cellRadius);
+        const maxRow = Math.min(this.rows - 1, centerRow + cellRadius);
+
+        for (let c = minCol; c <= maxCol; c++) {
+            for (let r = minRow; r <= maxRow; r++) {
+                const key = `${c},${r}`;
+                if (this.buckets.has(key)) {
+                    const bucket = this.buckets.get(key);
+                    for (let i = 0; i < bucket.length; i++) {
+                        found.push(bucket[i]);
+                    }
+                }
+            }
+        }
+        return found;
+    }
+}
+
+// ==========================================
 // CLASE BASE: ENTITY
 // ==========================================
 class Entity {
@@ -985,19 +1084,16 @@ class Entity {
 
         // Sistema de imágenes
         this.image = null;
-        // Intentar cargar imagen automáticamente en el próximo ciclo para asegurar que 'type' esté definido
+        // Intentar cargar imagen automáticamente en el próximo ciclo
         setTimeout(() => this.loadIcon(), 0);
     }
 
     loadIcon() {
         if (!this.type) return;
-
-        // OPTIMIZACIÓN: Usar imagen precargada del AssetLoader
         const preloadedImage = assetLoader.getImage(this.type);
         if (preloadedImage) {
             this.image = preloadedImage;
         }
-        // Si no existe imagen precargada, se usará el emoji (fallback)
     }
 
     takeDamage(amount) {
@@ -1016,22 +1112,17 @@ class Entity {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
 
-        // OPTIMIZACIÓN: Render Culling
-        // Si la entidad está fuera de la pantalla, no dibujarla
         if (screenX < -this.size || screenX > CONFIG.CANVAS_WIDTH + this.size ||
             screenY < -this.size || screenY > CONFIG.CANVAS_HEIGHT + this.size) {
             return;
         }
 
-        // Círculo de fondo
         ctx.fillStyle = this.getTeamColor();
         ctx.beginPath();
         ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // Icono (Imagen o Emoji)
         if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
-            // Dibujar imagen
             ctx.save();
             ctx.beginPath();
             ctx.arc(screenX, screenY, this.size * 0.8, 0, Math.PI * 2);
@@ -1039,14 +1130,12 @@ class Entity {
             ctx.drawImage(this.image, screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
             ctx.restore();
         } else {
-            // Dibujar emoji (fallback)
             ctx.font = `${this.size * 1.5}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(this.icon, screenX, screenY);
         }
 
-        // Barra de vida
         if (this.hp < this.maxHp) {
             const barWidth = this.size * 2;
             const barHeight = 4;
@@ -1080,7 +1169,7 @@ class Entity {
 class Unit extends Entity {
     constructor(x, y, team) {
         super(x, y, team);
-        this.size = 32; // 64x64 pixeles de diámetro
+        this.size = 32;
         this.isUnit = true;
         this.speed = 50;
         this.targetX = null;
@@ -1088,29 +1177,24 @@ class Unit extends Entity {
         this.attackTarget = null;
         this.gatherTarget = null;
         this.attackDamage = 5;
-        this.attackSpeed = 1; // ataques por segundo
-        this.attackRange = 50; // Aumentado para compensar el tamaño
+        this.attackSpeed = 1;
+        this.attackRange = 50;
         this.attackCooldown = 0;
         this.canAttack = false;
         this.canGather = false;
 
-        // OPTIMIZACIÓN: Timer para IA (para no buscar enemigos cada frame)
-        // Offset aleatorio para distribuir la carga de CPU entre varios frames
         this.aiTimer = Math.random() * 0.5;
-        this.aiCheckInterval = 0.5; // Revisar entorno cada 0.5 segundos
+        this.aiCheckInterval = 0.5;
     }
 
     update(deltaTime, game) {
-        // OPTIMIZACIÓN: Actualizar timer de IA
         this.aiTimer -= deltaTime;
 
-        // IA básica: atacar enemigos cercanos
         if (!this.attackTarget && this.canAttack && this.aiTimer <= 0) {
             this.findNearbyEnemy(game);
-            this.aiTimer = this.aiCheckInterval; // Reiniciar timer
+            this.aiTimer = this.aiCheckInterval;
         }
 
-        // Atacar objetivo
         if (this.attackTarget) {
             if (this.attackTarget.isDead) {
                 this.attackTarget = null;
@@ -1119,7 +1203,6 @@ class Unit extends Entity {
                 this.tryAttack(this.attackTarget, deltaTime);
             }
         }
-        // Recolectar recurso
         else if (this.gatherTarget && this.canGather) {
             if (this.gatherTarget.amount <= 0) {
                 this.gatherTarget = null;
@@ -1128,10 +1211,8 @@ class Unit extends Entity {
                 this.tryGather(this.gatherTarget, deltaTime, game);
             }
         }
-        // Moverse a posición
         else if (this.targetX !== null) {
             this.moveTowardsTarget(this.targetX, this.targetY, deltaTime);
-
             const dist = Math.hypot(this.x - this.targetX, this.y - this.targetY);
             if (dist < 10) {
                 this.targetX = null;
@@ -1139,7 +1220,6 @@ class Unit extends Entity {
             }
         }
 
-        // Actualizar cooldown de ataque
         if (this.attackCooldown > 0) {
             this.attackCooldown -= deltaTime;
         }
@@ -1147,13 +1227,17 @@ class Unit extends Entity {
 
     findNearbyEnemy(game) {
         const searchRadius = 200;
-        const enemies = this.team === 'player' ? game.enemies : game.units.filter(u => u.team === 'player');
 
-        for (let enemy of enemies) {
-            const dist = Math.hypot(this.x - enemy.x, this.y - enemy.y);
-            if (dist < searchRadius) {
-                this.attackTarget = enemy;
-                break;
+        // OPTIMIZACIÓN: Usar Spatial Grid
+        const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius);
+
+        for (let entity of nearbyEntities) {
+            if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
+                const dist = Math.hypot(this.x - entity.x, this.y - entity.y);
+                if (dist < searchRadius) {
+                    this.attackTarget = entity;
+                    break;
+                }
             }
         }
     }
@@ -1170,7 +1254,6 @@ class Unit extends Entity {
             this.x += moveX;
             this.y += moveY;
 
-            // Límites del mapa
             this.x = Math.max(0, Math.min(CONFIG.CANVAS_WIDTH, this.x));
             this.y = Math.max(0, Math.min(CONFIG.CANVAS_HEIGHT, this.y));
         }

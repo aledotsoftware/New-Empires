@@ -1200,17 +1200,6 @@ class Villager extends Unit {
         this.icon = '👨‍🌾';
         this.name = 'Aldeano';
         this.type = 'villager';
-        this.maxHp = 50;
-        this.hp = 50;
-        this.attackDamage = 3;
-        this.canAttack = true;
-        this.canGather = true;
-    }
-}
-
-class Warrior extends Unit {
-    constructor(x, y, team) {
-        super(x, y, team);
         this.icon = '⚔️';
         this.name = 'Guerrero';
         this.type = 'warrior';
@@ -1319,9 +1308,12 @@ function gameLoop(currentTime) {
 // ==========================================
 // INICIALIZACIÓN
 // ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-    // Cargar civilizaciones (ahora es síncrono)
-    civilizationManager.loadCivilizations();
+window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Iniciar carga de assets en segundo plano
+    assetLoader.loadAll();
+
+    // 2. Cargar civilizaciones (esperar a que estén listas para mostrar la selección)
+    await civilizationManager.loadCivilizations();
 
     // Elementos de UI
     const startButton = document.getElementById('startButton');

@@ -257,7 +257,11 @@ const CONFIG = {
         house: { width: 3, height: 3 },
         barracks: { width: 4, height: 4 },
         townCenter: { width: 5, height: 5 },
-        storage: { width: 2, height: 2 }
+        storage: { width: 2, height: 2 },
+        storageWood: { width: 2, height: 2 },
+        market: { width: 2, height: 2 },
+        temple: { width: 2, height: 2 },
+        workshop: { width: 2, height: 2 }
     },
 
     // Costos de construcción
@@ -265,14 +269,19 @@ const CONFIG = {
         house: { wood: 30 },
         barracks: { wood: 175 },
         townCenter: { wood: 275, stone: 100 },
-        storage: { wood: 100 }
+        storage: { wood: 100 },
+        storageWood: { wood: 100 },
+        market: { wood: 150, stone: 50 },
+        temple: { wood: 200, gold: 100 },
+        workshop: { wood: 200, gold: 50 }
     },
 
     // Costos de unidades
     UNIT_COSTS: {
         villager: { food: 50 },
         warrior: { food: 60, gold: 20 },
-        archer: { food: 50, gold: 40, wood: 25 }
+        archer: { food: 50, gold: 40, wood: 25 },
+        trader: { food: 50, gold: 40, wood: 25 }
     },
 
     // Velocidades de recolección (por segundo)
@@ -320,7 +329,11 @@ class AssetLoader {
             { key: 'townCenter', src: 'assets/icons/townCenter.png' },
             { key: 'house', src: 'assets/icons/house.png' },
             { key: 'barracks', src: 'assets/icons/barracks.png' },
-            { key: 'storage', src: 'assets/icons/storage.png' }
+            { key: 'storage', src: 'assets/icons/storage.png' },
+            { key: 'storageWood', src: 'assets/icons/storageWood.png' },
+            { key: 'market', src: 'assets/icons/market.png' },
+            { key: 'temple', src: 'assets/icons/temple.png' },
+            { key: 'workshop', src: 'assets/icons/workshop.png' }
         ];
 
         this.totalAssets = assetsToLoad.length;
@@ -389,6 +402,9 @@ class Game {
         // Control de cámara
         this.camera = { x: 0, y: 0 };
         this.cameraSpeed = 10;
+
+        // Configuración de visualización
+        this.showGrid = true; // Mostrar/ocultar cuadrícula (configurable)
 
         // Mouse
         this.mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
@@ -684,7 +700,11 @@ class Game {
                 'q': 'house',
                 'w': 'barracks',
                 'e': 'townCenter',
-                'r': 'storage'
+                'r': 'storage',
+                't': 'storageWood',
+                'y': 'market',
+                'u': 'temple',
+                'i': 'workshop'
             };
 
             const key = e.key.toLowerCase();
@@ -774,6 +794,18 @@ class Game {
                 break;
             case 'storage':
                 building = new Storage(centerX, centerY, 'player');
+                break;
+            case 'storageWood':
+                building = new StorageWood(centerX, centerY, 'player');
+                break;
+            case 'market':
+                building = new Market(centerX, centerY, 'player');
+                break;
+            case 'temple':
+                building = new Temple(centerX, centerY, 'player');
+                break;
+            case 'workshop':
+                building = new Workshop(centerX, centerY, 'player');
                 break;
         }
 
@@ -973,8 +1005,10 @@ class Game {
         // Dibujar terreno
         this.drawTerrain();
 
-        // Dibujar grid
-        this.drawGrid();
+        // Dibujar grid (solo si está activado)
+        if (this.showGrid) {
+            this.drawGrid();
+        }
 
         // Dibujar nodos de recursos
         this.drawResourceNodes();
@@ -1100,6 +1134,10 @@ class Game {
             case 'barracks': icon = '⚔️'; break;
             case 'townCenter': icon = '🏰'; break;
             case 'storage': icon = '📦'; break;
+            case 'storageWood': icon = '🌲'; break;
+            case 'market': icon = '🏪'; break;
+            case 'temple': icon = '⛪'; break;
+            case 'workshop': icon = '🔨'; break;
         }
 
         const fontSize = Math.min(width, height) * 0.6;
@@ -1460,18 +1498,12 @@ class Entity {
             return;
         }
 
+        // Dibujar fondo cuadrado en lugar de redondo
         ctx.fillStyle = this.getTeamColor();
-        ctx.beginPath();
-        ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
 
         if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(screenX, screenY, this.size * 0.8, 0, Math.PI * 2);
-            ctx.clip();
             ctx.drawImage(this.image, screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
-            ctx.restore();
         } else {
             ctx.font = `${this.size * 1.5}px Arial`;
             ctx.textAlign = 'center';
@@ -1950,6 +1982,54 @@ class Storage extends Building {
     }
 }
 
+class StorageWood extends Building {
+    constructor(x, y, team) {
+        super(x, y, team);
+        this.icon = '🌲';
+        this.name = 'Depósito de Madera';
+        this.type = 'storageWood';
+        this.maxHp = 800;
+        this.hp = 800;
+        this.size = 40;
+    }
+}
+
+class Market extends Building {
+    constructor(x, y, team) {
+        super(x, y, team);
+        this.icon = '🏪';
+        this.name = 'Mercado';
+        this.type = 'market';
+        this.maxHp = 1000;
+        this.hp = 1000;
+        this.size = 45;
+    }
+}
+
+class Temple extends Building {
+    constructor(x, y, team) {
+        super(x, y, team);
+        this.icon = '⛪';
+        this.name = 'Templo';
+        this.type = 'temple';
+        this.maxHp = 1500;
+        this.hp = 1500;
+        this.size = 55;
+    }
+}
+
+class Workshop extends Building {
+    constructor(x, y, team) {
+        super(x, y, team);
+        this.icon = '🔨';
+        this.name = 'Taller';
+        this.type = 'workshop';
+        this.maxHp = 1100;
+        this.hp = 1100;
+        this.size = 50;
+    }
+}
+
 // ==========================================
 // GAME LOOP
 // ==========================================
@@ -2353,4 +2433,36 @@ function selectMapSize(sizeKey) {
 function backToMapSize() {
     document.getElementById('civSelectionScreen').classList.add('hidden');
     document.getElementById('mapSizeScreen').classList.remove('hidden');
+}
+
+// ==========================================
+// FUNCIÓN DE CONFIGURACIÓN - Toggle Grid
+// ==========================================
+function toggleGrid() {
+    if (window.game) {
+        game.showGrid = !game.showGrid;
+        const toggleElement = document.getElementById('gridToggleValue');
+        if (toggleElement) {
+            toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+        }
+    }
+}
+
+function showSettings() {
+    const modal = document.getElementById('settingsScreen');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Actualizar estado actual
+        const toggleElement = document.getElementById('gridToggleValue');
+        if (toggleElement && window.game) {
+            toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+        }
+    }
+}
+
+function hideSettings() {
+    const modal = document.getElementById('settingsScreen');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
 }

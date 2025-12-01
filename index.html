@@ -151,6 +151,10 @@
                 <span class="time-icon">⏱️</span>
                 <span id="gameTime">00:00</span>
             </div>
+            <button class="btn-secondary" onclick="showSettings()"
+                style="margin-left: 15px; padding: 8px 16px; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.5);">
+                ⚙️ Config
+            </button>
         </div>
 
         <!-- Contenedor Principal del Juego -->
@@ -225,6 +229,41 @@
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
+                    <div class="build-option" data-building="storageWood">
+                        <div class="build-icon">🌲</div>
+                        <div class="build-name">Depósito de Madera</div>
+                        <div class="build-cost">
+                            <span>🪵 100</span>
+                        </div>
+                        <div class="build-info">Almacena madera</div>
+                    </div>
+                    <div class="build-option" data-building="market">
+                        <div class="build-icon">🏪</div>
+                        <div class="build-name">Mercado</div>
+                        <div class="build-cost">
+                            <span>🪵 150</span>
+                            <span>🪨 50</span>
+                        </div>
+                        <div class="build-info">Almacena recursos</div>
+                    </div>
+                    <div class="build-option" data-building="temple">
+                        <div class="build-icon">⛪</div>
+                        <div class="build-name">Templo</div>
+                        <div class="build-cost">
+                            <span>🪵 200</span>
+                            <span>🪨 100</span>
+                        </div>
+                        <div class="build-info">Almacena recursos</div>
+                    </div>
+                    <div class="build-option" data-building="workshop">
+                        <div class="build-icon">🔨</div>
+                        <div class="build-name">Taller</div>
+                        <div class="build-cost">
+                            <span>🪵 200</span>
+                            <span>🪨 50</span>
+                        </div>
+                        <div class="build-info">Almacena recursos</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -237,6 +276,35 @@
             <p id="gameOverMessage" class="game-over-message"></p>
             <div class="game-over-stats" id="gameOverStats"></div>
             <button id="restartButton" class="btn-restart" onclick="location.reload()">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <!-- Pantalla de Configuración -->
+    <div id="settingsScreen" class="modal-overlay hidden">
+        <div class="modal-content settings-modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>⚙️ Configuración</h2>
+                <button class="btn-close" onclick="hideSettings()">✕</button>
+            </div>
+            <div class="settings-content" style="padding: 20px;">
+                <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
+                    <h3 style="margin-bottom: 20px; color: #d4af37;">Visualización</h3>
+
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #e2e8f0;">
+                            Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
+                        </label>
+                        <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;">
+                            Alternar
+                        </button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-secondary" onclick="hideSettings()">Cerrar</button>
+                </div>
+            </div>
         </div>
     </div>
 

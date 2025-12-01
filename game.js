@@ -413,6 +413,11 @@ class Game {
         this.camera = { x: 0, y: 0 };
         this.cameraSpeed = 10;
 
+        // Configuración de desplazamiento por bordes
+        this.edgeScrollSpeed = 15; // Velocidad de desplazamiento
+        this.edgeScrollMargin = 20; // Margen en píxeles para activar el desplazamiento
+        this.hasMouseMoved = false; // Para evitar desplazamiento inicial
+
         // Configuración de visualización
         this.showGrid = true; // Mostrar/ocultar cuadrícula (configurable)
 
@@ -593,6 +598,7 @@ class Game {
     setupEventListeners() {
         // Mouse move
         this.canvas.addEventListener('mousemove', (e) => {
+            this.hasMouseMoved = true;
             const rect = this.canvas.getBoundingClientRect();
             this.mouse.x = e.clientX - rect.left;
             this.mouse.y = e.clientY - rect.top;
@@ -969,8 +975,36 @@ class Game {
         }
     }
 
+    handleEdgeScrolling() {
+        if (!this.hasMouseMoved) return;
+
+        const margin = this.edgeScrollMargin;
+        const speed = this.edgeScrollSpeed;
+
+        // Desplazamiento horizontal
+        if (this.mouse.x < margin) {
+            this.camera.x -= speed;
+        } else if (this.mouse.x > this.canvas.width - margin) {
+            this.camera.x += speed;
+        }
+
+        // Desplazamiento vertical
+        if (this.mouse.y < margin) {
+            this.camera.y -= speed;
+        } else if (this.mouse.y > this.canvas.height - margin) {
+            this.camera.y += speed;
+        }
+
+        // Mantener la cámara dentro de los límites del mapa
+        this.camera.x = Math.max(0, Math.min(this.camera.x, CONFIG.CANVAS_WIDTH - this.viewWidth));
+        this.camera.y = Math.max(0, Math.min(this.camera.y, CONFIG.CANVAS_HEIGHT - this.viewHeight));
+    }
+
     update(deltaTime) {
         if (this.isPaused || this.isGameOver) return;
+
+        // Manejar desplazamiento de cámara por bordes
+        this.handleEdgeScrolling();
 
         // Actualizar tecnologías
         if (this.techManager) this.techManager.update(deltaTime);

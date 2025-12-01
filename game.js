@@ -414,8 +414,8 @@ class Game {
 
         // Configuración avanzada de cámara RTS
         this.cameraConfig = {
-            baseSpeed: 500,      // Píxeles por segundo (teclado)
-            edgeSpeed: 800,      // Velocidad máxima en bordes
+            baseSpeed: 1500,      // Píxeles por segundo (teclado)
+            edgeSpeed: 2500,      // Velocidad máxima en bordes
             edgeThreshold: 30,   // Margen en píxeles para activar scroll
             smoothness: 0.1      // Factor de suavizado (lerp)
         };

@@ -602,7 +602,7 @@ class Game {
 
     setupEventListeners() {
         // Mouse move
-        this.canvas.addEventListener('mousemove', (e) => {
+        window.addEventListener('mousemove', (e) => {
             this.hasMouseMoved = true;
             const rect = this.canvas.getBoundingClientRect();
             this.mouse.x = e.clientX - rect.left;

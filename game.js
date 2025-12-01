@@ -356,13 +356,23 @@ const assetLoader = new AssetLoader();
 // CLASE PRINCIPAL DEL JUEGO
 // ==========================================
 class Game {
-    constructor(civId = 'romans') {
+    constructor(civId = 'romans', mapConfig = null) {
         this.civilizationId = civId;
         this.civilization = civilizationManager.getCivilization(civId);
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.minimap = document.getElementById('minimapCanvas');
         this.minimapCtx = this.minimap.getContext('2d');
+
+        // Configuración del mapa procedural
+        this.mapConfig = mapConfig || {
+            seed: Date.now(),
+            width: Math.floor(CONFIG.CANVAS_WIDTH / TILE_SIZE),
+            height: Math.floor(CONFIG.CANVAS_HEIGHT / TILE_SIZE),
+            numPlayers: 2,
+            biome: 'grassland',
+            style: 'continental'
+        };
 
         // Configurar dimensiones
         this.resizeCanvas();
@@ -470,7 +480,75 @@ class Game {
     }
 
     generateMap() {
-        // Generar nodos de recursos
+        // Usar el generador procedural de mapas
+        if (typeof ProceduralMapGenerator !== 'undefined') {
+            console.log('🗺️ Usando generador procedural de mapas');
+
+            const mapGen = new ProceduralMapGenerator(this.mapConfig);
+            const generatedMap = mapGen.generate();
+
+            // Aplicar el mapa generado al TerrainMap existente
+            this.applyProceduralTerrain(generatedMap);
+
+            // Aplicar recursos generados
+            this.applyProceduralResources(generatedMap);
+
+            // Guardar información de posiciones de jugadores
+            this.proceduralPlayerStarts = generatedMap.playerStarts;
+
+            // Guardar decoraciones para renderizado futuro
+            this.proceduralDecorations = generatedMap.decorations;
+
+            console.log(`✅ Mapa procedural aplicado (Semilla: ${generatedMap.metadata.seed})`);
+        } else {
+            // Fallback: generación simple de recursos (código original)
+            console.log('⚠️ Generador procedural no disponible, usando generación simple');
+            this.generateSimpleMap();
+        }
+    }
+
+    applyProceduralTerrain(generatedMap) {
+        // Aplicar tipos de terreno del mapa generado al TerrainMap existente
+        const { terrainTypes, heightmap } = generatedMap;
+
+        for (let y = 0; y < terrainTypes.length; y++) {
+            for (let x = 0; x < terrainTypes[y].length; x++) {
+                const terrainType = terrainTypes[y][x];
+                const index = this.terrainMap.getIndex(x, y);
+
+                if (index >= 0 && index < this.terrainMap.grid.length) {
+                    this.terrainMap.grid[index] = terrainType;
+                }
+            }
+        }
+    }
+
+    applyProceduralResources(generatedMap) {
+        // Convertir recursos del mapa generado al formato del juego
+        const resourceIcons = {
+            wood: '🌲',
+            food: '🌾',
+            gold: '💎',
+            stone: '🪨'
+        };
+
+        this.resourceNodes = [];
+
+        for (let res of generatedMap.resources) {
+            this.resourceNodes.push({
+                x: res.x * TILE_SIZE,
+                y: res.y * TILE_SIZE,
+                type: res.type,
+                icon: resourceIcons[res.type] || '❓',
+                amount: res.amount,
+                radius: 20,
+                playerId: res.playerId || null
+            });
+        }
+    }
+
+    generateSimpleMap() {
+        // Código original de generación simple (fallback)
         const resourceTypes = [
             { type: 'wood', icon: '🌲', amount: 500 },
             { type: 'food', icon: '🌾', amount: 400 },

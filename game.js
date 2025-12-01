@@ -1039,7 +1039,7 @@ class Game {
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         this.ctx.lineWidth = 1;
 
-        const gridSize = 100;
+        const gridSize = TILE_SIZE;
         const startX = Math.floor(this.camera.x / gridSize) * gridSize;
         const startY = Math.floor(this.camera.y / gridSize) * gridSize;
 

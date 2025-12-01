@@ -41,6 +41,61 @@ const CONFIG = {
 };
 
 // ==========================================
+// GESTOR DE ASSETS (Optimización de carga)
+// ==========================================
+class AssetLoader {
+    constructor() {
+        this.assets = {};
+        this.loadedCount = 0;
+        this.totalAssets = 0;
+    }
+
+    loadImage(key, src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => {
+                this.assets[key] = img;
+                this.loadedCount++;
+                console.log(`✅ Asset cargado: ${key}`);
+                resolve(img);
+            };
+            img.onerror = () => {
+                console.warn(`⚠️ No se pudo cargar asset: ${key} (${src})`);
+                // Resolvemos igual para no bloquear el juego, pero sin imagen
+                resolve(null);
+            };
+        });
+    }
+
+    async loadAll() {
+        const assetsToLoad = [
+            { key: 'villager', src: 'assets/icons/villager.png' },
+            { key: 'warrior', src: 'assets/icons/warrior.png' },
+            { key: 'archer', src: 'assets/icons/archer.png' },
+            { key: 'townCenter', src: 'assets/icons/townCenter.png' },
+            { key: 'house', src: 'assets/icons/house.png' },
+            { key: 'barracks', src: 'assets/icons/barracks.png' },
+            { key: 'storage', src: 'assets/icons/storage.png' }
+        ];
+
+        this.totalAssets = assetsToLoad.length;
+        console.log('🔄 Iniciando carga de assets...');
+
+        const promises = assetsToLoad.map(asset => this.loadImage(asset.key, asset.src));
+        await Promise.all(promises);
+
+        console.log('✨ Todos los assets procesados.');
+    }
+
+    getImage(key) {
+        return this.assets[key];
+    }
+}
+
+const assetLoader = new AssetLoader();
+
+// ==========================================
 // CLASE PRINCIPAL DEL JUEGO
 // ==========================================
 class Game {
@@ -717,22 +772,29 @@ class Game {
 
         // Edificios
         for (let building of this.buildings) {
-            this.minimapCtx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
-            this.minimapCtx.fillRect(
-                building.x * scale - 2,
-                building.y * scale - 2,
-                4, 4
-            );
+            const x = building.x * scale;
+            const y = building.y * scale;
+            const size = Math.max(4, building.size * scale * 2);
+
+            if (building.image && building.image.complete) {
+                this.minimapCtx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
+            } else {
+                this.minimapCtx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
+                this.minimapCtx.fillRect(x - 2, y - 2, 4, 4);
+            }
         }
 
         // Unidades
         for (let unit of this.units) {
-            this.minimapCtx.fillStyle = unit.team === 'player' ? '#3182ce' : '#e53e3e';
-            this.minimapCtx.fillRect(
-                unit.x * scale - 1,
-                unit.y * scale - 1,
-                2, 2
-            );
+            const x = unit.x * scale;
+            const y = unit.y * scale;
+
+            // Unidades son muy pequeñas, mejor usar puntos de color brillante
+            // Pero si el usuario quiere iconos, podemos intentar dibujar un punto más grande con el color del equipo
+            this.minimapCtx.fillStyle = unit.team === 'player' ? '#63b3ed' : '#fc8181';
+            this.minimapCtx.beginPath();
+            this.minimapCtx.arc(x, y, 2, 0, Math.PI * 2);
+            this.minimapCtx.fill();
         }
 
         // Viewport
@@ -923,13 +985,12 @@ class Entity {
     loadIcon() {
         if (!this.type) return;
 
-        const img = new Image();
-        img.src = `assets/icons/${this.type}.png`;
-
-        img.onload = () => {
-            this.image = img;
-        };
-        // Si falla, simplemente no hacemos nada y se usará el emoji
+        // OPTIMIZACIÓN: Usar imagen precargada del AssetLoader
+        const preloadedImage = assetLoader.getImage(this.type);
+        if (preloadedImage) {
+            this.image = preloadedImage;
+        }
+        // Si no existe imagen precargada, se usará el emoji (fallback)
     }
 
     takeDamage(amount) {
@@ -947,6 +1008,13 @@ class Entity {
     render(ctx, camera) {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
+
+        // OPTIMIZACIÓN: Render Culling
+        // Si la entidad está fuera de la pantalla, no dibujarla
+        if (screenX < -this.size || screenX > CONFIG.CANVAS_WIDTH + this.size ||
+            screenY < -this.size || screenY > CONFIG.CANVAS_HEIGHT + this.size) {
+            return;
+        }
 
         // Círculo de fondo
         ctx.fillStyle = this.getTeamColor();
@@ -1018,12 +1086,21 @@ class Unit extends Entity {
         this.attackCooldown = 0;
         this.canAttack = false;
         this.canGather = false;
+
+        // OPTIMIZACIÓN: Timer para IA (para no buscar enemigos cada frame)
+        // Offset aleatorio para distribuir la carga de CPU entre varios frames
+        this.aiTimer = Math.random() * 0.5;
+        this.aiCheckInterval = 0.5; // Revisar entorno cada 0.5 segundos
     }
 
     update(deltaTime, game) {
+        // OPTIMIZACIÓN: Actualizar timer de IA
+        this.aiTimer -= deltaTime;
+
         // IA básica: atacar enemigos cercanos
-        if (!this.attackTarget && this.canAttack) {
+        if (!this.attackTarget && this.canAttack && this.aiTimer <= 0) {
             this.findNearbyEnemy(game);
+            this.aiTimer = this.aiCheckInterval; // Reiniciar timer
         }
 
         // Atacar objetivo

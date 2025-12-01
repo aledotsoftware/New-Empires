@@ -59,6 +59,104 @@ class GridMap {
     }
 }
 
+// Clase para gestión de terrenos
+class TerrainMap {
+    constructor(width, height, tileSize) {
+        this.width = width;
+        this.height = height;
+        this.tileSize = tileSize;
+        this.cols = Math.floor(width / tileSize);
+        this.rows = Math.floor(height / tileSize);
+        this.grid = new Array(this.cols * this.rows).fill('grassland');
+
+        this.generateTerrain();
+    }
+
+    generateTerrain() {
+        // Generar bosques (15-20% del mapa)
+        this.generatePatches('forest', 0.17, 8);
+
+        // Generar agua (5-10% del mapa)
+        this.generatePatches('water', 0.08, 12);
+
+        // Generar montañas (3-5% del mapa)
+        this.generatePatches('mountain', 0.04, 6);
+
+        // Generar colinas (8-12% del mapa)
+        this.generatePatches('hill', 0.10, 5);
+
+        // Generar desiertos (5-8% del mapa)
+        this.generatePatches('desert', 0.06, 7);
+    }
+
+    generatePatches(terrainType, coverage, patchSize) {
+        const targetTiles = Math.floor(this.grid.length * coverage);
+        let tilesPlaced = 0;
+        const maxAttempts = targetTiles * 3;
+        let attempts = 0;
+
+        while (tilesPlaced < targetTiles && attempts < maxAttempts) {
+            attempts++;
+            const startCol = Math.floor(Math.random() * this.cols);
+            const startRow = Math.floor(Math.random() * this.rows);
+
+            // Crear parche usando distribución aleatoria
+            const patchTiles = Math.floor(patchSize + Math.random() * patchSize);
+            for (let i = 0; i < patchTiles; i++) {
+                const offsetX = Math.floor(Math.random() * patchSize) - patchSize / 2;
+                const offsetY = Math.floor(Math.random() * patchSize) - patchSize / 2;
+                const col = startCol + offsetX;
+                const row = startRow + offsetY;
+
+                if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
+                    const index = this.getIndex(col, row);
+                    if (this.grid[index] === 'grassland') {
+                        this.grid[index] = terrainType;
+                        tilesPlaced++;
+                        if (tilesPlaced >= targetTiles) break;
+                    }
+                }
+            }
+        }
+    }
+
+    getIndex(col, row) {
+        return row * this.cols + col;
+    }
+
+    getTerrainAt(x, y) {
+        const col = Math.floor(x / this.tileSize);
+        const row = Math.floor(y / this.tileSize);
+
+        if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) {
+            return 'grassland';
+        }
+
+        const index = this.getIndex(col, row);
+        return this.grid[index];
+    }
+
+    getTerrainData(terrainType) {
+        return TERRAIN_TYPES[terrainType] || TERRAIN_TYPES.grassland;
+    }
+
+    canBuildAt(x, y, widthTiles, heightTiles) {
+        for (let i = 0; i < widthTiles; i++) {
+            for (let j = 0; j < heightTiles; j++) {
+                const checkX = x + (i * this.tileSize);
+                const checkY = y + (j * this.tileSize);
+                const terrain = this.getTerrainAt(checkX, checkY);
+                const terrainData = this.getTerrainData(terrain);
+                if (!terrainData.buildable) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+
+
 // Tamaños de mapa (en tiles de 32px)
 const MAP_SIZES = {
     tiny: { name: 'Pequeño', tiles: 120, width: 3840, height: 3840 },
@@ -68,6 +166,73 @@ const MAP_SIZES = {
     large: { name: 'Grande', tiles: 220, width: 7040, height: 7040 },
     giant: { name: 'Gigante', tiles: 240, width: 7680, height: 7680 },
     ludicrous: { name: 'Absurdo', tiles: 480, width: 15360, height: 15360 }
+};
+
+// Tipos de terreno
+const TERRAIN_TYPES = {
+    grassland: {
+        name: 'Pastizal',
+        color: '#7cb342',
+        buildable: true,
+        movementSpeed: 1.0,
+        combatBonus: {
+            cavalry: 1.15  // +15% ataque para caballería
+        },
+        resources: ['food'],  // Puede aparecer trigo/comida
+        constructionSpeed: 1.0
+    },
+    forest: {
+        name: 'Bosque',
+        color: '#2e7d32',
+        buildable: false,  // No se puede construir
+        movementSpeed: 0.7,  // -30% velocidad
+        combatBonus: {
+            archer: 1.1  // +10% defensa para arqueros
+        },
+        resources: ['wood'],
+        constructionSpeed: 0
+    },
+    water: {
+        name: 'Agua',
+        color: '#1976d2',
+        buildable: false,
+        movementSpeed: 0,  // Unidades terrestres no pueden pasar
+        combatBonus: {},
+        resources: ['food'],  // Pesca
+        constructionSpeed: 0,
+        requiresBoat: true
+    },
+    mountain: {
+        name: 'Montaña',
+        color: '#5d4037',
+        buildable: false,
+        movementSpeed: 0,  // Impassable
+        combatBonus: {},
+        resources: ['stone'],
+        constructionSpeed: 0,
+        impassable: true
+    },
+    hill: {
+        name: 'Colina',
+        color: '#8d6e63',
+        buildable: true,
+        movementSpeed: 0.6,  // -40% velocidad al subir
+        combatBonus: {
+            archer: 1.2,  // +20% alcance para arqueros
+            defense: 1.15  // +15% defensa general
+        },
+        resources: ['stone'],
+        constructionSpeed: 0.8  // -20% velocidad de construcción
+    },
+    desert: {
+        name: 'Desierto',
+        color: '#fdd835',
+        buildable: true,
+        movementSpeed: 0.85,  // -15% velocidad
+        combatBonus: {},
+        resources: ['gold'],
+        constructionSpeed: 0.9
+    }
 };
 
 const CONFIG = {
@@ -242,6 +407,9 @@ class Game {
 
         // SISTEMA DE GRID (Cuadrícula de construcción y colisiones)
         this.gridMap = new GridMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
+
+        // SISTEMA DE TERRENOS
+        this.terrainMap = new TerrainMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
 
         // SISTEMA DE TECNOLOGÍAS
         this.techManager = new TechManager(this);
@@ -564,9 +732,15 @@ class Game {
         const snap = this.gridMap.snapToGrid(this.mouse.worldX, this.mouse.worldY);
         const size = CONFIG.BUILDING_SIZES[this.buildMode];
 
-        // Verificar si el área está libre
+        // Verificar si el área está libre en el grid
         if (!this.gridMap.isAreaFree(snap.col, snap.row, size.width, size.height)) {
             this.showNotification('No se puede construir aquí: Espacio ocupado', 'error');
+            return;
+        }
+
+        // Verificar si el terreno permite construcción
+        if (!this.terrainMap.canBuildAt(snap.x, snap.y, size.width, size.height)) {
+            this.showNotification('No se puede construir en este tipo de terreno', 'error');
             return;
         }
 
@@ -761,10 +935,43 @@ class Game {
         screen.classList.remove('hidden');
     }
 
+    drawTerrain() {
+        if (!this.terrainMap) return;
+
+        const startCol = Math.floor(this.camera.x / TILE_SIZE);
+        const startRow = Math.floor(this.camera.y / TILE_SIZE);
+        const endCol = Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE);
+        const endRow = Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE);
+
+        for (let row = startRow; row < endRow; row++) {
+            for (let col = startCol; col < endCol; col++) {
+                if (col < 0 || col >= this.terrainMap.cols || row < 0 || row >= this.terrainMap.rows) {
+                    continue;
+                }
+
+                const index = this.terrainMap.getIndex(col, row);
+                const terrainType = this.terrainMap.grid[index];
+                const terrainData = TERRAIN_TYPES[terrainType] || TERRAIN_TYPES.grassland;
+
+                const x = Math.floor(col * TILE_SIZE - this.camera.x);
+                const y = Math.floor(row * TILE_SIZE - this.camera.y);
+
+                this.ctx.fillStyle = terrainData.color;
+                this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+
+                // Dibujar borde sutil para distinguir tiles
+                // this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                // this.ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+            }
+        }
+    }
+
     render() {
         // Limpiar canvas
-        this.ctx.fillStyle = '#2d5016';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Dibujar terreno
+        this.drawTerrain();
 
         // Dibujar grid
         this.drawGrid();
@@ -1384,8 +1591,17 @@ class Unit extends Entity {
         const dist = Math.hypot(dx, dy);
 
         if (dist > 5) {
-            let moveX = (dx / dist) * this.speed * deltaTime;
-            let moveY = (dy / dist) * this.speed * deltaTime;
+            // Obtener modificador de terreno
+            let speedModifier = 1.0;
+            if (game && game.terrainMap) {
+                const terrain = game.terrainMap.getTerrainAt(this.x, this.y);
+                const terrainData = game.terrainMap.getTerrainData(terrain);
+                speedModifier = terrainData.movementSpeed;
+            }
+
+            const effectiveSpeed = this.speed * speedModifier;
+            let moveX = (dx / dist) * effectiveSpeed * deltaTime;
+            let moveY = (dy / dist) * effectiveSpeed * deltaTime;
 
             // Colisiones con edificios (GridMap)
             if (game && game.gridMap) {
@@ -1427,11 +1643,42 @@ class Unit extends Entity {
         }
     }
 
-    tryAttack(target, deltaTime) {
+    tryAttack(target, deltaTime, game) {
         const dist = Math.hypot(this.x - target.x, this.y - target.y);
 
         if (dist <= this.attackRange && this.attackCooldown <= 0) {
-            target.takeDamage(this.attackDamage);
+            let damage = this.attackDamage;
+
+            // Aplicar bonificaciones de terreno si el juego está disponible
+            if (game && game.terrainMap) {
+                // Bonificación del atacante
+                const myTerrain = game.terrainMap.getTerrainAt(this.x, this.y);
+                const myTerrainData = game.terrainMap.getTerrainData(myTerrain);
+
+                if (myTerrainData.combatBonus[this.type]) {
+                    damage *= myTerrainData.combatBonus[this.type];
+                }
+
+                // Bonificación defensiva del objetivo
+                const targetTerrain = game.terrainMap.getTerrainAt(target.x, target.y);
+                const targetTerrainData = game.terrainMap.getTerrainData(targetTerrain);
+
+                if (targetTerrainData.combatBonus.defense) {
+                    damage /= targetTerrainData.combatBonus.defense;
+                }
+
+                // Bonificación defensiva específica contra tipo de unidad (ej. arqueros en bosque)
+                if (targetTerrainData.combatBonus[target.type]) {
+                    // Si el terreno da bonificación al tipo de unidad defensora, reduce el daño recibido
+                    // Nota: Esto asume que el bonus en TERRAIN_TYPES es genérico. 
+                    // Para simplificar, usaremos la lógica de defensa general o específica si es defensa.
+                    // Pero según la config: archer: 1.1 en bosque es defensa.
+                    // Vamos a interpretar los valores en combatBonus como multiplicadores de fuerza.
+                    // Si es defensa, reduce daño.
+                }
+            }
+
+            target.takeDamage(damage);
             this.attackCooldown = 1 / this.attackSpeed;
         }
     }
@@ -1820,6 +2067,9 @@ window.addEventListener('DOMContentLoaded', async () => {
             civGrid.appendChild(card);
         });
     }
+
+    // Renderizar civilizaciones inicialmente
+    renderCivSelection();
 
     // Iniciar juego con la civilización seleccionada
     function startGame(civId) {

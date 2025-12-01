@@ -426,6 +426,10 @@ class Game {
         // Configuración de visualización
         this.showGrid = true; // Mostrar/ocultar cuadrícula (configurable)
 
+        // Configuración de aldeanos inactivos
+        this.enableIdleVillagerCycle = true; // Habilitar ciclo de aldeanos inactivos con TAB
+        this.idleVillagerIndex = 0; // Índice para el ciclo de aldeanos inactivos
+
         // Mouse
         this.mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
         this.isDragging = false;
@@ -711,6 +715,36 @@ class Game {
         this.updateActionsPanel();
     }
 
+    selectNextIdleVillager() {
+        // Obtener todos los aldeanos inactivos del jugador
+        const idleVillagers = this.units.filter(unit =>
+            unit.type === 'villager' &&
+            unit.team === 'player' &&
+            unit.state === 'IDLE'
+        );
+
+        if (idleVillagers.length === 0) {
+            this.showNotification('No hay aldeanos inactivos', 'info');
+            return;
+        }
+
+        // Ciclar al siguiente aldeano inactivo
+        this.idleVillagerIndex = this.idleVillagerIndex % idleVillagers.length;
+        const villager = idleVillagers[this.idleVillagerIndex];
+
+        // Seleccionar el aldeano
+        this.selectedEntities = [villager];
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
+
+        // Centrar cámara en el aldeano
+        this.camera.x = villager.x - this.viewWidth / 2;
+        this.camera.y = villager.y - this.viewHeight / 2;
+
+        // Incrementar índice para la próxima vez
+        this.idleVillagerIndex++;
+    }
+
     handleRightClick() {
         if (this.selectedEntities.length === 0) return;
 
@@ -763,6 +797,15 @@ class Game {
     }
 
     handleKeyPress(e) {
+        // TAB - Seleccionar siguiente aldeano inactivo
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            if (this.enableIdleVillagerCycle) {
+                this.selectNextIdleVillager();
+            }
+            return;
+        }
+
         // B - Build menu
         if (e.key === 'b' || e.key === 'B') {
             if (this.selectedEntities.length === 1 &&
@@ -2616,6 +2659,13 @@ function showSettings() {
             toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
         }
 
+        // Sincronizar toggle de aldeanos inactivos
+        const idleToggleElement = document.getElementById('idleVillagerToggleValue');
+        if (idleToggleElement && game) {
+            idleToggleElement.textContent = game.enableIdleVillagerCycle ? 'Activado' : 'Desactivado';
+            idleToggleElement.style.color = game.enableIdleVillagerCycle ? '#48bb78' : '#f56565';
+        }
+
         // Sincronizar sliders de cámara
         if (game && game.cameraConfig) {
             const speedSlider = document.getElementById('cameraSpeedSlider');
@@ -2655,5 +2705,16 @@ function hideSettings() {
     const modal = document.getElementById('settingsScreen');
     if (modal) {
         modal.classList.add('hidden');
+    }
+}
+
+function toggleIdleVillagerCycle() {
+    if (game) {
+        game.enableIdleVillagerCycle = !game.enableIdleVillagerCycle;
+        const toggleElement = document.getElementById('idleVillagerToggleValue');
+        if (toggleElement) {
+            toggleElement.textContent = game.enableIdleVillagerCycle ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = game.enableIdleVillagerCycle ? '#48bb78' : '#f56565';
+        }
     }
 }

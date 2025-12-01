@@ -1677,3 +1677,186 @@ function createParticles() {
 function closeBuildMenu() {
     document.getElementById('buildMenu').classList.add('hidden');
 }
+
+// ==========================================
+// ÁRBOL DE TECNOLOGÍAS
+// ==========================================
+
+function showTechTree() {
+    const modal = document.getElementById('techTreeScreen');
+    if (!modal) {
+        console.error('Tech tree modal not found');
+        return;
+    }
+
+    modal.classList.remove('hidden');
+    renderTechTree();
+}
+
+function hideTechTree() {
+    const modal = document.getElementById('techTreeScreen');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function renderTechTree() {
+    const content = document.getElementById('techTreeContent');
+    if (!content) return;
+
+    content.innerHTML = '';
+
+    // Obtener el estado actual del juego si existe
+    const techManager = game ? game.techManager : null;
+    const currentAge = techManager ? techManager.currentAge : 1;
+
+    // Header con información de edad actual
+    const headerSection = document.createElement('div');
+    headerSection.className = 'tech-tree-header';
+    headerSection.innerHTML = `
+        <div class="current-age-info">
+            <h3>📜 Edad Actual: ${AGES[currentAge].name}</h3>
+            <p class="age-period">${AGES[currentAge].period} - ${AGES[currentAge].era}</p>
+        </div>
+        <div class="timeline-legend">
+            <div class="legend-item"><span class="legend-color past"></span> Edades Pasadas</div>
+            <div class="legend-item"><span class="legend-color current"></span> Edad Actual</div>
+            <div class="legend-item"><span class="legend-color future"></span> Edades Futuras</div>
+        </div>
+    `;
+    content.appendChild(headerSection);
+
+    // Categorías de tecnologías
+    const categories = [
+        { id: 'TOOLS', title: 'Herramientas', icon: '🔨', color: '#8b7355' },
+        { id: 'AGRICULTURE', title: 'Agricultura', icon: '🌾', color: '#6a994e' },
+        { id: 'ECONOMY', title: 'Economía', icon: '💰', color: '#d4af37' },
+        { id: 'ARCHITECTURE', title: 'Arquitectura', icon: '🏛️', color: '#a8a29e' },
+        { id: 'MILITARY', title: 'Militar', icon: '⚔️', color: '#c53030' },
+        { id: 'DEFENSE', title: 'Defensa', icon: '🛡️', color: '#3182ce' },
+        { id: 'CULTURE', title: 'Cultura', icon: '📚', color: '#805ad5' }
+    ];
+
+    // Container principal horizontal
+    const horizontalTimeline = document.createElement('div');
+    horizontalTimeline.className = 'horizontal-timeline';
+
+    // Crear timeline horizontal por edades
+    for (let age = 1; age <= 30; age++) {
+        const ageColumn = document.createElement('div');
+        ageColumn.className = 'age-column';
+
+        const ageInfo = AGES[age];
+        const isCurrentAge = age === currentAge;
+        const isPastAge = age < currentAge;
+        const isFutureAge = age > currentAge;
+
+        // Header de la edad
+        const ageHeader = document.createElement('div');
+        ageHeader.className = `age-column-header ${isCurrentAge ? 'current' : ''} ${isPastAge ? 'past' : ''} ${isFutureAge ? 'future' : ''}`;
+        ageHeader.innerHTML = `
+            <div class="age-number-badge">${age}</div>
+            <div class="age-info">
+                <div class="age-name-short">${ageInfo.name}</div>
+                <div class="age-period-short">${ageInfo.period}</div>
+            </div>
+        `;
+        ageColumn.appendChild(ageHeader);
+
+        // Contenedor de tecnologías por categoría
+        const techContainer = document.createElement('div');
+        techContainer.className = 'age-tech-container';
+
+        categories.forEach(category => {
+            const categoryTechs = Object.values(TECHNOLOGIES).filter(
+                t => t.category === TECH_CATEGORIES[category.id] && t.age === age
+            );
+
+            if (categoryTechs.length > 0) {
+                const categoryRow = document.createElement('div');
+                categoryRow.className = 'tech-category-row';
+                categoryRow.style.borderLeftColor = category.color;
+
+                categoryTechs.forEach(tech => {
+                    const techCard = createCompactTechCard(tech, techManager, category.color);
+                    categoryRow.appendChild(techCard);
+                });
+
+                techContainer.appendChild(categoryRow);
+            }
+        });
+
+        ageColumn.appendChild(techContainer);
+        horizontalTimeline.appendChild(ageColumn);
+    }
+
+    content.appendChild(horizontalTimeline);
+
+    // Auto-scroll a la edad actual
+    setTimeout(() => {
+        const currentAgeColumn = horizontalTimeline.querySelector('.age-column-header.current');
+        if (currentAgeColumn) {
+            currentAgeColumn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }, 100);
+}
+
+// Nueva función para crear tarjetas compactas en timeline horizontal
+function createCompactTechCard(tech, techManager, categoryColor) {
+    const card = document.createElement('div');
+    card.className = 'tech-card-compact';
+
+    // Determinar el estado de la tecnología
+    let status = 'available';
+    let statusIcon = '';
+
+    if (techManager) {
+        if (techManager.isResearched(tech.id)) {
+            status = 'researched';
+            statusIcon = '✓';
+        } else if (techManager.isLocked(tech.id)) {
+            status = 'locked';
+            statusIcon = '🔒';
+        } else if (techManager.isResearching(tech.id)) {
+            status = 'researching';
+            statusIcon = '⏳';
+        }
+    }
+
+    card.setAttribute('data-status', status);
+    card.style.borderTopColor = categoryColor;
+
+    // Generar string de costos compacto
+    let costHTML = '';
+    const costIcons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
+    for (let [resource, amount] of Object.entries(tech.cost)) {
+        const icon = costIcons[resource] || resource;
+        costHTML += `<span class="cost-mini">${icon}${amount}</span>`;
+    }
+
+    card.innerHTML = `
+        <div class="tech-icon-compact">${tech.icon}</div>
+        <div class="tech-name-compact" title="${tech.name}">${tech.name}</div>
+        ${statusIcon ? `<div class="tech-status-icon">${statusIcon}</div>` : ''}
+        <div class="tech-cost-compact">${costHTML}</div>
+    `;
+
+    // Tooltip con información completa
+    card.title = `${tech.name}\n${tech.description}\nTiempo: ${tech.researchTime}s`;
+
+    // Mostrar prerequisitos si existen
+    if (tech.prerequisites && tech.prerequisites.length > 0) {
+        const prereqNames = tech.prerequisites.map(id => {
+            const prereqTech = TECHNOLOGIES[id];
+            return prereqTech ? prereqTech.name : id;
+        }).join(', ');
+        card.title += `\nRequiere: ${prereqNames}`;
+    }
+
+    return card;
+}
+
+function getRomanNumeral(num) {
+    const numerals = ['', 'I', 'II', 'III', 'IV', 'V'];
+    return numerals[num] || num;
+}

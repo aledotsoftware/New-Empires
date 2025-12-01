@@ -1,0 +1,80 @@
+{
+    "civilizationId": "mongols",
+    "name": "Mongoles",
+    "description": "Civilización nómada de las estepas",
+    "icon": "🏇",
+    "color": "#8B4513",
+    "bonuses": {
+        "unitSpeed": 1.15,
+        "cavalryAttack": 1.20,
+        "gatherSpeed": 1.0
+    },
+    "uniqueUnit": {
+        "id": "mangudai",
+        "name": "Mangudai",
+        "icon": "🏹",
+        "baseUnit": "archer",
+        "age": 18,
+        "bonuses": {
+            "attackDamage": 1.3,
+            "attackSpeed": 1.2,
+            "speed": 1.4
+        }
+    },
+    "technologyOverrides": {
+        "weaving": {
+            "name": "Tejido de Fieltro",
+            "icon": "🧶",
+            "description": "Técnica mongola de crear fieltro con lana de oveja."
+        },
+        "mudBricks": {
+            "name": "Estructura de Yurta",
+            "icon": "⛺",
+            "description": "Construcción de yurtas portátiles tradicionales."
+        },
+        "horseColar": {
+            "name": "Maestría Ecuestre",
+            "icon": "🐴",
+            "description": "Habilidad superior en doma y cría de caballos de las estepas."
+        }
+    },
+    "buildingOverrides": {
+        "house": {
+            "name": "Yurta",
+            "icon": "⛺",
+            "description": "Vivienda portátil tradicional mongola."
+        },
+        "barracks": {
+            "name": "Campo de Entrenamiento",
+            "icon": "🏕️",
+            "description": "Área de entrenamiento para guerreros nómadas."
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "steppeTactics",
+            "name": "Tácticas de Estepa",
+            "icon": "🐎",
+            "category": "MILITARY",
+            "age": 20,
+            "description": "Tácticas de guerrilla y ataque rápido perfeccionadas en las estepas.",
+            "cost": {
+                "food": 300,
+                "gold": 200
+            },
+            "researchTime": 40,
+            "building": "barracks",
+            "prerequisites": [
+                "horseColar"
+            ],
+            "effects": {
+                "unitStats": {
+                    "cavalry": {
+                        "speed": 1.25,
+                        "attackDamage": 1.15
+                    }
+                }
+            }
+        }
+    ]
+}

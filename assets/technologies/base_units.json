@@ -1,0 +1,199 @@
+{
+    "metadata": {
+        "version": "1.0.0",
+        "description": "Unidades base del juego - Pueden ser renombradas por cada civilización"
+    },
+    "units": [
+        {
+            "id": "villager",
+            "baseName": "Aldeano",
+            "baseIcon": "👨‍🌾",
+            "baseDescription": "Recolecta recursos y construye edificios.",
+            "type": "civilian",
+            "cost": {
+                "food": 50
+            },
+            "trainTime": 10,
+            "maxHp": 50,
+            "attackDamage": 3,
+            "attackSpeed": 1.0,
+            "attackRange": 5,
+            "speed": 50,
+            "lineOfSight": 4,
+            "populationCost": 1,
+            "availableFromAge": 1,
+            "abilities": [
+                "gather",
+                "build",
+                "attack"
+            ]
+        },
+        {
+            "id": "warrior",
+            "baseName": "Guerrero",
+            "baseIcon": "⚔️",
+            "baseDescription": "Unidad de infantería básica.",
+            "type": "melee",
+            "cost": {
+                "food": 60,
+                "gold": 20
+            },
+            "trainTime": 15,
+            "maxHp": 100,
+            "attackDamage": 10,
+            "attackSpeed": 1.2,
+            "attackRange": 10,
+            "speed": 50,
+            "lineOfSight": 5,
+            "populationCost": 1,
+            "availableFromAge": 3,
+            "abilities": [
+                "attack"
+            ]
+        },
+        {
+            "id": "archer",
+            "baseName": "Arquero",
+            "baseIcon": "🏹",
+            "baseDescription": "Unidad de rango básica.",
+            "type": "ranged",
+            "cost": {
+                "food": 30,
+                "wood": 25,
+                "gold": 15
+            },
+            "trainTime": 12,
+            "maxHp": 60,
+            "attackDamage": 8,
+            "attackSpeed": 1.5,
+            "attackRange": 100,
+            "speed": 45,
+            "lineOfSight": 6,
+            "populationCost": 1,
+            "availableFromAge": 3,
+            "abilities": [
+                "attack"
+            ]
+        },
+        {
+            "id": "cavalry",
+            "baseName": "Caballería",
+            "baseIcon": "🐴",
+            "baseDescription": "Unidad montada rápida.",
+            "type": "cavalry",
+            "cost": {
+                "food": 80,
+                "gold": 40
+            },
+            "trainTime": 20,
+            "maxHp": 120,
+            "attackDamage": 12,
+            "attackSpeed": 1.3,
+            "attackRange": 10,
+            "speed": 80,
+            "lineOfSight": 6,
+            "populationCost": 2,
+            "availableFromAge": 17,
+            "abilities": [
+                "attack",
+                "charge"
+            ]
+        },
+        {
+            "id": "spearman",
+            "baseName": "Lancero",
+            "baseIcon": "🗡️",
+            "baseDescription": "Infantería con lanza, efectiva contra caballería.",
+            "type": "melee",
+            "cost": {
+                "food": 50,
+                "wood": 30
+            },
+            "trainTime": 14,
+            "maxHp": 90,
+            "attackDamage": 9,
+            "attackSpeed": 1.1,
+            "attackRange": 15,
+            "speed": 48,
+            "lineOfSight": 5,
+            "populationCost": 1,
+            "availableFromAge": 10,
+            "abilities": [
+                "attack"
+            ],
+            "bonusVs": {
+                "cavalry": 2.0
+            }
+        },
+        {
+            "id": "scout",
+            "baseName": "Explorador",
+            "baseIcon": "🔭",
+            "baseDescription": "Unidad rápida de exploración.",
+            "type": "cavalry",
+            "cost": {
+                "food": 60
+            },
+            "trainTime": 10,
+            "maxHp": 70,
+            "attackDamage": 5,
+            "attackSpeed": 1.5,
+            "attackRange": 10,
+            "speed": 100,
+            "lineOfSight": 10,
+            "populationCost": 1,
+            "availableFromAge": 8,
+            "abilities": [
+                "scout",
+                "attack"
+            ]
+        },
+        {
+            "id": "priest",
+            "baseName": "Sacerdote",
+            "baseIcon": "🙏",
+            "baseDescription": "Unidad de soporte que cura y convierte.",
+            "type": "support",
+            "cost": {
+                "food": 100,
+                "gold": 100
+            },
+            "trainTime": 30,
+            "maxHp": 50,
+            "attackDamage": 0,
+            "attackSpeed": 0,
+            "attackRange": 50,
+            "speed": 40,
+            "lineOfSight": 7,
+            "populationCost": 1,
+            "availableFromAge": 14,
+            "abilities": [
+                "heal",
+                "convert"
+            ]
+        },
+        {
+            "id": "trader",
+            "baseName": "Comerciante",
+            "baseIcon": "💰",
+            "baseDescription": "Genera oro mediante rutas comerciales.",
+            "type": "civilian",
+            "cost": {
+                "food": 70,
+                "wood": 50
+            },
+            "trainTime": 25,
+            "maxHp": 60,
+            "attackDamage": 0,
+            "attackSpeed": 0,
+            "attackRange": 0,
+            "speed": 60,
+            "lineOfSight": 5,
+            "populationCost": 1,
+            "availableFromAge": 12,
+            "abilities": [
+                "trade"
+            ]
+        }
+    ]
+}

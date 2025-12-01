@@ -1,0 +1,153 @@
+{
+    "metadata": {
+        "version": "1.0.0",
+        "description": "Edificios base del juego - Pueden ser renombrados por cada civilización"
+    },
+    "buildings": [
+        {
+            "id": "house",
+            "baseName": "Casa",
+            "baseIcon": "🏠",
+            "baseDescription": "Proporciona espacio de población.",
+            "type": "housing",
+            "cost": {
+                "wood": 30
+            },
+            "buildTime": 10,
+            "maxHp": 500,
+            "size": 30,
+            "populationProvided": 5,
+            "availableFromAge": 1
+        },
+        {
+            "id": "townCenter",
+            "baseName": "Centro Urbano",
+            "baseIcon": "🏰",
+            "baseDescription": "Centro administrativo y productivo de la civilización.",
+            "type": "production",
+            "cost": {
+                "wood": 275,
+                "stone": 100
+            },
+            "buildTime": 60,
+            "maxHp": 2000,
+            "size": 60,
+            "populationProvided": 0,
+            "availableFromAge": 1,
+            "canProduce": [
+                "villager"
+            ],
+            "canResearch": [
+                "generalTechnologies"
+            ]
+        },
+        {
+            "id": "barracks",
+            "baseName": "Cuartel",
+            "baseIcon": "⚔️",
+            "baseDescription": "Entrena unidades militares terrestres.",
+            "type": "military",
+            "cost": {
+                "wood": 175
+            },
+            "buildTime": 30,
+            "maxHp": 1200,
+            "size": 50,
+            "populationProvided": 0,
+            "availableFromAge": 3,
+            "canProduce": [
+                "warrior",
+                "archer"
+            ],
+            "canResearch": [
+                "militaryTechnologies"
+            ]
+        },
+        {
+            "id": "storage",
+            "baseName": "Depósito",
+            "baseIcon": "📦",
+            "baseDescription": "Almacena recursos y permite investigar tecnologías económicas.",
+            "type": "economy",
+            "cost": {
+                "wood": 100
+            },
+            "buildTime": 20,
+            "maxHp": 800,
+            "size": 40,
+            "populationProvided": 0,
+            "availableFromAge": 1,
+            "canProduce": [],
+            "canResearch": [
+                "economicTechnologies"
+            ]
+        },
+        {
+            "id": "market",
+            "baseName": "Mercado",
+            "baseIcon": "🏪",
+            "baseDescription": "Permite comerciar recursos.",
+            "type": "economy",
+            "cost": {
+                "wood": 150,
+                "stone": 50
+            },
+            "buildTime": 25,
+            "maxHp": 1000,
+            "size": 45,
+            "populationProvided": 0,
+            "availableFromAge": 12,
+            "canProduce": [
+                "trader"
+            ],
+            "canResearch": [
+                "tradeTechnologies"
+            ]
+        },
+        {
+            "id": "temple",
+            "baseName": "Templo",
+            "baseIcon": "⛪",
+            "baseDescription": "Centro religioso y cultural.",
+            "type": "culture",
+            "cost": {
+                "wood": 200,
+                "gold": 100
+            },
+            "buildTime": 40,
+            "maxHp": 1500,
+            "size": 55,
+            "populationProvided": 0,
+            "availableFromAge": 14,
+            "canProduce": [
+                "priest"
+            ],
+            "canResearch": [
+                "culturalTechnologies"
+            ]
+        },
+        {
+            "id": "workshop",
+            "baseName": "Taller",
+            "baseIcon": "🔨",
+            "baseDescription": "Produce maquinaria de asedio.",
+            "type": "military",
+            "cost": {
+                "wood": 200,
+                "gold": 50
+            },
+            "buildTime": 35,
+            "maxHp": 1100,
+            "size": 50,
+            "populationProvided": 0,
+            "availableFromAge": 22,
+            "canProduce": [
+                "batteringRam",
+                "catapult"
+            ],
+            "canResearch": [
+                "siegeTechnologies"
+            ]
+        }
+    ]
+}

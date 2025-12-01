@@ -1,0 +1,402 @@
+{
+    "metadata": {
+        "version": "1.0.0",
+        "description": "Tecnologías base del juego - Pueden ser renombradas por cada civilización",
+        "totalAges": 30
+    },
+    "ages": {
+        "1": {
+            "name": "Paleolítico Superior Inicial",
+            "period": "13.000-12.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "2": {
+            "name": "Paleolítico Superior Final",
+            "period": "12.500-12.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "3": {
+            "name": "Mesolítico Temprano",
+            "period": "12.000-11.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "4": {
+            "name": "Mesolítico",
+            "period": "11.500-11.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "5": {
+            "name": "Revolución Neolítica Inicial",
+            "period": "11.000-10.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "6": {
+            "name": "Neolítico Temprano",
+            "period": "10.500-10.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "7": {
+            "name": "Neolítico Medio",
+            "period": "10.000-9.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "8": {
+            "name": "Neolítico Avanzado",
+            "period": "9.500-9.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "9": {
+            "name": "Primeras Aldeas",
+            "period": "9.000-8.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "10": {
+            "name": "Proto-Civilización",
+            "period": "8.500-8.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "11": {
+            "name": "Edad del Cobre Inicial",
+            "period": "8.000-7.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "12": {
+            "name": "Edad del Cobre",
+            "period": "7.500-7.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "13": {
+            "name": "Calcolítico",
+            "period": "7.000-6.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "14": {
+            "name": "Primeras Ciudades",
+            "period": "6.500-6.000 a.C.",
+            "era": "Prehistoria"
+        },
+        "15": {
+            "name": "Proto-Escritura",
+            "period": "6.000-5.500 a.C.",
+            "era": "Prehistoria"
+        },
+        "16": {
+            "name": "Edad del Bronce Inicial",
+            "period": "5.500-5.000 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "17": {
+            "name": "Bronce Temprano",
+            "period": "5.000-4.500 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "18": {
+            "name": "Bronce Medio I",
+            "period": "4.500-4.000 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "19": {
+            "name": "Bronce Medio II",
+            "period": "4.000-3.500 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "20": {
+            "name": "Bronce Tardío",
+            "period": "3.500-3.000 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "21": {
+            "name": "Grandes Imperios del Bronce",
+            "period": "3.000-2.500 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "22": {
+            "name": "Apogeo del Bronce",
+            "period": "2.500-2.000 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "23": {
+            "name": "Colapso del Bronce",
+            "period": "2.000-1.500 a.C.",
+            "era": "Edad del Bronce"
+        },
+        "24": {
+            "name": "Edad del Hierro Inicial",
+            "period": "1.500-1.000 a.C.",
+            "era": "Edad del Hierro"
+        },
+        "25": {
+            "name": "Hierro I",
+            "period": "1.000-500 a.C.",
+            "era": "Edad del Hierro"
+        },
+        "26": {
+            "name": "Hierro II - Era Clásica",
+            "period": "500-1 a.C.",
+            "era": "Edad Clásica"
+        },
+        "27": {
+            "name": "Era Romana",
+            "period": "1-500 d.C.",
+            "era": "Edad Clásica"
+        },
+        "28": {
+            "name": "Alta Edad Media",
+            "period": "500-1000 d.C.",
+            "era": "Edad Media"
+        },
+        "29": {
+            "name": "Baja Edad Media",
+            "period": "1000-1500 d.C.",
+            "era": "Edad Media"
+        },
+        "30": {
+            "name": "Era Moderna Temprana",
+            "period": "1500-2000 d.C.",
+            "era": "Edad Moderna"
+        }
+    },
+    "categories": {
+        "TOOLS": {
+            "name": "Herramientas",
+            "icon": "🔨",
+            "color": "#8b7355"
+        },
+        "AGRICULTURE": {
+            "name": "Agricultura",
+            "icon": "🌾",
+            "color": "#6a994e"
+        },
+        "ECONOMY": {
+            "name": "Economía",
+            "icon": "💰",
+            "color": "#d4af37"
+        },
+        "ARCHITECTURE": {
+            "name": "Arquitectura",
+            "icon": "🏛️",
+            "color": "#a8a29e"
+        },
+        "MILITARY": {
+            "name": "Militar",
+            "icon": "⚔️",
+            "color": "#c53030"
+        },
+        "DEFENSE": {
+            "name": "Defensa",
+            "icon": "🛡️",
+            "color": "#3182ce"
+        },
+        "CULTURE": {
+            "name": "Cultura",
+            "icon": "📚",
+            "color": "#805ad5"
+        }
+    },
+    "technologies": [
+        {
+            "id": "flintKnapping",
+            "baseName": "Talla de Sílex",
+            "baseIcon": "🪨",
+            "category": "TOOLS",
+            "age": 1,
+            "baseDescription": "Arte de tallar sílex para crear herramientas cortantes.",
+            "cost": {
+                "food": 25
+            },
+            "researchTime": 5,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "gatherRates": {
+                    "wood": 1.1
+                }
+            }
+        },
+        {
+            "id": "caveArt",
+            "baseName": "Arte Rupestre",
+            "baseIcon": "🎨",
+            "category": "CULTURE",
+            "age": 2,
+            "baseDescription": "Primeras expresiones artísticas humanas.",
+            "cost": {
+                "food": 30
+            },
+            "researchTime": 8,
+            "building": "townCenter",
+            "prerequisites": [
+                "flintKnapping"
+            ],
+            "effects": {}
+        },
+        {
+            "id": "huntingBow",
+            "baseName": "Arco de Caza",
+            "baseIcon": "🏹",
+            "category": "MILITARY",
+            "age": 3,
+            "baseDescription": "Invención del arco para caza y guerra.",
+            "cost": {
+                "food": 40,
+                "wood": 20
+            },
+            "researchTime": 10,
+            "building": "barracks",
+            "prerequisites": [],
+            "effects": {
+                "unitStats": {
+                    "archer": {
+                        "attackRange": 1
+                    }
+                }
+            }
+        },
+        {
+            "id": "microliths",
+            "baseName": "Microlitos",
+            "baseIcon": "🔪",
+            "category": "TOOLS",
+            "age": 4,
+            "baseDescription": "Pequeñas herramientas de piedra muy afiladas.",
+            "cost": {
+                "food": 50
+            },
+            "researchTime": 10,
+            "building": "townCenter",
+            "prerequisites": [
+                "flintKnapping"
+            ],
+            "effects": {
+                "gatherRates": {
+                    "food": 1.15
+                }
+            }
+        },
+        {
+            "id": "domestication",
+            "baseName": "Domesticación Animal",
+            "baseIcon": "🐑",
+            "category": "AGRICULTURE",
+            "age": 5,
+            "baseDescription": "Domesticación de los primeros animales.",
+            "cost": {
+                "food": 75
+            },
+            "researchTime": 15,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "gatherRates": {
+                    "food": 1.25
+                }
+            }
+        },
+        {
+            "id": "agriculture",
+            "baseName": "Agricultura",
+            "baseIcon": "🌾",
+            "category": "AGRICULTURE",
+            "age": 6,
+            "baseDescription": "Cultivo de las primeras plantas.",
+            "cost": {
+                "food": 100
+            },
+            "researchTime": 20,
+            "building": "townCenter",
+            "prerequisites": [
+                "domestication"
+            ],
+            "effects": {
+                "gatherRates": {
+                    "food": 1.3
+                }
+            }
+        },
+        {
+            "id": "pottery",
+            "baseName": "Cerámica",
+            "baseIcon": "🏺",
+            "category": "TOOLS",
+            "age": 7,
+            "baseDescription": "Creación de recipientes de arcilla cocida.",
+            "cost": {
+                "food": 80,
+                "wood": 40
+            },
+            "researchTime": 15,
+            "building": "storage",
+            "prerequisites": [],
+            "effects": {
+                "maxStorage": 1.2
+            }
+        },
+        {
+            "id": "weaving",
+            "baseName": "Tejido",
+            "baseIcon": "🧵",
+            "category": "ECONOMY",
+            "age": 8,
+            "baseDescription": "Arte de tejer fibras para crear telas.",
+            "cost": {
+                "food": 90
+            },
+            "researchTime": 12,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "unitStats": {
+                    "villager": {
+                        "maxHp": 5
+                    }
+                }
+            }
+        },
+        {
+            "id": "mudBricks",
+            "baseName": "Ladrillos de Adobe",
+            "baseIcon": "🧱",
+            "category": "ARCHITECTURE",
+            "age": 9,
+            "baseDescription": "Construcción con ladrillos de barro secados al sol.",
+            "cost": {
+                "food": 100,
+                "wood": 50
+            },
+            "researchTime": 20,
+            "building": "townCenter",
+            "prerequisites": [
+                "pottery"
+            ],
+            "effects": {
+                "buildingStats": {
+                    "all": {
+                        "maxHpMultiplier": 1.15
+                    }
+                }
+            }
+        },
+        {
+            "id": "irrigation",
+            "baseName": "Irrigación",
+            "baseIcon": "💧",
+            "category": "AGRICULTURE",
+            "age": 10,
+            "baseDescription": "Sistemas de riego para cultivos.",
+            "cost": {
+                "food": 120,
+                "wood": 60
+            },
+            "researchTime": 25,
+            "building": "storage",
+            "prerequisites": [
+                "agriculture"
+            ],
+            "effects": {
+                "gatherRates": {
+                    "food": 1.35
+                }
+            }
+        }
+    ]
+}

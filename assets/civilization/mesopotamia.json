@@ -1,0 +1,111 @@
+{
+    "civilizationId": "mesopotamia",
+    "name": "Mesopotamia",
+    "description": "Cuna de la civilización entre los ríos Tigris y Éufrates",
+    "icon": "🏛️",
+    "color": "#D4A574",
+    "bonuses": {
+        "buildSpeed": 1.20,
+        "buildingHp": 1.15,
+        "agricultureBonus": 1.25
+    },
+    "uniqueUnit": {
+        "id": "warCart",
+        "name": "Carro de Guerra",
+        "icon": "🛞",
+        "baseUnit": "warrior",
+        "age": 18,
+        "bonuses": {
+            "attackDamage": 1.4,
+            "speed": 1.5,
+            "maxHp": 1.3
+        }
+    },
+    "technologyOverrides": {
+        "mudBricks": {
+            "name": "Ladrillos de Arcilla Cocida",
+            "icon": "🧱",
+            "description": "Avanzada técnica mesopotámica de cocción de ladrillos."
+        },
+        "writing": {
+            "name": "Escritura Cuneiforme",
+            "icon": "✍️",
+            "description": "Sistema de escritura mediante marcas en arcilla."
+        },
+        "irrigation": {
+            "name": "Canales de Irrigación",
+            "icon": "💧",
+            "description": "Sofisticado sistema de canales para aprovechar los ríos."
+        },
+        "wheel": {
+            "name": "Rueda con Radios",
+            "icon": "☸️",
+            "description": "Mejora mesopotámica de la rueda con radios."
+        }
+    },
+    "buildingOverrides": {
+        "house": {
+            "name": "Casa de Adobe",
+            "icon": "🏘️",
+            "description": "Vivienda de adobe típica mesopotámica."
+        },
+        "townCenter": {
+            "name": "Zigurat",
+            "icon": "🗼",
+            "description": "Templo escalonado que sirve como centro administrativo."
+        },
+        "storage": {
+            "name": "Granero",
+            "icon": "🌾",
+            "description": "Almacén de grano mesopotámico."
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "codeOfHammurabi",
+            "name": "Código de Hammurabi",
+            "icon": "⚖️",
+            "category": "CULTURE",
+            "age": 19,
+            "description": "Primer código de leyes escrito de la humanidad.",
+            "cost": {
+                "food": 200,
+                "gold": 300
+            },
+            "researchTime": 50,
+            "building": "townCenter",
+            "prerequisites": [
+                "writing"
+            ],
+            "effects": {
+                "villagerProduction": 1.15,
+                "tradeBonus": 1.25
+            }
+        },
+        {
+            "id": "hangingGardens",
+            "name": "Jardines Colgantes",
+            "icon": "🌺",
+            "category": "ARCHITECTURE",
+            "age": 21,
+            "description": "Una de las maravillas del mundo antiguo.",
+            "cost": {
+                "food": 500,
+                "wood": 300,
+                "gold": 400
+            },
+            "researchTime": 80,
+            "building": "townCenter",
+            "prerequisites": [
+                "irrigation",
+                "stoneMasonry"
+            ],
+            "effects": {
+                "gatherRates": {
+                    "food": 1.5
+                },
+                "villagerMaxHp": 20
+            }
+        }
+    ]
+}

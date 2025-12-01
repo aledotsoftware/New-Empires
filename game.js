@@ -411,12 +411,17 @@ class Game {
 
         // Control de cámara
         this.camera = { x: 0, y: 0 };
-        this.cameraSpeed = 10;
 
-        // Configuración de desplazamiento por bordes
-        this.edgeScrollSpeed = 15; // Velocidad de desplazamiento
-        this.edgeScrollMargin = 20; // Margen en píxeles para activar el desplazamiento
-        this.hasMouseMoved = false; // Para evitar desplazamiento inicial
+        // Configuración avanzada de cámara RTS
+        this.cameraConfig = {
+            baseSpeed: 500,      // Píxeles por segundo (teclado)
+            edgeSpeed: 800,      // Velocidad máxima en bordes
+            edgeThreshold: 30,   // Margen en píxeles para activar scroll
+            smoothness: 0.1      // Factor de suavizado (lerp)
+        };
+
+        this.hasMouseMoved = false;
+        this.keysPressed = {}; // Estado de teclas para movimiento suave
 
         // Configuración de visualización
         this.showGrid = true; // Mostrar/ocultar cuadrícula (configurable)
@@ -637,9 +642,15 @@ class Game {
             this.handleRightClick();
         });
 
-        // Teclado
+        // Teclado (keydown)
         document.addEventListener('keydown', (e) => {
+            this.keysPressed[e.key.toLowerCase()] = true;
             this.handleKeyPress(e);
+        });
+
+        // Teclado (keyup)
+        document.addEventListener('keyup', (e) => {
+            this.keysPressed[e.key.toLowerCase()] = false;
         });
 
         // Minimapa click
@@ -798,12 +809,8 @@ class Game {
             }
         }
 
-        // WASD - Camera movement
-        const speed = this.cameraSpeed;
-        if (e.key === 'w' || e.key === 'W') this.camera.y -= speed;
-        if (e.key === 's' || e.key === 'S') this.camera.y += speed;
-        if (e.key === 'a' || e.key === 'A') this.camera.x -= speed;
-        if (e.key === 'd' || e.key === 'D') this.camera.x += speed;
+        // WASD - Camera movement handled in updateCamera()
+        // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
     }
 
     openBuildMenu() {
@@ -975,36 +982,75 @@ class Game {
         }
     }
 
-    handleEdgeScrolling() {
-        if (!this.hasMouseMoved) return;
+    updateCamera(deltaTime) {
+        let dx = 0;
+        let dy = 0;
+        const dt = deltaTime / 1000; // Convertir a segundos
 
-        const margin = this.edgeScrollMargin;
-        const speed = this.edgeScrollSpeed;
+        // 1. Panning por teclado (WASD / Flechas)
+        const keys = this.keysPressed;
+        if (keys['w'] || keys['arrowup']) dy -= 1;
+        if (keys['s'] || keys['arrowdown']) dy += 1;
+        if (keys['a'] || keys['arrowleft']) dx -= 1;
+        if (keys['d'] || keys['arrowright']) dx += 1;
 
-        // Desplazamiento horizontal
-        if (this.mouse.x < margin) {
-            this.camera.x -= speed;
-        } else if (this.mouse.x > this.canvas.width - margin) {
-            this.camera.x += speed;
+        // Normalizar vector de teclado si es diagonal
+        if (dx !== 0 || dy !== 0) {
+            const length = Math.hypot(dx, dy);
+            dx = (dx / length) * this.cameraConfig.baseSpeed;
+            dy = (dy / length) * this.cameraConfig.baseSpeed;
         }
 
-        // Desplazamiento vertical
-        if (this.mouse.y < margin) {
-            this.camera.y -= speed;
-        } else if (this.mouse.y > this.canvas.height - margin) {
-            this.camera.y += speed;
+        // 2. Panning por bordes (Edge Scrolling)
+        if (this.hasMouseMoved) {
+            const margin = this.cameraConfig.edgeThreshold;
+            const maxSpeed = this.cameraConfig.edgeSpeed;
+
+            // Factor de velocidad basado en qué tan cerca está del borde (0.0 a 1.0)
+            let edgeDx = 0;
+            let edgeDy = 0;
+
+            if (this.mouse.x < margin) {
+                edgeDx = -maxSpeed * ((margin - this.mouse.x) / margin);
+            } else if (this.mouse.x > this.canvas.width - margin) {
+                edgeDx = maxSpeed * ((this.mouse.x - (this.canvas.width - margin)) / margin);
+            }
+
+            if (this.mouse.y < margin) {
+                edgeDy = -maxSpeed * ((margin - this.mouse.y) / margin);
+            } else if (this.mouse.y > this.canvas.height - margin) {
+                edgeDy = maxSpeed * ((this.mouse.y - (this.canvas.height - margin)) / margin);
+            }
+
+            // Sumar al movimiento (prioridad al borde si es mayor que teclado)
+            if (edgeDx !== 0) dx = edgeDx;
+            if (edgeDy !== 0) dy = edgeDy;
         }
 
-        // Mantener la cámara dentro de los límites del mapa
-        this.camera.x = Math.max(0, Math.min(this.camera.x, CONFIG.CANVAS_WIDTH - this.viewWidth));
-        this.camera.y = Math.max(0, Math.min(this.camera.y, CONFIG.CANVAS_HEIGHT - this.viewHeight));
+        // 3. Aplicar movimiento con deltaTime
+        if (dx !== 0 || dy !== 0) {
+            this.camera.x += dx * dt;
+            this.camera.y += dy * dt;
+
+            // 4. Clamping (Límites del mapa)
+            // Precalcular límites para evitar accesos repetidos
+            const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
+            const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
+
+            // Clamp eficiente
+            if (this.camera.x < 0) this.camera.x = 0;
+            else if (this.camera.x > maxCamX) this.camera.x = maxCamX;
+
+            if (this.camera.y < 0) this.camera.y = 0;
+            else if (this.camera.y > maxCamY) this.camera.y = maxCamY;
+        }
     }
 
     update(deltaTime) {
         if (this.isPaused || this.isGameOver) return;
 
-        // Manejar desplazamiento de cámara por bordes
-        this.handleEdgeScrolling();
+        // Actualizar cámara (Sistema RTS optimizado)
+        this.updateCamera(deltaTime);
 
         // Actualizar tecnologías
         if (this.techManager) this.techManager.update(deltaTime);

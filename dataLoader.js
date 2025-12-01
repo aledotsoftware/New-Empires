@@ -1,52 +1,73 @@
 // ==========================================
-// DATA LOADER - Sistema de Carga de JSON
+// DATA LOADER - Sistema de Carga de JSON Optimizado
 // ==========================================
 
 class DataLoader {
     constructor() {
-        this.baseTechnologies = null;
-        this.baseBuildings = null;
-        this.baseUnits = null;
+        this.baseData = {
+            technologies: null,
+            buildings: null,
+            units: null,
+            ages: null,
+            categories: null
+        };
         this.civilizations = new Map();
-        this.ages = null;
-        this.categories = null;
         this.loaded = false;
+
+        // Configuración centralizada
+        this.PATHS = {
+            BASE_TECHS: 'assets/technologies/base_technologies.json',
+            BASE_BUILDINGS: 'assets/technologies/base_buildings.json',
+            BASE_UNITS: 'assets/technologies/base_units.json',
+            CIVILIZATION: (id) => `assets/civilization/${id}.json`
+        };
+
+        // Lista de civilizaciones (Idealmente debería venir de un manifiesto externo)
+        this.AVAILABLE_CIVS = ['mongols', 'mesopotamia', 'romans', 'vikings', 'argentinians'];
     }
 
     /**
-     * Carga todos los datos base del juego
+     * Helper privado para realizar fetch de JSON con manejo de errores
+     */
+    async _fetchJson(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error(`❌ Error cargando ${url}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Carga todos los datos base del juego en paralelo
      */
     async loadBaseData() {
+        console.log('🔄 Cargando datos base...');
         try {
-            console.log('🔄 Cargando datos base...');
+            const [techData, buildingsData, unitsData] = await Promise.all([
+                this._fetchJson(this.PATHS.BASE_TECHS),
+                this._fetchJson(this.PATHS.BASE_BUILDINGS),
+                this._fetchJson(this.PATHS.BASE_UNITS)
+            ]);
 
-            // Cargar tecnologías base
-            const techResponse = await fetch('assets/technologies/base_technologies.json');
-            const techData = await techResponse.json();
-            this.baseTechnologies = techData.technologies;
-            this.ages = techData.ages;
-            this.categories = techData.categories;
-
-            // Cargar edificios base
-            const buildingsResponse = await fetch('assets/technologies/base_buildings.json');
-            const buildingsData = await buildingsResponse.json();
-            this.baseBuildings = buildingsData.buildings;
-
-            // Cargar unidades base
-            const unitsResponse = await fetch('assets/technologies/base_units.json');
-            const unitsData = await unitsResponse.json();
-            this.baseUnits = unitsData.units;
+            this.baseData.technologies = techData.technologies;
+            this.baseData.ages = techData.ages;
+            this.baseData.categories = techData.categories;
+            this.baseData.buildings = buildingsData.buildings;
+            this.baseData.units = unitsData.units;
 
             console.log('✅ Datos base cargados:', {
-                technologies: this.baseTechnologies.length,
-                buildings: this.baseBuildings.length,
-                units: this.baseUnits.length,
-                ages: Object.keys(this.ages).length
+                technologies: this.baseData.technologies.length,
+                buildings: this.baseData.buildings.length,
+                units: this.baseData.units.length,
+                ages: Object.keys(this.baseData.ages || {}).length
             });
 
             return true;
         } catch (error) {
-            console.error('❌ Error cargando datos base:', error);
+            console.error('❌ Fallo crítico en carga de datos base');
             return false;
         }
     }
@@ -56,169 +77,119 @@ class DataLoader {
      */
     async loadCivilization(civilizationId) {
         try {
-            const response = await fetch(`assets/civilization/${civilizationId}.json`);
-            const civData = await response.json();
+            const civData = await this._fetchJson(this.PATHS.CIVILIZATION(civilizationId));
             this.civilizations.set(civilizationId, civData);
             console.log(`✅ Civilización cargada: ${civData.name}`);
             return civData;
         } catch (error) {
-            console.error(`❌ Error cargando civilización ${civilizationId}:`, error);
             return null;
         }
     }
 
     /**
-     * Carga todas las civilizaciones disponibles
+     * Carga todas las civilizaciones disponibles en paralelo
      */
     async loadAllCivilizations() {
-        // Lista de civilizaciones disponibles
-        const availableCivs = ['mongols', 'mesopotamia', 'romans', 'vikings', 'argentinians'];
-
-        const promises = availableCivs.map(civId => this.loadCivilization(civId));
+        const promises = this.AVAILABLE_CIVS.map(civId => this.loadCivilization(civId));
         await Promise.all(promises);
-
         console.log(`✅ ${this.civilizations.size} civilizaciones cargadas`);
     }
 
     /**
-     * Obtiene las tecnologías para una civilización específica
-     * Aplica sobrescrituras y añade tecnologías únicas
+     * Método genérico optimizado para aplicar overrides
+     * Elimina la duplicación de código en getTechnologies, getBuildings, etc.
      */
+    _applyOverrides(baseList, overrides = {}, uniqueItems = []) {
+        if (!baseList) return [];
+
+        // Usamos structuredClone para una copia profunda nativa y eficiente
+        // Mapeamos directamente para transformar los datos
+        const processedList = baseList.map(item => {
+            const override = overrides[item.id];
+
+            // Creamos el nuevo objeto item base
+            const newItem = structuredClone(item);
+
+            // Aplicamos transformación de propiedades base -> activas
+            // Si hay override, usa eso, si no, usa baseName/baseIcon, si no, mantiene el original
+            newItem.name = override?.name || item.baseName || item.name;
+            newItem.icon = override?.icon || item.baseIcon || item.icon;
+            newItem.description = override?.description || item.baseDescription || item.description;
+
+            // Si hay otras propiedades en el override, las mezclamos
+            if (override) {
+                Object.assign(newItem, override);
+            }
+
+            return newItem;
+        });
+
+        // Añadir items únicos si existen
+        if (uniqueItems && uniqueItems.length > 0) {
+            processedList.push(...structuredClone(uniqueItems));
+        }
+
+        return processedList;
+    }
+
     getTechnologiesForCivilization(civilizationId) {
         const civData = this.civilizations.get(civilizationId);
-        if (!civData) {
-            console.warn(`Civilización ${civilizationId} no encontrada, usando datos base`);
-            return this.baseTechnologies;
-        }
+        if (!civData) return this.baseData.technologies;
 
-        // Clonar tecnologías base
-        let technologies = JSON.parse(JSON.stringify(this.baseTechnologies));
-
-        // Aplicar sobrescrituras
-        if (civData.technologyOverrides) {
-            technologies = technologies.map(tech => {
-                const override = civData.technologyOverrides[tech.id];
-                if (override) {
-                    return {
-                        ...tech,
-                        name: override.name || tech.baseName,
-                        icon: override.icon || tech.baseIcon,
-                        description: override.description || tech.baseDescription
-                    };
-                }
-                return {
-                    ...tech,
-                    name: tech.baseName,
-                    icon: tech.baseIcon,
-                    description: tech.baseDescription
-                };
-            });
-        }
-
-        // Añadir tecnologías únicas
-        if (civData.uniqueTechnologies) {
-            technologies.push(...civData.uniqueTechnologies);
-        }
-
-        return technologies;
+        return this._applyOverrides(
+            this.baseData.technologies,
+            civData.technologyOverrides,
+            civData.uniqueTechnologies
+        );
     }
 
-    /**
-     * Obtiene los edificios para una civilización específica
-     */
     getBuildingsForCivilization(civilizationId) {
         const civData = this.civilizations.get(civilizationId);
-        if (!civData) {
-            return this.baseBuildings;
-        }
+        if (!civData) return this.baseData.buildings;
 
-        let buildings = JSON.parse(JSON.stringify(this.baseBuildings));
-
-        // Aplicar sobrescrituras
-        if (civData.buildingOverrides) {
-            buildings = buildings.map(building => {
-                const override = civData.buildingOverrides[building.id];
-                if (override) {
-                    return {
-                        ...building,
-                        name: override.name || building.baseName,
-                        icon: override.icon || building.baseIcon,
-                        description: override.description || building.baseDescription
-                    };
-                }
-                return {
-                    ...building,
-                    name: building.baseName,
-                    icon: building.baseIcon,
-                    description: building.baseDescription
-                };
-            });
-        }
-
-        return buildings;
+        return this._applyOverrides(
+            this.baseData.buildings,
+            civData.buildingOverrides
+        );
     }
 
-    /**
-     * Obtiene las unidades para una civilización específica
-     */
     getUnitsForCivilization(civilizationId) {
         const civData = this.civilizations.get(civilizationId);
-        if (!civData) {
-            return this.baseUnits;
-        }
+        if (!civData) return this.baseData.units;
 
-        let units = JSON.parse(JSON.stringify(this.baseUnits));
+        const units = this._applyOverrides(
+            this.baseData.units,
+            civData.unitOverrides
+        );
 
-        // Aplicar sobrescrituras
-        if (civData.unitOverrides) {
-            units = units.map(unit => {
-                const override = civData.unitOverrides[unit.id];
-                if (override) {
-                    return {
-                        ...unit,
-                        name: override.name || unit.baseName,
-                        icon: override.icon || unit.baseIcon,
-                        description: override.description || unit.baseDescription
-                    };
-                }
-                return {
-                    ...unit,
-                    name: unit.baseName,
-                    icon: unit.baseIcon,
-                    description: unit.baseDescription
-                };
-            });
-        }
-
-        // Añadir unidad única si existe
+        // Manejo especial para unidad única que requiere lógica extra
         if (civData.uniqueUnit) {
-            units.push(this.createUniqueUnit(civData.uniqueUnit));
+            const uniqueUnit = this.createUniqueUnit(civData.uniqueUnit);
+            if (uniqueUnit) units.push(uniqueUnit);
         }
 
         return units;
     }
 
-    /**
-     * Crea una unidad única basada en una unidad base
-     */
     createUniqueUnit(uniqueUnitData) {
-        const baseUnit = this.baseUnits.find(u => u.id === uniqueUnitData.baseUnit);
+        const baseUnit = this.baseData.units.find(u => u.id === uniqueUnitData.baseUnit);
         if (!baseUnit) {
             console.error(`Unidad base ${uniqueUnitData.baseUnit} no encontrada`);
             return null;
         }
 
-        // Clonar unidad base
-        const uniqueUnit = JSON.parse(JSON.stringify(baseUnit));
+        const uniqueUnit = structuredClone(baseUnit);
 
-        // Aplicar propiedades únicas
-        uniqueUnit.id = uniqueUnitData.id;
-        uniqueUnit.name = uniqueUnitData.name;
-        uniqueUnit.icon = uniqueUnitData.icon;
-        uniqueUnit.availableFromAge = uniqueUnitData.age;
-        uniqueUnit.isUnique = true;
+        // Aplicar propiedades únicas de forma más limpia
+        Object.assign(uniqueUnit, {
+            id: uniqueUnitData.id,
+            name: uniqueUnitData.name,
+            icon: uniqueUnitData.icon,
+            availableFromAge: uniqueUnitData.age,
+            isUnique: true
+        });
 
-        // Aplicar bonificaciones
+        // Aplicar bonificaciones matemáticamente
         if (uniqueUnitData.bonuses) {
             for (const [stat, multiplier] of Object.entries(uniqueUnitData.bonuses)) {
                 if (typeof uniqueUnit[stat] === 'number') {
@@ -230,64 +201,23 @@ class DataLoader {
         return uniqueUnit;
     }
 
-    /**
-     * Obtiene información de una edad específica
-     */
-    getAgeInfo(ageNumber) {
-        return this.ages ? this.ages[ageNumber] : null;
-    }
+    // Getters simples
+    getAgeInfo(ageNumber) { return this.baseData.ages?.[ageNumber] || null; }
+    getAllAges() { return this.baseData.ages; }
+    getCategories() { return this.baseData.categories; }
+    getCivilizationData(civilizationId) { return this.civilizations.get(civilizationId); }
+    getAllCivilizations() { return Array.from(this.civilizations.values()); }
+    isLoaded() { return this.loaded; }
 
-    /**
-     * Obtiene todas las edades
-     */
-    getAllAges() {
-        return this.ages;
-    }
-
-    /**
-     * Obtiene información de categorías
-     */
-    getCategories() {
-        return this.categories;
-    }
-
-    /**
-     * Obtiene datos de una civilización
-     */
-    getCivilizationData(civilizationId) {
-        return this.civilizations.get(civilizationId);
-    }
-
-    /**
-     * Obtiene lista de todas las civilizaciones cargadas
-     */
-    getAllCivilizations() {
-        return Array.from(this.civilizations.values());
-    }
-
-    /**
-     * Inicializa el loader cargando todos los datos necesarios
-     */
     async initialize() {
         console.log('🚀 Inicializando DataLoader...');
-
         const baseLoaded = await this.loadBaseData();
-        if (!baseLoaded) {
-            throw new Error('No se pudieron cargar los datos base');
-        }
+        if (!baseLoaded) throw new Error('No se pudieron cargar los datos base');
 
         await this.loadAllCivilizations();
-
         this.loaded = true;
         console.log('✅ DataLoader inicializado correctamente');
         return true;
-    }
-
-    /**
-     * Verifica si los datos están cargados
-     */
-    isLoaded() {
-        return this.loaded;
     }
 }
 

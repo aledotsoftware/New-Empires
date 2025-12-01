@@ -301,6 +301,28 @@
                     </div>
                 </div>
 
+                <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
+                    <h3 style="margin-bottom: 20px; color: #d4af37;">Cámara</h3>
+
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <label style="font-weight: 600; color: #e2e8f0;">Velocidad de Desplazamiento</label>
+                            <span id="cameraSpeedValue" style="color: #48bb78;">1200 px/s</span>
+                        </div>
+                        <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
+                            style="width: 100%; accent-color: #d4af37;" oninput="updateCameraSpeed(this.value)">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <label style="font-weight: 600; color: #e2e8f0;">Margen de Activación</label>
+                            <span id="cameraMarginValue" style="color: #48bb78;">30 px</span>
+                        </div>
+                        <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"
+                            style="width: 100%; accent-color: #d4af37;" oninput="updateCameraMargin(this.value)">
+                    </div>
+                </div>
+
                 <div style="text-align: center; margin-top: 20px;">
                     <button class="btn-secondary" onclick="hideSettings()">Cerrar</button>
                 </div>

@@ -2615,6 +2615,39 @@ function showSettings() {
         if (toggleElement && game) {
             toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
         }
+
+        // Sincronizar sliders de cámara
+        if (game && game.cameraConfig) {
+            const speedSlider = document.getElementById('cameraSpeedSlider');
+            const marginSlider = document.getElementById('cameraMarginSlider');
+            const speedValue = document.getElementById('cameraSpeedValue');
+            const marginValue = document.getElementById('cameraMarginValue');
+
+            if (speedSlider) {
+                speedSlider.value = game.cameraConfig.edgeSpeed;
+                speedValue.textContent = `${game.cameraConfig.edgeSpeed} px/s`;
+            }
+            if (marginSlider) {
+                marginSlider.value = game.cameraConfig.edgeThreshold;
+                marginValue.textContent = `${game.cameraConfig.edgeThreshold} px`;
+            }
+        }
+    }
+}
+
+function updateCameraSpeed(value) {
+    const speed = parseInt(value);
+    document.getElementById('cameraSpeedValue').textContent = `${speed} px/s`;
+    if (game && game.cameraConfig) {
+        game.cameraConfig.edgeSpeed = speed;
+    }
+}
+
+function updateCameraMargin(value) {
+    const margin = parseInt(value);
+    document.getElementById('cameraMarginValue').textContent = `${margin} px`;
+    if (game && game.cameraConfig) {
+        game.cameraConfig.edgeThreshold = margin;
     }
 }
 

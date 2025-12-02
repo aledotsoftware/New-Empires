@@ -9,8 +9,8 @@
 ## 📊 Progreso General
 
 **Total de módulos planificados**: 25  
-**Módulos completados**: 6  
-**Progreso**: 24%
+**Módulos completados**: 17  
+**Progreso**: 68%
 
 ---
 
@@ -40,41 +40,41 @@
 
 ---
 
-## 🔄 Fase 4: Entidades Base (EN PROGRESO)
+## ✅ Fase 4: Entidades Base (COMPLETADA)
 
 ### js/entities/
-- [ ] `Entity.js` - Clase base para todas las entidades
-- [ ] `Unit.js` - Clase base para unidades móviles
-- [ ] `Building.js` - Clase base para edificios
+- [x] `Entity.js` - Clase base para todas las entidades
+- [x] `Unit.js` - Clase base para unidades móviles
+- [x] `Building.js` - Clase base para edificios
 
 **Archivos origen**: `game.js` (líneas 1742-2244)  
 **Prioridad**: Alta - Son la base para todas las entidades específicas
 
 ---
 
-## ⏳ Fase 5: Unidades Específicas (PENDIENTE)
+## ✅ Fase 5: Unidades Específicas (COMPLETADA)
 
 ### js/entities/units/
-- [ ] `Villager.js` - Aldeano (recolección, construcción)
-- [ ] `Warrior.js` - Guerrero (combate cuerpo a cuerpo)
-- [ ] `Archer.js` - Arquero (combate a distancia)
+- [x] `Villager.js` - Aldeano (recolección, construcción)
+- [x] `Warrior.js` - Guerrero (combate cuerpo a cuerpo)
+- [x] `Archer.js` - Arquero (combate a distancia)
 
 **Archivos origen**: `game.js` (líneas 2025-2232)  
 **Dependencias**: `Entity.js`, `Unit.js`
 
 ---
 
-## ⏳ Fase 6: Edificios Específicos (PENDIENTE)
+## ✅ Fase 6: Edificios Específicos (COMPLETADA)
 
 ### js/entities/buildings/
-- [ ] `TownCenter.js` - Centro Urbano
-- [ ] `House.js` - Casa
-- [ ] `Barracks.js` - Cuartel
-- [ ] `Storage.js` - Depósito general
-- [ ] `StorageWood.js` - Depósito de madera
-- [ ] `Market.js` - Mercado
-- [ ] `Temple.js` - Templo
-- [ ] `Workshop.js` - Taller
+- [x] `TownCenter.js` - Centro Urbano
+- [x] `House.js` - Casa
+- [x] `Barracks.js` - Cuartel
+- [x] `Storage.js` - Depósito general
+- [x] `StorageWood.js` - Depósito de madera
+- [x] `Market.js` - Mercado
+- [x] `Temple.js` - Templo
+- [x] `Workshop.js` - Taller
 
 **Archivos origen**: `game.js` (líneas 2249-2343)  
 **Dependencias**: `Entity.js`, `Building.js`
@@ -234,4 +234,4 @@ Estos archivos ya están bien organizados o son archivos de datos:
 ---
 
 **Última actualización**: 2025-12-02 18:22  
-**Módulos completados hoy**: 6/25
+**Módulos completados hoy**: 17/25

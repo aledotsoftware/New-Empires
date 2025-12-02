@@ -1,7 +1,7 @@
 {
-    "civilizationId": "mesopotamia",
-    "name": "Mesopotamia",
-    "description": "Cuna de la civilización entre los ríos Tigris y Éufrates",
+    "civilizationId": "sumeria",
+    "name": "Sumeria",
+    "description": "Cuna de la civilización entre los ríos Tigris y Éufrates que se desarrolló en la región de Sumeria, en la antigua Mesopotamia, entre los ríos Tigris y Éufrates, hace más de 5000 años. Los sumerios crearon sistemas de escritura, establecieron leyes y sentaron las bases de sociedades organizadas con ciudades-estado independientes.",
     "icon": "🏛️",
     "iconEmoji": "🗼",
     "color": "#D4A574",

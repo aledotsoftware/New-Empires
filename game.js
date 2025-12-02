@@ -2361,8 +2361,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         soundManager.loadAll();
     }
 
-    // 3. Cargar civilizaciones (esperar a que estén listas para mostrar la selección)
-    await civilizationManager.loadCivilizations();
+    // 3. Renderizar selección de civilizaciones
+    renderCivilizationSelection();
 
     // Elementos de UI
     const startButton = document.getElementById('startButton');
@@ -2837,7 +2837,11 @@ function toggleIdleVillagerCycle() {
 // ==========================================
 // CONTROL DE SONIDO
 // ==========================================
-function toggleSound() {
+// ==========================================
+// CONTROL DE SONIDO
+// ==========================================
+window.toggleSound = function () {
+    console.log('🔊 Toggle Sound llamado');
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
         const toggleElement = document.getElementById('soundToggleValue');
@@ -2845,13 +2849,103 @@ function toggleSound() {
             toggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
             toggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
         }
+    } else {
+        console.error('❌ soundManager no está definido');
     }
-}
+};
 
-function updateSoundVolume(value) {
+window.updateSoundVolume = function (value) {
+    // console.log('🔊 Update Volume:', value); // Comentado para no spammear
     const volume = parseInt(value) / 100;
-    document.getElementById('volumeValue').textContent = `${value}%`;
+    const volumeValue = document.getElementById('volumeValue');
+    if (volumeValue) {
+        volumeValue.textContent = `${value}%`;
+    }
+
     if (typeof soundManager !== 'undefined') {
         soundManager.setVolume(volume);
+    } else {
+        console.error('❌ soundManager no está definido');
+    }
+};
+
+// ==========================================
+// SELECCIÓN DE CIVILIZACIÓN Y START GAME
+// ==========================================
+function renderCivilizationSelection() {
+    const civGrid = document.getElementById('civGrid');
+    if (!civGrid) return;
+
+    civGrid.innerHTML = '';
+    const civilizaciones = dataLoader.getAllCivilizations();
+
+    if (civilizaciones.length === 0) {
+        civGrid.innerHTML = '<p style="color:white; text-align:center;">No se pudieron cargar las civilizaciones.</p>';
+        return;
+    }
+
+    civilizaciones.forEach(civ => {
+        const card = document.createElement('div');
+        card.className = 'civ-card';
+
+        // Bonus list HTML
+        const bonusesHtml = civ.bonuses ? civ.bonuses.map(bonus => `<li>${bonus}</li>`).join('') : '';
+
+        // Unique unit info
+        let uniqueUnitHtml = '';
+        if (civ.uniqueUnit) {
+            uniqueUnitHtml = `
+                <div class="civ-unique-unit">
+                    <strong>Unidad Única:</strong> ${civ.uniqueUnit.name}
+                </div>
+            `;
+        }
+
+        card.innerHTML = `
+            <div class="civ-icon">${civ.icon}</div>
+            <h3 class="civ-name">${civ.name}</h3>
+            <div class="civ-description">${civ.description}</div>
+            ${uniqueUnitHtml}
+            <ul class="civ-bonuses">
+                ${bonusesHtml}
+            </ul>
+            <button class="btn-select-civ">Seleccionar</button>
+        `;
+
+        card.addEventListener('click', () => selectCivilization(civ));
+        civGrid.appendChild(card);
+    });
+}
+
+function selectCivilization(civilization) {
+    console.log(`👑 Civilización seleccionada: ${civilization.name}`);
+
+    // Ocultar pantalla de selección
+    document.getElementById('civSelectionScreen').classList.add('hidden');
+
+    // Mostrar pantalla de juego
+    document.getElementById('gameScreen').classList.remove('hidden');
+
+    // Iniciar el juego
+    startGame(civilization);
+}
+
+function startGame(civilization) {
+    const canvas = document.getElementById('gameCanvas');
+
+    // Configurar canvas
+    canvas.width = CONFIG.CANVAS_WIDTH;
+    canvas.height = CONFIG.CANVAS_HEIGHT;
+
+    // Inicializar juego
+    game = new Game(canvas, civilization);
+
+    // Iniciar loop
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+
+    // Reproducir sonido de inicio de partida si existe
+    if (typeof soundManager !== 'undefined') {
+        soundManager.play('startGame');
     }
 }

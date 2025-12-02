@@ -23,7 +23,7 @@ class DataLoader {
         };
 
         // Lista de civilizaciones (Idealmente debería venir de un manifiesto externo)
-        this.AVAILABLE_CIVS = ['mongols', 'mesopotamia', 'romans', 'vikings', 'argentinians'];
+        this.AVAILABLE_CIVS = ['mongols', 'sumeria', 'romans', 'vikings', 'argentinians'];
     }
 
     /**

@@ -9,8 +9,8 @@
 ## 📊 Progreso General
 
 **Total de módulos planificados**: 25  
-**Módulos completados**: 17  
-**Progreso**: 68%
+**Módulos completados**: 18  
+**Progreso**: 72%
 
 ---
 
@@ -75,22 +75,6 @@
 - [x] `Market.js` - Mercado
 - [x] `Temple.js` - Templo
 - [x] `Workshop.js` - Taller
-
-**Archivos origen**: `game.js` (líneas 2249-2343)  
-**Dependencias**: `Entity.js`, `Building.js`
-
----
-
-## ⏳ Fase 7: Clase Principal del Juego (PENDIENTE)
-
-### js/core/
-- [ ] `Game.js` - Clase principal que orquesta todo
-
-**Archivos origen**: `game.js` (líneas 384-1680)  
-**Dependencias**: Todos los módulos anteriores  
-**Complejidad**: Alta - 1300 líneas de código  
-**Nota**: Este será el módulo más complejo de extraer
-
 ---
 
 ## ⏳ Fase 8: UI y Helpers (PENDIENTE)

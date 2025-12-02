@@ -698,6 +698,11 @@ class Game {
 
             if (closest) {
                 this.selectedEntities = [closest];
+
+                // Reproducir sonido de selección
+                if (typeof soundManager !== 'undefined') {
+                    soundManager.playEntitySelection(closest.type);
+                }
             }
         } else {
             // Selección de área
@@ -768,6 +773,19 @@ class Game {
             }
         }
 
+        // Verificar si clickeó en un edificio en construcción (propio)
+        let targetBuilding = null;
+        for (let building of this.buildings) {
+            if (building.team === 'player' && building.isUnderConstruction) {
+                const dist = Math.hypot(building.x - this.mouse.worldX, building.y - this.mouse.worldY);
+                // Usar un radio aproximado basado en el tamaño del edificio
+                if (dist < building.size / 2 + 20) {
+                    targetBuilding = building;
+                    break;
+                }
+            }
+        }
+
         // Comandar unidades
         for (let entity of this.selectedEntities) {
             if (entity.isUnit) {
@@ -785,6 +803,13 @@ class Game {
                         entity.state = 'GATHERING';
                         entity.currentResourceNode = targetResource;
                     }
+                } else if (targetBuilding && entity.type === 'villager') {
+                    // Asignar construcción
+                    entity.state = 'BUILDING';
+                    entity.buildTarget = targetBuilding;
+                    entity.attackTarget = null;
+                    entity.gatherTarget = null;
+                    entity.targetX = null;
                 } else {
                     entity.targetX = this.mouse.worldX;
                     entity.targetY = this.mouse.worldY;
@@ -950,8 +975,10 @@ class Game {
             building.gridCol = snap.col;
             building.gridRow = snap.row;
 
-            // Ajustar tamaño visual para que coincida con el grid (opcional, pero recomendado)
-            // building.size = Math.max(size.width, size.height) * TILE_SIZE / 2; 
+            // Configurar construcción progresiva
+            building.isUnderConstruction = true;
+            building.constructionMaxHp = building.maxHp;
+            building.hp = 1; // Comienza con 1 HP
 
             // Ocupar grid
             this.gridMap.occupyArea(snap.col, snap.row, size.width, size.height, building);
@@ -961,7 +988,26 @@ class Game {
 
             this.buildings.push(building);
             this.entities.push(building);
-            this.showNotification(`${building.name} construido`, 'success');
+
+            // Reproducir sonido de inicio de construcción
+            if (typeof soundManager !== 'undefined') {
+                soundManager.play('buildStart');
+            }
+
+            // Asignar al aldeano seleccionado para construir
+            if (this.selectedEntities.length === 1 &&
+                this.selectedEntities[0].type === 'villager' &&
+                this.selectedEntities[0].team === 'player') {
+
+                const villager = this.selectedEntities[0];
+                villager.state = 'BUILDING';
+                villager.buildTarget = building;
+                villager.attackTarget = null;
+                villager.gatherTarget = null;
+                villager.targetX = null;
+            }
+
+            this.showNotification(`${building.name} (En construcción)`, 'info');
         }
 
         this.buildMode = null;
@@ -978,6 +1024,11 @@ class Game {
     }
 
     trainUnit(unitType, building) {
+        if (building.isUnderConstruction) {
+            this.showNotification('El edificio está en construcción', 'error');
+            return;
+        }
+
         const cost = CONFIG.UNIT_COSTS[unitType];
 
         if (!this.canAfford(cost)) {
@@ -1020,6 +1071,13 @@ class Game {
             this.units.push(unit);
             this.entities.push(unit);
             this.population++;
+
+            // Reproducir sonido de creación
+            if (typeof soundManager !== 'undefined') {
+                const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
+                soundManager.play(soundKey);
+            }
+
             this.showNotification(`${unit.name} entrenado`, 'success');
             this.updateUI();
         }
@@ -1433,50 +1491,57 @@ class Game {
         const seconds = elapsed % 60;
         document.getElementById('gameTime').textContent =
             `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        // Controlar visibilidad del panel unificado
+        const controlPanel = document.getElementById('unitControlPanel');
+        if (controlPanel) {
+            if (this.selectedEntities.length > 0) {
+                controlPanel.classList.remove('hidden');
+                this.updateSelectionPanel();
+                this.updateActionsPanel();
+            } else {
+                controlPanel.classList.add('hidden');
+            }
+        }
     }
 
     updateSelectionPanel() {
         const content = document.getElementById('selectionContent');
+        if (!content) return;
 
         if (this.selectedEntities.length === 0) {
-            content.innerHTML = '<p class="no-selection">Ninguna unidad seleccionada</p>';
+            content.innerHTML = '';
             return;
         }
 
         if (this.selectedEntities.length === 1) {
             const entity = this.selectedEntities[0];
             content.innerHTML = `
-                <div class="unit-info">
-                    <div class="unit-header">
-                        <div class="unit-icon-large">
-                            <img src="assets/icons/${entity.type}.png" 
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" 
-                                 style="width: 100%; height: 100%; object-fit: contain;">
-                            <span style="display: none; font-size: 40px;">${entity.icon}</span>
-                        </div>
-                        <div class="unit-details">
-                            <h3>${entity.name}</h3>
-                            <div class="unit-type">${entity.type}</div>
-                        </div>
+                <div class="selection-info">
+                    <div class="selection-icon">
+                        ${entity.icon}
                     </div>
-                    <div class="unit-stats">
-                        <div class="stat-row">
-                            <span class="stat-label">Vida:</span>
-                            <div class="health-bar">
-                                <div class="health-fill" style="width: ${(entity.hp / entity.maxHp) * 100}%"></div>
-                            </div>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">HP:</span>
-                            <span class="stat-value">${Math.floor(entity.hp)} / ${entity.maxHp}</span>
+                    <div class="selection-details">
+                        <h3>${entity.name}</h3>
+                        <div class="selection-stats">
+                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
+                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
                         </div>
                     </div>
                 </div>
             `;
         } else {
             content.innerHTML = `
-                <div class="unit-info">
-                    <h3>${this.selectedEntities.length} unidades seleccionadas</h3>
+                <div class="selection-info">
+                    <div class="selection-icon">
+                        👥
+                    </div>
+                    <div class="selection-details">
+                        <h3>${this.selectedEntities.length} Unidades</h3>
+                        <div class="selection-stats">
+                            <div>Selección múltiple</div>
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -1484,34 +1549,35 @@ class Game {
 
     updateActionsPanel() {
         const grid = document.getElementById('actionsGrid');
+        if (!grid) return;
+
         grid.innerHTML = '';
 
         if (this.selectedEntities.length !== 1) return;
 
         const entity = this.selectedEntities[0];
 
+        // Solo mostrar acciones si es del jugador
+        if (entity.team !== 'player') return;
+
         if (entity.type === 'villager') {
             grid.innerHTML = `
-                <div class="action-button" onclick="game.openBuildMenu()">
-                    <div class="action-icon">🏗️</div>
-                    <div class="action-name">Construir</div>
-                    <div class="action-cost">B</div>
-                </div>
+                <button class="action-btn" onclick="game.openBuildMenu()">
+                    <div class="btn-icon">🏗️</div>
+                    <div class="btn-label">Construir</div>
+                </button>
             `;
         } else if (entity.type === 'townCenter') {
             const cost = CONFIG.UNIT_COSTS.villager;
             const canAfford = this.canAfford(cost);
 
             grid.innerHTML = `
-                <div class="action-button ${!canAfford ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEntities[0])">
-                    <div class="action-icon">
-                        <img src="assets/icons/villager.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" style="width: 100%; height: 100%; object-fit: contain;">
-                        <span style="display: none;">👨‍🌾</span>
-                    </div>
-                    <div class="action-name">Aldeano</div>
-                    <div class="action-cost">🌾${cost.food}</div>
-                </div>
+                <button class="action-btn ${!canAfford ? 'disabled' : ''}" 
+                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEntities[0])"
+                     title="Coste: ${cost.food} Comida">
+                    <div class="btn-icon">👨‍🌾</div>
+                    <div class="btn-label">Aldeano</div>
+                </button>
             `;
         } else if (entity.type === 'barracks') {
             const warriorCost = CONFIG.UNIT_COSTS.warrior;
@@ -1520,24 +1586,18 @@ class Game {
             const canAffordArcher = this.canAfford(archerCost);
 
             grid.innerHTML = `
-                <div class="action-button ${!canAffordWarrior ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])">
-                    <div class="action-icon">
-                        <img src="assets/icons/warrior.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" style="width: 100%; height: 100%; object-fit: contain;">
-                        <span style="display: none;">⚔️</span>
-                    </div>
-                    <div class="action-name">Guerrero</div>
-                    <div class="action-cost">🌾${warriorCost.food} 💰${warriorCost.gold}</div>
-                </div>
-                <div class="action-button ${!canAffordArcher ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])">
-                    <div class="action-icon">
-                        <img src="assets/icons/archer.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" style="width: 100%; height: 100%; object-fit: contain;">
-                        <span style="display: none;">🏹</span>
-                    </div>
-                    <div class="action-name">Arquero</div>
-                    <div class="action-cost">🌾${archerCost.food} 💰${archerCost.gold}</div>
-                </div>
+                <button class="action-btn ${!canAffordWarrior ? 'disabled' : ''}" 
+                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])"
+                     title="Coste: ${warriorCost.food} Comida, ${warriorCost.gold} Oro">
+                    <div class="btn-icon">⚔️</div>
+                    <div class="btn-label">Guerrero</div>
+                </button>
+                <button class="action-btn ${!canAffordArcher ? 'disabled' : ''}" 
+                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])"
+                     title="Coste: ${archerCost.food} Comida, ${archerCost.gold} Oro">
+                    <div class="btn-icon">🏹</div>
+                    <div class="btn-label">Arquero</div>
+                </button>
             `;
         }
 
@@ -1552,15 +1612,19 @@ class Game {
                     costString += `${icon}${amount} `;
                 }
 
-                grid.innerHTML += `
-                    <div class="action-button ${!canAfford ? 'disabled' : ''}" 
-                         onclick="if(this.classList.contains('disabled')) return; game.techManager.startResearch('${tech.id}')"
-                         title="${tech.description}">
-                        <div class="action-icon">${tech.icon || '🔬'}</div>
-                        <div class="action-name">${tech.name}</div>
-                        <div class="action-cost">${costString}</div>
-                    </div>
+                const btn = document.createElement('button');
+                btn.className = `action-btn ${!canAfford ? 'disabled' : ''}`;
+                btn.title = `${tech.name}\n${tech.description}\nCoste: ${costString}`;
+                btn.onclick = () => {
+                    if (!btn.classList.contains('disabled')) {
+                        game.techManager.startResearch(tech.id);
+                    }
+                };
+                btn.innerHTML = `
+                    <div class="btn-icon">${tech.icon || '🔬'}</div>
+                    <div class="btn-label">${tech.name}</div>
                 `;
+                grid.appendChild(btn);
             }
         }
     }
@@ -1955,6 +2019,9 @@ class Villager extends Unit {
         this.currentResourceNode = null;
         this.dropOffTarget = null;
         this.buildTarget = null;
+
+        // Temporizador para sonidos de trabajo
+        this.workTimer = 0;
     }
 
     update(deltaTime, game) {
@@ -2039,11 +2106,27 @@ class Villager extends Unit {
                     let buildSpeed = 50;
                     if (game && game.civilizationId) buildSpeed *= civilizationManager.getBuildSpeed(game.civilizationId);
                     this.buildTarget.hp += buildSpeed * deltaTime;
+
+                    // Sonido de trabajo periódico
+                    this.workTimer += deltaTime;
+                    if (this.workTimer >= 1.5) { // Cada 1.5 segundos
+                        this.workTimer = 0;
+                        if (typeof soundManager !== 'undefined') {
+                            soundManager.play('buildWork');
+                        }
+                    }
+
                     if (this.buildTarget.hp >= this.buildTarget.constructionMaxHp) {
                         this.buildTarget.hp = this.buildTarget.constructionMaxHp;
                         this.buildTarget.isUnderConstruction = false;
                         this.state = 'IDLE';
                         this.buildTarget = null;
+
+                        // Sonido de finalización
+                        if (typeof soundManager !== 'undefined') {
+                            soundManager.play('buildComplete');
+                        }
+
                         if (game) game.showNotification("Edificio completado", "success");
                     }
                 }
@@ -2129,6 +2212,8 @@ class Building extends Entity {
     constructor(x, y, team) {
         super(x, y, team);
         this.isBuilding = true;
+        this.isUnderConstruction = false;
+        this.constructionMaxHp = 0;
     }
 }
 
@@ -2271,6 +2356,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     // 2. Iniciar carga de assets en segundo plano
     assetLoader.loadAll();
 
+    // Cargar sonidos
+    if (typeof soundManager !== 'undefined') {
+        soundManager.loadAll();
+    }
+
     // 3. Cargar civilizaciones (esperar a que estén listas para mostrar la selección)
     await civilizationManager.loadCivilizations();
 
@@ -2291,6 +2381,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         startScreen.classList.add('hidden');
         mapSizeScreen.classList.remove('hidden');
         showMapSizeSelection();
+
+        // Reproducir sonido de inicio
+        if (typeof soundManager !== 'undefined') {
+            soundManager.play('startGame', 0.25);
+        }
     });
 
     // Volver al inicio desde selección de tamaño
@@ -2682,6 +2777,26 @@ function showSettings() {
                 marginValue.textContent = `${game.cameraConfig.edgeThreshold} px`;
             }
         }
+
+        // Sincronizar controles de sonido
+        if (typeof soundManager !== 'undefined') {
+            const soundToggleElement = document.getElementById('soundToggleValue');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+
+            if (soundToggleElement) {
+                soundToggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
+                soundToggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
+            }
+
+            if (volumeSlider) {
+                volumeSlider.value = soundManager.volume * 100;
+            }
+
+            if (volumeValue) {
+                volumeValue.textContent = `${Math.round(soundManager.volume * 100)}%`;
+            }
+        }
     }
 }
 
@@ -2716,5 +2831,27 @@ function toggleIdleVillagerCycle() {
             toggleElement.textContent = game.enableIdleVillagerCycle ? 'Activado' : 'Desactivado';
             toggleElement.style.color = game.enableIdleVillagerCycle ? '#48bb78' : '#f56565';
         }
+    }
+}
+
+// ==========================================
+// CONTROL DE SONIDO
+// ==========================================
+function toggleSound() {
+    if (typeof soundManager !== 'undefined') {
+        soundManager.setEnabled(!soundManager.enabled);
+        const toggleElement = document.getElementById('soundToggleValue');
+        if (toggleElement) {
+            toggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
+        }
+    }
+}
+
+function updateSoundVolume(value) {
+    const volume = parseInt(value) / 100;
+    document.getElementById('volumeValue').textContent = `${value}%`;
+    if (typeof soundManager !== 'undefined') {
+        soundManager.setVolume(volume);
     }
 }

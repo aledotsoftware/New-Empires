@@ -310,11 +310,23 @@ class AssetLoader {
             img.onload = () => {
                 this.assets[key] = img;
                 this.loadedCount++;
-                console.log(`✅ Asset cargado: ${key}`);
+                if (typeof debugLogger !== 'undefined') {
+                    debugLogger.debug(`Asset cargado: ${key}`, 'assets', {
+                        width: img.width,
+                        height: img.height,
+                        progress: `${this.loadedCount}/${this.totalAssets}`
+                    });
+                } else {
+                    console.log(`✅ Asset cargado: ${key}`);
+                }
                 resolve(img);
             };
             img.onerror = () => {
-                console.warn(`⚠️ No se pudo cargar asset: ${key} (${src})`);
+                if (typeof debugLogger !== 'undefined') {
+                    debugLogger.warn(`No se pudo cargar asset`, 'assets', { key, src });
+                } else {
+                    console.warn(`⚠️ No se pudo cargar asset: ${key} (${src})`);
+                }
                 // Resolvemos igual para no bloquear el juego, pero sin imagen
                 resolve(null);
             };
@@ -337,12 +349,26 @@ class AssetLoader {
         ];
 
         this.totalAssets = assetsToLoad.length;
-        console.log('🔄 Iniciando carga de assets...');
+
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.start('Cargando assets gráficos', 'assets');
+            debugLogger.time('Carga de assets', 'assets');
+        } else {
+            console.log('🔄 Iniciando carga de assets...');
+        }
 
         const promises = assetsToLoad.map(asset => this.loadImage(asset.key, asset.src));
         await Promise.all(promises);
 
-        console.log('✨ Todos los assets procesados.');
+        const loadedCount = Object.keys(this.assets).length;
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.timeEnd('Carga de assets', 'assets');
+            debugLogger.success(`${loadedCount}/${this.totalAssets} assets cargados`, 'assets', {
+                cargados: Object.keys(this.assets)
+            });
+        } else {
+            console.log('✨ Todos los assets procesados.');
+        }
     }
 
     getImage(key) {
@@ -2338,18 +2364,38 @@ function gameLoop(currentTime) {
 // INICIALIZACIÓN
 // ==========================================
 window.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Iniciando carga de datos del juego...');
+    if (typeof debugLogger !== 'undefined') {
+        debugLogger.start('Iniciando juego', 'game');
+        debugLogger.time('Inicialización completa del juego', 'game');
+    } else {
+        console.log('🚀 Iniciando carga de datos del juego...');
+    }
 
     // 1. Inicializar DataLoader primero
     try {
         await dataLoader.initialize();
-        console.log('✅ DataLoader inicializado correctamente');
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.success('DataLoader inicializado', 'game');
+        } else {
+            console.log('✅ DataLoader inicializado correctamente');
+        }
 
         // Inicializar datos de tecnologías desde DataLoader
         await initializeTechData();
-        console.log('✅ Datos de tecnologías cargados');
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.success('Datos de tecnologías cargados', 'game');
+        } else {
+            console.log('✅ Datos de tecnologías cargados');
+        }
     } catch (error) {
-        console.error('❌ Error inicializando datos:', error);
+        if (typeof debugLogger !== 'undefined') {
+            debugLogger.error('Error crítico inicializando datos', 'game', error, {
+                timestamp: Date.now(),
+                userAgent: navigator.userAgent
+            });
+        } else {
+            console.error('❌ Error inicializando datos:', error);
+        }
         // Continuar con datos por defecto
     }
 

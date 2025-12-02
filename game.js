@@ -2888,8 +2888,25 @@ function renderCivilizationSelection() {
         const card = document.createElement('div');
         card.className = 'civ-card';
 
-        // Bonus list HTML
-        const bonusesHtml = civ.bonuses ? civ.bonuses.map(bonus => `<li>${bonus}</li>`).join('') : '';
+        // Bonus list HTML - bonuses es un objeto, no un array
+        let bonusesHtml = '';
+        if (civ.bonuses && typeof civ.bonuses === 'object') {
+            const bonusDescriptions = {
+                buildSpeed: 'Velocidad de construcción',
+                buildingHp: 'HP de edificios',
+                agricultureBonus: 'Bonus agrícola',
+                gatherRate: 'Velocidad de recolección',
+                militaryBonus: 'Bonus militar'
+            };
+
+            bonusesHtml = Object.entries(civ.bonuses)
+                .map(([key, value]) => {
+                    const label = bonusDescriptions[key] || key;
+                    const percent = ((value - 1) * 100).toFixed(0);
+                    return `<li>${label}: +${percent}%</li>`;
+                })
+                .join('');
+        }
 
         // Unique unit info
         let uniqueUnitHtml = '';

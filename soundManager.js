@@ -42,13 +42,31 @@ class SoundManager {
      */
     async loadAll() {
         const soundsToLoad = [
-            // Sonidos de selección de edificios
-            { key: 'selectTownCenter', src: 'assets/sound/selectTownCenter.wav' }
-            // Aquí se agregarán más sonidos en el futuro:
-            // { key: 'selectHouse', src: 'assets/sound/selectHouse.wav' },
-            // { key: 'selectBarracks', src: 'assets/sound/selectBarracks.wav' },
-            // { key: 'buildingStart', src: 'assets/sound/buildingStart.wav' },
-            // { key: 'buildingComplete', src: 'assets/sound/buildingComplete.wav' },
+            // Edificios
+            { key: 'selectTownCenter', src: 'assets/sound/selectTownCenter.wav' },
+            { key: 'selectHouse', src: 'assets/sound/selectHouse.wav' },
+            { key: 'selectBarracks', src: 'assets/sound/selectBarracks.wav' },
+            { key: 'selectStorage', src: 'assets/sound/selectStorage.wav' },
+            { key: 'selectStorageWood', src: 'assets/sound/selectStorageWood.wav' },
+            { key: 'selectMarket', src: 'assets/sound/selectMarket.wav' },
+            { key: 'selectTemple', src: 'assets/sound/selectTemple.wav' },
+            { key: 'selectWorkshop', src: 'assets/sound/selectWorkshop.wav' },
+
+            // Unidades
+            { key: 'selectVillager', src: 'assets/sound/selectVillager.wav' },
+            { key: 'selectWarrior', src: 'assets/sound/selectWarrior.wav' },
+            { key: 'selectArcher', src: 'assets/sound/selectArcher.wav' },
+
+            // Creación y Construcción
+            { key: 'createVillager', src: 'assets/sound/createVillager.wav' },
+            { key: 'createWarrior', src: 'assets/sound/createWarrior.wav' },
+            { key: 'createArcher', src: 'assets/sound/createArcher.wav' },
+            { key: 'buildStart', src: 'assets/sound/buildStart.wav' },
+            { key: 'buildWork', src: 'assets/sound/buildWork.wav' },
+            { key: 'buildComplete', src: 'assets/sound/buildComplete.wav' },
+
+            // Música / Ambiente
+            { key: 'startGame', src: 'assets/sound/start-game.mp3' }
         ];
 
         console.log('🔄 Iniciando carga de sonidos...');
@@ -60,39 +78,45 @@ class SoundManager {
     /**
      * Reproduce un sonido
      * @param {string} key - Identificador del sonido a reproducir
+     * @param {number} [volume] - Volumen específico (opcional). Si no se especifica, usa el volumen global.
      */
-    play(key) {
+    play(key, volume = null) {
         if (!this.enabled) return;
 
         const sound = this.sounds[key];
         if (!sound) {
-            console.warn(`⚠️ Sonido no encontrado: ${key}`);
+            // No logueamos advertencia aquí para evitar spam si faltan archivos de sonido opcionales
             return;
         }
 
         // Clonar el audio para permitir múltiples reproducciones simultáneas
         const clone = sound.cloneNode();
-        clone.volume = this.volume;
+        clone.volume = volume !== null ? Math.max(0, Math.min(1, volume)) : this.volume;
+
         clone.play().catch(err => {
             console.warn(`⚠️ Error al reproducir sonido ${key}:`, err);
         });
     }
 
     /**
-     * Reproduce el sonido de selección de un edificio basado en su tipo
-     * @param {string} buildingType - Tipo de edificio (townCenter, house, barracks, etc.)
+     * Reproduce el sonido de selección de una entidad basado en su tipo
+     * @param {string} entityType - Tipo de entidad (townCenter, villager, warrior, etc.)
      */
-    playBuildingSelection(buildingType) {
-        // Mapear el tipo de edificio al sonido correspondiente
-        const soundKey = `select${buildingType.charAt(0).toUpperCase() + buildingType.slice(1)}`;
+    playEntitySelection(entityType) {
+        if (!entityType) return;
 
-        // Si el sonido específico existe, reproducirlo
+        // Mapear el tipo de entidad al sonido correspondiente (ej: villager -> selectVillager)
+        const soundKey = `select${entityType.charAt(0).toUpperCase() + entityType.slice(1)}`;
+
+        // Intentar reproducir el sonido específico
         if (this.sounds[soundKey]) {
             this.play(soundKey);
         } else {
-            // Fallback: intentar con un sonido genérico si existe
-            if (this.sounds['selectBuilding']) {
-                this.play('selectBuilding');
+            // Fallbacks opcionales si no existe el específico
+            if (entityType === 'villager' || entityType === 'warrior' || entityType === 'archer') {
+                if (this.sounds['selectUnit']) this.play('selectUnit');
+            } else {
+                if (this.sounds['selectBuilding']) this.play('selectBuilding');
             }
         }
     }

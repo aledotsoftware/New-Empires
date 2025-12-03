@@ -126,6 +126,55 @@
     <div id="gameScreen" class="game-screen hidden">
         <!-- Contenedor Principal del Juego -->
 
+        <!-- Top HUD: recursos, población, tiempo y settings -->
+        <div class="top-panel">
+            <div class="resources-panel">
+                <div class="resource-item">
+                    <div class="resource-icon">🌲</div>
+                    <div class="resource-info">
+                        <div class="resource-label">Madera</div>
+                        <div id="woodCount" class="resource-value">0</div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">🌾</div>
+                    <div class="resource-info">
+                        <div class="resource-label">Comida</div>
+                        <div id="foodCount" class="resource-value">0</div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">💎</div>
+                    <div class="resource-info">
+                        <div class="resource-label">Oro</div>
+                        <div id="goldCount" class="resource-value">0</div>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <div class="resource-icon">🪨</div>
+                    <div class="resource-info">
+                        <div class="resource-label">Piedra</div>
+                        <div id="stoneCount" class="resource-value">0</div>
+                    </div>
+                </div>
+                <div class="resource-item resource-population">
+                    <div class="resource-icon">👥</div>
+                    <div class="resource-info">
+                        <div class="resource-label">Población</div>
+                        <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="game-time">
+                    <span class="time-icon">⏱️</span>
+                    <span id="gameTime">00:00</span>
+                </div>
+                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;">⚙️</button>
+            </div>
+        </div>
+
         <!-- Menú de Construcción (Modal) -->
         <div id="buildMenu" class="modal-overlay hidden">
             <div class="modal-content build-menu">

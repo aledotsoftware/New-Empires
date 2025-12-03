@@ -122,8 +122,8 @@ function renderStaticTechTree() {
     const content = document.getElementById('techTreeContent');
     if (!content) return;
 
-    // Verificar si TECHNOLOGIES está disponible
-    if (typeof TECHNOLOGIES === 'undefined') {
+    // Verificar si TECHNOLOGIES está disponible y es iterable
+    if (typeof TECHNOLOGIES === 'undefined' || !Array.isArray(TECHNOLOGIES)) {
         content.innerHTML = '<p style="text-align: center; color: #999;">Árbol de tecnologías no disponible</p>';
         return;
     }
@@ -296,10 +296,73 @@ function startGame(civId, mapConfig) {
     debugLogger.success('Juego iniciado correctamente', 'game');
 }
 
+
+// ===== FUNCIONES DE INICIALIZACIÓN =====
+
+/**
+ * Genera dinámicamente las opciones de tamaño de mapa
+ */
+function populateMapSizes() {
+    const mapSizeGrid = document.getElementById('mapSizeGrid');
+    if (!mapSizeGrid) return;
+
+    mapSizeGrid.innerHTML = ''; // Limpiar contenido existente
+
+    // Generar botones desde MAP_SIZES
+    for (let [key, mapData] of Object.entries(MAP_SIZES)) {
+        const option = document.createElement('div');
+        option.className = 'map-size-option';
+        option.dataset.size = key;
+
+        option.innerHTML = `
+            <div class="size-icon">🗺️</div>
+            <div class="size-name">${mapData.name}</div>
+            <div class="size-desc">${mapData.width}×${mapData.height}</div>
+        `;
+
+        mapSizeGrid.appendChild(option);
+    }
+}
+
+/**
+ * Genera dinámicamente las opciones de civilización
+ */
+function populateCivilizations() {
+    const civGrid = document.getElementById('civGrid');
+    if (!civGrid || typeof dataLoader === 'undefined') return;
+
+    civGrid.innerHTML = ''; // Limpiar contenido existente
+
+    const civilizations = dataLoader.getAllCivilizations();
+
+    civilizations.forEach(civ => {
+        const option = document.createElement('div');
+        option.className = 'civ-option';
+        option.dataset.civ = civ.id;
+
+        option.innerHTML = `
+            <div class="civ-icon">${civ.icon}</div>
+            <div class="civ-name">${civ.name}</div>
+            <div class="civ-desc">${civ.description}</div>
+        `;
+
+        civGrid.appendChild(option);
+    });
+}
+
+
 // ===== EVENT LISTENERS =====
 
 document.addEventListener('DOMContentLoaded', () => {
     debugLogger.info('DOM cargado, inicializando juego...', 'game');
+
+    // Generar opciones de tamaño de mapa dinámicamente
+    populateMapSizes();
+
+    // Generar opciones de civilización dinámicamente (con delay para esperar dataLoader)
+    setTimeout(() => {
+        populateCivilizations();
+    }, 100);
 
     // Botón de inicio - ir a selección de tamaño de mapa
     const startButton = document.getElementById('startButton');
@@ -364,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Inicializar sonidos si soundManager está disponible
-    if (typeof soundManager !== 'undefined') {
+    if (typeof soundManager !== 'undefined' && typeof soundManager.init === 'function') {
         debugLogger.info('Inicializando sistema de sonido...', 'sound');
         soundManager.init();
     }

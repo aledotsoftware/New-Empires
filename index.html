@@ -570,8 +570,7 @@
                 'dataLoader.js',
                 'technologies.js',
                 'mapGenerator.js',
-                'soundManager.js',
-                'game.js?v=' + Math.random() // Extra cache bust para game.js
+                'soundManager.js'
             ];
             scripts.forEach(function (src) {
                 // Si ya tiene parámetros, agregar &v, si no, agregar ?v
@@ -580,6 +579,10 @@
             });
         })();
     </script>
+
+
+    <!-- Main.js (ES6 Module) - Debe cargarse al final -->
+    <script type="module" src="main.js"></script>
 </body>
 
 </html>

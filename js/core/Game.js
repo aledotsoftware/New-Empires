@@ -542,6 +542,28 @@ export class Game {
                 this.buildMode = buildingMap[key];
                 this.closeBuildMenu();
             }
+        } else {
+            // Hotkeys para botones del panel de control (grid 3x5)
+            // Solo funciona cuando el menú de construcción NO está abierto
+            const hotkeyActions = {
+                'Q': 0, 'W': 1, 'E': 2, 'R': 3, 'T': 4,  // Fila 1
+                'A': 5, 'S': 6, 'D': 7, 'F': 8, 'G': 9,  // Fila 2
+                'Z': 10, 'X': 11, 'C': 12, 'V': 13, 'B': 14  // Fila 3
+            };
+
+            const key = e.key.toUpperCase();
+            if (hotkeyActions.hasOwnProperty(key)) {
+                const btnIndex = hotkeyActions[key];
+                const actionsGrid = document.getElementById('actionsGrid');
+                if (actionsGrid) {
+                    const buttons = actionsGrid.querySelectorAll('.action-btn');
+                    if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
+                        buttons[btnIndex].click();
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
         }
 
         // WASD - Camera movement handled in updateCamera()
@@ -1297,6 +1319,183 @@ ities[0])"
                 `;
                 grid.appendChild(btn);
             }
+        }
+    }
+
+    updateSelectionPanel() {
+        const content = document.getElementById('selectionContent');
+        if (!content) return;
+
+        if (this.selectedEntities.length === 0) {
+            content.innerHTML = '';
+            return;
+        }
+
+        if (this.selectedEntities.length === 1) {
+            const entity = this.selectedEntities[0];
+            content.innerHTML = `
+                <div class="selection-info">
+                    <div class="selection-icon">
+                        ${entity.icon}
+                    </div>
+                    <div class="selection-details">
+                        <h3>${entity.name}</h3>
+                        <div class="selection-stats">
+                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
+                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="selection-info">
+                    <div class="selection-icon">
+                        👥
+                    </div>
+                    <div class="selection-details">
+                        <h3>${this.selectedEntities.length} Unidades</h3>
+                        <div class="selection-stats">
+                            <div>Selección múltiple</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    updateActionsPanel() {
+        const grid = document.getElementById('actionsGrid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        if (this.selectedEntities.length !== 1) return;
+
+        const entity = this.selectedEntities[0];
+
+        // Solo mostrar acciones si es del jugador
+        if (entity.team !== 'player') return;
+
+        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
+        // Fila 1: Q W E R T
+        // Fila 2: A S D F G
+        // Fila 3: Z X C V B
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',  // Fila 1
+            'A', 'S', 'D', 'F', 'G',  // Fila 2
+            'Z', 'X', 'C', 'V', 'B'   // Fila 3
+        ];
+
+        const buttons = [];
+
+        if (entity.type === 'villager') {
+            buttons.push({
+                icon: '🏗️',
+                label: 'Construir',
+                hotkey: 'Q',
+                action: () => this.openBuildMenu(),
+                enabled: true
+            });
+        } else if (entity.type === 'townCenter') {
+            const cost = CONFIG.UNIT_COSTS.villager;
+            const canAfford = this.canAfford(cost);
+
+            buttons.push({
+                icon: '👨‍🌾',
+                label: 'Aldeano',
+                hotkey: 'Q',
+                cost: `${cost.food}🌾`,
+                action: () => this.trainUnit('villager', this.selectedEntities[0]),
+                enabled: canAfford
+            });
+        } else if (entity.type === 'barracks') {
+            const warriorCost = CONFIG.UNIT_COSTS.warrior;
+            const archerCost = CONFIG.UNIT_COSTS.archer;
+            const canAffordWarrior = this.canAfford(warriorCost);
+            const canAffordArcher = this.canAfford(archerCost);
+
+            buttons.push({
+                icon: '⚔️',
+                label: 'Guerrero',
+                hotkey: 'Q',
+                cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
+                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
+                enabled: canAffordWarrior
+            });
+
+            buttons.push({
+                icon: '🏹',
+                label: 'Arquero',
+                hotkey: 'W',
+                cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
+                action: () => this.trainUnit('archer', this.selectedEntities[0]),
+                enabled: canAffordArcher
+            });
+        }
+
+        // Añadir tecnologías disponibles
+        if (this.techManager) {
+            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+            let techIndex = 0;
+            for (let tech of availableTechs) {
+                if (techIndex >= 13) break; // Máximo 13 botones más
+
+                const canAfford = this.techManager.canResearch(tech.id);
+                let costString = '';
+                for (let [res, amount] of Object.entries(tech.cost)) {
+                    const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                    costString += `${amount}${icon} `;
+                }
+
+                buttons.push({
+                    icon: tech.icon || '🔬',
+                    label: tech.name,
+                    hotkey: hotkeys[buttons.length],
+                    cost: costString.trim(),
+                    action: () => this.techManager.startResearch(tech.id),
+                    enabled: canAfford
+                });
+
+                techIndex++;
+            }
+        }
+
+        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        for (let i = 0; i < 15; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.setAttribute('data-hotkey', hotkeys[i]);
+
+            if (i < buttons.length) {
+                const buttonData = buttons[i];
+
+                if (!buttonData.enabled) {
+                    btn.classList.add('disabled');
+                }
+
+                btn.onclick = () => {
+                    if (!btn.classList.contains('disabled') && buttonData.action) {
+                        try {
+                            buttonData.action();
+                        } catch (error) {
+                            console.error('❌ Error al ejecutar acción:', error);
+                        }
+                    }
+                };
+
+                btn.innerHTML = `
+                    <div class="btn-icon">${buttonData.icon}</div>
+                    <div class="btn-label">${buttonData.label}</div>
+                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
+                `;
+            } else {
+                // Botón vacío
+                btn.classList.add('disabled');
+                btn.innerHTML = '<div class="btn-icon"></div>';
+            }
+
+            grid.appendChild(btn);
         }
     }
 

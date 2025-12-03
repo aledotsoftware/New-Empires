@@ -320,8 +320,75 @@ function populateMapSizes() {
             <div class="size-desc">${mapData.width}×${mapData.height}</div>
         `;
 
+        // Agregar event listener al crear el elemento
+        option.addEventListener('click', () => {
+            selectedMapSize = key;
+            debugLogger.info(`Tamaño de mapa seleccionado: ${key}`, 'ui');
+
+            // Ir a selección de civilización
+            document.getElementById('mapSizeScreen').classList.add('hidden');
+            document.getElementById('civSelectionScreen').classList.remove('hidden');
+        });
+
         mapSizeGrid.appendChild(option);
     }
+
+    debugLogger.info(`${Object.keys(MAP_SIZES).length} tamaños de mapa generados`, 'ui');
+}
+
+/**
+ * Genera dinámicamente las opciones de civilización
+ */
+function populateCivilizations() {
+    const civGrid = document.getElementById('civGrid');
+    if (!civGrid || typeof dataLoader === 'undefined') {
+        debugLogger.warn('No se puede popular civilizaciones - civGrid o dataLoader no disponibles', 'ui');
+        return;
+    }
+
+    civGrid.innerHTML = ''; // Limpiar contenido existente
+
+    const civilizations = dataLoader.getAllCivilizations();
+
+    if (!civilizations || civilizations.length === 0) {
+        debugLogger.warn('No hay civilizaciones disponibles', 'data');
+        civGrid.innerHTML = '<p style="color: white; text-align: center;">No se pudieron cargar las civilizaciones.</p>';
+        return;
+    }
+
+    civilizations.forEach(civ => {
+        const option = document.createElement('div');
+        option.className = 'civ-option';
+        option.dataset.civ = civ.id;
+
+        option.innerHTML = `
+            <div class="civ-icon">${civ.icon}</div>
+            <div class="civ-name">${civ.name}</div>
+            <div class="civ-desc">${civ.description}</div>
+        `;
+
+        // Agregar event listener al crear el elemento
+        option.addEventListener('click', () => {
+            selectedCivilization = civ.id;
+            debugLogger.info(`Civilización seleccionada: ${civ.id}`, 'ui');
+
+            // Obtener configuración del mapa
+            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
+
+            // Iniciar juego
+            startGame(civ.id, {
+                ...mapConfig,
+                seed: Date.now(),
+                numPlayers: 2,
+                biome: 'grassland',
+                style: 'continental'
+            });
+        });
+
+        civGrid.appendChild(option);
+    });
+
+    debugLogger.success(`${civilizations.length} civilizaciones cargadas`, 'ui');
 }
 
 /**
@@ -353,16 +420,33 @@ function populateCivilizations() {
 
 // ===== EVENT LISTENERS =====
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     debugLogger.info('DOM cargado, inicializando juego...', 'game');
 
     // Generar opciones de tamaño de mapa dinámicamente
     populateMapSizes();
 
-    // Generar opciones de civilización dinámicamente (con delay para esperar dataLoader)
-    setTimeout(() => {
-        populateCivilizations();
-    }, 100);
+    // Inicializar dataLoader y cargar civilizaciones
+    try {
+        if (typeof dataLoader !== 'undefined') {
+            debugLogger.info('Inicializando dataLoader...', 'data');
+            await dataLoader.initialize();
+            populateCivilizations();
+        } else {
+            debugLogger.warn('dataLoader no disponible, reintentando...', 'data');
+            // Fallback: Si dataLoader aún no está cargado, esperar un poco
+            setTimeout(async () => {
+                if (typeof dataLoader !== 'undefined') {
+                    await dataLoader.initialize();
+                    populateCivilizations();
+                } else {
+                    debugLogger.error('dataLoader no se pudo cargar', 'data');
+                }
+            }, 200);
+        }
+    } catch (error) {
+        debugLogger.error('Error inicializando dataLoader', 'data', error);
+    }
 
     // Botón de inicio - ir a selección de tamaño de mapa
     const startButton = document.getElementById('startButton');
@@ -374,41 +458,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Botones de selección de tamaño de mapa
-    const mapSizeButtons = document.querySelectorAll('.map-size-option');
-    mapSizeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const size = button.dataset.size;
-            selectedMapSize = size;
-            debugLogger.info(`Tamaño de mapa seleccionado: ${size}`, 'ui');
-
-            // Ir a selección de civilización
+    // Botón de volver al inicio desde selección de mapa
+    const backToStartButton = document.getElementById('backToStartButton');
+    if (backToStartButton) {
+        backToStartButton.addEventListener('click', () => {
             document.getElementById('mapSizeScreen').classList.add('hidden');
-            document.getElementById('civSelectionScreen').classList.remove('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
         });
-    });
+    }
 
-    // Botones de selección de civilización
-    const civButtons = document.querySelectorAll('.civ-option');
-    civButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const civId = button.dataset.civ;
-            selectedCivilization = civId;
-            debugLogger.info(`Civilización seleccionada: ${civId}`, 'ui');
-
-            // Obtener configuración del mapa
-            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
-
-            // Iniciar juego
-            startGame(civId, {
-                ...mapConfig,
-                seed: Date.now(),
-                numPlayers: 2,
-                biome: 'grassland',
-                style: 'continental'
-            });
+    // Botón de volver a selección de mapa desde civilización
+    const backToMapSizeButton = document.getElementById('backToMapSizeButton');
+    if (backToMapSizeButton) {
+        backToMapSizeButton.addEventListener('click', () => {
+            document.getElementById('civSelectionScreen').classList.add('hidden');
+            document.getElementById('mapSizeScreen').classList.remove('hidden');
         });
-    });
+    }
 
     // Botón de reiniciar desde game over
     const restartButton = document.getElementById('restartButton');

@@ -1057,7 +1057,74 @@ class TechManager {
     completeResearch(techId) {
         const tech = TECHNOLOGIES[techId];
         this.researchedTechs.add(techId);
-        tech.apply(this.game);
+        // Backwards-compatible application of effects:
+        // If the tech provides an `apply` function (legacy), call it.
+        // Otherwise, if the tech defines an `effects` object (JSON data), apply those effects.
+        try {
+            if (tech && typeof tech.apply === 'function') {
+                tech.apply(this.game);
+            } else if (tech && tech.effects) {
+                const eff = tech.effects;
+
+                // Gather rate multipliers
+                if (eff.gatherRates) {
+                    for (let [res, mul] of Object.entries(eff.gatherRates)) {
+                        if (this.game && typeof CONFIG !== 'undefined' && CONFIG.GATHER_RATES[res] != null) {
+                            CONFIG.GATHER_RATES[res] *= mul;
+                        }
+                    }
+                }
+
+                // Unit stat adjustments (supports additive or multiplier values)
+                if (eff.unitStats) {
+                    for (let [unitType, stats] of Object.entries(eff.unitStats)) {
+                        for (let [statKey, val] of Object.entries(stats)) {
+                            for (let u of this.game.units) {
+                                if (u.type === unitType) {
+                                    // Heuristic: keys containing 'max' or 'hp' are additive if value is small integer
+                                    const keyLower = statKey.toLowerCase();
+                                    if ((keyLower.includes('max') || keyLower.includes('hp') || keyLower.includes('damage')) && Number.isInteger(val) && Math.abs(val) <= 100) {
+                                        u[statKey] = (u[statKey] || 0) + val;
+                                    } else if (typeof val === 'number') {
+                                        u[statKey] = (u[statKey] || 0) * val;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Building stat adjustments
+                if (eff.buildingStats) {
+                    for (let [target, stats] of Object.entries(eff.buildingStats)) {
+                        if (target === 'all') {
+                            for (let b of this.game.buildings) {
+                                if (stats.maxHpMultiplier) {
+                                    b.maxHp = Math.floor(b.maxHp * stats.maxHpMultiplier);
+                                    b.hp = Math.min(b.hp, b.maxHp);
+                                }
+                            }
+                        } else {
+                            for (let b of this.game.buildings) {
+                                if (b.type === target && stats.maxHpMultiplier) {
+                                    b.maxHp = Math.floor(b.maxHp * stats.maxHpMultiplier);
+                                    b.hp = Math.min(b.hp, b.maxHp);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Other misc effects
+                if (eff.maxStorage) {
+                    if (typeof CONFIG !== 'undefined') {
+                        CONFIG.MAX_STORAGE = CONFIG.MAX_STORAGE ? Math.floor(CONFIG.MAX_STORAGE * eff.maxStorage) : Math.floor(1000 * eff.maxStorage);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error aplicando efectos de la tecnología', techId, e);
+        }
         this.game.showNotification(`¡${tech.name} investigado!`, 'success');
         this.game.updateActionsPanel(); // Quitar botón de la tecnología
     }

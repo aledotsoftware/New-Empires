@@ -833,6 +833,7 @@ class Game {
 
     handleKeyPress(e) {
         const key = e.key.toUpperCase();
+        console.log('⌨️ Tecla presionada:', key);
 
         // Hotkeys para botones del panel de control (grid 3x5)
         const hotkeyActions = {
@@ -843,15 +844,22 @@ class Game {
 
         // Verificar si la tecla es un hotkey del panel de control
         if (hotkeyActions.hasOwnProperty(key)) {
+            console.log('🔑 Hotkey detectado:', key, '-> botón índice', hotkeyActions[key]);
             const btnIndex = hotkeyActions[key];
             const actionsGrid = document.getElementById('actionsGrid');
             if (actionsGrid) {
                 const buttons = actionsGrid.querySelectorAll('.action-btn');
+                console.log('📊 Total botones encontrados:', buttons.length);
                 if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
+                    console.log('✅ Activando botón', btnIndex);
                     buttons[btnIndex].click();
                     e.preventDefault(); // Prevenir comportamiento por defecto
                     return;
+                } else {
+                    console.log('⚠️ Botón', btnIndex, 'no disponible o deshabilitado');
                 }
+            } else {
+                console.log('❌ actionsGrid no encontrado');
             }
         }
 
@@ -1686,7 +1694,7 @@ class Game {
                 icon: '🏗️',
                 label: 'Construir',
                 hotkey: 'Q',
-                action: () => game.openBuildMenu(),
+                action: () => this.openBuildMenu(),
                 enabled: true
             });
         } else if (entity.type === 'townCenter') {
@@ -1698,7 +1706,7 @@ class Game {
                 label: 'Aldeano',
                 hotkey: 'Q',
                 cost: `${cost.food}🌾`,
-                action: () => game.trainUnit('villager', game.selectedEntities[0]),
+                action: () => this.trainUnit('villager', this.selectedEntities[0]),
                 enabled: canAfford
             });
         } else if (entity.type === 'barracks') {
@@ -1712,7 +1720,7 @@ class Game {
                 label: 'Guerrero',
                 hotkey: 'Q',
                 cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
-                action: () => game.trainUnit('warrior', game.selectedEntities[0]),
+                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
                 enabled: canAffordWarrior
             });
 
@@ -1721,7 +1729,7 @@ class Game {
                 label: 'Arquero',
                 hotkey: 'W',
                 cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
-                action: () => game.trainUnit('archer', game.selectedEntities[0]),
+                action: () => this.trainUnit('archer', this.selectedEntities[0]),
                 enabled: canAffordArcher
             });
         }
@@ -1745,7 +1753,7 @@ class Game {
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: costString.trim(),
-                    action: () => game.techManager.startResearch(tech.id),
+                    action: () => this.techManager.startResearch(tech.id),
                     enabled: canAfford
                 });
 
@@ -1767,8 +1775,14 @@ class Game {
                 }
 
                 btn.onclick = () => {
+                    console.log('🖱️ Click en botón', i, 'disabled:', btn.classList.contains('disabled'), 'hasAction:', !!buttonData.action);
                     if (!btn.classList.contains('disabled') && buttonData.action) {
-                        buttonData.action();
+                        console.log('✅ Ejecutando acción del botón', i);
+                        try {
+                            buttonData.action();
+                        } catch (error) {
+                            console.error('❌ Error al ejecutar acción:', error);
+                        }
                     }
                 };
 
@@ -1785,6 +1799,17 @@ class Game {
 
             grid.appendChild(btn);
         }
+    }
+
+    openBuildMenu() {
+        console.log('🏗️ openBuildMenu() llamado');
+        // Por ahora, mostrar notificación de que la construcción no está implementada
+        // En el futuro, aquí se abrirá el menú de construcción completo
+        this.showNotification('Menú de construcción - En desarrollo', 'info');
+        console.log('🏗️ Abriendo menú de construcción...');
+
+        // TODO: Implementar menú de construcción modal aquí
+        // document.getElementById('buildMenu').classList.remove('hidden');
     }
 
     showNotification(message, type = 'info') {

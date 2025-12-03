@@ -125,80 +125,6 @@
     <!-- Pantalla de Juego -->
     <div id="gameScreen" class="game-screen hidden">
         <!-- Contenedor Principal del Juego -->
-        <div class="game-container">
-            <!-- Panel Superior: Recursos -->
-            <div class="top-panel">
-                <div class="resources-panel">
-                    <div class="resource-item" data-resource="wood">
-                        <span class="resource-icon">🪵</span>
-                        <div class="resource-info">
-                            <span class="resource-label">Madera</span>
-                            <span class="resource-value" id="woodCount">200</span>
-                        </div>
-                    </div>
-                    <div class="resource-item" data-resource="food">
-                        <span class="resource-icon">🌾</span>
-                        <div class="resource-info">
-                            <span class="resource-label">Comida</span>
-                            <span class="resource-value" id="foodCount">200</span>
-                        </div>
-                    </div>
-                    <div class="resource-item" data-resource="gold">
-                        <span class="resource-icon">💰</span>
-                        <div class="resource-info">
-                            <span class="resource-label">Oro</span>
-                            <span class="resource-value" id="goldCount">100</span>
-                        </div>
-                    </div>
-                    <div class="resource-item" data-resource="stone">
-                        <span class="resource-icon">🪨</span>
-                        <div class="resource-info">
-                            <span class="resource-label">Piedra</span>
-                            <span class="resource-value" id="stoneCount">100</span>
-                        </div>
-                    </div>
-                    <div class="resource-item resource-population">
-                        <span class="resource-icon">👥</span>
-                        <div class="resource-info">
-                            <span class="resource-label">Población</span>
-                            <span class="resource-value">
-                                <span id="currentPopulation">3</span>/<span id="maxPopulation">5</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="game-time">
-                    <span class="time-icon">⏱️</span>
-                    <span id="gameTime">00:00</span>
-                </div>
-                <button class="btn-secondary" onclick="showSettings()"
-                    style="margin-left: 15px; padding: 8px 16px; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.5);">
-                    ⚙️ Config
-                </button>
-            </div>
-
-            <!-- Canvas del Juego -->
-            <canvas id="gameCanvas"></canvas>
-
-            <!-- Minimapa -->
-            <div class="minimap-container">
-                <div class="minimap-header">Minimapa</div>
-                <canvas id="minimapCanvas"></canvas>
-            </div>
-
-            <!-- Panel de Control Unificado (Selección + Acciones) -->
-            <div class="unit-control-panel hidden" id="unitControlPanel">
-                <div class="panel-content" id="selectionContent">
-                    <!-- Se llena dinámicamente con info de la unidad -->
-                </div>
-                <div class="actions-grid" id="actionsGrid">
-                    <!-- Se llena dinámicamente con botones de acción -->
-                </div>
-            </div>
-
-            <!-- Mensajes de Notificación -->
-            <div class="notifications" id="notifications"></div>
-        </div>
 
         <!-- Menú de Construcción (Modal) -->
         <div id="buildMenu" class="modal-overlay hidden">
@@ -382,7 +308,7 @@
         </div>
 
         <!-- Panel de Control Unificado (Selección + Acciones) -->
-        <div class="unit-control-panel hidden" id="unitControl Panel">
+        <div class="unit-control-panel hidden" id="unitControlPanel">
             <div class="panel-content" id="selectionContent">
                 <!-- Se llena dinámicamente con info de la unidad -->
             </div>

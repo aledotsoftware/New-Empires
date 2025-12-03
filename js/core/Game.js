@@ -1164,24 +1164,29 @@ export class Game {
     }
 
     updateUI() {
+        // Helper seguro para asignar texto si el elemento existe
+        const setTextIfExists = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        };
+
         // Recursos
-        document.getElementById('woodCount').textContent = Math.floor(this.resources.wood);
-        document.getElementById('foodCount').textContent = Math.floor(this.resources.food);
-        document.getElementById('goldCount').textContent = Math.floor(this.resources.gold);
-        document.getElementById('stoneCount').textContent = Math.floor(this.resources.stone);
+        setTextIfExists('woodCount', Math.floor(this.resources.wood));
+        setTextIfExists('foodCount', Math.floor(this.resources.food));
+        setTextIfExists('goldCount', Math.floor(this.resources.gold));
+        setTextIfExists('stoneCount', Math.floor(this.resources.stone));
 
         // Población
-        document.getElementById('currentPopulation').textContent = this.population;
-        document.getElementById('maxPopulation').textContent = this.maxPopulation;
+        setTextIfExists('currentPopulation', this.population);
+        setTextIfExists('maxPopulation', this.maxPopulation);
 
         // Tiempo de juego
         const elapsed = Math.floor((Date.now() - this.gameStartTime) / 1000);
         const minutes = Math.floor(elapsed / 60);
         const seconds = elapsed % 60;
-        document.getElementById('gameTime').textContent =
-            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        setTextIfExists('gameTime', `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
 
-        // Controlar visibilidad del panel unificado
+        // Controlar visibilidad del panel unificado (si existe)
         const controlPanel = document.getElementById('unitControlPanel');
         if (controlPanel) {
             if (this.selectedEntities.length > 0) {

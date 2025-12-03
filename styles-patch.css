@@ -205,6 +205,21 @@
         text-transform: uppercase;
     }
 
+    /* Ensure the game screen and canvas size correctly when injected into the page */
+    #gameScreen {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - var(--top-panel-height, 0px));
+        display: block;
+        overflow: hidden;
+    }
+
+    #gameScreen #gameCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
     .unit-stats {
         display: flex;
         flex-direction: column;

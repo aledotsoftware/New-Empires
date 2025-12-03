@@ -80,6 +80,21 @@ window.updateGridSetting = function (enabled) {
     }
 };
 
+// Compatibilidad: función global legacy usada en HTML
+window.toggleGrid = function () {
+    if (window.game) {
+        window.game.showGrid = !window.game.showGrid;
+        const toggleElement = document.getElementById('gridToggleValue');
+        if (toggleElement) toggleElement.textContent = window.game.showGrid ? 'Activada' : 'Desactivada';
+    } else {
+        const toggleElement = document.getElementById('gridToggleValue');
+        if (toggleElement) {
+            const isActive = toggleElement.textContent === 'Activada';
+            toggleElement.textContent = isActive ? 'Desactivada' : 'Activada';
+        }
+    }
+};
+
 /**
  * Actualiza el margen de la cámara
  */
@@ -263,18 +278,28 @@ function startGame(civId, mapConfig) {
     debugLogger.info(`Mapa: ${mapConfig.name || 'Normal'}`, 'game');
 
     // Crear instancia del juego
+    // Ocultar pantallas de selección y mostrar la pantalla de juego primero
+    document.getElementById('civSelectionScreen').classList.add('hidden');
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('mapSizeScreen').classList.add('hidden');
+    document.getElementById('gameScreen').classList.remove('hidden');
+
+    // Crear instancia del juego ahora que el contenedor es visible
     game = new Game(civId, mapConfig);
 
     // Exponer game globalmente para compatibilidad con HTML (onclick handlers)
     window.game = game;
 
-    // Ocultar pantallas de selección
-    document.getElementById('civSelectionScreen').classList.add('hidden');
-    document.getElementById('startScreen').classList.add('hidden');
-    document.getElementById('mapSizeScreen').classList.add('hidden');
-
-    // Mostrar pantalla de juego
-    document.getElementById('gameScreen').classList.remove('hidden');
+    // Forzar un resize inmediato por si el render inicial se hizo antes de que
+    // el layout estuviera listo en algunos navegadores
+    try {
+        if (typeof game.resizeCanvas === 'function') {
+            // Ejecutar en el siguiente tick para asegurar que estilos se apliquen
+            setTimeout(() => game.resizeCanvas(), 0);
+        }
+    } catch (e) {
+        debugLogger.error('Error forzando resize del canvas', 'game', e);
+    }
 
     // Iniciar game loop
     let lastTime = performance.now();
@@ -427,9 +452,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     return unit;
                 },
-                getTeamColor: (civilizationId) => {
+                getTeamColor: (civilizationId, team) => {
                     const civ = dataLoader.getCivilizationData(civilizationId);
                     return civ?.color || '#4169E1';
+                },
+                getBuildSpeed: (civilizationId) => {
+                    const civ = dataLoader.getCivilizationData(civilizationId);
+                    return civ?.bonuses?.buildSpeed || 1;
                 }
             };
 
@@ -458,10 +487,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             return unit;
                         },
-                        getTeamColor: (civilizationId) => {
-                            const civ = dataLoader.getCivilizationData(civilizationId);
-                            return civ?.color || '#4169E1';
-                        }
+                            getTeamColor: (civilizationId) => {
+                                const civ = dataLoader.getCivilizationData(civilizationId);
+                                return civ?.color || '#4169E1';
+                            },
+                            getBuildSpeed: (civilizationId) => {
+                                const civ = dataLoader.getCivilizationData(civilizationId);
+                                return civ?.bonuses?.buildSpeed || 1;
+                            }
                     };
 
                     populateCivilizations();

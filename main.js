@@ -245,7 +245,14 @@ function renderTechTree() {
     content.innerHTML = html;
 }
 
-// ===== INICIALIZACIÓN DEL JUEGO =====
+/**
+ * Cierra el menú de construcción
+ */
+window.closeBuildMenu = function () {
+    if (window.game) {
+        window.game.closeBuildMenu();
+    }
+};
 
 /**
  * Inicia una nueva partida

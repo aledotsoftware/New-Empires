@@ -4,6 +4,17 @@
 const TILE_SIZE = 32; // Tamaño de celda en píxeles
 
 // ==========================================
+// VARIABLES GLOBALES
+// ==========================================
+// Exponer game y lastTime en el objeto window para acceso global
+window.game = null;
+window.lastTime = 0;
+
+// También crear referencias locales para compatibilidad
+let game = null;
+let lastTime = 0;
+
+// ==========================================
 // COMPATIBILITY LAYER FOR CIVILIZATION MANAGER
 // ==========================================
 const civilizationManager = {
@@ -1803,13 +1814,16 @@ class Game {
 
     openBuildMenu() {
         console.log('🏗️ openBuildMenu() llamado');
-        // Por ahora, mostrar notificación de que la construcción no está implementada
-        // En el futuro, aquí se abrirá el menú de construcción completo
-        this.showNotification('Menú de construcción - En desarrollo', 'info');
-        console.log('🏗️ Abriendo menú de construcción...');
 
-        // TODO: Implementar menú de construcción modal aquí
-        // document.getElementById('buildMenu').classList.remove('hidden');
+        // Mostrar el modal de construcción
+        const buildMenu = document.getElementById('buildMenu');
+        if (buildMenu) {
+            buildMenu.classList.remove('hidden');
+            console.log('✅ Menú de construcción mostrado');
+        } else {
+            console.error('❌ No se encontró el elemento buildMenu');
+            this.showNotification('Error: Menú de construcción no disponible', 'error');
+        }
     }
 
     showNotification(message, type = 'info') {
@@ -2502,16 +2516,17 @@ class Workshop extends Building {
 // ==========================================
 // GAME LOOP
 // ==========================================
-let game;
-let lastTime = 0;
 
 function gameLoop(currentTime) {
     const deltaTime = (currentTime - lastTime) / 1000; // Convertir a segundos
-    lastTime = currentTime;
+    lastTime = window.lastTime = currentTime;
 
-    if (game) {
-        game.update(Math.min(deltaTime, 0.1)); // Limitar delta para evitar saltos grandes
-        game.render();
+    // Usar window.game como referencia principal
+    const gameInstance = window.game || game;
+
+    if (gameInstance) {
+        gameInstance.update(Math.min(deltaTime, 0.1)); // Limitar delta para evitar saltos grandes
+        gameInstance.render();
     }
 
     requestAnimationFrame(gameLoop);
@@ -3178,11 +3193,25 @@ function startGame(civilization) {
     // Inicializar juego
     // Game constructor espera: (civId, mapConfig)
     // civilization es el objeto completo, necesitamos su ID
-    game = new Game(civilization.id);
+    game = window.game = new Game(civilization.id);
+    console.log('🎮 Game creado y asignado:', typeof game, typeof window.game);
+    console.log('🎮 openBuildMenu existe:', typeof game.openBuildMenu);
 
     // Iniciar loop
-    lastTime = performance.now();
+    lastTime = window.lastTime = performance.now();
     requestAnimationFrame(gameLoop);
 
+
     // Sonido de inicio ya se reprodujo al cargar
+}
+
+// ==========================================
+// FUNCIÓN GLOBAL PARA CERRAR MENÚ DE CONSTRUCCIÓN
+// ==========================================
+function closeBuildMenu() {
+    const buildMenu = document.getElementById('buildMenu');
+    if (buildMenu) {
+        buildMenu.classList.add('hidden');
+        console.log('🚪 Menú de construcción cerrado');
+    }
 }

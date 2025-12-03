@@ -784,9 +784,7 @@ export class Game {
         if (keys['a'] || keys['arrowleft']) dx -= 1;
         if (keys['d'] || keys['arrowright']) dx += 1;
 
-        // Normalizar vector de teclado si es d
-
-        iagonal
+        // Normalizar vector de teclado si es diagonal
         if (dx !== 0 || dy !== 0) {
             const length = Math.hypot(dx, dy);
             dx = (dx / length) * this.cameraConfig.baseSpeed;

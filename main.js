@@ -359,7 +359,7 @@ function populateCivilizations() {
     civilizations.forEach(civ => {
         const option = document.createElement('div');
         option.className = 'civ-option';
-        option.dataset.civ = civ.id;
+        option.dataset.civ = civ.civilizationId;
 
         option.innerHTML = `
             <div class="civ-icon">${civ.icon}</div>
@@ -369,14 +369,14 @@ function populateCivilizations() {
 
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
-            selectedCivilization = civ.id;
-            debugLogger.info(`Civilización seleccionada: ${civ.id}`, 'ui');
+            selectedCivilization = civ.civilizationId;
+            debugLogger.info(`Civilización seleccionada: ${civ.civilizationId}`, 'ui');
 
             // Obtener configuración del mapa
             const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
 
             // Iniciar juego
-            startGame(civ.id, {
+            startGame(civ.civilizationId, {
                 ...mapConfig,
                 seed: Date.now(),
                 numPlayers: 2,
@@ -389,32 +389,6 @@ function populateCivilizations() {
     });
 
     debugLogger.success(`${civilizations.length} civilizaciones cargadas`, 'ui');
-}
-
-/**
- * Genera dinámicamente las opciones de civilización
- */
-function populateCivilizations() {
-    const civGrid = document.getElementById('civGrid');
-    if (!civGrid || typeof dataLoader === 'undefined') return;
-
-    civGrid.innerHTML = ''; // Limpiar contenido existente
-
-    const civilizations = dataLoader.getAllCivilizations();
-
-    civilizations.forEach(civ => {
-        const option = document.createElement('div');
-        option.className = 'civ-option';
-        option.dataset.civ = civ.id;
-
-        option.innerHTML = `
-            <div class="civ-icon">${civ.icon}</div>
-            <div class="civ-name">${civ.name}</div>
-            <div class="civ-desc">${civ.description}</div>
-        `;
-
-        civGrid.appendChild(option);
-    });
 }
 
 
@@ -431,6 +405,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof dataLoader !== 'undefined') {
             debugLogger.info('Inicializando dataLoader...', 'data');
             await dataLoader.initialize();
+
+            // Crear civilizationManager compatibility layer
+            window.civilizationManager = {
+                getCivilization: (civilizationId) => dataLoader.getCivilizationData(civilizationId),
+                getStartingResources: (civilizationId) => {
+                    const civ = dataLoader.getCivilizationData(civilizationId);
+                    return civ?.startingResources || {};
+                },
+                applyBuildingBonuses: (building, civilizationId) => {
+                    // Por ahora no hace nada, se implementará más adelante
+                    return building;
+                },
+                applyUnitBonuses: (unit, civilizationId) => {
+                    const civ = dataLoader.getCivilizationData(civilizationId);
+                    if (civ && civ.bonuses) {
+                        // Aplicar bonificaciones si existen
+                        if (civ.bonuses.unitSpeed) {
+                            unit.speed = (unit.speed || 100) * civ.bonuses.unitSpeed;
+                        }
+                    }
+                    return unit;
+                },
+                getTeamColor: (civilizationId) => {
+                    const civ = dataLoader.getCivilizationData(civilizationId);
+                    return civ?.color || '#4169E1';
+                }
+            };
+
             populateCivilizations();
         } else {
             debugLogger.warn('dataLoader no disponible, reintentando...', 'data');
@@ -438,6 +440,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTimeout(async () => {
                 if (typeof dataLoader !== 'undefined') {
                     await dataLoader.initialize();
+
+                    // Crear civilizationManager compatibility layer
+                    window.civilizationManager = {
+                        getCivilization: (civilizationId) => dataLoader.getCivilizationData(civilizationId),
+                        getStartingResources: (civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            return civ?.startingResources || {};
+                        },
+                        applyBuildingBonuses: (building, civilizationId) => building,
+                        applyUnitBonuses: (unit, civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            if (civ && civ.bonuses) {
+                                if (civ.bonuses.unitSpeed) {
+                                    unit.speed = (unit.speed || 100) * civ.bonuses.unitSpeed;
+                                }
+                            }
+                            return unit;
+                        },
+                        getTeamColor: (civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            return civ?.color || '#4169E1';
+                        }
+                    };
+
                     populateCivilizations();
                 } else {
                     debugLogger.error('dataLoader no se pudo cargar', 'data');

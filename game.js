@@ -3,6 +3,41 @@
 // ==========================================
 const TILE_SIZE = 32; // Tamaño de celda en píxeles
 
+// ==========================================
+// COMPATIBILITY LAYER FOR CIVILIZATION MANAGER
+// ==========================================
+const civilizationManager = {
+    getAllCivilizations: () => dataLoader.getAllCivilizations(),
+    getCivilization: (id) => dataLoader.getCivilizationData(id),
+    getStartingResources: (id) => {
+        const civ = dataLoader.getCivilizationData(id);
+        return civ ? (civ.startingResources || {}) : {};
+    },
+    getBuildSpeed: (id) => {
+        const civ = dataLoader.getCivilizationData(id);
+        return civ && civ.bonuses ? (civ.bonuses.buildSpeed || 1) : 1;
+    },
+    applyBuildingBonuses: (building, civId) => {
+        const civ = dataLoader.getCivilizationData(civId);
+        if (!civ || !civ.bonuses) return;
+
+        if (civ.bonuses.buildingHp) building.maxHp = Math.floor(building.maxHp * civ.bonuses.buildingHp);
+        building.hp = building.isUnderConstruction ? 1 : building.maxHp;
+    },
+    applyUnitBonuses: (unit, civId) => {
+        const civ = dataLoader.getCivilizationData(civId);
+        if (!civ || !civ.bonuses) return;
+
+        if (civ.bonuses.unitSpeed) unit.speed = (unit.speed || 100) * civ.bonuses.unitSpeed; // Asumiendo velocidad base
+        if (civ.bonuses.unitAttack) unit.attackDamage = Math.floor(unit.attackDamage * civ.bonuses.unitAttack);
+        if (civ.bonuses.gatherSpeed && unit.type === 'villager') {
+            // La lógica de recolección usa CONFIG.GATHER_RATES, habría que ver cómo aplicarlo a la unidad individual
+            // o si la unidad tiene un multiplicador propio.
+            // Por ahora lo dejamos simple.
+        }
+    }
+};
+
 class GridMap {
     constructor(width, height, tileSize) {
         this.width = width;
@@ -2404,7 +2439,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Cargar sonidos
     if (typeof soundManager !== 'undefined') {
-        soundManager.loadAll();
+        await soundManager.loadAll();
+        // Reproducir sonido de inicio inmediatamente al cargar
+        const playPromise = soundManager.play('startGame', 0.25);
+        if (playPromise) {
+            playPromise.catch(() => {
+                console.log("🔊 Autoplay bloqueado - esperando interacción del usuario");
+                const playOnInteraction = () => {
+                    soundManager.play('startGame', 0.25);
+                    document.removeEventListener('click', playOnInteraction);
+                    document.removeEventListener('keydown', playOnInteraction);
+                };
+                document.addEventListener('click', playOnInteraction, { once: true });
+                document.addEventListener('keydown', playOnInteraction, { once: true });
+            });
+        }
     }
 
     // 3. Renderizar selección de civilizaciones
@@ -2423,16 +2472,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     createParticles();
 
     // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
-    startButton.addEventListener('click', () => {
-        startScreen.classList.add('hidden');
-        mapSizeScreen.classList.remove('hidden');
-        showMapSizeSelection();
+    // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
+    if (startButton) {
+        startButton.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            mapSizeScreen.classList.remove('hidden');
+            showMapSizeSelection();
 
-        // Reproducir sonido de inicio
-        if (typeof soundManager !== 'undefined') {
-            soundManager.play('startGame', 0.25);
-        }
-    });
+            // Sonido de inicio ya se reprodujo al cargar
+        });
+    } else {
+        console.error('❌ startButton no encontrado en el DOM');
+    }
 
     // Volver al inicio desde selección de tamaño
     backToStartButton.addEventListener('click', () => {
@@ -2541,15 +2592,16 @@ function createParticles() {
 }
 
 // Función global para cerrar el menú de construcción
-function closeBuildMenu() {
+// Función global para cerrar el menú de construcción
+window.closeBuildMenu = function () {
     document.getElementById('buildMenu').classList.add('hidden');
-}
+};
 
 // ==========================================
 // ÁRBOL DE TECNOLOGÍAS
 // ==========================================
 
-function showTechTree() {
+window.showTechTree = function () {
     const modal = document.getElementById('techTreeScreen');
     if (!modal) {
         console.error('Tech tree modal not found');
@@ -2560,7 +2612,7 @@ function showTechTree() {
     renderTechTree();
 }
 
-function hideTechTree() {
+window.hideTechTree = function () {
     const modal = document.getElementById('techTreeScreen');
     if (modal) {
         modal.classList.add('hidden');
@@ -2729,7 +2781,7 @@ function getRomanNumeral(num) {
 }
 
 // Funciones para selección de tamaño de mapa
-function showMapSizeSelection() {
+window.showMapSizeSelection = function () {
     const mapSizeGrid = document.getElementById('mapSizeGrid');
     if (!mapSizeGrid) return;
 
@@ -2754,7 +2806,7 @@ function showMapSizeSelection() {
     }
 }
 
-function selectMapSize(sizeKey) {
+window.selectMapSize = function (sizeKey) {
     const mapSize = MAP_SIZES[sizeKey];
     if (!mapSize) return;
 
@@ -2772,7 +2824,7 @@ function selectMapSize(sizeKey) {
     console.log(`Mapa seleccionado: ${mapSize.name} (${mapSize.tiles}×${mapSize.tiles})`);
 }
 
-function backToMapSize() {
+window.backToMapSize = function () {
     document.getElementById('civSelectionScreen').classList.add('hidden');
     document.getElementById('mapSizeScreen').classList.remove('hidden');
 }
@@ -2780,7 +2832,7 @@ function backToMapSize() {
 // ==========================================
 // FUNCIÓN DE CONFIGURACIÓN - Toggle Grid
 // ==========================================
-function toggleGrid() {
+window.toggleGrid = function () {
     if (game) {
         game.showGrid = !game.showGrid;
         const toggleElement = document.getElementById('gridToggleValue');
@@ -2790,7 +2842,7 @@ function toggleGrid() {
     }
 }
 
-function showSettings() {
+window.showSettings = function () {
     const modal = document.getElementById('settingsScreen');
     if (modal) {
         modal.classList.remove('hidden');
@@ -2846,7 +2898,7 @@ function showSettings() {
     }
 }
 
-function updateCameraSpeed(value) {
+window.updateCameraSpeed = function (value) {
     const speed = parseInt(value);
     document.getElementById('cameraSpeedValue').textContent = `${speed} px/s`;
     if (game && game.cameraConfig) {
@@ -2854,7 +2906,7 @@ function updateCameraSpeed(value) {
     }
 }
 
-function updateCameraMargin(value) {
+window.updateCameraMargin = function (value) {
     const margin = parseInt(value);
     document.getElementById('cameraMarginValue').textContent = `${margin} px`;
     if (game && game.cameraConfig) {
@@ -2862,14 +2914,14 @@ function updateCameraMargin(value) {
     }
 }
 
-function hideSettings() {
+window.hideSettings = function () {
     const modal = document.getElementById('settingsScreen');
     if (modal) {
         modal.classList.add('hidden');
     }
 }
 
-function toggleIdleVillagerCycle() {
+window.toggleIdleVillagerCycle = function () {
     if (game) {
         game.enableIdleVillagerCycle = !game.enableIdleVillagerCycle;
         const toggleElement = document.getElementById('idleVillagerToggleValue');
@@ -3001,14 +3053,14 @@ function startGame(civilization) {
     canvas.height = CONFIG.CANVAS_HEIGHT;
 
     // Inicializar juego
-    game = new Game(canvas, civilization);
+    // Inicializar juego
+    // Game constructor espera: (civId, mapConfig)
+    // civilization es el objeto completo, necesitamos su ID
+    game = new Game(civilization.id);
 
     // Iniciar loop
     lastTime = performance.now();
     requestAnimationFrame(gameLoop);
 
-    // Reproducir sonido de inicio de partida si existe
-    if (typeof soundManager !== 'undefined') {
-        soundManager.play('startGame');
-    }
+    // Sonido de inicio ya se reprodujo al cargar
 }

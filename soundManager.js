@@ -122,7 +122,9 @@ class SoundManager {
         const clone = sound.cloneNode();
         clone.volume = volume !== null ? Math.max(0, Math.min(1, volume)) : this.volume;
 
-        clone.play().catch(err => {
+        const promise = clone.play();
+
+        promise.catch(err => {
             if (typeof debugLogger !== 'undefined') {
                 debugLogger.warn(`Error al reproducir sonido`, 'sound', {
                     key,
@@ -134,6 +136,8 @@ class SoundManager {
                 console.warn(`⚠️ Error al reproducir sonido ${key}:`, err);
             }
         });
+
+        return promise;
     }
 
     /**

@@ -454,6 +454,7 @@ debugLogger.timeEnd('Operación', 'performance');
    - Carga civilizaciones
    - Carga assets en background
    - Carga sonidos
+   - Reproduce música de intro (`startGame`)
    - Renderiza pantalla de inicio
 5. **Selección de mapa y civilización**
 6. **Inicio del juego**:

@@ -22,7 +22,7 @@
     <script>
         (function () {
             var v = Date.now();
-            var styles = ['styles.css', 'styles-patch.css', 'tech-tree-styles.css'];
+            var styles = ['styles.css', 'styles-patch.css', 'tech-tree-styles.css', 'control-panel.css'];
             styles.forEach(function (href) {
                 document.write('<link rel="stylesheet" href="' + href + '?v=' + v + '">');
             });
@@ -187,7 +187,7 @@
             </div>
 
             <!-- Panel de Control Unificado (Selección + Acciones) -->
-            <div class="unit-control-panel hidden" id="unitControl Panel">
+            <div class="unit-control-panel hidden" id="unitControlPanel">
                 <div class="panel-content" id="selectionContent">
                     <!-- Se llena dinámicamente con info de la unidad -->
                 </div>

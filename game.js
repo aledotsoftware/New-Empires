@@ -17,6 +17,26 @@ const civilizationManager = {
         const civ = dataLoader.getCivilizationData(id);
         return civ && civ.bonuses ? (civ.bonuses.buildSpeed || 1) : 1;
     },
+    getTeamColor: (civId, team) => {
+        const civ = dataLoader.getCivilizationData(civId);
+
+        // Si la civilización tiene un color definido, usarlo para el equipo del jugador
+        if (civ && civ.color && team === 'player') {
+            // Convertir hex a rgba con transparencia
+            const hex = civ.color.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            return `rgba(${r}, ${g}, ${b}, 0.3)`;
+        }
+
+        // Colores por defecto para cada equipo
+        switch (team) {
+            case 'player': return 'rgba(72, 187, 120, 0.3)'; // Verde
+            case 'enemy': return 'rgba(197, 48, 48, 0.3)';   // Rojo
+            default: return 'rgba(160, 160, 160, 0.3)';      // Gris
+        }
+    },
     applyBuildingBonuses: (building, civId) => {
         const civ = dataLoader.getCivilizationData(civId);
         if (!civ || !civ.bonuses) return;
@@ -809,6 +829,34 @@ class Game {
 
         // Incrementar índice para la próxima vez
         this.idleVillagerIndex++;
+    }
+
+    handleKeyPress(e) {
+        const key = e.key.toUpperCase();
+
+        // Hotkeys para botones del panel de control (grid 3x5)
+        const hotkeyActions = {
+            'Q': 0, 'W': 1, 'E': 2, 'R': 3, 'T': 4,  // Fila 1
+            'A': 5, 'S': 6, 'D': 7, 'F': 8, 'G': 9,  // Fila 2
+            'Z': 10, 'X': 11, 'C': 12, 'V': 13, 'B': 14  // Fila 3
+        };
+
+        // Verificar si la tecla es un hotkey del panel de control
+        if (hotkeyActions.hasOwnProperty(key)) {
+            const btnIndex = hotkeyActions[key];
+            const actionsGrid = document.getElementById('actionsGrid');
+            if (actionsGrid) {
+                const buttons = actionsGrid.querySelectorAll('.action-btn');
+                if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
+                    buttons[btnIndex].click();
+                    e.preventDefault(); // Prevenir comportamiento por defecto
+                    return;
+                }
+            }
+        }
+
+        // Otros hotkeys existentes...
+        // (El resto de la lógica de teclas que pueda existir)
     }
 
     handleRightClick() {
@@ -1621,72 +1669,121 @@ class Game {
         // Solo mostrar acciones si es del jugador
         if (entity.team !== 'player') return;
 
+        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
+        // Fila 1: Q W E R T
+        // Fila 2: A S D F G
+        // Fila 3: Z X C V B
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',  // Fila 1
+            'A', 'S', 'D', 'F', 'G',  // Fila 2
+            'Z', 'X', 'C', 'V', 'B'   // Fila 3
+        ];
+
+        const buttons = [];
+
         if (entity.type === 'villager') {
-            grid.innerHTML = `
-                <button class="action-btn" onclick="game.openBuildMenu()">
-                    <div class="btn-icon">🏗️</div>
-                    <div class="btn-label">Construir</div>
-                </button>
-            `;
+            buttons.push({
+                icon: '🏗️',
+                label: 'Construir',
+                hotkey: 'Q',
+                action: () => game.openBuildMenu(),
+                enabled: true
+            });
         } else if (entity.type === 'townCenter') {
             const cost = CONFIG.UNIT_COSTS.villager;
             const canAfford = this.canAfford(cost);
 
-            grid.innerHTML = `
-                <button class="action-btn ${!canAfford ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEntities[0])"
-                     title="Coste: ${cost.food} Comida">
-                    <div class="btn-icon">👨‍🌾</div>
-                    <div class="btn-label">Aldeano</div>
-                </button>
-            `;
+            buttons.push({
+                icon: '👨‍🌾',
+                label: 'Aldeano',
+                hotkey: 'Q',
+                cost: `${cost.food}🌾`,
+                action: () => game.trainUnit('villager', game.selectedEntities[0]),
+                enabled: canAfford
+            });
         } else if (entity.type === 'barracks') {
             const warriorCost = CONFIG.UNIT_COSTS.warrior;
             const archerCost = CONFIG.UNIT_COSTS.archer;
             const canAffordWarrior = this.canAfford(warriorCost);
             const canAffordArcher = this.canAfford(archerCost);
 
-            grid.innerHTML = `
-                <button class="action-btn ${!canAffordWarrior ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])"
-                     title="Coste: ${warriorCost.food} Comida, ${warriorCost.gold} Oro">
-                    <div class="btn-icon">⚔️</div>
-                    <div class="btn-label">Guerrero</div>
-                </button>
-                <button class="action-btn ${!canAffordArcher ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])"
-                     title="Coste: ${archerCost.food} Comida, ${archerCost.gold} Oro">
-                    <div class="btn-icon">🏹</div>
-                    <div class="btn-label">Arquero</div>
-                </button>
-            `;
+            buttons.push({
+                icon: '⚔️',
+                label: 'Guerrero',
+                hotkey: 'Q',
+                cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
+                action: () => game.trainUnit('warrior', game.selectedEntities[0]),
+                enabled: canAffordWarrior
+            });
+
+            buttons.push({
+                icon: '🏹',
+                label: 'Arquero',
+                hotkey: 'W',
+                cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
+                action: () => game.trainUnit('archer', game.selectedEntities[0]),
+                enabled: canAffordArcher
+            });
         }
 
         // Añadir tecnologías disponibles
         if (this.techManager) {
             const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+            let techIndex = 0;
             for (let tech of availableTechs) {
+                if (techIndex >= 13) break; // Máximo 13 botones más (15 - 2 ya usados como máximo)
+
                 const canAfford = this.techManager.canResearch(tech.id);
                 let costString = '';
                 for (let [res, amount] of Object.entries(tech.cost)) {
                     const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                    costString += `${icon}${amount} `;
+                    costString += `${amount}${icon} `;
                 }
 
-                const btn = document.createElement('button');
-                btn.className = `action-btn ${!canAfford ? 'disabled' : ''}`;
-                btn.title = `${tech.name}\n${tech.description}\nCoste: ${costString}`;
+                buttons.push({
+                    icon: tech.icon || '🔬',
+                    label: tech.name,
+                    hotkey: hotkeys[buttons.length],
+                    cost: costString.trim(),
+                    action: () => game.techManager.startResearch(tech.id),
+                    enabled: canAfford
+                });
+
+                techIndex++;
+            }
+        }
+
+        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        for (let i = 0; i < 15; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.setAttribute('data-hotkey', hotkeys[i]);
+
+            if (i < buttons.length) {
+                const buttonData = buttons[i];
+
+                if (!buttonData.enabled) {
+                    btn.classList.add('disabled');
+                }
+
                 btn.onclick = () => {
-                    if (!btn.classList.contains('disabled')) {
-                        game.techManager.startResearch(tech.id);
+                    if (!btn.classList.contains('disabled') && buttonData.action) {
+                        buttonData.action();
                     }
                 };
+
                 btn.innerHTML = `
-                    <div class="btn-icon">${tech.icon || '🔬'}</div>
-                    <div class="btn-label">${tech.name}</div>
+                    <div class="btn-icon">${buttonData.icon}</div>
+                    <div class="btn-label">${buttonData.label}</div>
+                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
                 `;
-                grid.appendChild(btn);
+            } else {
+                // Botón vacío
+                btn.classList.add('disabled');
+                btn.innerHTML = '<div class="btn-icon"></div>';
             }
+
+            grid.appendChild(btn);
         }
     }
 

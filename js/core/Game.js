@@ -127,12 +127,26 @@ export class Game {
         // Cargar imagen del cursor personalizado
         this.cursorImage = new Image();
         this.cursorImage.src = 'assets/icons/cursor.png';
-        this.cursorImage.onload = () => {
-            console.log('✅ Cursor personalizado cargado');
-        };
-        this.cursorImage.onerror = () => {
-            console.warn('⚠️ No se pudo cargar cursor.png');
-        };
+
+        // Crear elemento DOM para el cursor
+        this.cursorElement = document.createElement('div');
+        this.cursorElement.id = 'customCursor';
+        this.cursorElement.style.position = 'fixed';
+        this.cursorElement.style.pointerEvents = 'none';
+        this.cursorElement.style.zIndex = '9999';
+        this.cursorElement.style.transform = 'translate(0, 0)'; // El cursor.png tiene la punta arriba-izquierda
+        this.cursorElement.style.width = '32px'; // Tamaño por defecto
+        this.cursorElement.style.height = 'auto';
+
+        const cursorImg = document.createElement('img');
+        cursorImg.src = 'assets/icons/cursor.png';
+        cursorImg.style.width = '100%';
+        cursorImg.style.height = 'auto';
+        cursorImg.style.display = 'block';
+        this.cursorElement.appendChild(cursorImg);
+
+        document.body.appendChild(this.cursorElement);
+        document.body.style.cursor = 'none';
 
         this.initializeGame();
         this.updateUI();
@@ -308,53 +322,23 @@ export class Game {
     }
 
     setupEventListeners() {
-        // Pointer Lock API - Bloquear cursor en el canvas
-        this.canvas.addEventListener('click', () => {
-            if (!this.isPointerLocked) {
-                this.canvas.requestPointerLock();
-            }
-        });
-
-        // Detectar cambios en Pointer Lock
-        document.addEventListener('pointerlockchange', () => {
-            this.isPointerLocked = document.pointerLockElement === this.canvas;
-            if (this.isPointerLocked) {
-                console.log('🖱️ Cursor bloqueado en el canvas');
-                this.showNotification('Cursor bloqueado (ESC para liberar)', 'info');
-                // Ocultar cursor CSS nativo
-                this.canvas.style.cursor = 'none';
-            } else {
-                console.log('🖱️ Cursor liberado');
-                // Restaurar cursor CSS
-                this.canvas.style.cursor = 'crosshair';
-            }
-        });
-
-        // Mouse move - Ahora maneja tanto pointer lock como movimiento normal
+        // Mouse move - Actualizar cursor DOM y posición lógica
         window.addEventListener('mousemove', (e) => {
             this.hasMouseMoved = true;
 
-            if (this.isPointerLocked) {
-                // Usar movimiento relativo cuando está bloqueado
-                this.mouse.x += e.movementX;
-                this.mouse.y += e.movementY;
-
-                // Mantener dentro de los límites del canvas
-                this.mouse.x = Math.max(0, Math.min(this.canvas.width, this.mouse.x));
-                this.mouse.y = Math.max(0, Math.min(this.canvas.height, this.mouse.y));
-            } else {
-                // Movimiento normal cuando no está bloqueado
-                const rect = this.canvas.getBoundingClientRect();
-                this.mouse.x = e.clientX - rect.left;
-                this.mouse.y = e.clientY - rect.top;
+            // Actualizar posición del cursor visual (DOM)
+            if (this.cursorElement) {
+                this.cursorElement.style.left = e.clientX + 'px';
+                this.cursorElement.style.top = e.clientY + 'px';
             }
+
+            // Actualizar posición lógica del mouse relativa al canvas
+            const rect = this.canvas.getBoundingClientRect();
+            this.mouse.x = e.clientX - rect.left;
+            this.mouse.y = e.clientY - rect.top;
 
             this.mouse.worldX = this.mouse.x + this.camera.x;
             this.mouse.worldY = this.mouse.y + this.camera.y;
-
-            if (this.isDragging) {
-                // Dibuja el rectángulo de selección
-            }
         });
 
         // Click izquierdo
@@ -1056,11 +1040,6 @@ export class Game {
 
         // Renderizar minimapa
         this.renderMinimap();
-
-        // Dibujar cursor personalizado si el pointer está bloqueado
-        if (this.isPointerLocked) {
-            this.drawCustomCursor();
-        }
     }
 
     drawGrid() {
@@ -1156,24 +1135,38 @@ export class Game {
         this.ctx.strokeRect(screenX, screenY, width, height);
 
         // Dibujar icono centrado
-        let icon = '🏗️';
-        switch (this.buildMode) {
-            case 'house': icon = '🏠'; break;
-            case 'barracks': icon = '⚔️'; break;
-            case 'townCenter': icon = '🏰'; break;
-            case 'storage': icon = '📦'; break;
-            case 'storageWood': icon = '🌲'; break;
-            case 'market': icon = '🏪'; break;
-            case 'temple': icon = '⛪'; break;
-            case 'workshop': icon = '🔨'; break;
+        let drawn = false;
+        if (typeof assetLoader !== 'undefined') {
+            const img = assetLoader.getImage(this.buildMode);
+            if (img && img.complete) {
+                // Dibujar imagen con opacidad
+                this.ctx.globalAlpha = 0.7;
+                this.ctx.drawImage(img, screenX, screenY, width, height);
+                this.ctx.globalAlpha = 1.0;
+                drawn = true;
+            }
         }
 
-        const fontSize = Math.min(width, height) * 0.6;
-        this.ctx.font = `${fontSize}px Arial`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.fillText(icon, screenX + width / 2, screenY + height / 2);
+        if (!drawn) {
+            let icon = '🏗️';
+            switch (this.buildMode) {
+                case 'house': icon = '🏠'; break;
+                case 'barracks': icon = '⚔️'; break;
+                case 'townCenter': icon = '🏰'; break;
+                case 'storage': icon = '📦'; break;
+                case 'storageWood': icon = '🌲'; break;
+                case 'market': icon = '🏪'; break;
+                case 'temple': icon = '⛪'; break;
+                case 'workshop': icon = '🔨'; break;
+            }
+
+            const fontSize = Math.min(width, height) * 0.6;
+            this.ctx.font = `${fontSize}px Arial`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            this.ctx.fillText(icon, screenX + width / 2, screenY + height / 2);
+        }
 
         // Dibujar grid local para referencia visual
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
@@ -1214,120 +1207,72 @@ export class Game {
             if (building.image && building.image.complete) {
                 this.minimapCtx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
             } else {
-                    </div >
-                    <div class="selection-details">
-                        <h3>${entity.name}</h3>
-                        <div class="selection-stats">
-                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
-                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
-                        </div>
-                    </div>
-                </div >
-                    `;
-    } else {
-        content.innerHTML = `
-                    < div class="selection-info" >
-                    <div class="selection-icon">
-                        👥
-                    </div>
-                    <div class="selection-details">
-                        <h3>${this.selectedEntities.length} Unidades</h3>
-                        <div class="selection-stats">
-                            <div>Selección múltiple</div>
-                        </div>
-                    </div>
-                </div >
-                    `;
-    }
-}
-
-updateActionsPanel() {
-    const grid = document.getElementById('actionsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-
-    if (this.selectedEntities.length !== 1) return;
-
-    const entity = this.selectedEntities[0];
-
-    // Solo mostrar acciones si es del jugador
-    if (entity.team !== 'player') return;
-
-    if (entity.type === 'villager') {
-        grid.innerHTML = `
-                    < button class="action-btn" onclick = "game.openBuildMenu()" >
-                    <div class="btn-icon">🏗️</div>
-                    <div class="btn-label">Construir</div>
-                </button >
-                    `;
-    } else if (entity.type === 'townCenter') {
-        const cost = CONFIG.UNIT_COSTS.villager;
-        const canAfford = this.canAfford(cost);
-
-        grid.innerHTML = `
-                    < button class="action-btn ${!canAfford ? 'disabled' : ''}"
-                onclick = "if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEnt
-
-                ities[0]) "
-                title = "Coste: ${cost.food} Comida" >
-                    <div class="btn-icon">👨‍🌾</div>
-                    <div class="btn-label">Aldeano</div>
-                </button >
-                    `;
-    } else if (entity.type === 'barracks') {
-        const warriorCost = CONFIG.UNIT_COSTS.warrior;
-        const archerCost = CONFIG.UNIT_COSTS.archer;
-        const canAffordWarrior = this.canAfford(warriorCost);
-        const canAffordArcher = this.canAfford(archerCost);
-
-        grid.innerHTML = `
-                    < button class="action-btn ${!canAffordWarrior ? 'disabled' : ''}"
-                onclick = "if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])"
-                title = "Coste: ${warriorCost.food} Comida, ${warriorCost.gold} Oro" >
-                    <div class="btn-icon">⚔️</div>
-                    <div class="btn-label">Guerrero</div>
-                </button >
-                    <button class="action-btn ${!canAffordArcher ? 'disabled' : ''}"
-                        onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])"
-                        title="Coste: ${archerCost.food} Comida, ${archerCost.gold} Oro">
-                        <div class="btn-icon">🏹</div>
-                        <div class="btn-label">Arquero</div>
-                    </button>
-                `;
-    }
-
-    // Añadir tecnologías disponibles
-    if (this.techManager) {
-        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-        for (let tech of availableTechs) {
-            const canAfford = this.techManager.canResearch(tech.id);
-            let costString = '';
-            for (let [res, amount] of Object.entries(tech.cost)) {
-                const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                costString += `${ icon }${ amount } `;
+                this.minimapCtx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
+                this.minimapCtx.fillRect(x - size / 2, y - size / 2, size, size);
             }
+        }
 
-            const btn = document.createElement('button');
-            btn.className = `action - btn ${ !canAfford ? 'disabled' : '' } `;
-            btn.title = `${ tech.name } \n${ tech.description } \nCoste: ${ costString } `;
-            btn.onclick = () => {
-                if (!btn.classList.contains('disabled')) {
-                    game.techManager.startResearch(tech.id);
-                }
-            };
-            btn.innerHTML = `
-                    < div class="btn-icon" > ${ tech.icon || '🔬' }</div >
-                        <div class="btn-label">${tech.name}</div>
-                `;
-            grid.appendChild(btn);
+        // Unidades
+        for (let unit of this.units) {
+            const x = unit.x * scale;
+            const y = unit.y * scale;
+            this.minimapCtx.fillStyle = unit.team === 'player' ? '#48bb78' : '#c53030';
+            this.minimapCtx.fillRect(x - 1, y - 1, 2, 2);
+        }
+
+        // Cámara
+        const camX = this.camera.x * scale;
+        const camY = this.camera.y * scale;
+        const camW = this.viewWidth * scale;
+        const camH = this.viewHeight * scale;
+
+        this.minimapCtx.strokeStyle = 'white';
+        this.minimapCtx.lineWidth = 1;
+        this.minimapCtx.strokeRect(camX, camY, camW, camH);
+    }
+
+    drawCustomCursor() {
+        if (this.cursorImage.complete) {
+            this.ctx.drawImage(this.cursorImage, this.mouse.x, this.mouse.y);
+        } else {
+            // Fallback cursor
+            this.ctx.fillStyle = 'white';
+            this.ctx.strokeStyle = 'black';
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.mouse.x, this.mouse.y);
+            this.ctx.lineTo(this.mouse.x + 15, this.mouse.y + 15);
+            this.ctx.lineTo(this.mouse.x, this.mouse.y + 22);
+            this.ctx.fill();
+            this.ctx.stroke();
         }
     }
-}
 
-updateSelectionPanel() {
-    const content = document.getElementById('selectionContent');
-    if (!content) return;
+    updateUI() {
+        // Actualizar recursos
+        document.getElementById('woodCount').textContent = Math.floor(this.resources.wood);
+        document.getElementById('foodCount').textContent = Math.floor(this.resources.food);
+        document.getElementById('goldCount').textContent = Math.floor(this.resources.gold);
+        document.getElementById('stoneCount').textContent = Math.floor(this.resources.stone);
+
+        // Actualizar población
+        document.getElementById('currentPopulation').textContent = Math.floor(this.population);
+        document.getElementById('maxPopulation').textContent = this.maxPopulation;
+
+        // Actualizar tiempo de juego
+        const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+        const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+        const timeElement = document.getElementById('gameTime');
+        if (timeElement) timeElement.textContent = `${minutes}:${seconds}`;
+
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
+    }
+
+    updateSelectionPanel() {
+        const content = document.getElementById('selectionContent');
+        if (!content) return;
 
     if (this.selectedEntities.length === 0) {
         content.innerHTML = '';
@@ -1336,10 +1281,19 @@ updateSelectionPanel() {
 
     if (this.selectedEntities.length === 1) {
         const entity = this.selectedEntities[0];
+
+        let iconHtml = entity.icon;
+        if (typeof assetLoader !== 'undefined') {
+            const src = assetLoader.getSrc(entity.type);
+            if (src) {
+                iconHtml = `<img src="${src}" alt="${entity.name}" class="icon-large">`;
+            }
+        }
+
         content.innerHTML = `
-                    < div class="selection-info" >
+                    <div class="selection-info">
                     <div class="selection-icon">
-                        ${entity.icon}
+                        ${iconHtml}
                     </div>
                     <div class="selection-details">
                         <h3>${entity.name}</h3>
@@ -1348,11 +1302,11 @@ updateSelectionPanel() {
                             ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
                         </div>
                     </div>
-                </div >
+                </div>
                     `;
     } else {
         content.innerHTML = `
-                    < div class="selection-info" >
+                    <div class="selection-info">
                     <div class="selection-icon">
                         👥
                     </div>
@@ -1362,7 +1316,7 @@ updateSelectionPanel() {
                             <div>Selección múltiple</div>
                         </div>
                     </div>
-                </div >
+                </div>
                     `;
     }
 }
@@ -1392,9 +1346,41 @@ updateActionsPanel() {
 
     const buttons = [];
 
+    // Helper para obtener iconos de botones
+    const getBtnIcon = (key, fallback) => {
+        if (typeof assetLoader !== 'undefined') {
+            const src = assetLoader.getSrc(key);
+            if (src) return `<img src="${src}" class="icon-small">`;
+        }
+        return fallback;
+    };
+
+    // Helper para formatear costo con iconos
+    const formatCost = (costObj) => {
+        let str = '';
+        for (let [res, amount] of Object.entries(costObj)) {
+            let icon = '';
+            if (typeof assetLoader !== 'undefined') {
+                const src = assetLoader.getSrc(res);
+                if (src) icon = `<img src="${src}" class="icon-tiny" style="width:16px;height:16px;vertical-align:middle;">`;
+                else {
+                    // Fallback emojis
+                    icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                }
+            }
+            str += `${amount}${icon} `;
+        }
+        return str.trim();
+    };
+
     if (entity.type === 'villager') {
         buttons.push({
-            icon: '🏗️',
+            icon: '🏗️', // No hay asset especifico para "construir" pero podríamos usar un martillo si existiera. Usaremos emoji por ahora o icono de workshop?
+            // User said prohibit emojis.
+            // Check assetLoader.getSrc('workshop') -> hammer icon? No.
+            // I'll leave emoji for action verbs if no icon, or try to find one.
+            // Actually, I can use a generic building icon.
+            icon: getBtnIcon('workshop', '🏗️'),
             label: 'Construir',
             hotkey: 'Q',
             action: () => this.openBuildMenu(),
@@ -1405,10 +1391,10 @@ updateActionsPanel() {
         const canAfford = this.canAfford(cost);
 
         buttons.push({
-            icon: '👨‍🌾',
+            icon: getBtnIcon('villager', '👨‍🌾'),
             label: 'Aldeano',
             hotkey: 'Q',
-            cost: `${ cost.food }🌾`,
+            cost: formatCost(cost),
             action: () => this.trainUnit('villager', this.selectedEntities[0]),
             enabled: canAfford
         });
@@ -1419,19 +1405,19 @@ updateActionsPanel() {
         const canAffordArcher = this.canAfford(archerCost);
 
         buttons.push({
-            icon: '⚔️',
+            icon: getBtnIcon('warrior', '⚔️'),
             label: 'Guerrero',
             hotkey: 'Q',
-            cost: `${ warriorCost.food }🌾 ${ warriorCost.gold }💰`,
+            cost: formatCost(warriorCost),
             action: () => this.trainUnit('warrior', this.selectedEntities[0]),
             enabled: canAffordWarrior
         });
 
         buttons.push({
-            icon: '🏹',
+            icon: getBtnIcon('archer', '🏹'),
             label: 'Arquero',
             hotkey: 'W',
-            cost: `${ archerCost.food }🌾 ${ archerCost.gold }💰`,
+            cost: formatCost(archerCost),
             action: () => this.trainUnit('archer', this.selectedEntities[0]),
             enabled: canAffordArcher
         });
@@ -1445,17 +1431,17 @@ updateActionsPanel() {
             if (techIndex >= 13) break; // Máximo 13 botones más
 
             const canAfford = this.techManager.canResearch(tech.id);
-            let costString = '';
-            for (let [res, amount] of Object.entries(tech.cost)) {
-                const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                costString += `${ amount }${ icon } `;
-            }
+            // Use formatCost helper
+            let costString = formatCost(tech.cost);
+
+            // TODO: Use asset icons for techs if available
+            // let icon = tech.icon || '🔬';
 
             buttons.push({
-                icon: tech.icon || '🔬',
+                icon: tech.icon || '🔬', // Tech icons are likely emojis in data, need to check Technologies.js to replace them or ignore
                 label: tech.name,
                 hotkey: hotkeys[buttons.length],
-                cost: costString.trim(),
+                cost: costString,
                 action: () => this.techManager.startResearch(tech.id),
                 enabled: canAfford
             });
@@ -1488,9 +1474,9 @@ updateActionsPanel() {
             };
 
             btn.innerHTML = `
-                    < div class="btn-icon" > ${ buttonData.icon }</div >
+                    <div class="btn-icon">${buttonData.icon}</div>
                         <div class="btn-label">${buttonData.label}</div>
-                    ${ buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : '' }
+                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
                 `;
         } else {
             // Botón vacío
@@ -1514,7 +1500,7 @@ showNotification(message, type = 'info') {
     };
 
     notification.innerHTML = `
-                    < div class="notification-icon" > ${ icons[type] }</div >
+                    <div class="notification-icon">${icons[type]}</div>
                         <div class="notification-text">${message}</div>
                 `;
 

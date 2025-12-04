@@ -96,6 +96,24 @@ window.toggleGrid = function () {
 };
 
 /**
+ * Actualiza el tamaño del cursor
+ */
+window.updateCursorSize = function (value) {
+    // debugLogger.debug(`Tamaño de cursor: ${value}px`, 'ui');
+    if (game && game.cursorElement) {
+        game.cursorElement.style.width = value + 'px';
+    } else {
+        // Si no hay juego, intentar buscar el elemento directamente
+        const cursor = document.getElementById('customCursor');
+        if (cursor) {
+            cursor.style.width = value + 'px';
+        }
+    }
+    const label = document.getElementById('cursorSizeValue');
+    if (label) label.textContent = value + 'px';
+};
+
+/**
  * Actualiza el margen de la cámara
  */
 window.updateCameraMargin = function (value) {
@@ -276,6 +294,11 @@ function startGame(civId, mapConfig) {
     debugLogger.start('Iniciando nuevo juego', 'game');
     debugLogger.info(`Civilización: ${civId}`, 'game');
     debugLogger.info(`Mapa: ${mapConfig.name || 'Normal'}`, 'game');
+
+    // Iniciar música
+    if (typeof soundManager !== 'undefined') {
+        soundManager.startMusic();
+    }
 
     // Crear instancia del juego
     // Ocultar pantallas de selección y mostrar la pantalla de juego primero
@@ -552,9 +575,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Inicializar sonidos si soundManager está disponible
-    if (typeof soundManager !== 'undefined' && typeof soundManager.init === 'function') {
+    if (typeof soundManager !== 'undefined') {
         debugLogger.info('Inicializando sistema de sonido...', 'sound');
-        soundManager.init();
+        if (typeof soundManager.init === 'function') {
+            soundManager.init();
+        }
     }
 
     // Renderizar tech tree estático para preview

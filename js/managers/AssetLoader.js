@@ -51,7 +51,12 @@ export class AssetLoader {
             { key: 'storageWood', src: 'assets/icons/storageWood.png' },
             { key: 'market', src: 'assets/icons/market.png' },
             { key: 'temple', src: 'assets/icons/temple.png' },
-            { key: 'workshop', src: 'assets/icons/workshop.png' }
+            { key: 'workshop', src: 'assets/icons/workshop.png' },
+            // Resource icons
+            { key: 'wood', src: 'assets/icons/storageWood.png' },
+            { key: 'food', src: 'assets/icons/house.png' }, // Fallback icon
+            { key: 'gold', src: 'assets/icons/market.png' }, // Fallback icon
+            { key: 'stone', src: 'assets/icons/storage.png' } // Fallback icon
         ];
 
         this.totalAssets = assetsToLoad.length;
@@ -79,6 +84,27 @@ export class AssetLoader {
 
     getImage(key) {
         return this.assets[key];
+    }
+
+    getSrc(key) {
+        const map = {
+            'villager': 'assets/icons/villager.png',
+            'warrior': 'assets/icons/warrior.png',
+            'archer': 'assets/icons/archer.png',
+            'townCenter': 'assets/icons/townCenter.png',
+            'house': 'assets/icons/house.png',
+            'barracks': 'assets/icons/barracks.png',
+            'storage': 'assets/icons/storage.png',
+            'storageWood': 'assets/icons/storageWood.png',
+            'market': 'assets/icons/market.png',
+            'temple': 'assets/icons/temple.png',
+            'workshop': 'assets/icons/workshop.png',
+            'wood': 'assets/icons/storageWood.png',
+            'food': 'assets/icons/house.png',
+            'gold': 'assets/icons/market.png',
+            'stone': 'assets/icons/storage.png'
+        };
+        return map[key] || '';
     }
 }
 

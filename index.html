@@ -308,6 +308,15 @@
                                 Alternar
                             </button>
                         </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <label style="font-weight: 600; color: #e2e8f0;">Tamaño del Cursor</label>
+                                <span id="cursorSizeValue" style="color: #48bb78;">32px</span>
+                            </div>
+                            <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
+                                style="width: 100%; accent-color: #d4af37;" oninput="updateCursorSize(this.value)">
+                        </div>
                     </div>
 
                     <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">

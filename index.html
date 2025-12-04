@@ -22,7 +22,7 @@
     <script>
         (function () {
             var v = Date.now();
-            var styles = ['styles.css', 'styles-patch.css', 'tech-tree-styles.css', 'control-panel.css', 'selection-styles.css'];
+            var styles = ['styles.css', 'styles-patch.css', 'tech-tree-styles.css', 'control-panel.css', 'selection-styles.css', 'hud-styles.css'];
             styles.forEach(function (href) {
                 document.write('<link rel="stylesheet" href="' + href + '?v=' + v + '">');
             });
@@ -42,17 +42,17 @@
                 <p>Construye tu civilización, recolecta recursos y conquista tus enemigos</p>
             </div>
             <button id="startButton" class="btn-start">
-                <span class="btn-icon">⚔️</span>
+                <span class="btn-icon"><img src="assets/icons/swords.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"></span>
                 Comenzar Juego
-                <span class="btn-icon">🏰</span>
+                <span class="btn-icon"><img src="assets/icons/townCenter.webp" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"></span>
             </button>
 
             <div class="start-buttons">
                 <button id="techTreeButton" class="btn-secondary" onclick="showTechTree()">
-                    📜 Árbol de Tecnologías
+                    <img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle"> Árbol de Tecnologías
                 </button>
                 <button id="settingsButtonStart" class="btn-secondary" onclick="showSettings()">
-                    ⚙️ Configuración
+                    <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle"> Configuración
                 </button>
             </div>
 
@@ -85,7 +85,7 @@
     <div id="techTreeScreen" class="modal-overlay hidden">
         <div class="modal-content tech-tree-modal">
             <div class="modal-header">
-                <h2>📜 Árbol de Tecnologías</h2>
+                <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Árbol de Tecnologías</h2>
                 <button class="btn-close" onclick="hideTechTree()">✕</button>
             </div>
             <div class="tech-tree-content" id="techTreeContent">
@@ -130,35 +130,35 @@
         <div class="top-panel">
             <div class="resources-panel">
                 <div class="resource-item">
-                    <div class="resource-icon">🌲</div>
+                    <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon">🌾</div>
+                    <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon">💎</div>
+                    <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Oro</div>
                         <div id="goldCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon">🪨</div>
+                    <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item resource-population">
-                    <div class="resource-icon">👥</div>
+                    <div class="resource-icon"><img src="assets/icons/population.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Población</div>
                         <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
@@ -168,10 +168,10 @@
 
             <div style="display:flex; align-items:center; gap:12px;">
                 <div class="game-time">
-                    <span class="time-icon">⏱️</span>
+                    <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></span>
                     <span id="gameTime">00:00</span>
                 </div>
-                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;">⚙️</button>
+                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></button>
             </div>
         </div>
 
@@ -179,75 +179,75 @@
         <div id="buildMenu" class="modal-overlay hidden">
             <div class="modal-content build-menu">
                 <div class="modal-header">
-                    <h2>🏗️ Construir Edificio</h2>
+                    <h2><img src="assets/icons/workshop.webp" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Construir Edificio</h2>
                     <button class="btn-close" onclick="closeBuildMenu()">✕</button>
                 </div>
                 <div class="build-grid">
                     <div class="build-option" data-building="house">
-                        <div class="build-icon">🏠</div>
+                        <div class="build-icon"><img src="assets/icons/house.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Casa</div>
                         <div class="build-cost">
-                            <span>🪵 30</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 30</span>
                         </div>
                         <div class="build-info">+5 población</div>
                     </div>
                     <div class="build-option" data-building="barracks">
-                        <div class="build-icon">⚔️</div>
+                        <div class="build-icon"><img src="assets/icons/barracks.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Cuartel</div>
                         <div class="build-cost">
-                            <span>🪵 175</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 175</span>
                         </div>
                         <div class="build-info">Entrena unidades</div>
                     </div>
                     <div class="build-option" data-building="townCenter">
-                        <div class="build-icon">🏰</div>
+                        <div class="build-icon"><img src="assets/icons/townCenter.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Centro Urbano</div>
                         <div class="build-cost">
-                            <span>🪵 275</span>
-                            <span>🪨 100</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 275</span>
+                            <span><img src="assets/icons/stone.png" class="icon-tiny"> 100</span>
                         </div>
                         <div class="build-info">Entrena aldeanos</div>
                     </div>
                     <div class="build-option" data-building="storage">
-                        <div class="build-icon">📦</div>
+                        <div class="build-icon"><img src="assets/icons/storage.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Depósito</div>
                         <div class="build-cost">
-                            <span>🪵 100</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 100</span>
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
                     <div class="build-option" data-building="storageWood">
-                        <div class="build-icon">🌲</div>
+                        <div class="build-icon"><img src="assets/icons/storageWood.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Depósito de Madera</div>
                         <div class="build-cost">
-                            <span>🪵 100</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 100</span>
                         </div>
                         <div class="build-info">Almacena madera</div>
                     </div>
                     <div class="build-option" data-building="market">
-                        <div class="build-icon">🏪</div>
+                        <div class="build-icon"><img src="assets/icons/market.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Mercado</div>
                         <div class="build-cost">
-                            <span>🪵 150</span>
-                            <span>🪨 50</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 150</span>
+                            <span><img src="assets/icons/stone.png" class="icon-tiny"> 50</span>
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
                     <div class="build-option" data-building="temple">
-                        <div class="build-icon">⛪</div>
+                        <div class="build-icon"><img src="assets/icons/temple.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Templo</div>
                         <div class="build-cost">
-                            <span>🪵 200</span>
-                            <span>🪨 100</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 200</span>
+                            <span><img src="assets/icons/stone.png" class="icon-tiny"> 100</span>
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
                     <div class="build-option" data-building="workshop">
-                        <div class="build-icon">🔨</div>
+                        <div class="build-icon"><img src="assets/icons/workshop.webp" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Taller</div>
                         <div class="build-cost">
-                            <span>🪵 200</span>
-                            <span>🪨 50</span>
+                            <span><img src="assets/icons/wood.png" class="icon-tiny"> 200</span>
+                            <span><img src="assets/icons/stone.png" class="icon-tiny"> 50</span>
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
@@ -269,7 +269,7 @@
         <div id="settingsScreen" class="modal-overlay hidden">
             <div class="modal-content settings-modal" style="max-width: 500px;">
                 <div class="modal-header">
-                    <h2>⚙️ Configuración</h2>
+                    <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Configuración</h2>
                     <button class="btn-close" onclick="hideSettings()">✕</button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
@@ -308,6 +308,15 @@
                                 Alternar
                             </button>
                         </div>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <label style="font-weight: 600; color: #e2e8f0;">Tamaño del Cursor</label>
+                                <span id="cursorSizeValue" style="color: #48bb78;">32px</span>
+                            </div>
+                            <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
+                                style="width: 100%; accent-color: #d4af37;" oninput="updateCursorSize(this.value)">
+                        </div>
                     </div>
 
                     <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
@@ -338,201 +347,43 @@
                 </div>
             </div>
             <div class="game-time">
-                <span class="time-icon">⏱️</span>
+                <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></span>
                 <span id="gameTime">00:00</span>
             </div>
             <button class="btn-secondary" onclick="showSettings()"
                 style="margin-left: 15px; padding: 8px 16px; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.5);">
-                ⚙️ Config
+                <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;"> Config
             </button>
         </div>
 
         <!-- Canvas del Juego -->
         <canvas id="gameCanvas"></canvas>
 
-        <!-- Minimapa -->
-        <div class="minimap-container">
-            <div class="minimap-header">Minimapa</div>
-            <canvas id="minimapCanvas"></canvas>
-        </div>
-
-        <!-- Panel de Control Unificado (Selección + Acciones) -->
-        <div class="unit-control-panel hidden" id="unitControlPanel">
-            <div class="panel-content" id="selectionContent">
-                <!-- Se llena dinámicamente con info de la unidad -->
+        <!-- HUD Inferior (Nuevo) -->
+        <div id="gameHUD">
+            <!-- 1. Panel de Información (Izquierda) -->
+            <div id="infoPanel">
+                <div id="selectionContent">
+                    <!-- Se llena dinámicamente con info de la unidad -->
+                    <div style="display:flex;align-items:center;height:100%;color:#888;">Nada seleccionado</div>
+                </div>
             </div>
-            <div class="actions-grid" id="actionsGrid">
-                <!-- Se llena dinámicamente con botones de acción -->
+
+            <!-- 2. Panel de Comandos (Centro) - Grilla 3x5 -->
+            <div id="commandPanel">
+                <!-- Se llena dinámicamente con 15 botones -->
+            </div>
+
+            <!-- 3. Minimapa (Derecha) -->
+            <div id="minimapPanel">
+                <div class="minimap-container">
+                    <canvas id="minimapCanvas"></canvas>
+                </div>
             </div>
         </div>
 
         <!-- Mensajes de Notificación -->
         <div class="notifications" id="notifications"></div>
-    </div>
-
-    <!-- Menú de Construcción (Modal) -->
-    <div id="buildMenu" class="modal-overlay hidden">
-        <div class="modal-content build-menu">
-            <div class="modal-header">
-                <h2>🏗️ Construir Edificio</h2>
-                <button class="btn-close" onclick="closeBuildMenu()">✕</button>
-            </div>
-            <div class="build-grid">
-                <div class="build-option" data-building="house">
-                    <div class="build-icon">🏠</div>
-                    <div class="build-name">Casa</div>
-                    <div class="build-cost">
-                        <span>🪵 30</span>
-                    </div>
-                    <div class="build-info">+5 población</div>
-                </div>
-                <div class="build-option" data-building="barracks">
-                    <div class="build-icon">⚔️</div>
-                    <div class="build-name">Cuartel</div>
-                    <div class="build-cost">
-                        <span>🪵 175</span>
-                    </div>
-                    <div class="build-info">Entrena unidades</div>
-                </div>
-                <div class="build-option" data-building="townCenter">
-                    <div class="build-icon">🏰</div>
-                    <div class="build-name">Centro Urbano</div>
-                    <div class="build-cost">
-                        <span>🪵 275</span>
-                        <span>🪨 100</span>
-                    </div>
-                    <div class="build-info">Entrena aldeanos</div>
-                </div>
-                <div class="build-option" data-building="storage">
-                    <div class="build-icon">📦</div>
-                    <div class="build-name">Depósito</div>
-                    <div class="build-cost">
-                        <span>🪵 100</span>
-                    </div>
-                    <div class="build-info">Almacena recursos</div>
-                </div>
-                <div class="build-option" data-building="storageWood">
-                    <div class="build-icon">🌲</div>
-                    <div class="build-name">Depósito de Madera</div>
-                    <div class="build-cost">
-                        <span>🪵 100</span>
-                    </div>
-                    <div class="build-info">Almacena madera</div>
-                </div>
-                <div class="build-option" data-building="market">
-                    <div class="build-icon">🏪</div>
-                    <div class="build-name">Mercado</div>
-                    <div class="build-cost">
-                        <span>🪵 150</span>
-                        <span>🪨 50</span>
-                    </div>
-                    <div class="build-info">Almacena recursos</div>
-                </div>
-                <div class="build-option" data-building="temple">
-                    <div class="build-icon">⛪</div>
-                    <div class="build-name">Templo</div>
-                    <div class="build-cost">
-                        <span>🪵 200</span>
-                        <span>🪨 100</span>
-                    </div>
-                    <div class="build-info">Almacena recursos</div>
-                </div>
-                <div class="build-option" data-building="workshop">
-                    <div class="build-icon">🔨</div>
-                    <div class="build-name">Taller</div>
-                    <div class="build-cost">
-                        <span>🪵 200</span>
-                        <span>🪨 50</span>
-                    </div>
-                    <div class="build-info">Almacena recursos</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pantalla de Game Over -->
-    <div id="gameOverScreen" class="game-over-screen hidden">
-        <div class="game-over-content">
-            <h1 id="gameOverTitle" class="game-over-title">Victoria</h1>
-            <p id="gameOverMessage" class="game-over-message"></p>
-            <div class="game-over-stats" id="gameOverStats"></div>
-            <button id="restartButton" class="btn-restart" onclick="location.reload()">Jugar de Nuevo</button>
-        </div>
-    </div>
-
-    <!-- Pantalla de Configuración -->
-    <div id="settingsScreen" class="modal-overlay hidden">
-        <div class="modal-content settings-modal" style="max-width: 500px;">
-            <div class="modal-header">
-                <h2>⚙️ Configuración</h2>
-                <button class="btn-close" onclick="hideSettings()">✕</button>
-            </div>
-            <div class="settings-content" style="padding: 20px;">
-                <div style="margin-bottom: 30px;">
-                    <h3 style="margin-bottom: 20px; color: #d4af37;">Sonido</h3>
-
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                        <label style="font-weight: 600; color: #e2e8f0;">
-                            Efectos de Sonido: <span id="soundToggleValue" style="color: #48bb78;">Activado</span>
-                        </label>
-                        <button class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;">
-                            Alternar
-                        </button>
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <label style="font-weight: 600; color: #e2e8f0;">Volumen Maestro</label>
-                            <span id="volumeValue" style="color: #48bb78;">50%</span>
-                        </div>
-                        <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"
-                            style="width: 100%; accent-color: #d4af37;" oninput="updateSoundVolume(this.value)">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                    <h3 style="margin-bottom: 20px; color: #d4af37;">Visualización</h3>
-
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                        <label style="font-weight: 600; color: #e2e8f0;">
-                            Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
-                        </label>
-                        <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;">
-                            Alternar
-                        </button>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                    <h3 style="margin-bottom: 20px; color: #d4af37;">Cámara</h3>
-
-                    <div style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <label style="font-weight: 600; color: #e2e8f0;">Velocidad de Desplazamiento</label>
-                            <span id="cameraSpeedValue" style="color: #48bb78;">1200 px/s</span>
-                        </div>
-                        <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
-                            style="width: 100%; accent-color: #d4af37;" oninput="updateCameraSpeed(this.value)">
-                    </div>
-
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <label style="font-weight: 600; color: #e2e8f0;">Margen de Activación</label>
-                            <span id="cameraMarginValue" style="color: #48bb78;">30 px</span>
-                        </div>
-                        <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"
-                            style="width: 100%; accent-color: #d4af37;" oninput="updateCameraMargin(this.value)">
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn-secondary" onclick="hideSettings()">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
     </div>
 
     <!-- DEV MODE: Carga dinámica de scripts con timestamp para evitar caché -->

@@ -1,0 +1,191 @@
+
+/* HUD Container - Fixed at bottom */
+#gameHUD {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 180px; /* Adjust height as needed */
+    background: rgba(20, 20, 30, 0.95);
+    border-top: 2px solid #d4af37;
+    display: grid;
+    grid-template-columns: 300px 1fr 300px; /* Info | Commands | Minimap */
+    gap: 10px;
+    padding: 10px;
+    z-index: 100;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* 1. Information Panel (Left) */
+#infoPanel {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+#selectionContent {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 100%;
+}
+
+.selection-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid #d4af37;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.selection-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.selection-details h3 {
+    margin: 0 0 5px 0;
+    color: #d4af37;
+    font-size: 1.2rem;
+    font-family: 'Cinzel', serif;
+}
+
+.selection-stats {
+    font-size: 0.9rem;
+    color: #cbd5e0;
+}
+
+/* 2. Command Panel (Center) - 3x5 Grid */
+#commandPanel {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 6px;
+    padding: 0 20px;
+    max-width: 600px; /* Limit width */
+    margin: 0 auto;
+}
+
+.action-btn {
+    position: relative;
+    background: linear-gradient(135deg, #2d3748, #1a202c);
+    border: 1px solid #4a5568;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 2px;
+    min-width: 0; /* Fix flex issue */
+}
+
+.action-btn:hover:not(.disabled) {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    border-color: #d4af37;
+    transform: translateY(-1px);
+}
+
+.action-btn:active:not(.disabled) {
+    transform: translateY(1px);
+}
+
+.action-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #1a202c;
+    border-color: #2d3748;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
+.btn-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.btn-label {
+    font-size: 0.7rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.btn-hotkey {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    font-size: 0.6rem;
+    color: #a0aec0;
+    font-weight: bold;
+    background: rgba(0,0,0,0.5);
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+.btn-cost {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+    color: #fbbf24;
+    background: rgba(0,0,0,0.7);
+    padding: 1px 3px;
+    border-radius: 2px;
+    display: none; /* Hide by default, show on hover? Or usually always visible if fits */
+}
+
+.action-btn:hover .btn-cost {
+    display: block;
+}
+
+
+/* 3. Minimap (Right) */
+#minimapPanel {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.minimap-container {
+    width: 160px; /* Keeping it square-ish based on height */
+    height: 160px;
+    background: #000;
+    border: 2px solid #4a5568;
+    position: relative;
+}
+
+#minimapCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+/* Hide legacy panels */
+.unit-control-panel {
+    display: none !important;
+}

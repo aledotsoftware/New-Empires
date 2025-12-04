@@ -96,6 +96,24 @@ window.toggleGrid = function () {
 };
 
 /**
+ * Actualiza el tamaño del cursor
+ */
+window.updateCursorSize = function (value) {
+    // debugLogger.debug(`Tamaño de cursor: ${value}px`, 'ui');
+    if (game && game.cursorElement) {
+        game.cursorElement.style.width = value + 'px';
+    } else {
+        // Si no hay juego, intentar buscar el elemento directamente
+        const cursor = document.getElementById('customCursor');
+        if (cursor) {
+            cursor.style.width = value + 'px';
+        }
+    }
+    const label = document.getElementById('cursorSizeValue');
+    if (label) label.textContent = value + 'px';
+};
+
+/**
  * Actualiza el margen de la cámara
  */
 window.updateCameraMargin = function (value) {
@@ -163,9 +181,9 @@ function renderStaticTechTree() {
         if (techs.length === 0) continue;
 
         const categoryNames = {
-            economy: '💰 Economía',
-            military: '⚔️ Militar',
-            defense: '🛡️ Defensa'
+            economy: 'Economía',
+            military: 'Militar',
+            defense: 'Defensa'
         };
 
         html += `<div class="tech-category">`;
@@ -173,16 +191,29 @@ function renderStaticTechTree() {
         html += `<div class="tech-grid">`;
 
         for (let tech of techs) {
+            // Helper for resources icons
+            const getResIcon = (res) => {
+                 if (assetLoader && assetLoader.getSrc) {
+                     const src = assetLoader.getSrc(res);
+                     if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+                 }
+                 // fallback if assetLoader not ready (unlikely here) or no asset
+                 return `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+            };
+
+            const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
+                            ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
+                            : `<div class="tech-icon-placeholder">T</div>`;
+
             html += `
                 <div class="tech-item locked">
-                    <div class="tech-icon">${tech.icon || '🔬'}</div>
+                    <div class="tech-icon">${techIcon}</div>
                     <div class="tech-name">${tech.name}</div>
                     <div class="tech-desc">${tech.description}</div>
                     <div class="tech-cost">
                         ${Object.entries(tech.cost).map(([res, amount]) => {
-                const icons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
-                return `${icons[res] || res}: ${amount}`;
-            }).join(' | ')}
+                            return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
+                        }).join(' ')}
                     </div>
                 </div>
             `;
@@ -219,9 +250,9 @@ function renderTechTree() {
         if (techs.length === 0) continue;
 
         const categoryNames = {
-            economy: '💰 Economía',
-            military: '⚔️ Militar',
-            defense: '🛡️ Defensa'
+            economy: 'Economía',
+            military: 'Militar',
+            defense: 'Defensa'
         };
 
         html += `<div class="tech-category">`;
@@ -237,17 +268,30 @@ function renderTechTree() {
             else if (status.researching) statusClass = 'researching';
             else if (canResearch) statusClass = 'available';
 
+             // Helper for resources icons
+            const getResIcon = (res) => {
+                 if (assetLoader && assetLoader.getSrc) {
+                     const src = assetLoader.getSrc(res);
+                     if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+                 }
+                 return `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+            };
+
+            const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
+                            ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
+                            : `<div class="tech-icon-placeholder">T</div>`;
+
+
             html += `
                 <div class="tech-item ${statusClass}" 
                      onclick="if(game && game.techManager && game.techManager.canResearch('${tech.id}')) { game.techManager.startResearch('${tech.id}'); renderTechTree(); }">
-                    <div class="tech-icon">${tech.icon || '🔬'}</div>
+                    <div class="tech-icon">${techIcon}</div>
                     <div class="tech-name">${tech.name}</div>
                     <div class="tech-desc">${tech.description}</div>
                     <div class="tech-cost">
                         ${Object.entries(tech.cost).map(([res, amount]) => {
-                const icons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
-                return `${icons[res] || res}: ${amount}`;
-            }).join(' | ')}
+                             return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
+                        }).join(' ')}
                     </div>
                     ${status.researching ? `<div class="tech-progress">Investigando...</div>` : ''}
                 </div>
@@ -276,6 +320,11 @@ function startGame(civId, mapConfig) {
     debugLogger.start('Iniciando nuevo juego', 'game');
     debugLogger.info(`Civilización: ${civId}`, 'game');
     debugLogger.info(`Mapa: ${mapConfig.name || 'Normal'}`, 'game');
+
+    // Iniciar música
+    if (typeof soundManager !== 'undefined') {
+        soundManager.startMusic();
+    }
 
     // Crear instancia del juego
     // Ocultar pantallas de selección y mostrar la pantalla de juego primero
@@ -339,8 +388,11 @@ function populateMapSizes() {
         option.className = 'map-size-option';
         option.dataset.size = key;
 
+        // Remove emoji 🗺️. Use a generic icon or shape.
+        const mapIcon = `<div style="width:40px;height:40px;background:#444;border:1px solid #666;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#888;">Map</div>`;
+
         option.innerHTML = `
-            <div class="size-icon">🗺️</div>
+            <div class="size-icon">${mapIcon}</div>
             <div class="size-name">${mapData.name}</div>
             <div class="size-desc">${mapData.width}×${mapData.height}</div>
         `;
@@ -386,8 +438,23 @@ function populateCivilizations() {
         option.className = 'civ-option';
         option.dataset.civ = civ.civilizationId;
 
+        // Remove emoji if present in civ.icon (likely is)
+        // Check if there is an image for the civ
+        let iconHtml = '';
+        if (assetLoader && assetLoader.getSrc) {
+             const src = assetLoader.getSrc(civ.civilizationId);
+             if (src) {
+                 iconHtml = `<img src="${src}" class="civ-icon-img" style="width:64px;height:64px;object-fit:contain;">`;
+             } else {
+                 // Fallback: Use first letter or generic
+                 iconHtml = `<div class="civ-icon-placeholder" style="font-size:30px;line-height:64px;text-align:center;">${civ.name.substring(0,1)}</div>`;
+             }
+        } else {
+             iconHtml = `<div class="civ-icon-placeholder">${civ.name.substring(0,1)}</div>`;
+        }
+
         option.innerHTML = `
-            <div class="civ-icon">${civ.icon}</div>
+            <div class="civ-icon">${iconHtml}</div>
             <div class="civ-name">${civ.name}</div>
             <div class="civ-desc">${civ.description}</div>
         `;
@@ -547,14 +614,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     debugLogger.info('Iniciando carga de assets...', 'assets');
     assetLoader.loadAll().then(() => {
         debugLogger.success('Todos los assets cargados', 'assets');
+        // Repopulate civs to update icons if they were loaded after initial population
+        populateCivilizations();
+        // Update tech tree if visible
+        const techScreen = document.getElementById('techTreeScreen');
+        if (techScreen && !techScreen.classList.contains('hidden')) {
+             if (game) renderTechTree(); else renderStaticTechTree();
+        }
     }).catch(err => {
         debugLogger.error('Error cargando assets', 'assets', err);
     });
 
     // Inicializar sonidos si soundManager está disponible
-    if (typeof soundManager !== 'undefined' && typeof soundManager.init === 'function') {
+    if (typeof soundManager !== 'undefined') {
         debugLogger.info('Inicializando sistema de sonido...', 'sound');
-        soundManager.init();
+        if (typeof soundManager.init === 'function') {
+            soundManager.init();
+        }
     }
 
     // Renderizar tech tree estático para preview

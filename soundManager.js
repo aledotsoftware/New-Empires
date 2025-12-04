@@ -164,6 +164,41 @@ class SoundManager {
     }
 
     /**
+     * Inicia la música de fondo
+     */
+    startMusic() {
+        if (!this.enabled) return;
+
+        // Playlist logic
+        const musicTracks = [
+            'assets/sound/game0.mp3',
+            'assets/sound/game1.mp3',
+            'assets/sound/game2.mp3',
+            'assets/sound/game3.mp3',
+            'assets/sound/game4.mp3',
+            'assets/sound/game5.mp3'
+        ];
+
+        let currentTrackIndex = Math.floor(Math.random() * musicTracks.length);
+
+        const playNext = () => {
+            const track = musicTracks[currentTrackIndex];
+            this.musicAudio = new Audio(track);
+            this.musicAudio.volume = this.volume * 0.5; // Música un poco más baja
+            this.musicAudio.addEventListener('ended', () => {
+                currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
+                playNext();
+            });
+            this.musicAudio.play().catch(e => {
+                console.warn("Autoplay blocked or error playing music:", e);
+                // Try again on interaction if needed, but for now we log
+            });
+        };
+
+        playNext();
+    }
+
+    /**
      * Activa o desactiva los sonidos
      * @param {boolean} enabled - true para activar, false para desactivar
      */
@@ -182,6 +217,10 @@ class SoundManager {
             if (this.sounds[key]) {
                 this.sounds[key].volume = this.volume;
             }
+        }
+        // Actualizar volumen de música si está sonando
+        if (this.musicAudio) {
+            this.musicAudio.volume = this.volume * 0.5;
         }
     }
 }

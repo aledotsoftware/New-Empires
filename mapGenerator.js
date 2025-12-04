@@ -412,19 +412,21 @@ class ProceduralMapGenerator {
             this.placeStartingResources(start);
         }
 
-        // Recursos neutrales distribuidos por el mapa
-        this.placeNeutralResources('wood', 40);
-        this.placeNeutralResources('food', 35);
-        this.placeNeutralResources('gold', 20);
-        this.placeNeutralResources('stone', 20);
+        // Recursos neutrales distribuidos por el mapa (cantidades duplicadas para más recursos)
+        this.placeNeutralResources('wood', 80);   // Duplicado: 40 → 80
+        this.placeNeutralResources('food', 70);   // Duplicado: 35 → 70
+        this.placeNeutralResources('gold', 40);   // Duplicado: 20 → 40
+        this.placeNeutralResources('stone', 40);  // Duplicado: 20 → 40
+
+        console.log(`🌍 Recursos generados: ${this.resources.length} nodos totales`);
     }
 
     placeStartingResources(start) {
         const resourceConfig = [
-            { type: 'wood', count: 4, minDist: 8, maxDist: 15, amount: 500 },
-            { type: 'food', count: 4, minDist: 6, maxDist: 12, amount: 400 },
-            { type: 'gold', count: 2, minDist: 10, maxDist: 20, amount: 800 },
-            { type: 'stone', count: 2, minDist: 10, maxDist: 20, amount: 600 }
+            { type: 'wood', count: 8, minDist: 8, maxDist: 18, amount: 600 },   // 4→8, cantidad aumentada
+            { type: 'food', count: 8, minDist: 6, maxDist: 15, amount: 500 },   // 4→8, cantidad aumentada
+            { type: 'gold', count: 4, minDist: 10, maxDist: 25, amount: 1000 }, // 2→4, cantidad aumentada
+            { type: 'stone', count: 4, minDist: 10, maxDist: 25, amount: 800 }  // 2→4, cantidad aumentada
         ];
 
         for (let config of resourceConfig) {
@@ -447,7 +449,7 @@ class ProceduralMapGenerator {
     }
 
     placeNeutralResources(type, count) {
-        const placed = 0;
+        let placed = 0;  // Cambiado de const a let para poder incrementar
         const maxAttempts = count * 10;
         let attempts = 0;
 
@@ -468,13 +470,17 @@ class ProceduralMapGenerator {
                 }
 
                 if (!tooClose) {
-                    const amount = type === 'gold' ? 1200 : type === 'stone' ? 1000 : 600;
+                    // Cantidades mejoradas para recursos neutrales
+                    const amount = type === 'gold' ? 1500 :    // Oro: 1200 → 1500
+                        type === 'stone' ? 1200 :   // Piedra: 1000 → 1200
+                            type === 'wood' ? 800 : 700; // Madera: 800, Comida: 700
                     this.resources.push({
                         x, y,
                         type,
                         amount,
                         playerId: null
                     });
+                    placed++;  // IMPORTANTE: Incrementar contador
                 }
             }
         }

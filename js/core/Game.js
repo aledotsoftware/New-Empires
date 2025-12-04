@@ -98,6 +98,9 @@ export class Game {
         this.enableIdleVillagerCycle = true; // Habilitar ciclo de aldeanos inactivos con TAB
         this.idleVillagerIndex = 0; // Índice para el ciclo de aldeanos inactivos
 
+        // Pointer Lock para múltiples monitores
+        this.isPointerLocked = false;
+
         // Mouse
         this.mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
         this.isDragging = false;
@@ -120,6 +123,16 @@ export class Game {
 
         // SISTEMA DE TECNOLOGÍAS (variable global temporal)
         this.techManager = new TechManager(this);
+
+        // Cargar imagen del cursor personalizado
+        this.cursorImage = new Image();
+        this.cursorImage.src = 'assets/icons/cursor.png';
+        this.cursorImage.onload = () => {
+            console.log('✅ Cursor personalizado cargado');
+        };
+        this.cursorImage.onerror = () => {
+            console.warn('⚠️ No se pudo cargar cursor.png');
+        };
 
         this.initializeGame();
         this.updateUI();
@@ -231,19 +244,37 @@ export class Game {
     generateSimpleMap() {
         // Código original de generación simple (fallback)
         const resourceTypes = [
-            { type: 'wood', icon: '🌲', amount: 500 },
-            { type: 'food', icon: '🌾', amount: 400 },
-            { type: 'gold', icon: '💎', amount: 300 },
-            { type: 'stone', icon: '🪨', amount: 300 }
+            { type: 'wood', icon: '🌲', amount: 600, weight: 0.35 },  // 35% de probabilidad (más común)
+            { type: 'food', icon: '🌾', amount: 500, weight: 0.30 },  // 30% de probabilidad
+            { type: 'gold', icon: '💎', amount: 400, weight: 0.20 },  // 20% de probabilidad (más valioso)
+            { type: 'stone', icon: '🪨', amount: 400, weight: 0.15 }  // 15% de probabilidad (más raro)
         ];
 
-        for (let i = 0; i < 20; i++) {
-            const resType = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
+        // Generar 60 nodos de recursos (triplicamos la cantidad original)
+        for (let i = 0; i < 60; i++) {
+            // Selección ponderada de tipo de recurso
+            const rand = Math.random();
+            let cumulative = 0;
+            let resType = resourceTypes[0];
+
+            for (let type of resourceTypes) {
+                cumulative += type.weight;
+                if (rand <= cumulative) {
+                    resType = type;
+                    break;
+                }
+            }
+
             const x = Math.random() * CONFIG.CANVAS_WIDTH;
             const y = Math.random() * CONFIG.CANVAS_HEIGHT;
 
-            // Evitar spawn cerca del centro inicial
-            if (Math.hypot(x - 400, y - 400) > 200) {
+            // Evitar spawn cerca del centro inicial (jugador)
+            const distanceFromPlayer = Math.hypot(x - 400, y - 400);
+            // Evitar spawn cerca de la base enemiga
+            const distanceFromEnemy = Math.hypot(x - (CONFIG.CANVAS_WIDTH - 400), y - (CONFIG.CANVAS_HEIGHT - 400));
+
+            // Solo colocar si está lejos de ambas bases (mínimo 200 unidades)
+            if (distanceFromPlayer > 200 && distanceFromEnemy > 200) {
                 this.resourceNodes.push({
                     x, y,
                     type: resType.type,
@@ -251,8 +282,13 @@ export class Game {
                     amount: resType.amount,
                     radius: 20
                 });
+            } else {
+                // Reintentar esta iteración
+                i--;
             }
         }
+
+        console.log(`✅ Mapa simple generado con ${this.resourceNodes.length} nodos de recursos`);
     }
 
     spawnEnemies() {
@@ -272,12 +308,47 @@ export class Game {
     }
 
     setupEventListeners() {
-        // Mouse move
+        // Pointer Lock API - Bloquear cursor en el canvas
+        this.canvas.addEventListener('click', () => {
+            if (!this.isPointerLocked) {
+                this.canvas.requestPointerLock();
+            }
+        });
+
+        // Detectar cambios en Pointer Lock
+        document.addEventListener('pointerlockchange', () => {
+            this.isPointerLocked = document.pointerLockElement === this.canvas;
+            if (this.isPointerLocked) {
+                console.log('🖱️ Cursor bloqueado en el canvas');
+                this.showNotification('Cursor bloqueado (ESC para liberar)', 'info');
+                // Ocultar cursor CSS nativo
+                this.canvas.style.cursor = 'none';
+            } else {
+                console.log('🖱️ Cursor liberado');
+                // Restaurar cursor CSS
+                this.canvas.style.cursor = 'crosshair';
+            }
+        });
+
+        // Mouse move - Ahora maneja tanto pointer lock como movimiento normal
         window.addEventListener('mousemove', (e) => {
             this.hasMouseMoved = true;
-            const rect = this.canvas.getBoundingClientRect();
-            this.mouse.x = e.clientX - rect.left;
-            this.mouse.y = e.clientY - rect.top;
+
+            if (this.isPointerLocked) {
+                // Usar movimiento relativo cuando está bloqueado
+                this.mouse.x += e.movementX;
+                this.mouse.y += e.movementY;
+
+                // Mantener dentro de los límites del canvas
+                this.mouse.x = Math.max(0, Math.min(this.canvas.width, this.mouse.x));
+                this.mouse.y = Math.max(0, Math.min(this.canvas.height, this.mouse.y));
+            } else {
+                // Movimiento normal cuando no está bloqueado
+                const rect = this.canvas.getBoundingClientRect();
+                this.mouse.x = e.clientX - rect.left;
+                this.mouse.y = e.clientY - rect.top;
+            }
+
             this.mouse.worldX = this.mouse.x + this.camera.x;
             this.mouse.worldY = this.mouse.y + this.camera.y;
 
@@ -506,10 +577,14 @@ export class Game {
             }
         }
 
-        // ESC - Cancel
+        // ESC - Cancel y liberar pointer lock
         if (e.key === 'Escape') {
             this.buildMode = null;
             this.closeBuildMenu();
+            // Liberar pointer lock si está activo
+            if (this.isPointerLocked) {
+                document.exitPointerLock();
+            }
         }
 
         // H o Space - Center on town center (ir al centro urbano)
@@ -981,6 +1056,11 @@ export class Game {
 
         // Renderizar minimapa
         this.renderMinimap();
+
+        // Dibujar cursor personalizado si el pointer está bloqueado
+        if (this.isPointerLocked) {
+            this.drawCustomCursor();
+        }
     }
 
     drawGrid() {

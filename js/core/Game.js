@@ -18,7 +18,7 @@ import { Workshop } from '../entities/buildings/Workshop.js';
 /**
  * Game - Clase principal del juego
  * Orquesta todos los sistemas: rendering, input, lógica, UI
- * Requiere variables globales: civilizationManager, TechManager, ProceduralMapGenerator, soundManager
+ * Requiere variables globales: civilizationManager, TechManager, ProceduralMapGenerator, soundManager, assetLoader
  */
 export class Game {
     // NOTA: Este archivo usa temporalmente variables globales (civilizationManager, TechManager, etc.)
@@ -190,7 +190,7 @@ export class Game {
     generateMap() {
         // Usar el generador procedural de mapas (variable global temporal)
         if (typeof ProceduralMapGenerator !== 'undefined') {
-            console.log('🗺️ Usando generador procedural de mapas');
+            console.log('Usando generador procedural de mapas');
 
             const mapGen = new ProceduralMapGenerator(this.mapConfig);
             const generatedMap = mapGen.generate();
@@ -232,14 +232,6 @@ export class Game {
     }
 
     applyProceduralResources(generatedMap) {
-        // Convertir recursos del mapa generado al formato del juego
-        const resourceIcons = {
-            wood: '🌲',
-            food: '🌾',
-            gold: '💎',
-            stone: '🪨'
-        };
-
         this.resourceNodes = [];
 
         for (let res of generatedMap.resources) {
@@ -247,7 +239,6 @@ export class Game {
                 x: res.x * TILE_SIZE,
                 y: res.y * TILE_SIZE,
                 type: res.type,
-                icon: resourceIcons[res.type] || '❓',
                 amount: res.amount,
                 radius: 20,
                 playerId: res.playerId || null
@@ -258,10 +249,10 @@ export class Game {
     generateSimpleMap() {
         // Código original de generación simple (fallback)
         const resourceTypes = [
-            { type: 'wood', icon: '🌲', amount: 600, weight: 0.35 },  // 35% de probabilidad (más común)
-            { type: 'food', icon: '🌾', amount: 500, weight: 0.30 },  // 30% de probabilidad
-            { type: 'gold', icon: '💎', amount: 400, weight: 0.20 },  // 20% de probabilidad (más valioso)
-            { type: 'stone', icon: '🪨', amount: 400, weight: 0.15 }  // 15% de probabilidad (más raro)
+            { type: 'wood', amount: 600, weight: 0.35 },  // 35% de probabilidad (más común)
+            { type: 'food', amount: 500, weight: 0.30 },  // 30% de probabilidad
+            { type: 'gold', amount: 400, weight: 0.20 },  // 20% de probabilidad (más valioso)
+            { type: 'stone', amount: 400, weight: 0.15 }  // 15% de probabilidad (más raro)
         ];
 
         // Generar 60 nodos de recursos (triplicamos la cantidad original)
@@ -292,7 +283,6 @@ export class Game {
                 this.resourceNodes.push({
                     x, y,
                     type: resType.type,
-                    icon: resType.icon,
                     amount: resType.amount,
                     radius: 20
                 });
@@ -613,7 +603,7 @@ export class Game {
             const key = e.key.toUpperCase();
             if (hotkeyActions.hasOwnProperty(key)) {
                 const btnIndex = hotkeyActions[key];
-                const actionsGrid = document.getElementById('actionsGrid');
+                const actionsGrid = document.getElementById('commandPanel');
                 if (actionsGrid) {
                     const buttons = actionsGrid.querySelectorAll('.action-btn');
                     if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
@@ -1079,10 +1069,17 @@ export class Game {
             this.ctx.fill();
 
             // Icon
-            this.ctx.font = '30px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText(node.icon, screenX, screenY);
+            if (typeof assetLoader !== 'undefined') {
+                const img = assetLoader.getImage(node.type);
+                if (img && img.complete) {
+                    const size = node.radius * 1.5;
+                    this.ctx.drawImage(img, screenX - size/2, screenY - size/2, size, size);
+                } else {
+                    // Fallback to square if image not ready
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
+                }
+            }
         }
     }
 
@@ -1275,7 +1272,7 @@ export class Game {
         if (!content) return;
 
     if (this.selectedEntities.length === 0) {
-        content.innerHTML = '';
+        content.innerHTML = `<div style="display:flex;align-items:center;height:100%;color:#888;">Nada seleccionado</div>`;
         return;
     }
 
@@ -1305,10 +1302,20 @@ export class Game {
                 </div>
                     `;
     } else {
+        let iconHtml = '';
+        if (typeof assetLoader !== 'undefined') {
+            const src = assetLoader.getSrc('population');
+            if (src) {
+                 iconHtml = `<img src="${src}" alt="Group">`;
+            } else {
+                 iconHtml = `<span>GRP</span>`;
+            }
+        }
+
         content.innerHTML = `
                     <div class="selection-info">
                     <div class="selection-icon">
-                        👥
+                        ${iconHtml}
                     </div>
                     <div class="selection-details">
                         <h3>${this.selectedEntities.length} Unidades</h3>
@@ -1321,30 +1328,36 @@ export class Game {
     }
 }
 
-updateActionsPanel() {
-    const grid = document.getElementById('actionsGrid');
-    if (!grid) return;
+    updateActionsPanel() {
+        // Usar el nuevo ID commandPanel
+        const grid = document.getElementById('commandPanel');
+        if (!grid) return;
 
-    grid.innerHTML = '';
+        grid.innerHTML = '';
 
-    if (this.selectedEntities.length !== 1) return;
+        // Si no hay selección o es múltiple, mostrar panel vacío
+        if (this.selectedEntities.length !== 1) {
+            this.renderEmptyGrid(grid);
+            return;
+        }
 
-    const entity = this.selectedEntities[0];
+        const entity = this.selectedEntities[0];
 
-    // Solo mostrar acciones si es del jugador
-    if (entity.team !== 'player') return;
+        // Solo mostrar acciones si es del jugador
+        if (entity.team !== 'player') {
+            this.renderEmptyGrid(grid);
+            return;
+        }
 
-    // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
-    // Fila 1: Q W E R T
-    // Fila 2: A S D F G
-    // Fila 3: Z X C V B
-    const hotkeys = [
-        'Q', 'W', 'E', 'R', 'T',  // Fila 1
-        'A', 'S', 'D', 'F', 'G',  // Fila 2
-        'Z', 'X', 'C', 'V', 'B'   // Fila 3
-    ];
-
-    const buttons = [];
+        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
+        // Fila 1: Q W E R T
+        // Fila 2: A S D F G
+        // Fila 3: Z X C V B
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',  // Fila 1
+            'A', 'S', 'D', 'F', 'G',  // Fila 2
+            'Z', 'X', 'C', 'V', 'B'   // Fila 3
+        ];
 
     // Helper para obtener iconos de botones
     const getBtnIcon = (key, fallback) => {
@@ -1437,6 +1450,7 @@ updateActionsPanel() {
             // TODO: Use asset icons for techs if available
             // let icon = tech.icon || '🔬';
 
+        if (entity.type === 'villager') {
             buttons.push({
                 icon: tech.icon || '🔬', // Tech icons are likely emojis in data, need to check Technologies.js to replace them or ignore
                 label: tech.name,
@@ -1445,59 +1459,105 @@ updateActionsPanel() {
                 action: () => this.techManager.startResearch(tech.id),
                 enabled: canAfford
             });
+        } else if (entity.type === 'barracks') {
+            const warriorCost = CONFIG.UNIT_COSTS.warrior;
+            const archerCost = CONFIG.UNIT_COSTS.archer;
+            const canAffordWarrior = this.canAfford(warriorCost);
+            const canAffordArcher = this.canAfford(archerCost);
 
-            techIndex++;
+            buttons.push({
+                icon: getBtnIcon('warrior', 'W'),
+                label: 'Guerrero',
+                hotkey: 'Q',
+                cost: formatCost(warriorCost),
+                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
+                enabled: canAffordWarrior
+            });
+
+            buttons.push({
+                icon: getBtnIcon('archer', 'A'),
+                label: 'Arquero',
+                hotkey: 'W',
+                cost: formatCost(archerCost),
+                action: () => this.trainUnit('archer', this.selectedEntities[0]),
+                enabled: canAffordArcher
+            });
         }
-    }
 
-    // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
-    for (let i = 0; i < 15; i++) {
-        const btn = document.createElement('button');
-        btn.className = 'action-btn';
-        btn.setAttribute('data-hotkey', hotkeys[i]);
+        // Añadir tecnologías disponibles
+        if (this.techManager) {
+            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+            // Llenar slots vacíos hasta donde corresponda si queremos un layout fijo,
+            // pero por ahora simplemente agregamos al siguiente slot disponible.
+            for (let tech of availableTechs) {
+                if (buttons.length >= 15) break;
 
-        if (i < buttons.length) {
-            const buttonData = buttons[i];
+                const canAfford = this.techManager.canResearch(tech.id);
+                let costString = formatCost(tech.cost);
 
-            if (!buttonData.enabled) {
-                btn.classList.add('disabled');
+                buttons.push({
+                    icon: getBtnIcon(tech.id, 'T'),
+                    label: tech.name,
+                    hotkey: hotkeys[buttons.length],
+                    cost: costString,
+                    action: () => this.techManager.startResearch(tech.id),
+                    enabled: canAfford
+                });
             }
+        }
 
-            btn.onclick = () => {
-                if (!btn.classList.contains('disabled') && buttonData.action) {
-                    try {
-                        buttonData.action();
-                    } catch (error) {
-                        console.error('❌ Error al ejecutar acción:', error);
-                    }
+        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        for (let i = 0; i < 15; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn';
+            btn.setAttribute('data-hotkey', hotkeys[i]);
+
+            if (i < buttons.length) {
+                const buttonData = buttons[i];
+
+                if (!buttonData.enabled) {
+                    btn.classList.add('disabled');
                 }
-            };
 
             btn.innerHTML = `
                     <div class="btn-icon">${buttonData.icon}</div>
                         <div class="btn-label">${buttonData.label}</div>
                     ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
                 `;
-        } else {
-            // Botón vacío
-            btn.classList.add('disabled');
-            btn.innerHTML = '<div class="btn-icon"></div>';
-        }
+            }
 
-        grid.appendChild(btn);
+            grid.appendChild(btn);
+        }
     }
-}
+
+    renderEmptyGrid(grid) {
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
+        ];
+
+        for (let i = 0; i < 15; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn disabled';
+            btn.innerHTML = `
+                <div class="btn-hotkey">${hotkeys[i]}</div>
+                <div class="btn-icon"></div>
+            `;
+            grid.appendChild(btn);
+        }
+    }
 
 showNotification(message, type = 'info') {
     const container = document.getElementById('notifications');
     const notification = document.createElement('div');
     notification.className = `notification ${ type } `;
 
-    const icons = {
-        info: 'ℹ️',
-        error: '❌',
-        success: '✅'
-    };
+    // Remove emoji icons, use CSS styling or generic icons if available
+
+    // I'll create a simple colored block
+    const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
+    const iconStyle = `width:20px;height:20px;background:${color};border-radius:50%;display:inline-block;margin-right:10px;`;
 
     notification.innerHTML = `
                     <div class="notification-icon">${icons[type]}</div>

@@ -1214,120 +1214,72 @@ export class Game {
             if (building.image && building.image.complete) {
                 this.minimapCtx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
             } else {
-                    </div >
-                    <div class="selection-details">
-                        <h3>${entity.name}</h3>
-                        <div class="selection-stats">
-                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
-                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
-                        </div>
-                    </div>
-                </div >
-                    `;
-    } else {
-        content.innerHTML = `
-                    < div class="selection-info" >
-                    <div class="selection-icon">
-                        👥
-                    </div>
-                    <div class="selection-details">
-                        <h3>${this.selectedEntities.length} Unidades</h3>
-                        <div class="selection-stats">
-                            <div>Selección múltiple</div>
-                        </div>
-                    </div>
-                </div >
-                    `;
-    }
-}
-
-updateActionsPanel() {
-    const grid = document.getElementById('actionsGrid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-
-    if (this.selectedEntities.length !== 1) return;
-
-    const entity = this.selectedEntities[0];
-
-    // Solo mostrar acciones si es del jugador
-    if (entity.team !== 'player') return;
-
-    if (entity.type === 'villager') {
-        grid.innerHTML = `
-                    < button class="action-btn" onclick = "game.openBuildMenu()" >
-                    <div class="btn-icon">🏗️</div>
-                    <div class="btn-label">Construir</div>
-                </button >
-                    `;
-    } else if (entity.type === 'townCenter') {
-        const cost = CONFIG.UNIT_COSTS.villager;
-        const canAfford = this.canAfford(cost);
-
-        grid.innerHTML = `
-                    < button class="action-btn ${!canAfford ? 'disabled' : ''}"
-                onclick = "if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEnt
-
-                ities[0]) "
-                title = "Coste: ${cost.food} Comida" >
-                    <div class="btn-icon">👨‍🌾</div>
-                    <div class="btn-label">Aldeano</div>
-                </button >
-                    `;
-    } else if (entity.type === 'barracks') {
-        const warriorCost = CONFIG.UNIT_COSTS.warrior;
-        const archerCost = CONFIG.UNIT_COSTS.archer;
-        const canAffordWarrior = this.canAfford(warriorCost);
-        const canAffordArcher = this.canAfford(archerCost);
-
-        grid.innerHTML = `
-                    < button class="action-btn ${!canAffordWarrior ? 'disabled' : ''}"
-                onclick = "if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])"
-                title = "Coste: ${warriorCost.food} Comida, ${warriorCost.gold} Oro" >
-                    <div class="btn-icon">⚔️</div>
-                    <div class="btn-label">Guerrero</div>
-                </button >
-                    <button class="action-btn ${!canAffordArcher ? 'disabled' : ''}"
-                        onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])"
-                        title="Coste: ${archerCost.food} Comida, ${archerCost.gold} Oro">
-                        <div class="btn-icon">🏹</div>
-                        <div class="btn-label">Arquero</div>
-                    </button>
-                `;
-    }
-
-    // Añadir tecnologías disponibles
-    if (this.techManager) {
-        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-        for (let tech of availableTechs) {
-            const canAfford = this.techManager.canResearch(tech.id);
-            let costString = '';
-            for (let [res, amount] of Object.entries(tech.cost)) {
-                const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                costString += `${ icon }${ amount } `;
+                this.minimapCtx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
+                this.minimapCtx.fillRect(x - size / 2, y - size / 2, size, size);
             }
+        }
 
-            const btn = document.createElement('button');
-            btn.className = `action - btn ${ !canAfford ? 'disabled' : '' } `;
-            btn.title = `${ tech.name } \n${ tech.description } \nCoste: ${ costString } `;
-            btn.onclick = () => {
-                if (!btn.classList.contains('disabled')) {
-                    game.techManager.startResearch(tech.id);
-                }
-            };
-            btn.innerHTML = `
-                    < div class="btn-icon" > ${ tech.icon || '🔬' }</div >
-                        <div class="btn-label">${tech.name}</div>
-                `;
-            grid.appendChild(btn);
+        // Unidades
+        for (let unit of this.units) {
+            const x = unit.x * scale;
+            const y = unit.y * scale;
+            this.minimapCtx.fillStyle = unit.team === 'player' ? '#48bb78' : '#c53030';
+            this.minimapCtx.fillRect(x - 1, y - 1, 2, 2);
+        }
+
+        // Cámara
+        const camX = this.camera.x * scale;
+        const camY = this.camera.y * scale;
+        const camW = this.viewWidth * scale;
+        const camH = this.viewHeight * scale;
+
+        this.minimapCtx.strokeStyle = 'white';
+        this.minimapCtx.lineWidth = 1;
+        this.minimapCtx.strokeRect(camX, camY, camW, camH);
+    }
+
+    drawCustomCursor() {
+        if (this.cursorImage.complete) {
+            this.ctx.drawImage(this.cursorImage, this.mouse.x, this.mouse.y);
+        } else {
+            // Fallback cursor
+            this.ctx.fillStyle = 'white';
+            this.ctx.strokeStyle = 'black';
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.mouse.x, this.mouse.y);
+            this.ctx.lineTo(this.mouse.x + 15, this.mouse.y + 15);
+            this.ctx.lineTo(this.mouse.x, this.mouse.y + 22);
+            this.ctx.fill();
+            this.ctx.stroke();
         }
     }
-}
 
-updateSelectionPanel() {
-    const content = document.getElementById('selectionContent');
-    if (!content) return;
+    updateUI() {
+        // Actualizar recursos
+        document.getElementById('woodCount').textContent = Math.floor(this.resources.wood);
+        document.getElementById('foodCount').textContent = Math.floor(this.resources.food);
+        document.getElementById('goldCount').textContent = Math.floor(this.resources.gold);
+        document.getElementById('stoneCount').textContent = Math.floor(this.resources.stone);
+
+        // Actualizar población
+        document.getElementById('currentPopulation').textContent = Math.floor(this.population);
+        document.getElementById('maxPopulation').textContent = this.maxPopulation;
+
+        // Actualizar tiempo de juego
+        const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+        const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+        const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+        const timeElement = document.getElementById('gameTime');
+        if (timeElement) timeElement.textContent = `${minutes}:${seconds}`;
+
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
+    }
+
+    updateSelectionPanel() {
+        const content = document.getElementById('selectionContent');
+        if (!content) return;
 
     if (this.selectedEntities.length === 0) {
         content.innerHTML = '';
@@ -1431,7 +1383,7 @@ updateActionsPanel() {
             icon: '🏹',
             label: 'Arquero',
             hotkey: 'W',
-            cost: `${ archerCost.food }🌾 ${ archerCost.gold }💰`,
+            cost: `${ archerCost.food }🌾 ${ archerCost.gold }💰 ${ archerCost.wood }🪵`,
             action: () => this.trainUnit('archer', this.selectedEntities[0]),
             enabled: canAffordArcher
         });

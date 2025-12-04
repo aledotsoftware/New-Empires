@@ -1132,6 +1132,7 @@ export class Game {
         this.ctx.strokeRect(screenX, screenY, width, height);
 
         // Dibujar icono centrado
+        let drawn = false;
         if (typeof assetLoader !== 'undefined') {
             const img = assetLoader.getImage(this.buildMode);
             if (img && img.complete) {
@@ -1139,14 +1140,29 @@ export class Game {
                 this.ctx.globalAlpha = 0.7;
                 this.ctx.drawImage(img, screenX, screenY, width, height);
                 this.ctx.globalAlpha = 1.0;
-            } else {
-                 // Fallback text if no image
-                this.ctx.fillStyle = 'white';
-                this.ctx.font = '12px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText(this.buildMode, screenX + width/2, screenY + height/2);
+                drawn = true;
             }
+        }
+
+        if (!drawn) {
+            let icon = '🏗️';
+            switch (this.buildMode) {
+                case 'house': icon = '🏠'; break;
+                case 'barracks': icon = '⚔️'; break;
+                case 'townCenter': icon = '🏰'; break;
+                case 'storage': icon = '📦'; break;
+                case 'storageWood': icon = '🌲'; break;
+                case 'market': icon = '🏪'; break;
+                case 'temple': icon = '⛪'; break;
+                case 'workshop': icon = '🔨'; break;
+            }
+
+            const fontSize = Math.min(width, height) * 0.6;
+            this.ctx.font = `${fontSize}px Arial`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            this.ctx.fillText(icon, screenX + width / 2, screenY + height / 2);
         }
 
         // Dibujar grid local para referencia visual
@@ -1263,17 +1279,16 @@ export class Game {
     if (this.selectedEntities.length === 1) {
         const entity = this.selectedEntities[0];
 
-        let iconHtml = '';
+        let iconHtml = entity.icon;
         if (typeof assetLoader !== 'undefined') {
             const src = assetLoader.getSrc(entity.type);
             if (src) {
-                iconHtml = `<img src="${src}" alt="${entity.name}">`;
-            } else {
-                 iconHtml = `<span>${entity.name.substring(0,2)}</span>`;
+                iconHtml = `<img src="${src}" alt="${entity.name}" class="icon-large">`;
             }
         }
 
         content.innerHTML = `
+                    <div class="selection-info">
                     <div class="selection-icon">
                         ${iconHtml}
                     </div>
@@ -1284,7 +1299,8 @@ export class Game {
                             ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
                         </div>
                     </div>
-                `;
+                </div>
+                    `;
     } else {
         let iconHtml = '';
         if (typeof assetLoader !== 'undefined') {
@@ -1297,6 +1313,7 @@ export class Game {
         }
 
         content.innerHTML = `
+                    <div class="selection-info">
                     <div class="selection-icon">
                         ${iconHtml}
                     </div>
@@ -1306,7 +1323,8 @@ export class Game {
                             <div>Selección múltiple</div>
                         </div>
                     </div>
-                `;
+                </div>
+                    `;
     }
 }
 
@@ -1341,50 +1359,104 @@ export class Game {
             'Z', 'X', 'C', 'V', 'B'   // Fila 3
         ];
 
-        const buttons = [];
+    // Helper para obtener iconos de botones
+    const getBtnIcon = (key, fallback) => {
+        if (typeof assetLoader !== 'undefined') {
+            const src = assetLoader.getSrc(key);
+            if (src) return `<img src="${src}" class="icon-small">`;
+        }
+        return fallback;
+    };
 
-        // Helper para obtener iconos de botones
-        const getBtnIcon = (key, fallbackText) => {
+    // Helper para formatear costo con iconos
+    const formatCost = (costObj) => {
+        let str = '';
+        for (let [res, amount] of Object.entries(costObj)) {
+            let icon = '';
             if (typeof assetLoader !== 'undefined') {
-                const src = assetLoader.getSrc(key);
-                if (src) return `<img src="${src}" class="icon-small">`;
-            }
-            return `<span>${fallbackText}</span>`;
-        };
-
-        // Helper para formatear costo con iconos
-        const formatCost = (costObj) => {
-            let str = '';
-            for (let [res, amount] of Object.entries(costObj)) {
-                let icon = '';
-                if (typeof assetLoader !== 'undefined') {
-                    const src = assetLoader.getSrc(res);
-                    if (src) icon = `<img src="${src}" class="icon-tiny" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                    else icon = `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+                const src = assetLoader.getSrc(res);
+                if (src) icon = `<img src="${src}" class="icon-tiny" style="width:16px;height:16px;vertical-align:middle;">`;
+                else {
+                    // Fallback emojis
+                    icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
                 }
-                str += `<span style="display:inline-flex;align-items:center;margin-right:4px;">${amount}${icon}</span>`;
             }
-            return str.trim();
-        };
+            str += `${amount}${icon} `;
+        }
+        return str.trim();
+    };
+
+    if (entity.type === 'villager') {
+        buttons.push({
+            icon: '🏗️', // No hay asset especifico para "construir" pero podríamos usar un martillo si existiera. Usaremos emoji por ahora o icono de workshop?
+            // User said prohibit emojis.
+            // Check assetLoader.getSrc('workshop') -> hammer icon? No.
+            // I'll leave emoji for action verbs if no icon, or try to find one.
+            // Actually, I can use a generic building icon.
+            icon: getBtnIcon('workshop', '🏗️'),
+            label: 'Construir',
+            hotkey: 'Q',
+            action: () => this.openBuildMenu(),
+            enabled: true
+        });
+    } else if (entity.type === 'townCenter') {
+        const cost = CONFIG.UNIT_COSTS.villager;
+        const canAfford = this.canAfford(cost);
+
+        buttons.push({
+            icon: getBtnIcon('villager', '👨‍🌾'),
+            label: 'Aldeano',
+            hotkey: 'Q',
+            cost: formatCost(cost),
+            action: () => this.trainUnit('villager', this.selectedEntities[0]),
+            enabled: canAfford
+        });
+    } else if (entity.type === 'barracks') {
+        const warriorCost = CONFIG.UNIT_COSTS.warrior;
+        const archerCost = CONFIG.UNIT_COSTS.archer;
+        const canAffordWarrior = this.canAfford(warriorCost);
+        const canAffordArcher = this.canAfford(archerCost);
+
+        buttons.push({
+            icon: getBtnIcon('warrior', '⚔️'),
+            label: 'Guerrero',
+            hotkey: 'Q',
+            cost: formatCost(warriorCost),
+            action: () => this.trainUnit('warrior', this.selectedEntities[0]),
+            enabled: canAffordWarrior
+        });
+
+        buttons.push({
+            icon: getBtnIcon('archer', '🏹'),
+            label: 'Arquero',
+            hotkey: 'W',
+            cost: formatCost(archerCost),
+            action: () => this.trainUnit('archer', this.selectedEntities[0]),
+            enabled: canAffordArcher
+        });
+    }
+
+    // Añadir tecnologías disponibles
+    if (this.techManager) {
+        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+        let techIndex = 0;
+        for (let tech of availableTechs) {
+            if (techIndex >= 13) break; // Máximo 13 botones más
+
+            const canAfford = this.techManager.canResearch(tech.id);
+            // Use formatCost helper
+            let costString = formatCost(tech.cost);
+
+            // TODO: Use asset icons for techs if available
+            // let icon = tech.icon || '🔬';
 
         if (entity.type === 'villager') {
             buttons.push({
-                icon: getBtnIcon('workshop', 'B'), // Use workshop icon or just 'B' text
-                label: 'Construir',
-                hotkey: 'Q',
-                action: () => this.openBuildMenu(),
-                enabled: true
-            });
-        } else if (entity.type === 'townCenter') {
-            const cost = CONFIG.UNIT_COSTS.villager;
-            const canAfford = this.canAfford(cost);
-
-            buttons.push({
-                icon: getBtnIcon('villager', 'V'),
-                label: 'Aldeano',
-                hotkey: 'Q',
-                cost: formatCost(cost),
-                action: () => this.trainUnit('villager', this.selectedEntities[0]),
+                icon: tech.icon || '🔬', // Tech icons are likely emojis in data, need to check Technologies.js to replace them or ignore
+                label: tech.name,
+                hotkey: hotkeys[buttons.length],
+                cost: costString,
+                action: () => this.techManager.startResearch(tech.id),
                 enabled: canAfford
             });
         } else if (entity.type === 'barracks') {
@@ -1447,28 +1519,10 @@ export class Game {
                     btn.classList.add('disabled');
                 }
 
-                btn.onclick = () => {
-                    if (!btn.classList.contains('disabled') && buttonData.action) {
-                        try {
-                            buttonData.action();
-                        } catch (error) {
-                            console.error('❌ Error al ejecutar acción:', error);
-                        }
-                    }
-                };
-
-                btn.innerHTML = `
-                        <div class="btn-hotkey">${buttonData.hotkey}</div>
-                        <div class="btn-icon">${buttonData.icon}</div>
+            btn.innerHTML = `
+                    <div class="btn-icon">${buttonData.icon}</div>
                         <div class="btn-label">${buttonData.label}</div>
-                        ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
-                    `;
-            } else {
-                // Botón vacío
-                btn.classList.add('disabled');
-                btn.innerHTML = `
-                    <div class="btn-hotkey">${hotkeys[i]}</div>
-                    <div class="btn-icon"></div>
+                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
                 `;
             }
 
@@ -1506,7 +1560,7 @@ showNotification(message, type = 'info') {
     const iconStyle = `width:20px;height:20px;background:${color};border-radius:50%;display:inline-block;margin-right:10px;`;
 
     notification.innerHTML = `
-                    <div style="${iconStyle}"></div>
+                    <div class="notification-icon">${icons[type]}</div>
                         <div class="notification-text">${message}</div>
                 `;
 

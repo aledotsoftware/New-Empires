@@ -53,26 +53,10 @@ export class AssetLoader {
             { key: 'temple', src: 'assets/icons/temple.png' },
             { key: 'workshop', src: 'assets/icons/workshop.png' },
             // Resource icons
-            { key: 'wood', src: 'assets/icons/wood.png' },
-            { key: 'food', src: 'assets/icons/food.png' },
-            { key: 'gold', src: 'assets/icons/gold.png' },
-            { key: 'stone', src: 'assets/icons/stone.png' },
-            { key: 'population', src: 'assets/icons/population.png' },
-            // UI Icons
-            { key: 'time', src: 'assets/icons/time.png' },
-            { key: 'settings', src: 'assets/icons/settings.png' },
-            { key: 'techtree', src: 'assets/icons/techtree.png' },
-            { key: 'map', src: 'assets/icons/map.png' },
-            { key: 'start', src: 'assets/icons/start.png' },
-            { key: 'close', src: 'assets/icons/close.png' },
-            { key: 'check', src: 'assets/icons/check.png' },
-            { key: 'info', src: 'assets/icons/info.png' },
-            { key: 'error', src: 'assets/icons/error.png' },
-            { key: 'build', src: 'assets/icons/build.png' },
-            { key: 'tech_economy', src: 'assets/icons/tech_economy.png' },
-            { key: 'tech_military', src: 'assets/icons/tech_military.png' },
-            { key: 'tech_defense', src: 'assets/icons/tech_defense.png' },
-            { key: 'science', src: 'assets/icons/science.png' }
+            { key: 'wood', src: 'assets/icons/storageWood.png' },
+            { key: 'food', src: 'assets/icons/house.png' }, // Fallback icon
+            { key: 'gold', src: 'assets/icons/market.png' }, // Fallback icon
+            { key: 'stone', src: 'assets/icons/storage.png' } // Fallback icon
         ];
 
         this.totalAssets = assetsToLoad.length;
@@ -115,25 +99,10 @@ export class AssetLoader {
             'market': 'assets/icons/market.png',
             'temple': 'assets/icons/temple.png',
             'workshop': 'assets/icons/workshop.png',
-            'wood': 'assets/icons/wood.png',
-            'food': 'assets/icons/food.png',
-            'gold': 'assets/icons/gold.png',
-            'stone': 'assets/icons/stone.png',
-            'population': 'assets/icons/population.png',
-            'time': 'assets/icons/time.png',
-            'settings': 'assets/icons/settings.png',
-            'techtree': 'assets/icons/techtree.png',
-            'map': 'assets/icons/map.png',
-            'start': 'assets/icons/start.png',
-            'close': 'assets/icons/close.png',
-            'check': 'assets/icons/check.png',
-            'info': 'assets/icons/info.png',
-            'error': 'assets/icons/error.png',
-            'build': 'assets/icons/build.png',
-            'tech_economy': 'assets/icons/tech_economy.png',
-            'tech_military': 'assets/icons/tech_military.png',
-            'tech_defense': 'assets/icons/tech_defense.png',
-            'science': 'assets/icons/science.png'
+            'wood': 'assets/icons/storageWood.png',
+            'food': 'assets/icons/house.png',
+            'gold': 'assets/icons/market.png',
+            'stone': 'assets/icons/storage.png'
         };
         return map[key] || '';
     }

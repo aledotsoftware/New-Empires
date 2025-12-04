@@ -1,0 +1,35 @@
+// =================================================================
+// FUNCIÓN drawCustomCursor() - Agregar a Game.js
+// =================================================================
+// Ubicación: Después de la función renderMinimap() (línea ~1244)
+// =================================================================
+
+    drawCustomCursor() {
+        if (!this.cursorImage || !this.cursorImage.complete) return;
+
+        const cursorSize = 24; // Tamaño del cursor en píxeles
+        
+        // Dibujar la imagen del cursor en la posición del mouse
+        // Centrado en el punto del mouse
+        this.ctx.drawImage(
+            this.cursorImage,
+            this.mouse.x - cursorSize / 2,
+            this.mouse.y - cursorSize / 2,
+            cursorSize,
+            cursorSize
+        );
+    }
+
+// =================================================================
+// CAMBIO EN EL CONSTRUCTOR - Línea ~134
+// =================================================================
+// Cambiar la ruta de la imagen del cursor de:
+//     this.cursorImage.src = 'assets/icons/cursor.png';
+// A UNA DE ESTAS DOS OPCIONES:
+// 
+// OPCIÓN 1 (cursor medieval simple):
+        this.cursorImage.src = 'assets/icons/middle-ages-custom-cursor.png';
+
+// OPCIÓN 2 (cursor.png - el que ya intentamos):
+        this.cursorImage.src = 'assets/icons/cursor.png';
+// =================================================================

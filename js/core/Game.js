@@ -1214,87 +1214,7 @@ export class Game {
             if (building.image && building.image.complete) {
                 this.minimapCtx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
             } else {
-                this.minimapCtx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
-                this.minimapCtx.fillRect(x - 2, y - 2, 4, 4);
-            }
-        }
-
-        // Unidades
-        for (let unit of this.units) {
-            const x = unit.x * scale;
-            const y = unit.y * scale;
-
-            // Unidades son muy pequeñas, mejor usar puntos de color brillante
-            // Pero si el usuario quiere iconos, podemos intentar dibujar un punto más grande con el color del equipo
-            this.minimapCtx.fillStyle = unit.team === 'player' ? '#63b3ed' : '#fc8181';
-            this.minimapCtx.beginPath();
-            this.minimapCtx.arc(x, y, 2, 0, Math.PI * 2);
-            this.minimapCtx.fill();
-        }
-
-        // Viewport
-        this.minimapCtx.strokeStyle = '#d4af37';
-        this.minimapCtx.lineWidth = 1;
-        this.minimapCtx.strokeRect(
-            this.camera.x * scale,
-            this.camera.y * scale,
-            this.viewWidth * scale,
-            this.viewHeight * scale
-        );
-    }
-
-    updateUI() {
-        // Helper seguro para asignar texto si el elemento existe
-        const setTextIfExists = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value;
-        };
-
-        // Recursos
-        setTextIfExists('woodCount', Math.floor(this.resources.wood));
-        setTextIfExists('foodCount', Math.floor(this.resources.food));
-        setTextIfExists('goldCount', Math.floor(this.resources.gold));
-        setTextIfExists('stoneCount', Math.floor(this.resources.stone));
-
-        // Población
-        setTextIfExists('currentPopulation', this.population);
-        setTextIfExists('maxPopulation', this.maxPopulation);
-
-        // Tiempo de juego
-        const elapsed = Math.floor((Date.now() - this.gameStartTime) / 1000);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        setTextIfExists('gameTime', `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-
-        // Controlar visibilidad del panel unificado (si existe)
-        const controlPanel = document.getElementById('unitControlPanel');
-        if (controlPanel) {
-            if (this.selectedEntities.length > 0) {
-                controlPanel.classList.remove('hidden');
-                this.updateSelectionPanel();
-                this.updateActionsPanel();
-            } else {
-                controlPanel.classList.add('hidden');
-            }
-        }
-    }
-
-    updateSelectionPanel() {
-        const content = document.getElementById('selectionContent');
-        if (!content) return;
-
-        if (this.selectedEntities.length === 0) {
-            content.innerHTML = '';
-            return;
-        }
-
-        if (this.selectedEntities.length === 1) {
-            const entity = this.selectedEntities[0];
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        ${entity.icon}
-                    </div>
+                    </div >
                     <div class="selection-details">
                         <h3>${entity.name}</h3>
                         <div class="selection-stats">
@@ -1302,11 +1222,11 @@ export class Game {
                             ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
                         </div>
                     </div>
-                </div>
-            `;
-        } else {
-            content.innerHTML = `
-                <div class="selection-info">
+                </div >
+                    `;
+    } else {
+        content.innerHTML = `
+                    < div class="selection-info" >
                     <div class="selection-icon">
                         👥
                     </div>
@@ -1316,292 +1236,292 @@ export class Game {
                             <div>Selección múltiple</div>
                         </div>
                     </div>
-                </div>
-            `;
-        }
+                </div >
+                    `;
     }
+}
 
-    updateActionsPanel() {
-        const grid = document.getElementById('actionsGrid');
-        if (!grid) return;
+updateActionsPanel() {
+    const grid = document.getElementById('actionsGrid');
+    if (!grid) return;
 
-        grid.innerHTML = '';
+    grid.innerHTML = '';
 
-        if (this.selectedEntities.length !== 1) return;
+    if (this.selectedEntities.length !== 1) return;
 
-        const entity = this.selectedEntities[0];
+    const entity = this.selectedEntities[0];
 
-        // Solo mostrar acciones si es del jugador
-        if (entity.team !== 'player') return;
+    // Solo mostrar acciones si es del jugador
+    if (entity.team !== 'player') return;
 
-        if (entity.type === 'villager') {
-            grid.innerHTML = `
-                <button class="action-btn" onclick="game.openBuildMenu()">
+    if (entity.type === 'villager') {
+        grid.innerHTML = `
+                    < button class="action-btn" onclick = "game.openBuildMenu()" >
                     <div class="btn-icon">🏗️</div>
                     <div class="btn-label">Construir</div>
-                </button>
-            `;
-        } else if (entity.type === 'townCenter') {
-            const cost = CONFIG.UNIT_COSTS.villager;
-            const canAfford = this.canAfford(cost);
+                </button >
+                    `;
+    } else if (entity.type === 'townCenter') {
+        const cost = CONFIG.UNIT_COSTS.villager;
+        const canAfford = this.canAfford(cost);
 
-            grid.innerHTML = `
-                <button class="action-btn ${!canAfford ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEnt
+        grid.innerHTML = `
+                    < button class="action-btn ${!canAfford ? 'disabled' : ''}"
+                onclick = "if(this.classList.contains('disabled')) return; game.trainUnit('villager', game.selectedEnt
 
-ities[0])"
-                     title="Coste: ${cost.food} Comida">
+                ities[0]) "
+                title = "Coste: ${cost.food} Comida" >
                     <div class="btn-icon">👨‍🌾</div>
                     <div class="btn-label">Aldeano</div>
-                </button>
-            `;
-        } else if (entity.type === 'barracks') {
-            const warriorCost = CONFIG.UNIT_COSTS.warrior;
-            const archerCost = CONFIG.UNIT_COSTS.archer;
-            const canAffordWarrior = this.canAfford(warriorCost);
-            const canAffordArcher = this.canAfford(archerCost);
+                </button >
+                    `;
+    } else if (entity.type === 'barracks') {
+        const warriorCost = CONFIG.UNIT_COSTS.warrior;
+        const archerCost = CONFIG.UNIT_COSTS.archer;
+        const canAffordWarrior = this.canAfford(warriorCost);
+        const canAffordArcher = this.canAfford(archerCost);
 
-            grid.innerHTML = `
-                <button class="action-btn ${!canAffordWarrior ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])"
-                     title="Coste: ${warriorCost.food} Comida, ${warriorCost.gold} Oro">
+        grid.innerHTML = `
+                    < button class="action-btn ${!canAffordWarrior ? 'disabled' : ''}"
+                onclick = "if(this.classList.contains('disabled')) return; game.trainUnit('warrior', game.selectedEntities[0])"
+                title = "Coste: ${warriorCost.food} Comida, ${warriorCost.gold} Oro" >
                     <div class="btn-icon">⚔️</div>
                     <div class="btn-label">Guerrero</div>
-                </button>
-                <button class="action-btn ${!canAffordArcher ? 'disabled' : ''}" 
-                     onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])"
-                     title="Coste: ${archerCost.food} Comida, ${archerCost.gold} Oro">
-                    <div class="btn-icon">🏹</div>
-                    <div class="btn-label">Arquero</div>
-                </button>
-            `;
-        }
-
-        // Añadir tecnologías disponibles
-        if (this.techManager) {
-            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-            for (let tech of availableTechs) {
-                const canAfford = this.techManager.canResearch(tech.id);
-                let costString = '';
-                for (let [res, amount] of Object.entries(tech.cost)) {
-                    const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                    costString += `${icon}${amount} `;
-                }
-
-                const btn = document.createElement('button');
-                btn.className = `action-btn ${!canAfford ? 'disabled' : ''}`;
-                btn.title = `${tech.name}\n${tech.description}\nCoste: ${costString}`;
-                btn.onclick = () => {
-                    if (!btn.classList.contains('disabled')) {
-                        game.techManager.startResearch(tech.id);
-                    }
-                };
-                btn.innerHTML = `
-                    <div class="btn-icon">${tech.icon || '🔬'}</div>
-                    <div class="btn-label">${tech.name}</div>
+                </button >
+                    <button class="action-btn ${!canAffordArcher ? 'disabled' : ''}"
+                        onclick="if(this.classList.contains('disabled')) return; game.trainUnit('archer', game.selectedEntities[0])"
+                        title="Coste: ${archerCost.food} Comida, ${archerCost.gold} Oro">
+                        <div class="btn-icon">🏹</div>
+                        <div class="btn-label">Arquero</div>
+                    </button>
                 `;
-                grid.appendChild(btn);
-            }
-        }
     }
 
-    updateSelectionPanel() {
-        const content = document.getElementById('selectionContent');
-        if (!content) return;
-
-        if (this.selectedEntities.length === 0) {
-            content.innerHTML = '';
-            return;
-        }
-
-        if (this.selectedEntities.length === 1) {
-            const entity = this.selectedEntities[0];
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        ${entity.icon}
-                    </div>
-                    <div class="selection-details">
-                        <h3>${entity.name}</h3>
-                        <div class="selection-stats">
-                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
-                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        👥
-                    </div>
-                    <div class="selection-details">
-                        <h3>${this.selectedEntities.length} Unidades</h3>
-                        <div class="selection-stats">
-                            <div>Selección múltiple</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    updateActionsPanel() {
-        const grid = document.getElementById('actionsGrid');
-        if (!grid) return;
-
-        grid.innerHTML = '';
-
-        if (this.selectedEntities.length !== 1) return;
-
-        const entity = this.selectedEntities[0];
-
-        // Solo mostrar acciones si es del jugador
-        if (entity.team !== 'player') return;
-
-        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
-        // Fila 1: Q W E R T
-        // Fila 2: A S D F G
-        // Fila 3: Z X C V B
-        const hotkeys = [
-            'Q', 'W', 'E', 'R', 'T',  // Fila 1
-            'A', 'S', 'D', 'F', 'G',  // Fila 2
-            'Z', 'X', 'C', 'V', 'B'   // Fila 3
-        ];
-
-        const buttons = [];
-
-        if (entity.type === 'villager') {
-            buttons.push({
-                icon: '🏗️',
-                label: 'Construir',
-                hotkey: 'Q',
-                action: () => this.openBuildMenu(),
-                enabled: true
-            });
-        } else if (entity.type === 'townCenter') {
-            const cost = CONFIG.UNIT_COSTS.villager;
-            const canAfford = this.canAfford(cost);
-
-            buttons.push({
-                icon: '👨‍🌾',
-                label: 'Aldeano',
-                hotkey: 'Q',
-                cost: `${cost.food}🌾`,
-                action: () => this.trainUnit('villager', this.selectedEntities[0]),
-                enabled: canAfford
-            });
-        } else if (entity.type === 'barracks') {
-            const warriorCost = CONFIG.UNIT_COSTS.warrior;
-            const archerCost = CONFIG.UNIT_COSTS.archer;
-            const canAffordWarrior = this.canAfford(warriorCost);
-            const canAffordArcher = this.canAfford(archerCost);
-
-            buttons.push({
-                icon: '⚔️',
-                label: 'Guerrero',
-                hotkey: 'Q',
-                cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
-                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-                enabled: canAffordWarrior
-            });
-
-            buttons.push({
-                icon: '🏹',
-                label: 'Arquero',
-                hotkey: 'W',
-                cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
-                action: () => this.trainUnit('archer', this.selectedEntities[0]),
-                enabled: canAffordArcher
-            });
-        }
-
-        // Añadir tecnologías disponibles
-        if (this.techManager) {
-            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-            let techIndex = 0;
-            for (let tech of availableTechs) {
-                if (techIndex >= 13) break; // Máximo 13 botones más
-
-                const canAfford = this.techManager.canResearch(tech.id);
-                let costString = '';
-                for (let [res, amount] of Object.entries(tech.cost)) {
-                    const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                    costString += `${amount}${icon} `;
-                }
-
-                buttons.push({
-                    icon: tech.icon || '🔬',
-                    label: tech.name,
-                    hotkey: hotkeys[buttons.length],
-                    cost: costString.trim(),
-                    action: () => this.techManager.startResearch(tech.id),
-                    enabled: canAfford
-                });
-
-                techIndex++;
+    // Añadir tecnologías disponibles
+    if (this.techManager) {
+        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+        for (let tech of availableTechs) {
+            const canAfford = this.techManager.canResearch(tech.id);
+            let costString = '';
+            for (let [res, amount] of Object.entries(tech.cost)) {
+                const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                costString += `${ icon }${ amount } `;
             }
-        }
 
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
-        for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.setAttribute('data-hotkey', hotkeys[i]);
-
-            if (i < buttons.length) {
-                const buttonData = buttons[i];
-
-                if (!buttonData.enabled) {
-                    btn.classList.add('disabled');
+            btn.className = `action - btn ${ !canAfford ? 'disabled' : '' } `;
+            btn.title = `${ tech.name } \n${ tech.description } \nCoste: ${ costString } `;
+            btn.onclick = () => {
+                if (!btn.classList.contains('disabled')) {
+                    game.techManager.startResearch(tech.id);
                 }
-
-                btn.onclick = () => {
-                    if (!btn.classList.contains('disabled') && buttonData.action) {
-                        try {
-                            buttonData.action();
-                        } catch (error) {
-                            console.error('❌ Error al ejecutar acción:', error);
-                        }
-                    }
-                };
-
-                btn.innerHTML = `
-                    <div class="btn-icon">${buttonData.icon}</div>
-                    <div class="btn-label">${buttonData.label}</div>
-                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
+            };
+            btn.innerHTML = `
+                    < div class="btn-icon" > ${ tech.icon || '🔬' }</div >
+                        <div class="btn-label">${tech.name}</div>
                 `;
-            } else {
-                // Botón vacío
-                btn.classList.add('disabled');
-                btn.innerHTML = '<div class="btn-icon"></div>';
-            }
-
             grid.appendChild(btn);
         }
     }
+}
 
-    showNotification(message, type = 'info') {
-        const container = document.getElementById('notifications');
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
+updateSelectionPanel() {
+    const content = document.getElementById('selectionContent');
+    if (!content) return;
 
-        const icons = {
-            info: 'ℹ️',
-            error: '❌',
-            success: '✅'
-        };
-
-        notification.innerHTML = `
-            <div class="notification-icon">${icons[type]}</div>
-            <div class="notification-text">${message}</div>
-        `;
-
-        container.appendChild(notification);
-
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+    if (this.selectedEntities.length === 0) {
+        content.innerHTML = '';
+        return;
     }
+
+    if (this.selectedEntities.length === 1) {
+        const entity = this.selectedEntities[0];
+        content.innerHTML = `
+                    < div class="selection-info" >
+                    <div class="selection-icon">
+                        ${entity.icon}
+                    </div>
+                    <div class="selection-details">
+                        <h3>${entity.name}</h3>
+                        <div class="selection-stats">
+                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
+                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
+                        </div>
+                    </div>
+                </div >
+                    `;
+    } else {
+        content.innerHTML = `
+                    < div class="selection-info" >
+                    <div class="selection-icon">
+                        👥
+                    </div>
+                    <div class="selection-details">
+                        <h3>${this.selectedEntities.length} Unidades</h3>
+                        <div class="selection-stats">
+                            <div>Selección múltiple</div>
+                        </div>
+                    </div>
+                </div >
+                    `;
+    }
+}
+
+updateActionsPanel() {
+    const grid = document.getElementById('actionsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    if (this.selectedEntities.length !== 1) return;
+
+    const entity = this.selectedEntities[0];
+
+    // Solo mostrar acciones si es del jugador
+    if (entity.team !== 'player') return;
+
+    // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
+    // Fila 1: Q W E R T
+    // Fila 2: A S D F G
+    // Fila 3: Z X C V B
+    const hotkeys = [
+        'Q', 'W', 'E', 'R', 'T',  // Fila 1
+        'A', 'S', 'D', 'F', 'G',  // Fila 2
+        'Z', 'X', 'C', 'V', 'B'   // Fila 3
+    ];
+
+    const buttons = [];
+
+    if (entity.type === 'villager') {
+        buttons.push({
+            icon: '🏗️',
+            label: 'Construir',
+            hotkey: 'Q',
+            action: () => this.openBuildMenu(),
+            enabled: true
+        });
+    } else if (entity.type === 'townCenter') {
+        const cost = CONFIG.UNIT_COSTS.villager;
+        const canAfford = this.canAfford(cost);
+
+        buttons.push({
+            icon: '👨‍🌾',
+            label: 'Aldeano',
+            hotkey: 'Q',
+            cost: `${ cost.food }🌾`,
+            action: () => this.trainUnit('villager', this.selectedEntities[0]),
+            enabled: canAfford
+        });
+    } else if (entity.type === 'barracks') {
+        const warriorCost = CONFIG.UNIT_COSTS.warrior;
+        const archerCost = CONFIG.UNIT_COSTS.archer;
+        const canAffordWarrior = this.canAfford(warriorCost);
+        const canAffordArcher = this.canAfford(archerCost);
+
+        buttons.push({
+            icon: '⚔️',
+            label: 'Guerrero',
+            hotkey: 'Q',
+            cost: `${ warriorCost.food }🌾 ${ warriorCost.gold }💰`,
+            action: () => this.trainUnit('warrior', this.selectedEntities[0]),
+            enabled: canAffordWarrior
+        });
+
+        buttons.push({
+            icon: '🏹',
+            label: 'Arquero',
+            hotkey: 'W',
+            cost: `${ archerCost.food }🌾 ${ archerCost.gold }💰`,
+            action: () => this.trainUnit('archer', this.selectedEntities[0]),
+            enabled: canAffordArcher
+        });
+    }
+
+    // Añadir tecnologías disponibles
+    if (this.techManager) {
+        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+        let techIndex = 0;
+        for (let tech of availableTechs) {
+            if (techIndex >= 13) break; // Máximo 13 botones más
+
+            const canAfford = this.techManager.canResearch(tech.id);
+            let costString = '';
+            for (let [res, amount] of Object.entries(tech.cost)) {
+                const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                costString += `${ amount }${ icon } `;
+            }
+
+            buttons.push({
+                icon: tech.icon || '🔬',
+                label: tech.name,
+                hotkey: hotkeys[buttons.length],
+                cost: costString.trim(),
+                action: () => this.techManager.startResearch(tech.id),
+                enabled: canAfford
+            });
+
+            techIndex++;
+        }
+    }
+
+    // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+    for (let i = 0; i < 15; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.setAttribute('data-hotkey', hotkeys[i]);
+
+        if (i < buttons.length) {
+            const buttonData = buttons[i];
+
+            if (!buttonData.enabled) {
+                btn.classList.add('disabled');
+            }
+
+            btn.onclick = () => {
+                if (!btn.classList.contains('disabled') && buttonData.action) {
+                    try {
+                        buttonData.action();
+                    } catch (error) {
+                        console.error('❌ Error al ejecutar acción:', error);
+                    }
+                }
+            };
+
+            btn.innerHTML = `
+                    < div class="btn-icon" > ${ buttonData.icon }</div >
+                        <div class="btn-label">${buttonData.label}</div>
+                    ${ buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : '' }
+                `;
+        } else {
+            // Botón vacío
+            btn.classList.add('disabled');
+            btn.innerHTML = '<div class="btn-icon"></div>';
+        }
+
+        grid.appendChild(btn);
+    }
+}
+
+showNotification(message, type = 'info') {
+    const container = document.getElementById('notifications');
+    const notification = document.createElement('div');
+    notification.className = `notification ${ type } `;
+
+    const icons = {
+        info: 'ℹ️',
+        error: '❌',
+        success: '✅'
+    };
+
+    notification.innerHTML = `
+                    < div class="notification-icon" > ${ icons[type] }</div >
+                        <div class="notification-text">${message}</div>
+                `;
+
+    container.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
 }

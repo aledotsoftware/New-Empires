@@ -88,6 +88,46 @@ body {
     animation: fadeInUp 1s ease-out;
 }
 
+/* Logo del Juego */
+.game-logo {
+    margin-bottom: 1rem;
+    animation: logoFloat 3s ease-in-out infinite, logoGlow 2s ease-in-out infinite alternate;
+}
+
+.logo-image {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.5));
+    transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+@keyframes logoFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes logoGlow {
+    from {
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
+    }
+
+    to {
+        filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.8));
+    }
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -1072,4 +1112,277 @@ body {
 .civ-icon-large:hover {
     filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.9));
     border-color: var(--primary-gold);
+}
+
+/* ==========================================
+   PANTALLA DE CONFIGURACIÓN DE PARTIDA
+   ========================================== */
+.game-setup-content {
+    max-width: 1200px;
+    width: 95%;
+    padding: 2rem;
+}
+
+.setup-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.setup-column {
+    background: rgba(26, 26, 46, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 1.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.setup-section-title {
+    font-family: var(--font-title);
+    color: var(--primary-gold);
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    position: sticky;
+    top: 0;
+    background: rgba(26, 26, 46, 0.95);
+    z-index: 10;
+    margin: -1.25rem -1.25rem 1rem -1.25rem;
+    padding: 1rem 1.25rem 0.75rem 1.25rem;
+}
+
+/* Estilos para Grid de Tamaño de Mapa */
+.map-size-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.map-size-option {
+    background: rgba(15, 52, 96, 0.3);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.map-size-option:hover {
+    background: rgba(15, 52, 96, 0.6);
+    border-color: rgba(212, 175, 55, 0.5);
+}
+
+.map-size-option.selected {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.map-size-option .size-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.map-size-option .size-name {
+    font-family: var(--font-title);
+    color: var(--primary-gold-light);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.map-size-option .size-desc {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Estilos para Grid de Civilizaciones */
+.civ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
+}
+
+.civ-option {
+    background: rgba(15, 52, 96, 0.3);
+    border: 3px solid transparent;
+    border-radius: 16px;
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.civ-option:hover {
+    background: rgba(15, 52, 96, 0.6);
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-3px);
+}
+
+.civ-option.selected {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    transform: scale(1.02);
+}
+
+.civ-option .civ-icon {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 5px solid rgba(212, 175, 55, 0.4);
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.civ-option.selected .civ-icon {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+.civ-option .civ-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.civ-option .civ-name {
+    font-family: var(--font-title);
+    color: var(--primary-gold-light);
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Contenedor del icono con posición relativa para el overlay */
+.civ-option .civ-icon {
+    position: relative;
+}
+
+/* Descripción como overlay sobre la imagen */
+.civ-option .civ-desc {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    background: rgba(10, 10, 25, 0.92);
+    border-radius: 50%;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 20;
+    box-sizing: border-box;
+}
+
+.civ-option:hover .civ-desc {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Asegurar que el contenedor principal tenga position relative */
+.civ-option {
+    position: relative;
+}
+
+/* Botones de Acción */
+.setup-actions {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.setup-actions .btn-start {
+    padding: 1rem 2.5rem;
+}
+
+.setup-actions .btn-start:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.setup-actions .btn-start:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    padding: 0.8rem 1.5rem;
+    font-family: var(--font-title);
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(26, 26, 46, 0.8);
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+/* Responsive para Pantalla de Configuración */
+@media (max-width: 900px) {
+    .setup-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .civ-grid {
+        max-height: 300px;
+    }
+
+    .setup-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+/* Botones de Inicio Extra */
+.start-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
 }

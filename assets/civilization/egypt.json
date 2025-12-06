@@ -1,0 +1,91 @@
+{
+    "civilizationId": "egypt",
+    "name": "Antiguo Egipto",
+    "description": "El imperio de los faraones. Maestros en arquitectura monumental, agricultura del Nilo y conocimientos místicos.",
+    "icon": "🔺",
+    "iconEmoji": "🏺",
+    "color": "#F4C430",
+    "bonuses": {
+        "buildSpeed": 1.15,
+        "buildingHp": 1.25,
+        "gatherGold": 1.20
+    },
+    "uniqueUnit": {
+        "id": "chariotArcher",
+        "name": "Arquero de Carro",
+        "icon": "🏹",
+        "baseUnit": "archer",
+        "age": 18,
+        "bonuses": {
+            "attackDamage": 1.3,
+            "speed": 1.6,
+            "range": 1.2
+        }
+    },
+    "technologyOverrides": {
+        "stoneMasonry": {
+            "name": "Cantería de Pirámides",
+            "icon": "🔺",
+            "description": "Técnicas avanzadas de construcción en piedra."
+        },
+        "writing": {
+            "name": "Jeroglíficos",
+            "icon": "𓀀",
+            "description": "Sistema de escritura sagrada egipcia."
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Palacio del Faraón",
+            "icon": "👑",
+            "description": "Centro del poder faraónico."
+        },
+        "temple": {
+            "name": "Templo de Ra",
+            "icon": "☀️",
+            "description": "Templo dedicado al dios del sol."
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "pyramidBuilding",
+            "name": "Construcción de Pirámides",
+            "icon": "🔺",
+            "category": "ARCHITECTURE",
+            "age": 20,
+            "description": "Técnicas monumentales de construcción.",
+            "cost": {
+                "stone": 400,
+                "gold": 200
+            },
+            "researchTime": 60,
+            "building": "townCenter",
+            "prerequisites": [
+                "stoneMasonry"
+            ],
+            "effects": {
+                "buildingHp": 1.30,
+                "buildSpeed": 1.20
+            }
+        },
+        {
+            "id": "embalming",
+            "name": "Arte del Embalsamamiento",
+            "icon": "⚱️",
+            "category": "CULTURE",
+            "age": 19,
+            "description": "Conocimientos místicos de preservación.",
+            "cost": {
+                "food": 150,
+                "gold": 250
+            },
+            "researchTime": 45,
+            "building": "temple",
+            "prerequisites": [],
+            "effects": {
+                "unitMaxHp": 1.10,
+                "healingSpeed": 1.50
+            }
+        }
+    ]
+}

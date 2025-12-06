@@ -1,0 +1,89 @@
+{
+    "civilizationId": "caliphate",
+    "name": "Califato Árabe",
+    "description": "Imperio de la Edad de Oro islámica. Expertos en ciencia, comercio y caballería ligera.",
+    "icon": "☪️",
+    "iconEmoji": "🌙",
+    "color": "#006400",
+    "bonuses": {
+        "tradeBonus": 1.35,
+        "researchSpeed": 1.20,
+        "cavalrySpeed": 1.15
+    },
+    "uniqueUnit": {
+        "id": "mamluk",
+        "name": "Mameluco",
+        "icon": "🗡️",
+        "baseUnit": "warrior",
+        "age": 19,
+        "bonuses": {
+            "speed": 1.4,
+            "attackDamage": 1.35,
+            "armor": 1.15
+        }
+    },
+    "technologyOverrides": {
+        "algebra": {
+            "name": "Álgebra",
+            "icon": "➕",
+            "description": "Matemáticas avanzadas árabes."
+        },
+        "medicine": {
+            "name": "Medicina Islámica",
+            "icon": "⚕️",
+            "description": "Conocimientos médicos avanzados."
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Gran Mezquita",
+            "icon": "🕌",
+            "description": "Centro religioso y administrativo."
+        },
+        "market": {
+            "name": "Zoco",
+            "icon": "🏬",
+            "description": "Mercado tradicional árabe."
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "houseOfWisdom",
+            "name": "Casa de la Sabiduría",
+            "icon": "📚",
+            "category": "SCIENCE",
+            "age": 19,
+            "description": "Centro de traducción y conocimiento.",
+            "cost": {
+                "food": 200,
+                "gold": 400
+            },
+            "researchTime": 55,
+            "building": "temple",
+            "prerequisites": [],
+            "effects": {
+                "researchSpeed": 1.30,
+                "allTechCost": 0.85
+            }
+        },
+        {
+            "id": "caravanRoutes",
+            "name": "Rutas de Caravanas",
+            "icon": "🐫",
+            "category": "ECONOMY",
+            "age": 18,
+            "description": "Red comercial a través del desierto.",
+            "cost": {
+                "wood": 200,
+                "gold": 300
+            },
+            "researchTime": 45,
+            "building": "market",
+            "prerequisites": [],
+            "effects": {
+                "tradeBonus": 1.40,
+                "goldGather": 1.20
+            }
+        }
+    ]
+}

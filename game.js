@@ -401,17 +401,19 @@ class AssetLoader {
 
     async loadAll() {
         const assetsToLoad = [
+            // Unidades
             { key: 'villager', src: 'assets/icons/villager.png' },
-            { key: 'warrior', src: 'assets/icons/warrior.png' },
-            { key: 'archer', src: 'assets/icons/archer.png' },
-            { key: 'townCenter', src: 'assets/icons/townCenter.png' },
-            { key: 'house', src: 'assets/icons/house.png' },
-            { key: 'barracks', src: 'assets/icons/barracks.png' },
-            { key: 'storage', src: 'assets/icons/storage.png' },
-            { key: 'storageWood', src: 'assets/icons/storageWood.png' },
-            { key: 'market', src: 'assets/icons/market.png' },
-            { key: 'temple', src: 'assets/icons/temple.png' },
-            { key: 'workshop', src: 'assets/icons/workshop.png' }
+            { key: 'warrior', src: 'assets/icons/warrior.webp' },
+            { key: 'archer', src: 'assets/icons/archer.webp' },
+            // Edificios
+            { key: 'townCenter', src: 'assets/icons/townCenter.webp' },
+            { key: 'house', src: 'assets/icons/house.webp' },
+            { key: 'barracks', src: 'assets/icons/barracks.webp' },
+            { key: 'storage', src: 'assets/icons/storage.webp' },
+            { key: 'storageWood', src: 'assets/icons/storageWood.webp' },
+            { key: 'market', src: 'assets/icons/market.webp' },
+            { key: 'temple', src: 'assets/icons/temple.webp' },
+            { key: 'workshop', src: 'assets/icons/workshop.webp' }
         ];
 
         this.totalAssets = assetsToLoad.length;
@@ -656,19 +658,20 @@ class Game {
     generateSimpleMap() {
         // Código original de generación simple (fallback)
         const resourceTypes = [
-            { type: 'wood', icon: '🌲', amount: 500 },
-            { type: 'food', icon: '🌾', amount: 400 },
-            { type: 'gold', icon: '💎', amount: 300 },
-            { type: 'stone', icon: '🪨', amount: 300 }
+            { type: 'wood', icon: '🌲', amount: 800 },
+            { type: 'food', icon: '🌾', amount: 600 },
+            { type: 'gold', icon: '💎', amount: 500 },
+            { type: 'stone', icon: '🪨', amount: 500 }
         ];
 
-        for (let i = 0; i < 20; i++) {
+        // Aumentado a 100 nodos de recursos
+        for (let i = 0; i < 100; i++) {
             const resType = resourceTypes[Math.floor(Math.random() * resourceTypes.length)];
             const x = Math.random() * CONFIG.CANVAS_WIDTH;
             const y = Math.random() * CONFIG.CANVAS_HEIGHT;
 
             // Evitar spawn cerca del centro inicial
-            if (Math.hypot(x - 400, y - 400) > 200) {
+            if (Math.hypot(x - 400, y - 400) > 150) {
                 this.resourceNodes.push({
                     x, y,
                     type: resType.type,
@@ -959,13 +962,8 @@ class Game {
             return;
         }
 
-        // B - Build menu
-        if (e.key === 'b' || e.key === 'B') {
-            if (this.selectedEntities.length === 1 &&
-                this.selectedEntities[0].type === 'villager') {
-                this.openBuildMenu();
-            }
-        }
+
+        // B - Ya no abre modal, los edificios aparecen en el panel de control al seleccionar aldeano
 
         // ESC - Cancel
         if (e.key === 'Escape') {
@@ -1701,12 +1699,36 @@ class Game {
         const buttons = [];
 
         if (entity.type === 'villager') {
-            buttons.push({
-                icon: '🏗️',
-                label: 'Construir',
-                hotkey: 'Q',
-                action: () => this.openBuildMenu(),
-                enabled: true
+            // Mostrar directamente los edificios que puede construir el aldeano
+            const buildings = [
+                { type: 'house', icon: '🏠', name: 'Casa', cost: { wood: 30 }, info: '+5 población' },
+                { type: 'barracks', icon: '⚔️', name: 'Cuartel', cost: { wood: 175 }, info: 'Entrena unidades' },
+                { type: 'storage', icon: '📦', name: 'Depósito', cost: { wood: 100 }, info: 'Almacena recursos' },
+                { type: 'storageWood', icon: '🪵', name: 'Dep. Madera', cost: { wood: 100 }, info: 'Almacena madera' },
+                { type: 'market', icon: '🏪', name: 'Mercado', cost: { wood: 175 }, info: 'Comercio' },
+                { type: 'temple', icon: '⛪', name: 'Templo', cost: { wood: 200, gold: 100 }, info: 'Tecnologías' },
+                { type: 'workshop', icon: '🔨', name: 'Taller', cost: { wood: 200 }, info: 'Máquinas de asedio' },
+                { type: 'townCenter', icon: '🏰', name: 'C. Urbano', cost: { wood: 275, stone: 100 }, info: 'Nuevo centro' }
+            ];
+
+            buildings.forEach((building, index) => {
+                const canAfford = this.canAfford(building.cost);
+                let costStr = '';
+                if (building.cost.wood) costStr += `${building.cost.wood}🪵 `;
+                if (building.cost.stone) costStr += `${building.cost.stone}🪨 `;
+                if (building.cost.gold) costStr += `${building.cost.gold}💰 `;
+
+                buttons.push({
+                    icon: building.icon,
+                    label: building.name,
+                    hotkey: hotkeys[index],
+                    cost: costStr.trim(),
+                    action: () => {
+                        this.buildMode = building.type;
+                        this.showNotification(`Selecciona ubicación para ${building.name}`, 'info');
+                    },
+                    enabled: canAfford
+                });
             });
         } else if (entity.type === 'townCenter') {
             const cost = CONFIG.UNIT_COSTS.villager;

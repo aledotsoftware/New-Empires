@@ -412,21 +412,21 @@ class ProceduralMapGenerator {
             this.placeStartingResources(start);
         }
 
-        // Recursos neutrales distribuidos por el mapa (cantidades duplicadas para más recursos)
-        this.placeNeutralResources('wood', 80);   // Duplicado: 40 → 80
-        this.placeNeutralResources('food', 70);   // Duplicado: 35 → 70
-        this.placeNeutralResources('gold', 40);   // Duplicado: 20 → 40
-        this.placeNeutralResources('stone', 40);  // Duplicado: 20 → 40
+        // Recursos neutrales distribuidos por el mapa (cantidad muy aumentada)
+        this.placeNeutralResources('wood', 250);   // 150 → 250
+        this.placeNeutralResources('food', 200);   // 120 → 200
+        this.placeNeutralResources('gold', 120);   // 80 → 120
+        this.placeNeutralResources('stone', 120);  // 80 → 120
 
         console.log(`🌍 Recursos generados: ${this.resources.length} nodos totales`);
     }
 
     placeStartingResources(start) {
         const resourceConfig = [
-            { type: 'wood', count: 8, minDist: 8, maxDist: 18, amount: 600 },   // 4→8, cantidad aumentada
-            { type: 'food', count: 8, minDist: 6, maxDist: 15, amount: 500 },   // 4→8, cantidad aumentada
-            { type: 'gold', count: 4, minDist: 10, maxDist: 25, amount: 1000 }, // 2→4, cantidad aumentada
-            { type: 'stone', count: 4, minDist: 10, maxDist: 25, amount: 800 }  // 2→4, cantidad aumentada
+            { type: 'wood', count: 12, minDist: 6, maxDist: 22, amount: 800 },   // Más nodos, más cantidad
+            { type: 'food', count: 12, minDist: 5, maxDist: 18, amount: 600 },   // Más nodos, más cantidad
+            { type: 'gold', count: 6, minDist: 8, maxDist: 28, amount: 1500 },   // Más nodos, más cantidad
+            { type: 'stone', count: 6, minDist: 8, maxDist: 28, amount: 1200 }   // Más nodos, más cantidad
         ];
 
         for (let config of resourceConfig) {
@@ -471,9 +471,9 @@ class ProceduralMapGenerator {
 
                 if (!tooClose) {
                     // Cantidades mejoradas para recursos neutrales
-                    const amount = type === 'gold' ? 1500 :    // Oro: 1200 → 1500
-                        type === 'stone' ? 1200 :   // Piedra: 1000 → 1200
-                            type === 'wood' ? 800 : 700; // Madera: 800, Comida: 700
+                    const amount = type === 'gold' ? 2000 :    // Oro aumentado
+                        type === 'stone' ? 1500 :              // Piedra aumentada
+                            type === 'wood' ? 1000 : 900;      // Madera y comida aumentadas
                     this.resources.push({
                         x, y,
                         type,

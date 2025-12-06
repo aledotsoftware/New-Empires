@@ -136,8 +136,7 @@ window.loadMainMenu = function () {
     document.getElementById('gameOverScreen').classList.add('hidden');
     document.getElementById('settingsScreen').classList.add('hidden');
     document.getElementById('techTreeScreen').classList.add('hidden');
-    document.getElementById('mapSizeScreen').classList.add('hidden');
-    document.getElementById('civSelectionScreen').classList.add('hidden');
+    document.getElementById('gameSetupScreen').classList.add('hidden');
 
     // Mostrar pantalla de inicio
     document.getElementById('startScreen').classList.remove('hidden');
@@ -146,6 +145,10 @@ window.loadMainMenu = function () {
     if (game) {
         game = null;
     }
+
+    // Resetear selecciones
+    selectedCivilization = null;
+    selectedMapSize = 'normal';
 };
 
 /**
@@ -193,17 +196,17 @@ function renderStaticTechTree() {
         for (let tech of techs) {
             // Helper for resources icons
             const getResIcon = (res) => {
-                 if (assetLoader && assetLoader.getSrc) {
-                     const src = assetLoader.getSrc(res);
-                     if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                 }
-                 // fallback if assetLoader not ready (unlikely here) or no asset
-                 return `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+                if (assetLoader && assetLoader.getSrc) {
+                    const src = assetLoader.getSrc(res);
+                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+                }
+                // fallback if assetLoader not ready (unlikely here) or no asset
+                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
             };
 
             const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                            ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                            : `<div class="tech-icon-placeholder">T</div>`;
+                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
+                : `<div class="tech-icon-placeholder">T</div>`;
 
             html += `
                 <div class="tech-item locked">
@@ -212,8 +215,8 @@ function renderStaticTechTree() {
                     <div class="tech-desc">${tech.description}</div>
                     <div class="tech-cost">
                         ${Object.entries(tech.cost).map(([res, amount]) => {
-                            return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-                        }).join(' ')}
+                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
+            }).join(' ')}
                     </div>
                 </div>
             `;
@@ -268,18 +271,18 @@ function renderTechTree() {
             else if (status.researching) statusClass = 'researching';
             else if (canResearch) statusClass = 'available';
 
-             // Helper for resources icons
+            // Helper for resources icons
             const getResIcon = (res) => {
-                 if (assetLoader && assetLoader.getSrc) {
-                     const src = assetLoader.getSrc(res);
-                     if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                 }
-                 return `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+                if (assetLoader && assetLoader.getSrc) {
+                    const src = assetLoader.getSrc(res);
+                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+                }
+                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
             };
 
             const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                            ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                            : `<div class="tech-icon-placeholder">T</div>`;
+                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
+                : `<div class="tech-icon-placeholder">T</div>`;
 
 
             html += `
@@ -290,8 +293,8 @@ function renderTechTree() {
                     <div class="tech-desc">${tech.description}</div>
                     <div class="tech-cost">
                         ${Object.entries(tech.cost).map(([res, amount]) => {
-                             return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-                        }).join(' ')}
+                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
+            }).join(' ')}
                     </div>
                     ${status.researching ? `<div class="tech-progress">Investigando...</div>` : ''}
                 </div>
@@ -328,9 +331,8 @@ function startGame(civId, mapConfig) {
 
     // Crear instancia del juego
     // Ocultar pantallas de selección y mostrar la pantalla de juego primero
-    document.getElementById('civSelectionScreen').classList.add('hidden');
+    document.getElementById('gameSetupScreen').classList.add('hidden');
     document.getElementById('startScreen').classList.add('hidden');
-    document.getElementById('mapSizeScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.remove('hidden');
 
     // Crear instancia del juego ahora que el contenedor es visible
@@ -388,26 +390,38 @@ function populateMapSizes() {
         option.className = 'map-size-option';
         option.dataset.size = key;
 
-        // Remove emoji 🗺️. Use a generic icon or shape.
-        const mapIcon = `<div style="width:40px;height:40px;background:#444;border:1px solid #666;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#888;">Map</div>`;
+        // Icono de mapa simple
+        const iconSize = key === 'tiny' ? '🗻' : key === 'small' ? '🏔️' : key === 'normal' ? '🌄' : key === 'large' ? '🌍' : '🌏';
 
         option.innerHTML = `
-            <div class="size-icon">${mapIcon}</div>
-            <div class="size-name">${mapData.name}</div>
-            <div class="size-desc">${mapData.width}×${mapData.height}</div>
+            <div class="size-icon">${iconSize}</div>
+            <div class="size-info">
+                <div class="size-name">${mapData.name}</div>
+                <div class="size-desc">${mapData.width}×${mapData.height} tiles</div>
+            </div>
         `;
 
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
+            // Remover selección anterior
+            mapSizeGrid.querySelectorAll('.map-size-option').forEach(opt => opt.classList.remove('selected'));
+            // Marcar como seleccionado
+            option.classList.add('selected');
             selectedMapSize = key;
             debugLogger.info(`Tamaño de mapa seleccionado: ${key}`, 'ui');
 
-            // Ir a selección de civilización
-            document.getElementById('mapSizeScreen').classList.add('hidden');
-            document.getElementById('civSelectionScreen').classList.remove('hidden');
+            // Habilitar botón de iniciar si también hay civilización seleccionada
+            updateStartButton();
         });
 
         mapSizeGrid.appendChild(option);
+    }
+
+    // Seleccionar 'normal' por defecto
+    const defaultOption = mapSizeGrid.querySelector('[data-size="normal"]');
+    if (defaultOption) {
+        defaultOption.classList.add('selected');
+        selectedMapSize = 'normal';
     }
 
     debugLogger.info(`${Object.keys(MAP_SIZES).length} tamaños de mapa generados`, 'ui');
@@ -433,54 +447,80 @@ function populateCivilizations() {
         return;
     }
 
+    // Mapeo de IDs de civilización a nombres de archivo de imagen
+    const civImageMap = {
+        'sumeria': 'sumerios.png',
+        'sumerios': 'sumerios.png',
+        'romans': 'romans.png',
+        'romanos': 'romans.png',
+        'vikings': 'vikings.png',
+        'vikingos': 'vikings.png',
+        'mongols': 'mongols.png',
+        'mongoles': 'mongols.png',
+        'argentinians': 'argentinians.png',
+        'argentinos': 'argentinians.png',
+        'egypt': 'egypt.png',
+        'egipto': 'egypt.png',
+        'babylon': 'babylon.png',
+        'babilonia': 'babylon.png',
+        'persia': 'persia.png',
+        'greece': 'greece.png',
+        'grecia': 'greece.png',
+        'byzantium': 'byzantium.png',
+        'bizancio': 'byzantium.png',
+        'caliphate': 'caliphate.png',
+        'califato': 'caliphate.png',
+        'spain': 'spain.png',
+        'españa': 'spain.png'
+    };
+
     civilizations.forEach(civ => {
         const option = document.createElement('div');
         option.className = 'civ-option';
         option.dataset.civ = civ.civilizationId;
 
-        // Remove emoji if present in civ.icon (likely is)
-        // Check if there is an image for the civ
-        let iconHtml = '';
-        if (assetLoader && assetLoader.getSrc) {
-             const src = assetLoader.getSrc(civ.civilizationId);
-             if (src) {
-                 iconHtml = `<img src="${src}" class="civ-icon-img" style="width:64px;height:64px;object-fit:contain;">`;
-             } else {
-                 // Fallback: Use first letter or generic
-                 iconHtml = `<div class="civ-icon-placeholder" style="font-size:30px;line-height:64px;text-align:center;">${civ.name.substring(0,1)}</div>`;
-             }
-        } else {
-             iconHtml = `<div class="civ-icon-placeholder">${civ.name.substring(0,1)}</div>`;
-        }
+        // Usar imagen de civilización desde assets/icons/civs/
+        const civId = civ.civilizationId.toLowerCase();
+        const imageName = civImageMap[civId] || `${civId}.png`;
+        const imageSrc = `assets/icons/civs/${imageName}`;
 
         option.innerHTML = `
-            <div class="civ-icon">${iconHtml}</div>
+            <div class="civ-icon">
+                <img src="${imageSrc}" alt="${civ.name}" onerror="this.style.display='none'; this.parentElement.querySelector('img').remove();">
+                <div class="civ-desc">${civ.description || ''}</div>
+            </div>
             <div class="civ-name">${civ.name}</div>
-            <div class="civ-desc">${civ.description}</div>
         `;
 
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
+            // Remover selección anterior
+            civGrid.querySelectorAll('.civ-option').forEach(opt => opt.classList.remove('selected'));
+            // Marcar como seleccionado
+            option.classList.add('selected');
             selectedCivilization = civ.civilizationId;
             debugLogger.info(`Civilización seleccionada: ${civ.civilizationId}`, 'ui');
 
-            // Obtener configuración del mapa
-            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
-
-            // Iniciar juego
-            startGame(civ.civilizationId, {
-                ...mapConfig,
-                seed: Date.now(),
-                numPlayers: 2,
-                biome: 'grassland',
-                style: 'continental'
-            });
+            // Habilitar botón de iniciar si también hay mapa seleccionado
+            updateStartButton();
         });
 
         civGrid.appendChild(option);
     });
 
     debugLogger.success(`${civilizations.length} civilizaciones cargadas`, 'ui');
+}
+
+/**
+ * Actualiza el estado del botón de iniciar partida
+ */
+function updateStartButton() {
+    const startButton = document.getElementById('startGameButton');
+    if (startButton) {
+        const canStart = selectedMapSize && selectedCivilization;
+        startButton.disabled = !canStart;
+        debugLogger.debug(`Botón iniciar: ${canStart ? 'habilitado' : 'deshabilitado'}`, 'ui');
+    }
 }
 
 
@@ -554,14 +594,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             return unit;
                         },
-                            getTeamColor: (civilizationId) => {
-                                const civ = dataLoader.getCivilizationData(civilizationId);
-                                return civ?.color || '#4169E1';
-                            },
-                            getBuildSpeed: (civilizationId) => {
-                                const civ = dataLoader.getCivilizationData(civilizationId);
-                                return civ?.bonuses?.buildSpeed || 1;
-                            }
+                        getTeamColor: (civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            return civ?.color || '#4169E1';
+                        },
+                        getBuildSpeed: (civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            return civ?.bonuses?.buildSpeed || 1;
+                        }
                     };
 
                     populateCivilizations();
@@ -574,31 +614,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         debugLogger.error('Error inicializando dataLoader', 'data', error);
     }
 
-    // Botón de inicio - ir a selección de tamaño de mapa
+    // Botón de inicio - ir a pantalla de configuración de partida
     const startButton = document.getElementById('startButton');
     if (startButton) {
         startButton.addEventListener('click', () => {
-            debugLogger.info('Mostrando selección de tamaño de mapa', 'ui');
+            debugLogger.info('Mostrando pantalla de configuración de partida', 'ui');
             document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('mapSizeScreen').classList.remove('hidden');
+            document.getElementById('gameSetupScreen').classList.remove('hidden');
+            // Actualizar estado del botón de inicio
+            updateStartButton();
         });
     }
 
-    // Botón de volver al inicio desde selección de mapa
+    // Botón de volver al inicio desde pantalla de configuración
     const backToStartButton = document.getElementById('backToStartButton');
     if (backToStartButton) {
         backToStartButton.addEventListener('click', () => {
-            document.getElementById('mapSizeScreen').classList.add('hidden');
+            document.getElementById('gameSetupScreen').classList.add('hidden');
             document.getElementById('startScreen').classList.remove('hidden');
         });
     }
 
-    // Botón de volver a selección de mapa desde civilización
-    const backToMapSizeButton = document.getElementById('backToMapSizeButton');
-    if (backToMapSizeButton) {
-        backToMapSizeButton.addEventListener('click', () => {
-            document.getElementById('civSelectionScreen').classList.add('hidden');
-            document.getElementById('mapSizeScreen').classList.remove('hidden');
+    // Botón de iniciar partida
+    const startGameButton = document.getElementById('startGameButton');
+    if (startGameButton) {
+        startGameButton.addEventListener('click', () => {
+            if (!selectedMapSize || !selectedCivilization) {
+                debugLogger.warn('Selecciona tamaño de mapa y civilización primero', 'ui');
+                return;
+            }
+
+            debugLogger.info(`Iniciando partida: ${selectedCivilization} en mapa ${selectedMapSize}`, 'ui');
+
+            // Obtener configuración del mapa
+            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
+
+            // Iniciar juego
+            startGame(selectedCivilization, {
+                ...mapConfig,
+                seed: Date.now(),
+                numPlayers: 2,
+                biome: 'grassland',
+                style: 'continental'
+            });
         });
     }
 
@@ -619,7 +677,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Update tech tree if visible
         const techScreen = document.getElementById('techTreeScreen');
         if (techScreen && !techScreen.classList.contains('hidden')) {
-             if (game) renderTechTree(); else renderStaticTechTree();
+            if (game) renderTechTree(); else renderStaticTechTree();
         }
     }).catch(err => {
         debugLogger.error('Error cargando assets', 'assets', err);

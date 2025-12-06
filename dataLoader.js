@@ -23,7 +23,20 @@ class DataLoader {
         };
 
         // Lista de civilizaciones (Idealmente debería venir de un manifiesto externo)
-        this.AVAILABLE_CIVS = ['mongols', 'sumeria', 'romans', 'vikings', 'argentinians'];
+        this.AVAILABLE_CIVS = [
+            'sumeria',
+            'egypt',
+            'babylon',
+            'persia',
+            'greece',
+            'romans',
+            'byzantium',
+            'caliphate',
+            'vikings',
+            'mongols',
+            'spain',
+            'argentinians'
+        ];
     }
 
     /**
@@ -264,7 +277,13 @@ class DataLoader {
     getAllAges() { return this.baseData.ages; }
     getCategories() { return this.baseData.categories; }
     getCivilizationData(civilizationId) { return this.civilizations.get(civilizationId); }
-    getAllCivilizations() { return Array.from(this.civilizations.values()); }
+
+    // Devolver civilizaciones en el orden definido en AVAILABLE_CIVS
+    getAllCivilizations() {
+        return this.AVAILABLE_CIVS
+            .map(civId => this.civilizations.get(civId))
+            .filter(civ => civ !== undefined);
+    }
     isLoaded() { return this.loaded; }
 
     async initialize() {

@@ -212,15 +212,41 @@ class SoundManager {
      */
     setVolume(volume) {
         this.volume = Math.max(0, Math.min(1, volume));
+        console.log(`🔊 Volumen establecido a: ${Math.round(this.volume * 100)}%`);
+
         // Actualizar volumen de todos los sonidos cargados
         for (let key in this.sounds) {
             if (this.sounds[key]) {
                 this.sounds[key].volume = this.volume;
             }
         }
+
         // Actualizar volumen de música si está sonando
         if (this.musicAudio) {
             this.musicAudio.volume = this.volume * 0.5;
+            console.log(`🎵 Volumen de música: ${Math.round(this.musicAudio.volume * 100)}%`);
+        }
+
+        // Guardar preferencia en localStorage
+        try {
+            localStorage.setItem('gameVolume', this.volume.toString());
+        } catch (e) {
+            // localStorage no disponible
+        }
+    }
+
+    /**
+     * Carga el volumen guardado en localStorage
+     */
+    loadSavedVolume() {
+        try {
+            const savedVolume = localStorage.getItem('gameVolume');
+            if (savedVolume !== null) {
+                this.volume = parseFloat(savedVolume);
+                console.log(`🔊 Volumen cargado: ${Math.round(this.volume * 100)}%`);
+            }
+        } catch (e) {
+            // localStorage no disponible
         }
     }
 }

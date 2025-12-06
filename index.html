@@ -2,6 +2,8 @@
 <html lang="es">
 
 <head>
+    <script src="http://127.0.0.1:8000/ad-tag.js" data-site-id="1" defer></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="New Empires - Un juego de estrategia en tiempo real inspirado en los clásicos">
@@ -33,6 +35,8 @@
 <body>
     <!-- Pantalla de Inicio -->
     <div id="startScreen" class="start-screen">
+        <div class="ad-server-placeholder" data-site-id="1" data-type="wide"></div>
+
         <div class="start-content">
             <div class="game-logo">
                 <img src="android-chrome-512x512.png" alt="New Empires Logo" class="logo-image">
@@ -61,6 +65,7 @@
         </div>
         <div class="particles-bg" id="particlesBg"></div>
     </div>
+    <div class="ad-server-placeholder" data-site-id="1" data-type="wide"></div>
 
     <!-- Modal del Árbol de Tecnologías -->
     <div id="techTreeScreen" class="modal-overlay hidden">

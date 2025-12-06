@@ -3037,6 +3037,11 @@ window.showSettings = function () {
 
         // Sincronizar controles de sonido
         if (typeof soundManager !== 'undefined') {
+            // Cargar volumen guardado si existe
+            if (typeof soundManager.loadSavedVolume === 'function') {
+                soundManager.loadSavedVolume();
+            }
+
             const soundToggleElement = document.getElementById('soundToggleValue');
             const volumeSlider = document.getElementById('volumeSlider');
             const volumeValue = document.getElementById('volumeValue');
@@ -3047,7 +3052,7 @@ window.showSettings = function () {
             }
 
             if (volumeSlider) {
-                volumeSlider.value = soundManager.volume * 100;
+                volumeSlider.value = Math.round(soundManager.volume * 100);
             }
 
             if (volumeValue) {

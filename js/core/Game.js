@@ -1287,20 +1287,40 @@ export class Game {
             }
         }
 
-        content.innerHTML = `
-                    <div class="selection-info">
-                    <div class="selection-icon">
-                        ${iconHtml}
-                    </div>
-                    <div class="selection-details">
-                        <h3>${entity.name}</h3>
-                        <div class="selection-stats">
-                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
-                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
-                    `;
+        content.innerHTML = '';
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'selection-info';
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'selection-icon';
+        iconDiv.innerHTML = iconHtml; // iconHtml contains <img> or sanitized placeholder
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'selection-details';
+
+        const nameHeader = document.createElement('h3');
+        nameHeader.textContent = entity.name;
+
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'selection-stats';
+
+        const hpDiv = document.createElement('div');
+        hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+        statsDiv.appendChild(hpDiv);
+
+        if (entity.attackDamage) {
+            const attackDiv = document.createElement('div');
+            attackDiv.textContent = `Ataque: ${entity.attackDamage}`;
+            statsDiv.appendChild(attackDiv);
+        }
+
+        detailsDiv.appendChild(nameHeader);
+        detailsDiv.appendChild(statsDiv);
+
+        infoDiv.appendChild(iconDiv);
+        infoDiv.appendChild(detailsDiv);
+        content.appendChild(infoDiv);
     } else {
         let iconHtml = '';
         if (typeof assetLoader !== 'undefined') {
@@ -1548,26 +1568,32 @@ export class Game {
         }
     }
 
-showNotification(message, type = 'info') {
-    const container = document.getElementById('notifications');
-    const notification = document.createElement('div');
-    notification.className = `notification ${ type } `;
+    showNotification(message, type = 'info') {
+        const container = document.getElementById('notifications');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
 
-    // Remove emoji icons, use CSS styling or generic icons if available
+        const icons = {
+            info: 'ℹ️',
+            error: '❌',
+            success: '✅'
+        };
 
-    // I'll create a simple colored block
-    const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
-    const iconStyle = `width:20px;height:20px;background:${color};border-radius:50%;display:inline-block;margin-right:10px;`;
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'notification-icon';
+        iconDiv.textContent = icons[type] || icons.info;
 
-    notification.innerHTML = `
-                    <div class="notification-icon">${icons[type]}</div>
-                        <div class="notification-text">${message}</div>
-                `;
+        const textDiv = document.createElement('div');
+        textDiv.className = 'notification-text';
+        textDiv.textContent = message;
 
-    container.appendChild(notification);
+        notification.appendChild(iconDiv);
+        notification.appendChild(textDiv);
 
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
 }

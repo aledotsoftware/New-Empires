@@ -42,17 +42,17 @@
                 <p>Construye tu civilización, recolecta recursos y conquista tus enemigos</p>
             </div>
             <button id="startButton" class="btn-start">
-                <span class="btn-icon"><img src="assets/icons/swords.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"></span>
+                <span class="btn-icon"><img src="assets/icons/swords.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""></span>
                 Comenzar Juego
-                <span class="btn-icon"><img src="assets/icons/townCenter.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"></span>
+                <span class="btn-icon"><img src="assets/icons/townCenter.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""></span>
             </button>
 
             <div class="start-buttons">
                 <button id="techTreeButton" class="btn-secondary" onclick="showTechTree()">
-                    <img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle"> Árbol de Tecnologías
+                    <img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle" alt=""> Árbol de Tecnologías
                 </button>
                 <button id="settingsButtonStart" class="btn-secondary" onclick="showSettings()">
-                    <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle"> Configuración
+                    <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle" alt=""> Configuración
                 </button>
             </div>
 
@@ -85,8 +85,8 @@
     <div id="techTreeScreen" class="modal-overlay hidden">
         <div class="modal-content tech-tree-modal">
             <div class="modal-header">
-                <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Árbol de Tecnologías</h2>
-                <button class="btn-close" onclick="hideTechTree()">✕</button>
+                <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""> Árbol de Tecnologías</h2>
+                <button class="btn-close" onclick="hideTechTree()" aria-label="Cerrar">✕</button>
             </div>
             <div class="tech-tree-content" id="techTreeContent">
                 <!-- Se llena dinámicamente con JavaScript -->
@@ -168,10 +168,10 @@
 
             <div style="display:flex; align-items:center; gap:12px;">
                 <div class="game-time">
-                    <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></span>
+                    <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;" alt=""></span>
                     <span id="gameTime">00:00</span>
                 </div>
-                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></button>
+                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;" aria-label="Configuración"><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;" alt=""></button>
             </div>
         </div>
 
@@ -179,8 +179,8 @@
         <div id="buildMenu" class="modal-overlay hidden">
             <div class="modal-content build-menu">
                 <div class="modal-header">
-                    <h2><img src="assets/icons/workshop.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Construir Edificio</h2>
-                    <button class="btn-close" onclick="closeBuildMenu()">✕</button>
+                    <h2><img src="assets/icons/workshop.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
+                    <button class="btn-close" onclick="closeBuildMenu()" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="build-grid">
                     <div class="build-option" data-building="house">
@@ -269,8 +269,8 @@
         <div id="settingsScreen" class="modal-overlay hidden">
             <div class="modal-content settings-modal" style="max-width: 500px;">
                 <div class="modal-header">
-                    <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Configuración</h2>
-                    <button class="btn-close" onclick="hideSettings()">✕</button>
+                    <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
+                    <button class="btn-close" onclick="hideSettings()" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
                     <div style="margin-bottom: 30px;">
@@ -281,14 +281,14 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Efectos de Sonido: <span id="soundToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
-                            <button class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;">
+                            <button class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;" aria-label="Alternar sonido">
                                 Alternar
                             </button>
                         </div>
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="font-weight: 600; color: #e2e8f0;">Volumen Maestro</label>
+                                <label for="volumeSlider" style="font-weight: 600; color: #e2e8f0;">Volumen Maestro</label>
                                 <span id="volumeValue" style="color: #48bb78;">50%</span>
                             </div>
                             <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"
@@ -304,14 +304,14 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
                             </label>
-                            <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;">
+                            <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;" aria-label="Alternar cuadrícula">
                                 Alternar
                             </button>
                         </div>
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="font-weight: 600; color: #e2e8f0;">Tamaño del Cursor</label>
+                                <label for="cursorSizeSlider" style="font-weight: 600; color: #e2e8f0;">Tamaño del Cursor</label>
                                 <span id="cursorSizeValue" style="color: #48bb78;">32px</span>
                             </div>
                             <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
@@ -324,7 +324,7 @@
 
                         <div style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="font-weight: 600; color: #e2e8f0;">Velocidad de Desplazamiento</label>
+                                <label for="cameraSpeedSlider" style="font-weight: 600; color: #e2e8f0;">Velocidad de Desplazamiento</label>
                                 <span id="cameraSpeedValue" style="color: #48bb78;">1200 px/s</span>
                             </div>
                             <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
@@ -333,7 +333,7 @@
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="font-weight: 600; color: #e2e8f0;">Margen de Activación</label>
+                                <label for="cameraMarginSlider" style="font-weight: 600; color: #e2e8f0;">Margen de Activación</label>
                                 <span id="cameraMarginValue" style="color: #48bb78;">30 px</span>
                             </div>
                             <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"

@@ -1511,18 +1511,29 @@ export class Game {
             const btn = document.createElement('button');
             btn.className = 'action-btn';
             btn.setAttribute('data-hotkey', hotkeys[i]);
+            btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
 
             if (i < buttons.length) {
                 const buttonData = buttons[i];
 
                 if (!buttonData.enabled) {
                     btn.classList.add('disabled');
+                    btn.setAttribute('aria-disabled', 'true');
                 }
 
-            btn.innerHTML = `
+                btn.setAttribute('aria-label', `${buttonData.label} (Tecla ${hotkeys[i]})`);
+                btn.innerHTML = `
                     <div class="btn-icon">${buttonData.icon}</div>
                         <div class="btn-label">${buttonData.label}</div>
                     ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
+                `;
+            } else {
+                btn.classList.add('disabled');
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
+                btn.innerHTML = `
+                    <div class="btn-hotkey">${hotkeys[i]}</div>
+                    <div class="btn-icon"></div>
                 `;
             }
 
@@ -1540,6 +1551,8 @@ export class Game {
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn disabled';
+            btn.setAttribute('aria-disabled', 'true');
+            btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
             btn.innerHTML = `
                 <div class="btn-hotkey">${hotkeys[i]}</div>
                 <div class="btn-icon"></div>

@@ -86,7 +86,7 @@
         <div class="modal-content tech-tree-modal">
             <div class="modal-header">
                 <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Árbol de Tecnologías</h2>
-                <button class="btn-close" onclick="hideTechTree()">✕</button>
+                <button class="btn-close" onclick="hideTechTree()" aria-label="Cerrar Árbol de Tecnologías">✕</button>
             </div>
             <div class="tech-tree-content" id="techTreeContent">
                 <!-- Se llena dinámicamente con JavaScript -->
@@ -171,7 +171,7 @@
                     <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></span>
                     <span id="gameTime">00:00</span>
                 </div>
-                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></button>
+                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;" aria-label="Abrir Configuración"><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></button>
             </div>
         </div>
 
@@ -180,7 +180,7 @@
             <div class="modal-content build-menu">
                 <div class="modal-header">
                     <h2><img src="assets/icons/workshop.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Construir Edificio</h2>
-                    <button class="btn-close" onclick="closeBuildMenu()">✕</button>
+                    <button class="btn-close" onclick="closeBuildMenu()" aria-label="Cerrar Menú de Construcción">✕</button>
                 </div>
                 <div class="build-grid">
                     <div class="build-option" data-building="house">
@@ -270,7 +270,7 @@
             <div class="modal-content settings-modal" style="max-width: 500px;">
                 <div class="modal-header">
                     <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle"> Configuración</h2>
-                    <button class="btn-close" onclick="hideSettings()">✕</button>
+                    <button class="btn-close" onclick="hideSettings()" aria-label="Cerrar Configuración">✕</button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
                     <div style="margin-bottom: 30px;">

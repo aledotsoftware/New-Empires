@@ -90,7 +90,7 @@
     justify-content: center;
     transition: all 0.2s;
     padding: 2px;
-    min-width: 0; /* Fix flex issue */
+    min-width: 0;
 }
 
 .action-btn:hover:not(.disabled) {

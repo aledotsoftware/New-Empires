@@ -1369,109 +1369,60 @@ export class Game {
             return;
         }
 
+        const buttons = [];
+
         // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
-        // Fila 1: Q W E R T
-        // Fila 2: A S D F G
-        // Fila 3: Z X C V B
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',  // Fila 1
             'A', 'S', 'D', 'F', 'G',  // Fila 2
             'Z', 'X', 'C', 'V', 'B'   // Fila 3
         ];
 
-    // Helper para obtener iconos de botones
-    const getBtnIcon = (key, fallback) => {
-        if (typeof assetLoader !== 'undefined') {
-            const src = assetLoader.getSrc(key);
-            if (src) return `<img src="${src}" class="icon-small">`;
-        }
-        return fallback;
-    };
-
-    // Helper para formatear costo con iconos
-    const formatCost = (costObj) => {
-        let str = '';
-        for (let [res, amount] of Object.entries(costObj)) {
-            let icon = '';
+        // Helper para obtener iconos de botones
+        const getBtnIcon = (key, fallback) => {
             if (typeof assetLoader !== 'undefined') {
-                const src = assetLoader.getSrc(res);
-                if (src) icon = `<img src="${src}" class="icon-tiny" style="width:16px;height:16px;vertical-align:middle;">`;
-                else {
-                    // Fallback emojis
-                    icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                }
+                const src = assetLoader.getSrc(key);
+                if (src) return `<img src="${src}" class="icon-small">`;
             }
-            str += `${amount}${icon} `;
-        }
-        return str.trim();
-    };
+            return fallback;
+        };
 
-    if (entity.type === 'villager') {
-        buttons.push({
-                icon: getBtnIcon('build', '🏗️'), // Use 'build' asset if available
-            label: 'Construir',
-            hotkey: 'Q',
-            action: () => this.openBuildMenu(),
-            enabled: true
-        });
-    } else if (entity.type === 'townCenter') {
-        const cost = CONFIG.UNIT_COSTS.villager;
-        const canAfford = this.canAfford(cost);
-
-        buttons.push({
-            icon: getBtnIcon('villager', '👨‍🌾'),
-            label: 'Aldeano',
-            hotkey: 'Q',
-            cost: formatCost(cost),
-            action: () => this.trainUnit('villager', this.selectedEntities[0]),
-            enabled: canAfford
-        });
-    } else if (entity.type === 'barracks') {
-        const warriorCost = CONFIG.UNIT_COSTS.warrior;
-        const archerCost = CONFIG.UNIT_COSTS.archer;
-        const canAffordWarrior = this.canAfford(warriorCost);
-        const canAffordArcher = this.canAfford(archerCost);
-
-        buttons.push({
-            icon: getBtnIcon('warrior', '⚔️'),
-            label: 'Guerrero',
-            hotkey: 'Q',
-            cost: formatCost(warriorCost),
-            action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-            enabled: canAffordWarrior
-        });
-
-        buttons.push({
-            icon: getBtnIcon('archer', '🏹'),
-            label: 'Arquero',
-            hotkey: 'W',
-            cost: formatCost(archerCost),
-            action: () => this.trainUnit('archer', this.selectedEntities[0]),
-            enabled: canAffordArcher
-        });
-    }
-
-    // Añadir tecnologías disponibles
-    if (this.techManager) {
-        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-        let techIndex = 0;
-        for (let tech of availableTechs) {
-            if (techIndex >= 13) break; // Máximo 13 botones más
-
-            const canAfford = this.techManager.canResearch(tech.id);
-            // Use formatCost helper
-            let costString = formatCost(tech.cost);
-
-            // TODO: Use asset icons for techs if available
-            // let icon = tech.icon || '🔬';
+        // Helper para formatear costo con iconos
+        const formatCost = (costObj) => {
+            let str = '';
+            for (let [res, amount] of Object.entries(costObj)) {
+                let icon = '';
+                if (typeof assetLoader !== 'undefined') {
+                    const src = assetLoader.getSrc(res);
+                    if (src) icon = `<img src="${src}" class="icon-tiny" style="width:16px;height:16px;vertical-align:middle;">`;
+                    else {
+                        // Fallback emojis
+                        icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                    }
+                }
+                str += `${amount}${icon} `;
+            }
+            return str.trim();
+        };
 
         if (entity.type === 'villager') {
             buttons.push({
-                icon: tech.icon || '🔬', // Tech icons are likely emojis in data, need to check Technologies.js to replace them or ignore
-                label: tech.name,
-                hotkey: hotkeys[buttons.length],
-                cost: costString,
-                action: () => this.techManager.startResearch(tech.id),
+                icon: getBtnIcon('build', '🏗️'),
+                label: 'Construir',
+                hotkey: 'Q',
+                action: () => this.openBuildMenu(),
+                enabled: true
+            });
+        } else if (entity.type === 'townCenter') {
+            const cost = CONFIG.UNIT_COSTS.villager;
+            const canAfford = this.canAfford(cost);
+
+            buttons.push({
+                icon: getBtnIcon('villager', '👨‍🌾'),
+                label: 'Aldeano',
+                hotkey: 'Q',
+                cost: formatCost(cost),
+                action: () => this.trainUnit('villager', this.selectedEntities[0]),
                 enabled: canAfford
             });
         } else if (entity.type === 'barracks') {
@@ -1481,7 +1432,7 @@ export class Game {
             const canAffordArcher = this.canAfford(archerCost);
 
             buttons.push({
-                icon: getBtnIcon('warrior', 'W'),
+                icon: getBtnIcon('warrior', '⚔️'),
                 label: 'Guerrero',
                 hotkey: 'Q',
                 cost: formatCost(warriorCost),
@@ -1490,7 +1441,7 @@ export class Game {
             });
 
             buttons.push({
-                icon: getBtnIcon('archer', 'A'),
+                icon: getBtnIcon('archer', '🏹'),
                 label: 'Arquero',
                 hotkey: 'W',
                 cost: formatCost(archerCost),
@@ -1511,13 +1462,7 @@ export class Game {
 
                 // Determine best icon for technology
                 let techIconKey = tech.id;
-                let techFallback = '🔬'; // Default scientific microscope emoji
-
-                // Try to find category-based icon if specific one doesn't exist
-                // We do this by checking if getSrc returns something for the tech ID
-                // Note: This relies on AssetLoader returning '' if not found.
-                // Since we can't easily check inside AssetLoader without calling getSrc,
-                // we'll implement logic here.
+                let techFallback = '🔬';
 
                 let hasSpecificIcon = false;
                 if (typeof assetLoader !== 'undefined') {
@@ -1527,14 +1472,10 @@ export class Game {
                 }
 
                 if (!hasSpecificIcon) {
-                    // Map category to generic asset icons
-                    // TECH_CATEGORIES values are strings like 'Economía', 'Militar', etc.
-                    // We need to match what's in technologies.js or the loaded data.
-
                     if (tech.category === 'Economía' || tech.category === 'ECONOMY') techIconKey = 'tech_economy';
                     else if (tech.category === 'Militar' || tech.category === 'MILITARY') techIconKey = 'tech_military';
                     else if (tech.category === 'Defensa' || tech.category === 'DEFENSE') techIconKey = 'tech_defense';
-                    else techIconKey = 'science'; // Fallback for Tools, Agriculture, etc.
+                    else techIconKey = 'science';
                 }
 
                 buttons.push({
@@ -1559,13 +1500,26 @@ export class Game {
 
                 if (!buttonData.enabled) {
                     btn.classList.add('disabled');
+                    btn.setAttribute('aria-disabled', 'true');
                 }
 
-            btn.innerHTML = `
+                btn.onclick = buttonData.action;
+                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
+                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+                btn.title = `${buttonData.label} (${hotkeys[i]})`;
+
+                btn.innerHTML = `
+                    <div class="btn-hotkey">${hotkeys[i]}</div>
                     <div class="btn-icon">${buttonData.icon}</div>
-                        <div class="btn-label">${buttonData.label}</div>
+                    <div class="btn-label">${buttonData.label}</div>
                     ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
                 `;
+            } else {
+                 btn.classList.add('disabled');
+                 btn.setAttribute('aria-disabled', 'true');
+                 btn.setAttribute('aria-label', `Sin acción (${hotkeys[i]})`);
+                 btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+                 btn.innerHTML = `<div class="btn-hotkey">${hotkeys[i]}</div>`;
             }
 
             grid.appendChild(btn);
@@ -1582,6 +1536,9 @@ export class Game {
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn disabled';
+            btn.setAttribute('aria-disabled', 'true');
+            btn.setAttribute('aria-label', `Sin acción (${hotkeys[i]})`);
+            btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
             btn.innerHTML = `
                 <div class="btn-hotkey">${hotkeys[i]}</div>
                 <div class="btn-icon"></div>

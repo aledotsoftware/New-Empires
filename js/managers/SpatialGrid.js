@@ -19,15 +19,19 @@ export class SpatialGrid {
         for (let i = 0; i < size; i++) {
             this.buckets[i] = [];
         }
+
+        // Optimización: Rastrear índices activos para limpiar solo lo necesario
+        this.activeIndices = [];
     }
 
     clear() {
-        // En lugar de crear nuevos arrays, vaciamos los existentes
-        // Esto reduce drásticamente la presión sobre el Garbage Collector
-        const len = this.buckets.length;
+        // En lugar de iterar todo el grid, solo limpiamos los buckets usados
+        const len = this.activeIndices.length;
         for (let i = 0; i < len; i++) {
-            this.buckets[i].length = 0;
+            const index = this.activeIndices[i];
+            this.buckets[index].length = 0;
         }
+        this.activeIndices.length = 0;
     }
 
     add(entity) {
@@ -37,7 +41,14 @@ export class SpatialGrid {
         // Verificación de límites simple
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
             const index = row * this.cols + col;
-            this.buckets[index].push(entity);
+            const bucket = this.buckets[index];
+
+            // Si el bucket estaba vacío, lo marcamos como activo
+            if (bucket.length === 0) {
+                this.activeIndices.push(index);
+            }
+
+            bucket.push(entity);
         }
     }
 

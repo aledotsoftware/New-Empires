@@ -1271,89 +1271,126 @@ export class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
-    if (this.selectedEntities.length === 0) {
-        content.innerHTML = `<div style="display:flex;align-items:center;height:100%;color:#888;">Nada seleccionado</div>`;
-        return;
-    }
+        // Limpiar contenido previo
+        while (content.firstChild) {
+            content.removeChild(content.firstChild);
+        }
 
-    if (this.selectedEntities.length === 1) {
-        const entity = this.selectedEntities[0];
+        if (this.selectedEntities.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.style.display = 'flex';
+            emptyDiv.style.alignItems = 'center';
+            emptyDiv.style.height = '100%';
+            emptyDiv.style.color = '#888';
+            emptyDiv.textContent = 'Nada seleccionado';
+            content.appendChild(emptyDiv);
+            return;
+        }
 
-        let iconHtml = entity.icon;
-        if (typeof assetLoader !== 'undefined') {
-            const src = assetLoader.getSrc(entity.type);
-            if (src) {
-                iconHtml = `<img src="${src}" alt="${entity.name}" class="icon-large">`;
+        if (this.selectedEntities.length === 1) {
+            const entity = this.selectedEntities[0];
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'selection-info';
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'selection-icon';
+
+            let iconSrc = null;
+            if (typeof assetLoader !== 'undefined') {
+                iconSrc = assetLoader.getSrc(entity.type);
             }
-        }
 
-        content.innerHTML = '';
-
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'selection-info';
-
-        const iconDiv = document.createElement('div');
-        iconDiv.className = 'selection-icon';
-        iconDiv.innerHTML = iconHtml; // iconHtml contains <img> or sanitized placeholder
-
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'selection-details';
-
-        const nameHeader = document.createElement('h3');
-        nameHeader.textContent = entity.name;
-
-        const statsDiv = document.createElement('div');
-        statsDiv.className = 'selection-stats';
-
-        const hpDiv = document.createElement('div');
-        hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
-        statsDiv.appendChild(hpDiv);
-
-        if (entity.attackDamage) {
-            const attackDiv = document.createElement('div');
-            attackDiv.textContent = `Ataque: ${entity.attackDamage}`;
-            statsDiv.appendChild(attackDiv);
-        }
-
-        detailsDiv.appendChild(nameHeader);
-        detailsDiv.appendChild(statsDiv);
-
-        infoDiv.appendChild(iconDiv);
-        infoDiv.appendChild(detailsDiv);
-        content.appendChild(infoDiv);
-    } else {
-        let iconHtml = '';
-        if (typeof assetLoader !== 'undefined') {
-            const src = assetLoader.getSrc('population');
-            if (src) {
-                 iconHtml = `<img src="${src}" alt="Group">`;
+            if (iconSrc) {
+                const img = document.createElement('img');
+                img.src = iconSrc;
+                img.alt = entity.name; // entity.name is usually safe but setting property is safer than HTML string
+                img.className = 'icon-large';
+                iconDiv.appendChild(img);
             } else {
-                 iconHtml = `<span>GRP</span>`;
+                // Fallback to emoji or text if no image
+                iconDiv.textContent = entity.icon || '';
             }
-        }
 
-        content.innerHTML = `
-                    <div class="selection-info">
-                    <div class="selection-icon">
-                        ${iconHtml}
-                    </div>
-                    <div class="selection-details">
-                        <h3>${this.selectedEntities.length} Unidades</h3>
-                        <div class="selection-stats">
-                            <div>Selección múltiple</div>
-                        </div>
-                    </div>
-                </div>
-                    `;
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'selection-details';
+
+            const nameHeader = document.createElement('h3');
+            nameHeader.textContent = entity.name;
+
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'selection-stats';
+
+            const hpDiv = document.createElement('div');
+            hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+            statsDiv.appendChild(hpDiv);
+
+            if (entity.attackDamage) {
+                const attackDiv = document.createElement('div');
+                attackDiv.textContent = `Ataque: ${entity.attackDamage}`;
+                statsDiv.appendChild(attackDiv);
+            }
+
+            detailsDiv.appendChild(nameHeader);
+            detailsDiv.appendChild(statsDiv);
+
+            infoDiv.appendChild(iconDiv);
+            infoDiv.appendChild(detailsDiv);
+            content.appendChild(infoDiv);
+        } else {
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'selection-info';
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'selection-icon';
+
+            let iconSrc = null;
+            if (typeof assetLoader !== 'undefined') {
+                iconSrc = assetLoader.getSrc('population');
+            }
+
+            if (iconSrc) {
+                const img = document.createElement('img');
+                img.src = iconSrc;
+                img.alt = 'Group';
+                iconDiv.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.textContent = 'GRP';
+                iconDiv.appendChild(span);
+            }
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'selection-details';
+
+            const nameHeader = document.createElement('h3');
+            nameHeader.textContent = `${this.selectedEntities.length} Unidades`;
+
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'selection-stats';
+
+            const selectionTextDiv = document.createElement('div');
+            selectionTextDiv.textContent = 'Selección múltiple';
+            statsDiv.appendChild(selectionTextDiv);
+
+            detailsDiv.appendChild(nameHeader);
+            detailsDiv.appendChild(statsDiv);
+
+            infoDiv.appendChild(iconDiv);
+            infoDiv.appendChild(detailsDiv);
+            content.appendChild(infoDiv);
+        }
     }
-}
 
     updateActionsPanel() {
         // Usar el nuevo ID commandPanel
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
-        grid.innerHTML = '';
+        // Limpiar contenido previo
+        while (grid.firstChild) {
+            grid.removeChild(grid.firstChild);
+        }
 
         // Si no hay selección o es múltiple, mostrar panel vacío
         if (this.selectedEntities.length !== 1) {
@@ -1378,36 +1415,57 @@ export class Game {
             'Z', 'X', 'C', 'V', 'B'   // Fila 3
         ];
 
-        // Helper para obtener iconos de botones
-        const getBtnIcon = (key, fallback) => {
+        const buttons = [];
+
+        // Helper para crear elementos
+        const createIconElement = (key, fallback) => {
             if (typeof assetLoader !== 'undefined') {
                 const src = assetLoader.getSrc(key);
-                if (src) return `<img src="${src}" class="icon-small">`;
+                if (src) {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.className = 'icon-small';
+                    return img;
+                }
             }
             return fallback;
         };
 
-        // Helper para formatear costo con iconos
-        const formatCost = (costObj) => {
-            let str = '';
+        const createCostElement = (costObj) => {
+            const container = document.createElement('div');
+            container.className = 'btn-cost';
+
             for (let [res, amount] of Object.entries(costObj)) {
-                let icon = '';
+                const span = document.createElement('span');
+                span.textContent = amount;
+                container.appendChild(span);
+
                 if (typeof assetLoader !== 'undefined') {
                     const src = assetLoader.getSrc(res);
-                    if (src) icon = `<img src="${src}" class="icon-tiny" style="width:16px;height:16px;vertical-align:middle;">`;
-                    else {
-                        // Fallback emojis
-                        icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                    if (src) {
+                        const img = document.createElement('img');
+                        img.src = src;
+                        img.className = 'icon-tiny';
+                        img.style.width = '16px';
+                        img.style.height = '16px';
+                        img.style.verticalAlign = 'middle';
+                        container.appendChild(img);
+                    } else {
+                        const iconSpan = document.createElement('span');
+                        iconSpan.textContent = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                        container.appendChild(iconSpan);
                     }
                 }
-                str += `${amount}${icon} `;
+                const space = document.createTextNode(' ');
+                container.appendChild(space);
             }
-            return str.trim();
+            return container;
         };
 
         if (entity.type === 'villager') {
             buttons.push({
-                icon: getBtnIcon('build', '🏗️'),
+                iconKey: 'workshop',
+                iconFallback: '🏗️',
                 label: 'Construir',
                 hotkey: 'Q',
                 action: () => this.openBuildMenu(),
@@ -1418,10 +1476,11 @@ export class Game {
             const canAfford = this.canAfford(cost);
 
             buttons.push({
-                icon: getBtnIcon('villager', '👨‍🌾'),
+                iconKey: 'villager',
+                iconFallback: '👨‍🌾',
                 label: 'Aldeano',
                 hotkey: 'Q',
-                cost: formatCost(cost),
+                cost: cost,
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
                 enabled: canAfford
             });
@@ -1432,19 +1491,21 @@ export class Game {
             const canAffordArcher = this.canAfford(archerCost);
 
             buttons.push({
-                icon: getBtnIcon('warrior', '⚔️'),
+                iconKey: 'warrior',
+                iconFallback: '⚔️',
                 label: 'Guerrero',
                 hotkey: 'Q',
-                cost: formatCost(warriorCost),
+                cost: warriorCost,
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
                 enabled: canAffordWarrior
             });
 
             buttons.push({
-                icon: getBtnIcon('archer', '🏹'),
+                iconKey: 'archer',
+                iconFallback: '🏹',
                 label: 'Arquero',
                 hotkey: 'W',
-                cost: formatCost(archerCost),
+                cost: archerCost,
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
                 enabled: canAffordArcher
             });
@@ -1458,7 +1519,6 @@ export class Game {
                 if (buttons.length >= 15) break;
 
                 const canAfford = this.techManager.canResearch(tech.id);
-                let costString = formatCost(tech.cost);
 
                 // Determine best icon for technology
                 let techIconKey = tech.id;
@@ -1482,7 +1542,7 @@ export class Game {
                     icon: getBtnIcon(techIconKey, tech.icon || techFallback),
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
-                    cost: costString,
+                    cost: tech.cost,
                     action: () => this.techManager.startResearch(tech.id),
                     enabled: canAfford
                 });
@@ -1500,26 +1560,37 @@ export class Game {
 
                 if (!buttonData.enabled) {
                     btn.classList.add('disabled');
-                    btn.setAttribute('aria-disabled', 'true');
+                } else {
+                    btn.onclick = buttonData.action;
                 }
 
-                btn.onclick = buttonData.action;
-                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
-                btn.title = `${buttonData.label} (${hotkeys[i]})`;
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+                const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
+                if (iconEl) iconDiv.appendChild(iconEl);
 
-                btn.innerHTML = `
-                    <div class="btn-hotkey">${hotkeys[i]}</div>
-                    <div class="btn-icon">${buttonData.icon}</div>
-                    <div class="btn-label">${buttonData.label}</div>
-                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
-                `;
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'btn-label';
+                labelDiv.textContent = buttonData.label;
+
+                btn.appendChild(iconDiv);
+                btn.appendChild(labelDiv);
+
+                if (buttonData.cost) {
+                    const costDiv = createCostElement(buttonData.cost);
+                    btn.appendChild(costDiv);
+                }
             } else {
-                 btn.classList.add('disabled');
-                 btn.setAttribute('aria-disabled', 'true');
-                 btn.setAttribute('aria-label', `Sin acción (${hotkeys[i]})`);
-                 btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
-                 btn.innerHTML = `<div class="btn-hotkey">${hotkeys[i]}</div>`;
+                btn.classList.add('disabled');
+                const hotkeyDiv = document.createElement('div');
+                hotkeyDiv.className = 'btn-hotkey';
+                hotkeyDiv.textContent = hotkeys[i];
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+
+                btn.appendChild(hotkeyDiv);
+                btn.appendChild(iconDiv);
             }
 
             grid.appendChild(btn);
@@ -1536,13 +1607,16 @@ export class Game {
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn disabled';
-            btn.setAttribute('aria-disabled', 'true');
-            btn.setAttribute('aria-label', `Sin acción (${hotkeys[i]})`);
-            btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
-            btn.innerHTML = `
-                <div class="btn-hotkey">${hotkeys[i]}</div>
-                <div class="btn-icon"></div>
-            `;
+
+            const hotkeyDiv = document.createElement('div');
+            hotkeyDiv.className = 'btn-hotkey';
+            hotkeyDiv.textContent = hotkeys[i];
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'btn-icon';
+
+            btn.appendChild(hotkeyDiv);
+            btn.appendChild(iconDiv);
             grid.appendChild(btn);
         }
     }

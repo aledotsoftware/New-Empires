@@ -1408,12 +1408,7 @@ export class Game {
 
     if (entity.type === 'villager') {
         buttons.push({
-            icon: '🏗️', // No hay asset especifico para "construir" pero podríamos usar un martillo si existiera. Usaremos emoji por ahora o icono de workshop?
-            // User said prohibit emojis.
-            // Check assetLoader.getSrc('workshop') -> hammer icon? No.
-            // I'll leave emoji for action verbs if no icon, or try to find one.
-            // Actually, I can use a generic building icon.
-            icon: getBtnIcon('workshop', '🏗️'),
+                icon: getBtnIcon('build', '🏗️'), // Use 'build' asset if available
             label: 'Construir',
             hotkey: 'Q',
             action: () => this.openBuildMenu(),
@@ -1507,16 +1502,43 @@ export class Game {
         // Añadir tecnologías disponibles
         if (this.techManager) {
             const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-            // Llenar slots vacíos hasta donde corresponda si queremos un layout fijo,
-            // pero por ahora simplemente agregamos al siguiente slot disponible.
+
             for (let tech of availableTechs) {
                 if (buttons.length >= 15) break;
 
                 const canAfford = this.techManager.canResearch(tech.id);
                 let costString = formatCost(tech.cost);
 
+                // Determine best icon for technology
+                let techIconKey = tech.id;
+                let techFallback = '🔬'; // Default scientific microscope emoji
+
+                // Try to find category-based icon if specific one doesn't exist
+                // We do this by checking if getSrc returns something for the tech ID
+                // Note: This relies on AssetLoader returning '' if not found.
+                // Since we can't easily check inside AssetLoader without calling getSrc,
+                // we'll implement logic here.
+
+                let hasSpecificIcon = false;
+                if (typeof assetLoader !== 'undefined') {
+                    if (assetLoader.getSrc(tech.id)) {
+                        hasSpecificIcon = true;
+                    }
+                }
+
+                if (!hasSpecificIcon) {
+                    // Map category to generic asset icons
+                    // TECH_CATEGORIES values are strings like 'Economía', 'Militar', etc.
+                    // We need to match what's in technologies.js or the loaded data.
+
+                    if (tech.category === 'Economía' || tech.category === 'ECONOMY') techIconKey = 'tech_economy';
+                    else if (tech.category === 'Militar' || tech.category === 'MILITARY') techIconKey = 'tech_military';
+                    else if (tech.category === 'Defensa' || tech.category === 'DEFENSE') techIconKey = 'tech_defense';
+                    else techIconKey = 'science'; // Fallback for Tools, Agriculture, etc.
+                }
+
                 buttons.push({
-                    icon: getBtnIcon(tech.id, 'T'),
+                    icon: getBtnIcon(techIconKey, tech.icon || techFallback),
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: costString,

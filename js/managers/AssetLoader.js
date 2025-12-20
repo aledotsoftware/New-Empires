@@ -56,7 +56,13 @@ export class AssetLoader {
             { key: 'wood', src: 'assets/icons/storageWood.png' },
             { key: 'food', src: 'assets/icons/house.png' }, // Fallback icon
             { key: 'gold', src: 'assets/icons/market.png' }, // Fallback icon
-            { key: 'stone', src: 'assets/icons/storage.png' } // Fallback icon
+            { key: 'stone', src: 'assets/icons/storage.png' }, // Fallback icon
+            // Technology icons
+            { key: 'tech_economy', src: 'assets/icons/tech_economy.png' },
+            { key: 'tech_military', src: 'assets/icons/tech_military.png' },
+            { key: 'tech_defense', src: 'assets/icons/tech_defense.png' },
+            { key: 'science', src: 'assets/icons/science.png' },
+            { key: 'build', src: 'assets/icons/build.png' } // Assuming build.png exists or fallback to workshop
         ];
 
         this.totalAssets = assetsToLoad.length;
@@ -102,7 +108,12 @@ export class AssetLoader {
             'wood': 'assets/icons/storageWood.png',
             'food': 'assets/icons/house.png',
             'gold': 'assets/icons/market.png',
-            'stone': 'assets/icons/storage.png'
+            'stone': 'assets/icons/storage.png',
+            'tech_economy': 'assets/icons/tech_economy.png',
+            'tech_military': 'assets/icons/tech_military.png',
+            'tech_defense': 'assets/icons/tech_defense.png',
+            'science': 'assets/icons/science.png',
+            'build': 'assets/icons/build.png'
         };
         return map[key] || '';
     }

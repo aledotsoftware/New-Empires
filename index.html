@@ -42,17 +42,21 @@
                 <p>Construye tu civilización, recolecta recursos y conquista tus enemigos</p>
             </div>
             <button id="startButton" class="btn-start">
-                <span class="btn-icon"><img src="assets/icons/swords.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""></span>
+                <span class="btn-icon"><img src="assets/icons/swords.png" onerror="this.style.display='none'"
+                        style="width:24px;vertical-align:middle" alt=""></span>
                 Comenzar Juego
-                <span class="btn-icon"><img src="assets/icons/townCenter.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""></span>
+                <span class="btn-icon"><img src="assets/icons/townCenter.png" onerror="this.style.display='none'"
+                        style="width:24px;vertical-align:middle" alt=""></span>
             </button>
 
             <div class="start-buttons">
                 <button id="techTreeButton" class="btn-secondary" onclick="showTechTree()">
-                    <img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle" alt=""> Árbol de Tecnologías
+                    <img src="assets/icons/tech.png" onerror="this.style.display='none'"
+                        style="width:20px;vertical-align:middle" alt=""> Árbol de Tecnologías
                 </button>
                 <button id="settingsButtonStart" class="btn-secondary" onclick="showSettings()">
-                    <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;vertical-align:middle" alt=""> Configuración
+                    <img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                        style="width:20px;vertical-align:middle" alt=""> Configuración
                 </button>
             </div>
 
@@ -85,7 +89,8 @@
     <div id="techTreeScreen" class="modal-overlay hidden">
         <div class="modal-content tech-tree-modal">
             <div class="modal-header">
-                <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""> Árbol de Tecnologías</h2>
+                <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'"
+                        style="width:24px;vertical-align:middle" alt=""> Árbol de Tecnologías</h2>
                 <button class="btn-close" onclick="hideTechTree()" aria-label="Cerrar">✕</button>
             </div>
             <div class="tech-tree-content" id="techTreeContent">
@@ -130,35 +135,40 @@
         <div class="top-panel">
             <div class="resources-panel">
                 <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
+                    <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
+                    <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
+                    <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Oro</div>
                         <div id="goldCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
+                    <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
                     </div>
                 </div>
                 <div class="resource-item resource-population">
-                    <div class="resource-icon"><img src="assets/icons/population.png" onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
+                    <div class="resource-icon"><img src="assets/icons/population.png"
+                            onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
                     <div class="resource-info">
                         <div class="resource-label">Población</div>
                         <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
@@ -168,10 +178,13 @@
 
             <div style="display:flex; align-items:center; gap:12px;">
                 <div class="game-time">
-                    <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;" alt=""></span>
+                    <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'"
+                            style="width:20px;height:20px;" alt=""></span>
                     <span id="gameTime">00:00</span>
                 </div>
-                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;" aria-label="Configuración"><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;" alt=""></button>
+                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
+                    aria-label="Configuración"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                        style="width:20px;height:20px;" alt=""></button>
             </div>
         </div>
 
@@ -179,12 +192,14 @@
         <div id="buildMenu" class="modal-overlay hidden">
             <div class="modal-content build-menu">
                 <div class="modal-header">
-                    <h2><img src="assets/icons/workshop.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
+                    <h2><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
+                            style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
                     <button class="btn-close" onclick="closeBuildMenu()" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="build-grid">
                     <div class="build-option" data-building="house">
-                        <div class="build-icon"><img src="assets/icons/house.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/house.png" onerror="this.style.display='none'"
+                                style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Casa</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 30</span>
@@ -192,7 +207,8 @@
                         <div class="build-info">+5 población</div>
                     </div>
                     <div class="build-option" data-building="barracks">
-                        <div class="build-icon"><img src="assets/icons/barracks.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/barracks.png" onerror="this.style.display='none'"
+                                style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Cuartel</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 175</span>
@@ -200,7 +216,9 @@
                         <div class="build-info">Entrena unidades</div>
                     </div>
                     <div class="build-option" data-building="townCenter">
-                        <div class="build-icon"><img src="assets/icons/townCenter.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/townCenter.png"
+                                onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;">
+                        </div>
                         <div class="build-name">Centro Urbano</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 275</span>
@@ -209,7 +227,8 @@
                         <div class="build-info">Entrena aldeanos</div>
                     </div>
                     <div class="build-option" data-building="storage">
-                        <div class="build-icon"><img src="assets/icons/storage.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/storage.png" onerror="this.style.display='none'"
+                                style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Depósito</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 100</span>
@@ -217,7 +236,9 @@
                         <div class="build-info">Almacena recursos</div>
                     </div>
                     <div class="build-option" data-building="storageWood">
-                        <div class="build-icon"><img src="assets/icons/storageWood.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/storageWood.png"
+                                onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;">
+                        </div>
                         <div class="build-name">Depósito de Madera</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 100</span>
@@ -225,7 +246,8 @@
                         <div class="build-info">Almacena madera</div>
                     </div>
                     <div class="build-option" data-building="market">
-                        <div class="build-icon"><img src="assets/icons/market.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/market.png" onerror="this.style.display='none'"
+                                style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Mercado</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 150</span>
@@ -234,7 +256,8 @@
                         <div class="build-info">Almacena recursos</div>
                     </div>
                     <div class="build-option" data-building="temple">
-                        <div class="build-icon"><img src="assets/icons/temple.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/temple.png" onerror="this.style.display='none'"
+                                style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Templo</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 200</span>
@@ -243,7 +266,8 @@
                         <div class="build-info">Almacena recursos</div>
                     </div>
                     <div class="build-option" data-building="workshop">
-                        <div class="build-icon"><img src="assets/icons/workshop.png" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"></div>
+                        <div class="build-icon"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
+                                style="width:100%;height:100%;object-fit:contain;"></div>
                         <div class="build-name">Taller</div>
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny"> 200</span>
@@ -269,7 +293,8 @@
         <div id="settingsScreen" class="modal-overlay hidden">
             <div class="modal-content settings-modal" style="max-width: 500px;">
                 <div class="modal-header">
-                    <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
+                    <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                            style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
                     <button class="btn-close" onclick="hideSettings()" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
@@ -281,14 +306,16 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Efectos de Sonido: <span id="soundToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
-                            <button class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;" aria-label="Alternar sonido">
+                            <button class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;"
+                                aria-label="Alternar sonido">
                                 Alternar
                             </button>
                         </div>
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label for="volumeSlider" style="font-weight: 600; color: #e2e8f0;">Volumen Maestro</label>
+                                <label for="volumeSlider" style="font-weight: 600; color: #e2e8f0;">Volumen
+                                    Maestro</label>
                                 <span id="volumeValue" style="color: #48bb78;">50%</span>
                             </div>
                             <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"
@@ -304,14 +331,16 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
                             </label>
-                            <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;" aria-label="Alternar cuadrícula">
+                            <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;"
+                                aria-label="Alternar cuadrícula">
                                 Alternar
                             </button>
                         </div>
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label for="cursorSizeSlider" style="font-weight: 600; color: #e2e8f0;">Tamaño del Cursor</label>
+                                <label for="cursorSizeSlider" style="font-weight: 600; color: #e2e8f0;">Tamaño del
+                                    Cursor</label>
                                 <span id="cursorSizeValue" style="color: #48bb78;">32px</span>
                             </div>
                             <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
@@ -324,7 +353,8 @@
 
                         <div style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label for="cameraSpeedSlider" style="font-weight: 600; color: #e2e8f0;">Velocidad de Desplazamiento</label>
+                                <label for="cameraSpeedSlider" style="font-weight: 600; color: #e2e8f0;">Velocidad de
+                                    Desplazamiento</label>
                                 <span id="cameraSpeedValue" style="color: #48bb78;">1200 px/s</span>
                             </div>
                             <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
@@ -333,7 +363,8 @@
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label for="cameraMarginSlider" style="font-weight: 600; color: #e2e8f0;">Margen de Activación</label>
+                                <label for="cameraMarginSlider" style="font-weight: 600; color: #e2e8f0;">Margen de
+                                    Activación</label>
                                 <span id="cameraMarginValue" style="color: #48bb78;">30 px</span>
                             </div>
                             <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"
@@ -347,12 +378,14 @@
                 </div>
             </div>
             <div class="game-time">
-                <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'" style="width:20px;height:20px;"></span>
+                <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'"
+                        style="width:20px;height:20px;"></span>
                 <span id="gameTime">00:00</span>
             </div>
             <button class="btn-secondary" onclick="showSettings()"
                 style="margin-left: 15px; padding: 8px 16px; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.5);">
-                <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;"> Config
+                <img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                    style="width:20px;height:20px;"> Config
             </button>
         </div>
 
@@ -397,7 +430,8 @@
                 'technologies.js',
                 'mapGenerator.js',
                 'soundManager.js',
-                'game.legacy.js'
+                'game.js',           // Motor principal del juego
+                'game.legacy.js'     // Shim de compatibilidad
             ];
             scripts.forEach(function (src) {
                 // Si ya tiene parámetros, agregar &v, si no, agregar ?v

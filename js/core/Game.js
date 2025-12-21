@@ -1558,8 +1558,13 @@ export class Game {
             if (i < buttons.length) {
                 const buttonData = buttons[i];
 
+                // ACCESIBILIDAD: Atributos ARIA
+                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
+
                 if (!buttonData.enabled) {
                     btn.classList.add('disabled');
+                    btn.setAttribute('aria-disabled', 'true');
                 } else {
                     btn.onclick = buttonData.action;
                 }
@@ -1582,6 +1587,11 @@ export class Game {
                 }
             } else {
                 btn.classList.add('disabled');
+                // ACCESIBILIDAD: Atributos ARIA para botones vacíos en panel activo
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
+                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+
                 const hotkeyDiv = document.createElement('div');
                 hotkeyDiv.className = 'btn-hotkey';
                 hotkeyDiv.textContent = hotkeys[i];
@@ -1607,6 +1617,10 @@ export class Game {
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn disabled';
+            // ACCESIBILIDAD: Atributos ARIA para botones vacíos
+            btn.setAttribute('aria-disabled', 'true');
+            btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
+            btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
 
             const hotkeyDiv = document.createElement('div');
             hotkeyDiv.className = 'btn-hotkey';

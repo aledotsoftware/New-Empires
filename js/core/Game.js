@@ -1,5 +1,6 @@
 // Imports de módulos creados
 import { CONFIG, TILE_SIZE, TERRAIN_TYPES } from './constants.js';
+import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';
@@ -1428,7 +1429,9 @@ export class Game {
                     return img;
                 }
             }
-            return fallback;
+            const span = document.createElement('span');
+            span.textContent = fallback;
+            return span;
         };
 
         const createCostElement = (costObj) => {
@@ -1539,7 +1542,8 @@ export class Game {
                 }
 
                 buttons.push({
-                    icon: getBtnIcon(techIconKey, tech.icon || techFallback),
+                    iconKey: techIconKey,
+                    iconFallback: tech.icon || techFallback,
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: tech.cost,

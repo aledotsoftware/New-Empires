@@ -495,7 +495,7 @@ function populateCivilizations() {
 
 // ===== EVENT LISTENERS =====
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initApp = async () => {
     debugLogger.info('DOM cargado, inicializando juego...', 'game');
 
     // Generar opciones de tamaño de mapa dinámicamente
@@ -646,7 +646,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderStaticTechTree();
 
     debugLogger.success('Inicialización completada', 'game');
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 // ===== EXPORTS (para debugging en consola) =====
 window.debugLogger = debugLogger;

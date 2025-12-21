@@ -1,9 +1,8 @@
 {
     "civilizationId": "argentinians",
-    "name": "Imperio Argentino",
-    "description": "Nación orgullosa con gran capacidad agrícola y unidades de caballería superiores.",
-    "icon": "🌞",
-    "iconEmoji": "☀️",
+    "name": "República Argentina",
+    "description": "Nación orgullosa con gran capacidad agrícola y unidades aereas superiores.",
+    "icon": "assets/icons/civs/argentinians.png",
     "color": "#75aadb",
     "primaryColor": "#75aadb",
     "secondaryColor": "#ffffff",
@@ -21,19 +20,19 @@
     "unitOverrides": {
         "villager": {
             "name": "Gaucho",
-            "icon": "🧉",
+            "icon": "assets/icons/villager.png",
             "gatherBonus": 1.2
         },
         "warrior": {
             "name": "Miliciano",
-            "icon": "🗡️",
+            "icon": "assets/icons/warrior.png",
             "attack": 12,
             "hp": 110,
             "speed": 45
         },
         "archer": {
             "name": "Cazador",
-            "icon": "🏹",
+            "icon": "assets/icons/archer.png",
             "attack": 8,
             "hp": 60,
             "speed": 50
@@ -42,24 +41,24 @@
     "buildingOverrides": {
         "townCenter": {
             "name": "Cabildo",
-            "icon": "🏛️",
+            "icon": "assets/icons/townCenter.png",
             "description": "Centro administrativo colonial argentino"
         },
         "house": {
             "name": "Rancho",
-            "icon": "🏠",
+            "icon": "assets/icons/house.png",
             "description": "Vivienda de las pampas"
         },
         "barracks": {
-            "name": "Fortín",
-            "icon": "⚔️",
+            "name": "Fortin",
+            "icon": "assets/icons/barracks.png",
             "description": "Fortaleza fronteriza argentina"
         }
     },
     "uniqueUnit": {
         "id": "granadero",
         "name": "Granadero a Caballo",
-        "icon": "🐎",
+        "icon": "assets/icons/warrior.png",
         "baseUnit": "warrior",
         "age": 19,
         "bonuses": {
@@ -73,10 +72,10 @@
         {
             "id": "pampasDomination",
             "name": "Dominio de las Pampas",
-            "icon": "🌾",
+            "icon": "assets/icons/tech_economy.png",
             "category": "ECONOMY",
             "age": 18,
-            "description": "Maestría en la agricultura y ganadería de las vastas llanuras.",
+            "description": "Maestria en la agricultura y ganaderia de las vastas llanuras.",
             "cost": {
                 "food": 300,
                 "wood": 150

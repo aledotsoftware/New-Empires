@@ -1,0 +1,84 @@
+{
+    "civilizationId": "byzantium",
+    "name": "Imperio Bizantino",
+    "description": "Herederos de Roma. Maestros de la diplomacia, el fuego griego y las defensas impenetrables.",
+    "icon": "☦️",
+    "iconEmoji": "🔱",
+    "color": "#800080",
+    "bonuses": {
+        "wallHp": 1.35,
+        "buildingHp": 1.20,
+        "religiousBonus": 1.25
+    },
+    "uniqueUnit": {
+        "id": "cataphract",
+        "name": "Catafracto",
+        "icon": "🐴",
+        "baseUnit": "warrior",
+        "age": 19,
+        "bonuses": {
+            "armor": 1.6,
+            "maxHp": 1.4,
+            "attackDamage": 1.25
+        }
+    },
+    "technologyOverrides": {
+        "fortification": {
+            "name": "Murallas Teodosianas",
+            "icon": "🏰",
+            "description": "Las murallas más impenetrables del mundo."
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Hagia Sophia",
+            "icon": "⛪",
+            "description": "Catedral y centro del poder bizantino."
+        },
+        "temple": {
+            "name": "Iglesia Ortodoxa",
+            "icon": "☦️",
+            "description": "Centro de la fe ortodoxa."
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "greekFire",
+            "name": "Fuego Griego",
+            "icon": "🔥",
+            "category": "MILITARY",
+            "age": 20,
+            "description": "Arma secreta incendiaria devastadora.",
+            "cost": {
+                "gold": 400,
+                "stone": 200
+            },
+            "researchTime": 60,
+            "building": "workshop",
+            "prerequisites": [],
+            "effects": {
+                "siegeDamage": 1.40,
+                "shipDamage": 1.50
+            }
+        },
+        {
+            "id": "themataSystem",
+            "name": "Sistema de Themas",
+            "icon": "🗺️",
+            "category": "ADMINISTRATION",
+            "age": 19,
+            "description": "Organización militar-administrativa del imperio.",
+            "cost": {
+                "food": 300,
+                "gold": 300
+            },
+            "researchTime": 55,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "unitProduction": 1.20,
+                "taxCollection": 1.15
+            }
+        }
+    ]
+}

@@ -1,9 +1,8 @@
 {
     "civilizationId": "mongols",
     "name": "Mongoles",
-    "description": "Civilización nómada de las estepas",
-    "icon": "🏇",
-    "iconEmoji": "🏹",
+    "description": "Civilizacion nomada de las estepas",
+    "icon": "assets/icons/civs/mongols.png",
     "color": "#8B4513",
     "bonuses": {
         "unitSpeed": 1.15,
@@ -13,7 +12,7 @@
     "uniqueUnit": {
         "id": "mangudai",
         "name": "Mangudai",
-        "icon": "🏹",
+        "icon": "assets/icons/archer.png",
         "baseUnit": "archer",
         "age": 18,
         "bonuses": {
@@ -25,40 +24,40 @@
     "technologyOverrides": {
         "weaving": {
             "name": "Tejido de Fieltro",
-            "icon": "🧶",
-            "description": "Técnica mongola de crear fieltro con lana de oveja."
+            "icon": "assets/icons/tech_economy.png",
+            "description": "Tecnica mongola de crear fieltro con lana de oveja."
         },
         "mudBricks": {
             "name": "Estructura de Yurta",
-            "icon": "⛺",
-            "description": "Construcción de yurtas portátiles tradicionales."
+            "icon": "assets/icons/tech_defense.png",
+            "description": "Construccion de yurtas portatiles tradicionales."
         },
         "horseColar": {
-            "name": "Maestría Ecuestre",
-            "icon": "🐴",
-            "description": "Habilidad superior en doma y cría de caballos de las estepas."
+            "name": "Maestria Ecuestre",
+            "icon": "assets/icons/tech_military.png",
+            "description": "Habilidad superior en doma y cria de caballos de las estepas."
         }
     },
     "buildingOverrides": {
         "house": {
             "name": "Yurta",
-            "icon": "⛺",
-            "description": "Vivienda portátil tradicional mongola."
+            "icon": "assets/icons/house.png",
+            "description": "Vivienda portatil tradicional mongola."
         },
         "barracks": {
             "name": "Campo de Entrenamiento",
-            "icon": "🏕️",
-            "description": "Área de entrenamiento para guerreros nómadas."
+            "icon": "assets/icons/barracks.png",
+            "description": "Area de entrenamiento para guerreros nomadas."
         }
     },
     "uniqueTechnologies": [
         {
             "id": "steppeTactics",
-            "name": "Tácticas de Estepa",
-            "icon": "🐎",
+            "name": "Tacticas de Estepa",
+            "icon": "assets/icons/tech_military.png",
             "category": "MILITARY",
             "age": 20,
-            "description": "Tácticas de guerrilla y ataque rápido perfeccionadas en las estepas.",
+            "description": "Tacticas de guerrilla y ataque rapido perfeccionadas en las estepas.",
             "cost": {
                 "food": 300,
                 "gold": 200

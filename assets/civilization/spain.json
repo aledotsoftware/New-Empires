@@ -1,0 +1,90 @@
+{
+    "civilizationId": "spain",
+    "name": "Reino de España",
+    "description": "Forjadores de un imperio global. Conquistadores, navegantes y defensores de la fe.",
+    "icon": "🦅",
+    "iconEmoji": "⚜️",
+    "color": "#AA151B",
+    "bonuses": {
+        "explorationBonus": 1.30,
+        "goldGather": 1.25,
+        "missionaryEfficiency": 1.35
+    },
+    "uniqueUnit": {
+        "id": "conquistador",
+        "name": "Conquistador",
+        "icon": "🗡️",
+        "baseUnit": "warrior",
+        "age": 20,
+        "bonuses": {
+            "attackDamage": 1.4,
+            "armor": 1.3,
+            "speed": 1.2
+        }
+    },
+    "technologyOverrides": {
+        "navigation": {
+            "name": "Navegación Española",
+            "icon": "⛵",
+            "description": "Técnicas de navegación oceánica."
+        },
+        "cavalry": {
+            "name": "Caballería Española",
+            "icon": "🐴",
+            "description": "Tradición ecuestre heredada de los moros."
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Real Alcázar",
+            "icon": "🏰",
+            "description": "Fortaleza-palacio real."
+        },
+        "temple": {
+            "name": "Catedral",
+            "icon": "⛪",
+            "description": "Centro de la fe católica."
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "reconquista",
+            "name": "Reconquista",
+            "icon": "⚔️",
+            "category": "MILITARY",
+            "age": 19,
+            "description": "Siglos de lucha forjan guerreros temibles.",
+            "cost": {
+                "food": 300,
+                "gold": 350
+            },
+            "researchTime": 55,
+            "building": "barracks",
+            "prerequisites": [],
+            "effects": {
+                "cavalryDamage": 1.25,
+                "infantryArmor": 1.20
+            }
+        },
+        {
+            "id": "newWorldTrade",
+            "name": "Comercio del Nuevo Mundo",
+            "icon": "💰",
+            "category": "ECONOMY",
+            "age": 21,
+            "description": "Riquezas de las Américas fluyen al imperio.",
+            "cost": {
+                "food": 400,
+                "wood": 300,
+                "gold": 200
+            },
+            "researchTime": 70,
+            "building": "market",
+            "prerequisites": [],
+            "effects": {
+                "goldGather": 1.40,
+                "tradeBonus": 1.30
+            }
+        }
+    ]
+}

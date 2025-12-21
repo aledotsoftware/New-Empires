@@ -1,9 +1,8 @@
 {
     "civilizationId": "vikings",
     "name": "Reino Vikingo",
-    "description": "Guerreros feroces del norte. Sus unidades son más rápidas y tienen mayor capacidad de ataque.",
-    "icon": "⚔️",
-    "iconEmoji": "⛵",
+    "description": "Guerreros feroces del norte. Sus unidades son mas rapidas y tienen mayor capacidad de ataque.",
+    "icon": "assets/icons/civs/vikings.png",
     "color": "#2b6cb0",
     "primaryColor": "#1e3a5f",
     "secondaryColor": "#4a90e2",
@@ -21,19 +20,19 @@
     "unitOverrides": {
         "villager": {
             "name": "Aldeano Vikingo",
-            "icon": "🧔",
+            "icon": "assets/icons/villager.png",
             "gatherBonus": 1.1
         },
         "warrior": {
             "name": "Berserker",
-            "icon": "🪓",
+            "icon": "assets/icons/warrior.png",
             "attack": 14,
             "hp": 100,
             "speed": 60
         },
         "archer": {
-            "name": "Arquero Nórdico",
-            "icon": "🏹",
+            "name": "Arquero Nordico",
+            "icon": "assets/icons/archer.png",
             "attack": 10,
             "hp": 55,
             "speed": 55
@@ -41,25 +40,25 @@
     },
     "buildingOverrides": {
         "townCenter": {
-            "name": "Gran Salón",
-            "icon": "🏰",
-            "description": "Salón de reunión vikingo"
+            "name": "Gran Salon",
+            "icon": "assets/icons/townCenter.png",
+            "description": "Salon de reunion vikingo"
         },
         "house": {
-            "name": "Cabaña Vikinga",
-            "icon": "🛖",
-            "description": "Vivienda nórdica resistente"
+            "name": "Cabana Vikinga",
+            "icon": "assets/icons/house.png",
+            "description": "Vivienda nordica resistente"
         },
         "barracks": {
             "name": "Campo de Guerra",
-            "icon": "⚔️",
-            "description": "Área de entrenamiento de guerreros vikingos"
+            "icon": "assets/icons/barracks.png",
+            "description": "Area de entrenamiento de guerreros vikingos"
         }
     },
     "uniqueUnit": {
         "id": "jarl",
         "name": "Jarl",
-        "icon": "👑",
+        "icon": "assets/icons/warrior.png",
         "baseUnit": "warrior",
         "age": 19,
         "bonuses": {
@@ -73,10 +72,10 @@
         {
             "id": "vikingRaids",
             "name": "Incursiones Vikingas",
-            "icon": "⛵",
+            "icon": "assets/icons/tech_military.png",
             "category": "MILITARY",
             "age": 19,
-            "description": "Tácticas de saqueo y ataque rápido perfeccionadas por los vikingos.",
+            "description": "Tacticas de saqueo y ataque rapido perfeccionadas por los vikingos.",
             "cost": {
                 "food": 250,
                 "gold": 150

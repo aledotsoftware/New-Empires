@@ -1,9 +1,8 @@
 {
     "civilizationId": "sumeria",
     "name": "Sumeria",
-    "description": "Cuna de la civilización entre los ríos Tigris y Éufrates que se desarrolló en la región de Sumeria, en la antigua Mesopotamia, entre los ríos Tigris y Éufrates, hace más de 5000 años. Los sumerios crearon sistemas de escritura, establecieron leyes y sentaron las bases de sociedades organizadas con ciudades-estado independientes.",
-    "icon": "🏛️",
-    "iconEmoji": "🗼",
+    "description": "Cuna de la civilizacion. Los sumerios crearon sistemas de escritura, establecieron leyes y sentaron las bases de sociedades organizadas.",
+    "icon": "assets/icons/civs/sumerios.png",
     "color": "#D4A574",
     "bonuses": {
         "buildSpeed": 1.20,
@@ -13,7 +12,7 @@
     "uniqueUnit": {
         "id": "warCart",
         "name": "Carro de Guerra",
-        "icon": "🛞",
+        "icon": "assets/icons/warrior.png",
         "baseUnit": "warrior",
         "age": 18,
         "bonuses": {
@@ -25,50 +24,50 @@
     "technologyOverrides": {
         "mudBricks": {
             "name": "Ladrillos de Arcilla Cocida",
-            "icon": "🧱",
-            "description": "Avanzada técnica mesopotámica de cocción de ladrillos."
+            "icon": "assets/icons/tech_defense.png",
+            "description": "Avanzada tecnica mesopotamica de coccion de ladrillos."
         },
         "writing": {
             "name": "Escritura Cuneiforme",
-            "icon": "✍️",
+            "icon": "assets/icons/tech_economy.png",
             "description": "Sistema de escritura mediante marcas en arcilla."
         },
         "irrigation": {
-            "name": "Canales de Irrigación",
-            "icon": "💧",
-            "description": "Sofisticado sistema de canales para aprovechar los ríos."
+            "name": "Canales de Irrigacion",
+            "icon": "assets/icons/tech_economy.png",
+            "description": "Sofisticado sistema de canales para aprovechar los rios."
         },
         "wheel": {
             "name": "Rueda con Radios",
-            "icon": "☸️",
-            "description": "Mejora mesopotámica de la rueda con radios."
+            "icon": "assets/icons/tech_economy.png",
+            "description": "Mejora mesopotamica de la rueda con radios."
         }
     },
     "buildingOverrides": {
         "house": {
             "name": "Casa de Adobe",
-            "icon": "🏘️",
-            "description": "Vivienda de adobe típica mesopotámica."
+            "icon": "assets/icons/house.png",
+            "description": "Vivienda de adobe tipica mesopotamica."
         },
         "townCenter": {
             "name": "Zigurat",
-            "icon": "🗼",
+            "icon": "assets/icons/townCenter.png",
             "description": "Templo escalonado que sirve como centro administrativo."
         },
         "storage": {
             "name": "Granero",
-            "icon": "🌾",
-            "description": "Almacén de grano mesopotámico."
+            "icon": "assets/icons/storage.png",
+            "description": "Almacen de grano mesopotamico."
         }
     },
     "uniqueTechnologies": [
         {
             "id": "codeOfHammurabi",
-            "name": "Código de Hammurabi",
-            "icon": "⚖️",
+            "name": "Codigo de Hammurabi",
+            "icon": "assets/icons/tech_economy.png",
             "category": "CULTURE",
             "age": 19,
-            "description": "Primer código de leyes escrito de la humanidad.",
+            "description": "Primer codigo de leyes escrito de la humanidad.",
             "cost": {
                 "food": 200,
                 "gold": 300
@@ -86,7 +85,7 @@
         {
             "id": "hangingGardens",
             "name": "Jardines Colgantes",
-            "icon": "🌺",
+            "icon": "assets/icons/tech_economy.png",
             "category": "ARCHITECTURE",
             "age": 21,
             "description": "Una de las maravillas del mundo antiguo.",

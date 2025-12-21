@@ -159,45 +159,45 @@
     "categories": {
         "TOOLS": {
             "name": "Herramientas",
-            "icon": "🔨",
+            "icon": "assets/icons/workshop.png",
             "color": "#8b7355"
         },
         "AGRICULTURE": {
             "name": "Agricultura",
-            "icon": "🌾",
+            "icon": "assets/icons/food.png",
             "color": "#6a994e"
         },
         "ECONOMY": {
-            "name": "Economía",
-            "icon": "💰",
+            "name": "Economia",
+            "icon": "assets/icons/gold.png",
             "color": "#d4af37"
         },
         "ARCHITECTURE": {
             "name": "Arquitectura",
-            "icon": "🏛️",
+            "icon": "assets/icons/townCenter.png",
             "color": "#a8a29e"
         },
         "MILITARY": {
             "name": "Militar",
-            "icon": "⚔️",
+            "icon": "assets/icons/warrior.png",
             "color": "#c53030"
         },
         "DEFENSE": {
             "name": "Defensa",
-            "icon": "🛡️",
+            "icon": "assets/icons/tech_defense.png",
             "color": "#3182ce"
         },
         "CULTURE": {
             "name": "Cultura",
-            "icon": "📚",
+            "icon": "assets/icons/science.png",
             "color": "#805ad5"
         }
     },
     "technologies": [
         {
             "id": "flintKnapping",
-            "baseName": "Talla de Sílex",
-            "baseIcon": "🪨",
+            "baseName": "Talla de Silex",
+            "baseIcon": "assets/icons/stone.png",
             "category": "TOOLS",
             "age": 1,
             "baseDescription": "Arte de tallar sílex para crear herramientas cortantes.",
@@ -216,7 +216,7 @@
         {
             "id": "caveArt",
             "baseName": "Arte Rupestre",
-            "baseIcon": "🎨",
+            "baseIcon": "assets/icons/science.png",
             "category": "CULTURE",
             "age": 2,
             "baseDescription": "Primeras expresiones artísticas humanas.",
@@ -233,7 +233,7 @@
         {
             "id": "huntingBow",
             "baseName": "Arco de Caza",
-            "baseIcon": "🏹",
+            "baseIcon": "assets/icons/archer.png",
             "category": "MILITARY",
             "age": 3,
             "baseDescription": "Invención del arco para caza y guerra.",
@@ -255,7 +255,7 @@
         {
             "id": "microliths",
             "baseName": "Microlitos",
-            "baseIcon": "🔪",
+            "baseIcon": "assets/icons/warrior.png",
             "category": "TOOLS",
             "age": 4,
             "baseDescription": "Pequeñas herramientas de piedra muy afiladas.",
@@ -275,8 +275,8 @@
         },
         {
             "id": "domestication",
-            "baseName": "Domesticación Animal",
-            "baseIcon": "🐑",
+            "baseName": "Domesticacion Animal",
+            "baseIcon": "assets/icons/food.png",
             "category": "AGRICULTURE",
             "age": 5,
             "baseDescription": "Domesticación de los primeros animales.",
@@ -295,7 +295,7 @@
         {
             "id": "agriculture",
             "baseName": "Agricultura",
-            "baseIcon": "🌾",
+            "baseIcon": "assets/icons/food.png",
             "category": "AGRICULTURE",
             "age": 6,
             "baseDescription": "Cultivo de las primeras plantas.",
@@ -315,8 +315,8 @@
         },
         {
             "id": "pottery",
-            "baseName": "Cerámica",
-            "baseIcon": "🏺",
+            "baseName": "Ceramica",
+            "baseIcon": "assets/icons/storage.png",
             "category": "TOOLS",
             "age": 7,
             "baseDescription": "Creación de recipientes de arcilla cocida.",
@@ -334,7 +334,7 @@
         {
             "id": "weaving",
             "baseName": "Tejido",
-            "baseIcon": "🧵",
+            "baseIcon": "assets/icons/tech_economy.png",
             "category": "ECONOMY",
             "age": 8,
             "baseDescription": "Arte de tejer fibras para crear telas.",
@@ -355,7 +355,7 @@
         {
             "id": "mudBricks",
             "baseName": "Ladrillos de Adobe",
-            "baseIcon": "🧱",
+            "baseIcon": "assets/icons/house.png",
             "category": "ARCHITECTURE",
             "age": 9,
             "baseDescription": "Construcción con ladrillos de barro secados al sol.",
@@ -378,8 +378,8 @@
         },
         {
             "id": "irrigation",
-            "baseName": "Irrigación",
-            "baseIcon": "💧",
+            "baseName": "Irrigacion",
+            "baseIcon": "assets/icons/tech_economy.png",
             "category": "AGRICULTURE",
             "age": 10,
             "baseDescription": "Sistemas de riego para cultivos.",

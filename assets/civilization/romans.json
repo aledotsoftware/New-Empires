@@ -1,9 +1,8 @@
 {
     "civilizationId": "romans",
     "name": "Imperio Romano",
-    "description": "Maestros de la construcción y la ingeniería. Sus edificios son más resistentes y se construyen más rápido.",
-    "icon": "🏛️",
-    "iconEmoji": "🦅",
+    "description": "Maestros de la construccion y la ingenieria. Sus edificios son mas resistentes y se construyen mas rapido.",
+    "icon": "assets/icons/civs/romans.png",
     "color": "#c53030",
     "primaryColor": "#8b0000",
     "secondaryColor": "#ffd700",
@@ -21,19 +20,19 @@
     "unitOverrides": {
         "villager": {
             "name": "Ciudadano Romano",
-            "icon": "👨‍🌾",
+            "icon": "assets/icons/villager.png",
             "gatherBonus": 1.0
         },
         "warrior": {
             "name": "Legionario",
-            "icon": "🛡️",
+            "icon": "assets/icons/warrior.png",
             "attack": 12,
             "hp": 110,
             "speed": 45
         },
         "archer": {
             "name": "Arquero Romano",
-            "icon": "🏹",
+            "icon": "assets/icons/archer.png",
             "attack": 8,
             "hp": 60,
             "speed": 50
@@ -42,24 +41,24 @@
     "buildingOverrides": {
         "townCenter": {
             "name": "Foro Romano",
-            "icon": "🏛️",
+            "icon": "assets/icons/townCenter.png",
             "description": "Centro administrativo del imperio romano"
         },
         "house": {
             "name": "Domus",
-            "icon": "🏠",
-            "description": "Vivienda romana típica"
+            "icon": "assets/icons/house.png",
+            "description": "Vivienda romana tipica"
         },
         "barracks": {
             "name": "Castra",
-            "icon": "⚔️",
+            "icon": "assets/icons/barracks.png",
             "description": "Campamento militar romano"
         }
     },
     "uniqueUnit": {
         "id": "centurion",
-        "name": "Centurión",
-        "icon": "🗡️",
+        "name": "Centurion",
+        "icon": "assets/icons/warrior.png",
         "baseUnit": "warrior",
         "age": 19,
         "bonuses": {
@@ -71,11 +70,11 @@
     "uniqueTechnologies": [
         {
             "id": "romanEngineering",
-            "name": "Ingeniería Romana",
-            "icon": "🏗️",
+            "name": "Ingenieria Romana",
+            "icon": "assets/icons/tech_defense.png",
             "category": "ARCHITECTURE",
             "age": 20,
-            "description": "Técnicas avanzadas de construcción romana con arcos y acueductos.",
+            "description": "Tecnicas avanzadas de construccion romana con arcos y acueductos.",
             "cost": {
                 "wood": 200,
                 "stone": 200

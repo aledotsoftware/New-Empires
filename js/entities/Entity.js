@@ -3,7 +3,10 @@
  * Unidades, edificios y otros objetos del juego heredan de esta clase
  */
 export class Entity {
+    static nextId = 0;
+
     constructor(x, y, team = 'neutral') {
+        this.id = Entity.nextId++;
         this.x = x;
         this.y = y;
         this.team = team;

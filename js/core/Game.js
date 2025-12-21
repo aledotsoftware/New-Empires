@@ -110,6 +110,11 @@ export class Game {
         this.buildMode = null;
         this.buildGhost = null;
 
+        // UI State caching (Performance Optimization)
+        this._lastSelectionSignature = null;
+        this._lastActionsSignature = null;
+        this._cachedButtons = [];
+
         this.setupEventListeners();
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
@@ -1271,6 +1276,34 @@ export class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
+        // Generar firma de selección actual para evitar DOM updates innecesarios
+        let currentSignature = '';
+        if (this.selectedEntities.length === 0) {
+            currentSignature = 'none';
+        } else if (this.selectedEntities.length === 1) {
+            currentSignature = `id:${this.selectedEntities[0].id}_type:${this.selectedEntities[0].type}`;
+        } else {
+            currentSignature = `multi:${this.selectedEntities.length}`;
+        }
+
+        const selectionChanged = currentSignature !== this._lastSelectionSignature;
+        this._lastSelectionSignature = currentSignature;
+
+        // Si la selección es la misma y es una sola entidad, solo actualizamos stats dinámicos (HP)
+        if (!selectionChanged && this.selectedEntities.length === 1) {
+            const entity = this.selectedEntities[0];
+            const hpElement = content.querySelector('.selection-hp-text');
+            if (hpElement) {
+                hpElement.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+            }
+            return; // Salir, no reconstruir DOM
+        }
+
+        // Si no cambió y no es single entity (o está vacío/multiple), no hay nada dinámico que actualizar
+        if (!selectionChanged) return;
+
+        // === RECONSTRUCCIÓN DEL DOM (Solo si cambió la selección) ===
+
         // Limpiar contenido previo
         while (content.firstChild) {
             content.removeChild(content.firstChild);
@@ -1322,6 +1355,7 @@ export class Game {
             statsDiv.className = 'selection-stats';
 
             const hpDiv = document.createElement('div');
+            hpDiv.className = 'selection-hp-text'; // Añadir clase para selector rápido
             hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
             statsDiv.appendChild(hpDiv);
 
@@ -1387,35 +1421,166 @@ export class Game {
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
+        // Determinar qué botones deben mostrarse
+        let buttons = [];
+        let shouldRenderEmpty = false;
+
+        if (this.selectedEntities.length !== 1) {
+            shouldRenderEmpty = true;
+        } else {
+            const entity = this.selectedEntities[0];
+            if (entity.team !== 'player') {
+                shouldRenderEmpty = true;
+            } else {
+                // Generar lista de botones (data only)
+                buttons = this.getActionsForEntity(entity);
+            }
+        }
+
+        // Si debe estar vacío
+        if (shouldRenderEmpty) {
+            if (this._lastActionsSignature !== 'empty') {
+                this.renderEmptyGrid(grid);
+                this._lastActionsSignature = 'empty';
+                this._cachedButtons = [];
+            }
+            return;
+        }
+
+        // Generar firma basada en tipos de botones e IDs (para saber si cambió la estructura)
+        // Usamos map para crear un string único de las acciones
+        const structureSignature = buttons.map(b => b.label + b.iconKey).join('|');
+
+        const structureChanged = structureSignature !== this._lastActionsSignature;
+        this._lastActionsSignature = structureSignature;
+
+        // 1. Si la estructura cambió, reconstruir DOM
+        if (structureChanged) {
+            this.renderActionButtons(grid, buttons);
+            this._cachedButtons = buttons; // Guardar referencia para actualizar estado
+        }
+        // 2. Si la estructura es igual, solo actualizar estado (enabled/disabled)
+        else {
+             this.updateActionButtonsState(grid, buttons);
+        }
+    }
+
+    getActionsForEntity(entity) {
+        const buttons = [];
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
+        ];
+
+        if (entity.type === 'villager') {
+            buttons.push({
+                iconKey: 'workshop',
+                iconFallback: '🏗️',
+                label: 'Construir',
+                hotkey: 'Q',
+                action: () => this.openBuildMenu(),
+                enabled: true
+            });
+        } else if (entity.type === 'townCenter') {
+            const cost = CONFIG.UNIT_COSTS.villager;
+            const canAfford = this.canAfford(cost);
+
+            buttons.push({
+                iconKey: 'villager',
+                iconFallback: '👨‍🌾',
+                label: 'Aldeano',
+                hotkey: 'Q',
+                cost: cost,
+                action: () => this.trainUnit('villager', this.selectedEntities[0]),
+                enabled: canAfford
+            });
+        } else if (entity.type === 'barracks') {
+            const warriorCost = CONFIG.UNIT_COSTS.warrior;
+            const archerCost = CONFIG.UNIT_COSTS.archer;
+            const canAffordWarrior = this.canAfford(warriorCost);
+            const canAffordArcher = this.canAfford(archerCost);
+
+            buttons.push({
+                iconKey: 'warrior',
+                iconFallback: '⚔️',
+                label: 'Guerrero',
+                hotkey: 'Q',
+                cost: warriorCost,
+                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
+                enabled: canAffordWarrior
+            });
+
+            buttons.push({
+                iconKey: 'archer',
+                iconFallback: '🏹',
+                label: 'Arquero',
+                hotkey: 'W',
+                cost: archerCost,
+                action: () => this.trainUnit('archer', this.selectedEntities[0]),
+                enabled: canAffordArcher
+            });
+        }
+
+        // Añadir tecnologías disponibles
+        if (this.techManager) {
+            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+
+            for (let tech of availableTechs) {
+                if (buttons.length >= 15) break;
+
+                const canAfford = this.techManager.canResearch(tech.id);
+
+                // Determine best icon for technology
+                let techIconKey = tech.id;
+                let techFallback = '🔬';
+
+                let hasSpecificIcon = false;
+                if (typeof assetLoader !== 'undefined') {
+                    if (assetLoader.getSrc(tech.id)) {
+                        hasSpecificIcon = true;
+                    }
+                }
+
+                if (!hasSpecificIcon) {
+                    if (tech.category === 'Economía' || tech.category === 'ECONOMY') techIconKey = 'tech_economy';
+                    else if (tech.category === 'Militar' || tech.category === 'MILITARY') techIconKey = 'tech_military';
+                    else if (tech.category === 'Defensa' || tech.category === 'DEFENSE') techIconKey = 'tech_defense';
+                    else techIconKey = 'science';
+                }
+
+                // Helper para getBtnIcon no existe en este scope, usamos lógica directa o asumimos global?
+                // En el código original se usaba getBtnIcon sin definición local, asumimos que existe o era un error en el snippet original.
+                // Mirando el código original, getBtnIcon NO estaba definido en updateActionsPanel.
+                // Probablemente era un error en el snippet original o una función global no mostrada.
+                // Reemplazaremos con lógica directa:
+
+                buttons.push({
+                    iconKey: techIconKey,
+                    iconFallback: tech.icon || techFallback,
+                    label: tech.name,
+                    hotkey: hotkeys[buttons.length],
+                    cost: tech.cost,
+                    action: () => this.techManager.startResearch(tech.id),
+                    enabled: canAfford
+                });
+            }
+        }
+
+        return buttons;
+    }
+
+    renderActionButtons(grid, buttons) {
         // Limpiar contenido previo
         while (grid.firstChild) {
             grid.removeChild(grid.firstChild);
         }
 
-        // Si no hay selección o es múltiple, mostrar panel vacío
-        if (this.selectedEntities.length !== 1) {
-            this.renderEmptyGrid(grid);
-            return;
-        }
-
-        const entity = this.selectedEntities[0];
-
-        // Solo mostrar acciones si es del jugador
-        if (entity.team !== 'player') {
-            this.renderEmptyGrid(grid);
-            return;
-        }
-
-        const buttons = [];
-
-        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
         const hotkeys = [
-            'Q', 'W', 'E', 'R', 'T',  // Fila 1
-            'A', 'S', 'D', 'F', 'G',  // Fila 2
-            'Z', 'X', 'C', 'V', 'B'   // Fila 3
+            'Q', 'W', 'E', 'R', 'T',
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
         ];
-
-        const buttons = [];
 
         // Helper para crear elementos
         const createIconElement = (key, fallback) => {
@@ -1549,7 +1714,7 @@ export class Game {
             }
         }
 
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        // Crear todos los 15 botones en el grid
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn';
@@ -1558,7 +1723,7 @@ export class Game {
             if (i < buttons.length) {
                 const buttonData = buttons[i];
 
-                // ACCESIBILIDAD: Atributos ARIA
+                // ACCESIBILIDAD
                 btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
                 btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
 
@@ -1587,7 +1752,7 @@ export class Game {
                 }
             } else {
                 btn.classList.add('disabled');
-                // ACCESIBILIDAD: Atributos ARIA para botones vacíos en panel activo
+                // ACCESIBILIDAD
                 btn.setAttribute('aria-disabled', 'true');
                 btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
                 btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
@@ -1604,6 +1769,32 @@ export class Game {
             }
 
             grid.appendChild(btn);
+        }
+    }
+
+    updateActionButtonsState(grid, buttons) {
+        const btnElements = grid.querySelectorAll('.action-btn');
+
+        for (let i = 0; i < buttons.length; i++) {
+            if (i >= btnElements.length) break;
+
+            const btn = btnElements[i];
+            const data = buttons[i];
+
+            const currentlyDisabled = btn.classList.contains('disabled');
+            const shouldBeDisabled = !data.enabled;
+
+            if (currentlyDisabled !== shouldBeDisabled) {
+                if (shouldBeDisabled) {
+                    btn.classList.add('disabled');
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.onclick = null; // Remover listener si deshabilitado para seguridad
+                } else {
+                    btn.classList.remove('disabled');
+                    btn.removeAttribute('aria-disabled');
+                    btn.onclick = data.action;
+                }
+            }
         }
     }
 

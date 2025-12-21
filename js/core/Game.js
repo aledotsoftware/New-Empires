@@ -1406,6 +1406,8 @@ export class Game {
             return;
         }
 
+        const buttons = [];
+
         // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',  // Fila 1
@@ -1426,66 +1428,8 @@ export class Game {
                     return img;
                 }
             }
-            str += `${amount}${icon} `;
-        }
-        return str.trim();
-    };
-
-    if (entity.type === 'villager') {
-        buttons.push({
-                icon: getBtnIcon('build', '🏗️'), // Use 'build' asset if available
-            label: 'Construir',
-            hotkey: 'Q',
-            action: () => this.openBuildMenu(),
-            enabled: true
-        });
-    } else if (entity.type === 'townCenter') {
-        const cost = CONFIG.UNIT_COSTS.villager;
-        const canAfford = this.canAfford(cost);
-
-        buttons.push({
-            icon: getBtnIcon('villager', '👨‍🌾'),
-            label: 'Aldeano',
-            hotkey: 'Q',
-            cost: formatCost(cost),
-            action: () => this.trainUnit('villager', this.selectedEntities[0]),
-            enabled: canAfford
-        });
-    } else if (entity.type === 'barracks') {
-        const warriorCost = CONFIG.UNIT_COSTS.warrior;
-        const archerCost = CONFIG.UNIT_COSTS.archer;
-        const canAffordWarrior = this.canAfford(warriorCost);
-        const canAffordArcher = this.canAfford(archerCost);
-
-        buttons.push({
-            icon: getBtnIcon('warrior', '⚔️'),
-            label: 'Guerrero',
-            hotkey: 'Q',
-            cost: formatCost(warriorCost),
-            action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-            enabled: canAffordWarrior
-        });
-
-        buttons.push({
-            icon: getBtnIcon('archer', '🏹'),
-            label: 'Arquero',
-            hotkey: 'W',
-            cost: formatCost(archerCost),
-            action: () => this.trainUnit('archer', this.selectedEntities[0]),
-            enabled: canAffordArcher
-        });
-    }
-
-    // Añadir tecnologías disponibles
-    if (this.techManager) {
-        const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-        let techIndex = 0;
-        for (let tech of availableTechs) {
-            if (techIndex >= 13) break; // Máximo 13 botones más
-
-            const canAfford = this.techManager.canResearch(tech.id);
-            // Use formatCost helper
-            let costString = formatCost(tech.cost);
+            return fallback;
+        };
 
         const createCostElement = (costObj) => {
             const container = document.createElement('div');
@@ -1578,13 +1522,7 @@ export class Game {
 
                 // Determine best icon for technology
                 let techIconKey = tech.id;
-                let techFallback = '🔬'; // Default scientific microscope emoji
-
-                // Try to find category-based icon if specific one doesn't exist
-                // We do this by checking if getSrc returns something for the tech ID
-                // Note: This relies on AssetLoader returning '' if not found.
-                // Since we can't easily check inside AssetLoader without calling getSrc,
-                // we'll implement logic here.
+                let techFallback = '🔬';
 
                 let hasSpecificIcon = false;
                 if (typeof assetLoader !== 'undefined') {
@@ -1594,14 +1532,10 @@ export class Game {
                 }
 
                 if (!hasSpecificIcon) {
-                    // Map category to generic asset icons
-                    // TECH_CATEGORIES values are strings like 'Economía', 'Militar', etc.
-                    // We need to match what's in technologies.js or the loaded data.
-
                     if (tech.category === 'Economía' || tech.category === 'ECONOMY') techIconKey = 'tech_economy';
                     else if (tech.category === 'Militar' || tech.category === 'MILITARY') techIconKey = 'tech_military';
                     else if (tech.category === 'Defensa' || tech.category === 'DEFENSE') techIconKey = 'tech_defense';
-                    else techIconKey = 'science'; // Fallback for Tools, Agriculture, etc.
+                    else techIconKey = 'science';
                 }
 
                 buttons.push({

@@ -1828,25 +1828,45 @@ class Game {
 
     showNotification(message, type = 'info') {
         const container = document.getElementById('notifications');
+        if (!container.hasAttribute('aria-live')) {
+            container.setAttribute('aria-live', 'polite');
+            container.setAttribute('aria-atomic', 'false');
+        }
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
+        notification.setAttribute('role', type === 'error' ? 'alert' : 'status');
 
         const icons = {
-            info: 'ℹ️',
-            error: '❌',
-            success: '✅'
+            info: 'assets/icons/info.png',
+            error: 'assets/icons/error.png',
+            success: 'assets/icons/check.png'
         };
 
-        notification.innerHTML = `
-            <div class="notification-icon">${icons[type]}</div>
-            <div class="notification-text">${message}</div>
-        `;
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'notification-icon';
 
+        const img = document.createElement('img');
+        img.src = icons[type] || icons.info;
+        img.alt = ''; // Decorative
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.verticalAlign = 'middle';
+        img.onerror = () => {
+            img.style.display = 'none';
+            iconDiv.textContent = type === 'error' ? '❌' : (type === 'success' ? '✅' : 'ℹ️');
+        };
+        iconDiv.appendChild(img);
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'notification-text';
+        textDiv.textContent = message;
+
+        notification.appendChild(iconDiv);
+        notification.appendChild(textDiv);
         container.appendChild(notification);
 
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        setTimeout(() => notification.remove(), 3000);
     }
 }
 

@@ -1637,18 +1637,46 @@ export class Game {
 
     showNotification(message, type = 'info') {
         const container = document.getElementById('notifications');
+        // Ensure container is a live region for screen readers
+        if (!container.hasAttribute('aria-live')) {
+            container.setAttribute('aria-live', 'polite');
+            container.setAttribute('aria-atomic', 'false');
+        }
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
 
+        // Accessibility: Errors should be assertive
+        if (type === 'error') {
+            notification.setAttribute('role', 'alert');
+        } else {
+            notification.setAttribute('role', 'status');
+        }
+
+        // Use asset icons instead of emojis if available, fallback to emoji if needed (but try to avoid)
         const icons = {
-            info: 'ℹ️',
-            error: '❌',
-            success: '✅'
+            info: 'assets/icons/info.png',
+            error: 'assets/icons/error.png',
+            success: 'assets/icons/check.png'
         };
 
         const iconDiv = document.createElement('div');
         iconDiv.className = 'notification-icon';
-        iconDiv.textContent = icons[type] || icons.info;
+
+        const iconSrc = icons[type] || icons.info;
+        const img = document.createElement('img');
+        img.src = iconSrc;
+        img.alt = ""; // Decorative, text follows
+        img.onerror = () => {
+            // Fallback if image missing
+            img.style.display = 'none';
+            iconDiv.textContent = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+        };
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.verticalAlign = 'middle';
+
+        iconDiv.appendChild(img);
 
         const textDiv = document.createElement('div');
         textDiv.className = 'notification-text';

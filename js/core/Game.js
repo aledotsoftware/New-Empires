@@ -1640,15 +1640,31 @@ export class Game {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
 
-        const icons = {
-            info: 'ℹ️',
-            error: '❌',
-            success: '✅'
+        // Map types to asset filenames
+        const iconFiles = {
+            info: 'info.png',
+            error: 'error.png',
+            success: 'check.png'
         };
 
         const iconDiv = document.createElement('div');
         iconDiv.className = 'notification-icon';
-        iconDiv.textContent = icons[type] || icons.info;
+
+        // Use image asset with alt text for accessibility
+        const img = document.createElement('img');
+        img.src = `assets/icons/${iconFiles[type] || 'info.png'}`;
+        img.alt = type === 'success' ? 'Éxito' : type === 'error' ? 'Error' : 'Información';
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.objectFit = 'contain';
+
+        // Add error handler for image loading failure
+        img.onerror = () => {
+            img.style.display = 'none';
+            iconDiv.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+        };
+
+        iconDiv.appendChild(img);
 
         const textDiv = document.createElement('div');
         textDiv.className = 'notification-text';

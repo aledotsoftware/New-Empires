@@ -1387,26 +1387,11 @@ export class Game {
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
-        // Limpiar contenido previo
-        while (grid.firstChild) {
-            grid.removeChild(grid.firstChild);
-        }
-
-        // Si no hay selección o es múltiple, mostrar panel vacío
-        if (this.selectedEntities.length !== 1) {
+        // OPTIMIZACIÓN: Inicializar grid si está vacío
+        if (grid.children.length !== 15) {
+            grid.innerHTML = '';
             this.renderEmptyGrid(grid);
-            return;
         }
-
-        const entity = this.selectedEntities[0];
-
-        // Solo mostrar acciones si es del jugador
-        if (entity.team !== 'player') {
-            this.renderEmptyGrid(grid);
-            return;
-        }
-
-        const buttons = [];
 
         // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
         const hotkeys = [
@@ -1415,9 +1400,104 @@ export class Game {
             'Z', 'X', 'C', 'V', 'B'   // Fila 3
         ];
 
-        const buttons = [];
+        let buttons = [];
 
-        // Helper para crear elementos
+        // Si hay selección única y es del jugador, calcular botones
+        if (this.selectedEntities.length === 1) {
+            const entity = this.selectedEntities[0];
+
+            if (entity.team === 'player') {
+                if (entity.type === 'villager') {
+                    buttons.push({
+                        iconKey: 'workshop',
+                        iconFallback: '🏗️',
+                        label: 'Construir',
+                        hotkey: 'Q',
+                        action: () => this.openBuildMenu(),
+                        enabled: true
+                    });
+                } else if (entity.type === 'townCenter') {
+                    const cost = CONFIG.UNIT_COSTS.villager;
+                    const canAfford = this.canAfford(cost);
+
+                    buttons.push({
+                        iconKey: 'villager',
+                        iconFallback: '👨‍🌾',
+                        label: 'Aldeano',
+                        hotkey: 'Q',
+                        cost: cost,
+                        action: () => this.trainUnit('villager', this.selectedEntities[0]),
+                        enabled: canAfford
+                    });
+                } else if (entity.type === 'barracks') {
+                    const warriorCost = CONFIG.UNIT_COSTS.warrior;
+                    const archerCost = CONFIG.UNIT_COSTS.archer;
+                    const canAffordWarrior = this.canAfford(warriorCost);
+                    const canAffordArcher = this.canAfford(archerCost);
+
+                    buttons.push({
+                        iconKey: 'warrior',
+                        iconFallback: '⚔️',
+                        label: 'Guerrero',
+                        hotkey: 'Q',
+                        cost: warriorCost,
+                        action: () => this.trainUnit('warrior', this.selectedEntities[0]),
+                        enabled: canAffordWarrior
+                    });
+
+                    buttons.push({
+                        iconKey: 'archer',
+                        iconFallback: '🏹',
+                        label: 'Arquero',
+                        hotkey: 'W',
+                        cost: archerCost,
+                        action: () => this.trainUnit('archer', this.selectedEntities[0]),
+                        enabled: canAffordArcher
+                    });
+                }
+
+                // Añadir tecnologías disponibles
+                if (this.techManager) {
+                    const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
+
+                    for (let tech of availableTechs) {
+                        if (buttons.length >= 15) break;
+
+                        const canAfford = this.techManager.canResearch(tech.id);
+
+                        // Determine best icon for technology
+                        let techIconKey = tech.id;
+                        let techFallback = '🔬';
+
+                        let hasSpecificIcon = false;
+                        if (typeof assetLoader !== 'undefined') {
+                            if (assetLoader.getSrc(tech.id)) {
+                                hasSpecificIcon = true;
+                            }
+                        }
+
+                        if (!hasSpecificIcon) {
+                            if (tech.category === 'Economía' || tech.category === 'ECONOMY') techIconKey = 'tech_economy';
+                            else if (tech.category === 'Militar' || tech.category === 'MILITARY') techIconKey = 'tech_military';
+                            else if (tech.category === 'Defensa' || tech.category === 'DEFENSE') techIconKey = 'tech_defense';
+                            else techIconKey = 'science';
+                        }
+
+                        buttons.push({
+                            iconKey: techIconKey,
+                            iconFallback: tech.icon || techFallback,
+                            label: tech.name,
+                            hotkey: hotkeys[buttons.length],
+                            cost: tech.cost,
+                            action: () => this.techManager.startResearch(tech.id),
+                            enabled: canAfford
+                        });
+                    }
+                }
+            }
+        }
+
+        // Helper para crear elementos DOM (fuera del loop)
         const createIconElement = (key, fallback) => {
             if (typeof assetLoader !== 'undefined') {
                 const src = assetLoader.getSrc(key);
@@ -1462,148 +1542,79 @@ export class Game {
             return container;
         };
 
-        if (entity.type === 'villager') {
-            buttons.push({
-                iconKey: 'workshop',
-                iconFallback: '🏗️',
-                label: 'Construir',
-                hotkey: 'Q',
-                action: () => this.openBuildMenu(),
-                enabled: true
-            });
-        } else if (entity.type === 'townCenter') {
-            const cost = CONFIG.UNIT_COSTS.villager;
-            const canAfford = this.canAfford(cost);
-
-            buttons.push({
-                iconKey: 'villager',
-                iconFallback: '👨‍🌾',
-                label: 'Aldeano',
-                hotkey: 'Q',
-                cost: cost,
-                action: () => this.trainUnit('villager', this.selectedEntities[0]),
-                enabled: canAfford
-            });
-        } else if (entity.type === 'barracks') {
-            const warriorCost = CONFIG.UNIT_COSTS.warrior;
-            const archerCost = CONFIG.UNIT_COSTS.archer;
-            const canAffordWarrior = this.canAfford(warriorCost);
-            const canAffordArcher = this.canAfford(archerCost);
-
-            buttons.push({
-                iconKey: 'warrior',
-                iconFallback: '⚔️',
-                label: 'Guerrero',
-                hotkey: 'Q',
-                cost: warriorCost,
-                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-                enabled: canAffordWarrior
-            });
-
-            buttons.push({
-                iconKey: 'archer',
-                iconFallback: '🏹',
-                label: 'Arquero',
-                hotkey: 'W',
-                cost: archerCost,
-                action: () => this.trainUnit('archer', this.selectedEntities[0]),
-                enabled: canAffordArcher
-            });
-        }
-
-        // Añadir tecnologías disponibles
-        if (this.techManager) {
-            const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
-
-            for (let tech of availableTechs) {
-                if (buttons.length >= 15) break;
-
-                const canAfford = this.techManager.canResearch(tech.id);
-
-                // Determine best icon for technology
-                let techIconKey = tech.id;
-                let techFallback = '🔬';
-
-                let hasSpecificIcon = false;
-                if (typeof assetLoader !== 'undefined') {
-                    if (assetLoader.getSrc(tech.id)) {
-                        hasSpecificIcon = true;
-                    }
-                }
-
-                if (!hasSpecificIcon) {
-                    if (tech.category === 'Economía' || tech.category === 'ECONOMY') techIconKey = 'tech_economy';
-                    else if (tech.category === 'Militar' || tech.category === 'MILITARY') techIconKey = 'tech_military';
-                    else if (tech.category === 'Defensa' || tech.category === 'DEFENSE') techIconKey = 'tech_defense';
-                    else techIconKey = 'science';
-                }
-
-                buttons.push({
-                    icon: getBtnIcon(techIconKey, tech.icon || techFallback),
-                    label: tech.name,
-                    hotkey: hotkeys[buttons.length],
-                    cost: tech.cost,
-                    action: () => this.techManager.startResearch(tech.id),
-                    enabled: canAfford
-                });
-            }
-        }
-
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        // OPTIMIZACIÓN: Actualizar botones existentes en lugar de recrearlos
+        const actionButtons = grid.children;
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.setAttribute('data-hotkey', hotkeys[i]);
+            const btn = actionButtons[i];
 
             if (i < buttons.length) {
                 const buttonData = buttons[i];
 
-                // ACCESIBILIDAD: Atributos ARIA
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
-                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
-
+                // Actualizar clases y atributos
+                btn.className = 'action-btn'; // Remover disabled si existía
                 if (!buttonData.enabled) {
                     btn.classList.add('disabled');
                     btn.setAttribute('aria-disabled', 'true');
+                    btn.onclick = null;
                 } else {
+                    btn.setAttribute('aria-disabled', 'false');
                     btn.onclick = buttonData.action;
                 }
 
+                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
+
+                // Limpiar contenido interno solo si es necesario (o simplemente sobrescribir)
+                // Para simplificar y asegurar estado correcto, reconstruimos el contenido interno
+                // Esto es mucho más barato que recrear el botón mismo
+                btn.innerHTML = '';
+
+                // Icono
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'btn-icon';
                 const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
-                if (iconEl) iconDiv.appendChild(iconEl);
+                if (iconEl) {
+                    if (typeof iconEl === 'string') {
+                        iconDiv.textContent = iconEl;
+                    } else {
+                        iconDiv.appendChild(iconEl);
+                    }
+                }
+                btn.appendChild(iconDiv);
 
+                // Etiqueta
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'btn-label';
                 labelDiv.textContent = buttonData.label;
-
-                btn.appendChild(iconDiv);
                 btn.appendChild(labelDiv);
 
+                // Costo
                 if (buttonData.cost) {
                     const costDiv = createCostElement(buttonData.cost);
                     btn.appendChild(costDiv);
                 }
+
             } else {
-                btn.classList.add('disabled');
-                // ACCESIBILIDAD: Atributos ARIA para botones vacíos en panel activo
-                btn.setAttribute('aria-disabled', 'true');
-                btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+                // Botón vacío
+                if (!btn.classList.contains('disabled') || btn.children.length > 2) {
+                    // Resetear a estado vacío solo si no lo está ya
+                    btn.className = 'action-btn disabled';
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
+                    btn.onclick = null;
 
-                const hotkeyDiv = document.createElement('div');
-                hotkeyDiv.className = 'btn-hotkey';
-                hotkeyDiv.textContent = hotkeys[i];
+                    btn.innerHTML = '';
 
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
+                    const hotkeyDiv = document.createElement('div');
+                    hotkeyDiv.className = 'btn-hotkey';
+                    hotkeyDiv.textContent = hotkeys[i];
 
-                btn.appendChild(hotkeyDiv);
-                btn.appendChild(iconDiv);
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+
+                    btn.appendChild(hotkeyDiv);
+                    btn.appendChild(iconDiv);
+                }
             }
-
-            grid.appendChild(btn);
         }
     }
 
@@ -1617,6 +1628,7 @@ export class Game {
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn disabled';
+            btn.setAttribute('data-hotkey', hotkeys[i]);
             // ACCESIBILIDAD: Atributos ARIA para botones vacíos
             btn.setAttribute('aria-disabled', 'true');
             btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);

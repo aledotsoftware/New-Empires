@@ -2635,7 +2635,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Función para renderizar tarjetas de civilización
+    // Funcion para renderizar tarjetas de civilizacion
     function renderCivSelection() {
         const civGrid = document.getElementById('civGrid');
         civGrid.innerHTML = '';
@@ -2649,29 +2649,45 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             // Generar lista de bonificaciones
             let bonusesHtml = '<ul>';
-            if (civ.bonuses.buildSpeed > 1) bonusesHtml += `<li>Construcción +${Math.round((civ.bonuses.buildSpeed - 1) * 100)}% rápida</li>`;
+            if (civ.bonuses.buildSpeed > 1) bonusesHtml += `<li>Construccion +${Math.round((civ.bonuses.buildSpeed - 1) * 100)}% rapida</li>`;
             if (civ.bonuses.buildingHp > 1) bonusesHtml += `<li>Edificios +${Math.round((civ.bonuses.buildingHp - 1) * 100)}% HP</li>`;
             if (civ.bonuses.unitSpeed > 1) bonusesHtml += `<li>Unidades +${Math.round((civ.bonuses.unitSpeed - 1) * 100)}% velocidad</li>`;
             if (civ.bonuses.unitAttack > 1) bonusesHtml += `<li>Unidades +${Math.round((civ.bonuses.unitAttack - 1) * 100)}% ataque</li>`;
-            if (civ.bonuses.gatherSpeed > 1) bonusesHtml += `<li>Recolección +${Math.round((civ.bonuses.gatherSpeed - 1) * 100)}% rápida</li>`;
+            if (civ.bonuses.gatherSpeed > 1) bonusesHtml += `<li>Recoleccion +${Math.round((civ.bonuses.gatherSpeed - 1) * 100)}% rapida</li>`;
             bonusesHtml += '</ul>';
 
-            // Usar iconEmoji si está disponible, sino usar icon normal
+            // Render icon - check if it's an image path
             const displayIcon = civ.iconEmoji || civ.icon;
+            let iconHtml;
+            if (displayIcon && (displayIcon.includes('/') || displayIcon.includes('.png'))) {
+                iconHtml = `<img src="${displayIcon}" alt="${civ.name}" style="width:64px;height:64px;object-fit:contain;">`;
+            } else {
+                iconHtml = displayIcon || civ.name.substring(0, 1);
+            }
+
+            // Render unique unit icon
+            let unitIconHtml = '';
+            if (civ.uniqueUnit && civ.uniqueUnit.icon) {
+                if (civ.uniqueUnit.icon.includes('/') || civ.uniqueUnit.icon.includes('.png')) {
+                    unitIconHtml = `<img src="${civ.uniqueUnit.icon}" alt="${civ.uniqueUnit.name}" style="width:20px;height:20px;vertical-align:middle;">`;
+                } else {
+                    unitIconHtml = civ.uniqueUnit.icon;
+                }
+            }
 
             card.innerHTML = `
-                <div class="civ-icon-large">${displayIcon}</div>
-                <h3>${civ.name}</h3>
-                <p>${civ.description}</p>
-                <div class="civ-bonuses">
-                    <strong>Bonificaciones:</strong>
-                    ${bonusesHtml}
-                </div>
-                <div class="civ-bonuses" style="margin-top: 10px;">
-                    <strong>Unidad Única:</strong>
-                    <ul><li>${civ.uniqueUnit.icon} ${civ.uniqueUnit.name}</li></ul>
-                </div>
-            `;
+            <div class="civ-icon-large">${iconHtml}</div>
+            <h3>${civ.name}</h3>
+            <p>${civ.description}</p>
+            <div class="civ-bonuses">
+                <strong>Bonificaciones:</strong>
+                ${bonusesHtml}
+            </div>
+            <div class="civ-bonuses" style="margin-top: 10px;">
+                <strong>Unidad Unica:</strong>
+                <ul><li>${unitIconHtml} ${civ.uniqueUnit.name}</li></ul>
+            </div>
+        `;
 
             card.onclick = () => startGame(civ.id);
             civGrid.appendChild(card);
@@ -3105,8 +3121,26 @@ window.updateSoundVolume = function (value) {
 };
 
 // ==========================================
-// SELECCIÓN DE CIVILIZACIÓN Y START GAME
+// SELECCION DE CIVILIZACION Y START GAME
 // ==========================================
+
+/**
+ * Helper function to render an icon as img or fallback
+ */
+function renderIconElement(iconPath, alt = '', size = '64px') {
+    if (!iconPath) {
+        return `<div class="civ-icon-placeholder" style="font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};">${alt.substring(0, 1)}</div>`;
+    }
+
+    // Check if it's an image path
+    if (iconPath.includes('/') || iconPath.includes('.png') || iconPath.includes('.jpg') || iconPath.includes('.svg')) {
+        return `<img src="${iconPath}" alt="${alt}" class="civ-icon-img" style="width:${size};height:${size};object-fit:contain;" onerror="this.style.display='none';">`;
+    }
+
+    // Return as-is for emojis
+    return `<span style="font-size:48px;">${iconPath}</span>`;
+}
+
 function renderCivilizationSelection() {
     const civGrid = document.getElementById('civGrid');
     if (!civGrid) return;
@@ -3127,10 +3161,10 @@ function renderCivilizationSelection() {
         let bonusesHtml = '';
         if (civ.bonuses && typeof civ.bonuses === 'object') {
             const bonusDescriptions = {
-                buildSpeed: 'Velocidad de construcción',
+                buildSpeed: 'Velocidad de construccion',
                 buildingHp: 'HP de edificios',
-                agricultureBonus: 'Bonus agrícola',
-                gatherRate: 'Velocidad de recolección',
+                agricultureBonus: 'Bonus agricola',
+                gatherRate: 'Velocidad de recoleccion',
                 militaryBonus: 'Bonus militar'
             };
 
@@ -3146,15 +3180,19 @@ function renderCivilizationSelection() {
         // Unique unit info
         let uniqueUnitHtml = '';
         if (civ.uniqueUnit) {
+            const unitIcon = renderIconElement(civ.uniqueUnit.icon, civ.uniqueUnit.name, '24px');
             uniqueUnitHtml = `
                 <div class="civ-unique-unit">
-                    <strong>Unidad Única:</strong> ${civ.uniqueUnit.name}
+                    <strong>Unidad Unica:</strong> ${unitIcon} ${civ.uniqueUnit.name}
                 </div>
             `;
         }
 
+        // Render civilization icon
+        const civIcon = renderIconElement(civ.icon, civ.name, '64px');
+
         card.innerHTML = `
-            <div class="civ-icon">${civ.icon}</div>
+            <div class="civ-icon">${civIcon}</div>
             <h3 class="civ-name">${civ.name}</h3>
             <div class="civ-description">${civ.description}</div>
             ${uniqueUnitHtml}

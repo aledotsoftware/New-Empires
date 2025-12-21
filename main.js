@@ -193,17 +193,17 @@ function renderStaticTechTree() {
         for (let tech of techs) {
             // Helper for resources icons
             const getResIcon = (res) => {
-                 if (assetLoader && assetLoader.getSrc) {
-                     const src = assetLoader.getSrc(res);
-                     if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                 }
-                 // fallback if assetLoader not ready (unlikely here) or no asset
-                 return `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+                if (assetLoader && assetLoader.getSrc) {
+                    const src = assetLoader.getSrc(res);
+                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+                }
+                // fallback if assetLoader not ready (unlikely here) or no asset
+                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
             };
 
             const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                            ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                            : `<div class="tech-icon-placeholder">T</div>`;
+                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
+                : `<div class="tech-icon-placeholder">T</div>`;
 
             html += `
                 <div class="tech-item locked">
@@ -212,8 +212,8 @@ function renderStaticTechTree() {
                     <div class="tech-desc">${tech.description}</div>
                     <div class="tech-cost">
                         ${Object.entries(tech.cost).map(([res, amount]) => {
-                            return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-                        }).join(' ')}
+                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
+            }).join(' ')}
                     </div>
                 </div>
             `;
@@ -268,18 +268,18 @@ function renderTechTree() {
             else if (status.researching) statusClass = 'researching';
             else if (canResearch) statusClass = 'available';
 
-             // Helper for resources icons
+            // Helper for resources icons
             const getResIcon = (res) => {
-                 if (assetLoader && assetLoader.getSrc) {
-                     const src = assetLoader.getSrc(res);
-                     if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                 }
-                 return `<span style="font-size:10px">${res.substring(0,1)}</span>`;
+                if (assetLoader && assetLoader.getSrc) {
+                    const src = assetLoader.getSrc(res);
+                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+                }
+                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
             };
 
             const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                            ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                            : `<div class="tech-icon-placeholder">T</div>`;
+                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
+                : `<div class="tech-icon-placeholder">T</div>`;
 
 
             html += `
@@ -290,8 +290,8 @@ function renderTechTree() {
                     <div class="tech-desc">${tech.description}</div>
                     <div class="tech-cost">
                         ${Object.entries(tech.cost).map(([res, amount]) => {
-                             return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-                        }).join(' ')}
+                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
+            }).join(' ')}
                     </div>
                     ${status.researching ? `<div class="tech-progress">Investigando...</div>` : ''}
                 </div>
@@ -414,7 +414,28 @@ function populateMapSizes() {
 }
 
 /**
- * Genera dinámicamente las opciones de civilización
+ * Helper function to render an icon as img or fallback
+ * @param {string} iconPath - The icon path or emoji
+ * @param {string} alt - Alt text for the image
+ * @param {string} size - Size of the icon (default 64px)
+ * @returns {string} HTML string
+ */
+function renderIconAsImage(iconPath, alt = '', size = '64px') {
+    if (!iconPath) {
+        return `<div class="civ-icon-placeholder" style="font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};">${alt.substring(0, 1)}</div>`;
+    }
+
+    // Check if it's an image path (contains / or . typical of file paths)
+    if (iconPath.includes('/') || iconPath.includes('.png') || iconPath.includes('.jpg') || iconPath.includes('.svg')) {
+        return `<img src="${iconPath}" alt="${alt}" class="civ-icon-img" style="width:${size};height:${size};object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;font-size:30px;">${alt.substring(0, 1)}</span>`;
+    }
+
+    // Return as-is for emojis (should not happen after migration, but as fallback)
+    return `<span style="font-size:48px;">${iconPath}</span>`;
+}
+
+/**
+ * Genera dinamicamente las opciones de civilizacion
  */
 function populateCivilizations() {
     const civGrid = document.getElementById('civGrid');
@@ -438,20 +459,8 @@ function populateCivilizations() {
         option.className = 'civ-option';
         option.dataset.civ = civ.civilizationId;
 
-        // Remove emoji if present in civ.icon (likely is)
-        // Check if there is an image for the civ
-        let iconHtml = '';
-        if (assetLoader && assetLoader.getSrc) {
-             const src = assetLoader.getSrc(civ.civilizationId);
-             if (src) {
-                 iconHtml = `<img src="${src}" class="civ-icon-img" style="width:64px;height:64px;object-fit:contain;">`;
-             } else {
-                 // Fallback: Use first letter or generic
-                 iconHtml = `<div class="civ-icon-placeholder" style="font-size:30px;line-height:64px;text-align:center;">${civ.name.substring(0,1)}</div>`;
-             }
-        } else {
-             iconHtml = `<div class="civ-icon-placeholder">${civ.name.substring(0,1)}</div>`;
-        }
+        // Use the icon from the JSON directly - render as image if it's a path
+        const iconHtml = renderIconAsImage(civ.icon, civ.name, '80px');
 
         option.innerHTML = `
             <div class="civ-icon">${iconHtml}</div>
@@ -462,9 +471,9 @@ function populateCivilizations() {
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
             selectedCivilization = civ.civilizationId;
-            debugLogger.info(`Civilización seleccionada: ${civ.civilizationId}`, 'ui');
+            debugLogger.info(`Civilizacion seleccionada: ${civ.civilizationId}`, 'ui');
 
-            // Obtener configuración del mapa
+            // Obtener configuracion del mapa
             const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
 
             // Iniciar juego
@@ -554,14 +563,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                             return unit;
                         },
-                            getTeamColor: (civilizationId) => {
-                                const civ = dataLoader.getCivilizationData(civilizationId);
-                                return civ?.color || '#4169E1';
-                            },
-                            getBuildSpeed: (civilizationId) => {
-                                const civ = dataLoader.getCivilizationData(civilizationId);
-                                return civ?.bonuses?.buildSpeed || 1;
-                            }
+                        getTeamColor: (civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            return civ?.color || '#4169E1';
+                        },
+                        getBuildSpeed: (civilizationId) => {
+                            const civ = dataLoader.getCivilizationData(civilizationId);
+                            return civ?.bonuses?.buildSpeed || 1;
+                        }
                     };
 
                     populateCivilizations();
@@ -619,7 +628,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Update tech tree if visible
         const techScreen = document.getElementById('techTreeScreen');
         if (techScreen && !techScreen.classList.contains('hidden')) {
-             if (game) renderTechTree(); else renderStaticTechTree();
+            if (game) renderTechTree(); else renderStaticTechTree();
         }
     }).catch(err => {
         debugLogger.error('Error cargando assets', 'assets', err);

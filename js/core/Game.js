@@ -902,41 +902,52 @@ export class Game {
         }
 
         // Actualizar todas las entidades
+        let hasDeadEntities = false;
         for (let entity of this.entities) {
             entity.update(deltaTime, this);
+            if (entity.isDead) hasDeadEntities = true;
         }
 
-        // Remover entidades muertas
-        this.entities = this.entities.filter(e => !e.isDead);
-        this.units = this.units.filter(u => !u.isDead);
-        this.buildings = this.buildings.filter(b => !b.isDead);
-        this.enemies = this.enemies.filter(e => !e.isDead);
+        // Remover entidades muertas (solo si es necesario para evitar GC)
+        if (hasDeadEntities) {
+            this.entities = this.entities.filter(e => !e.isDead);
+            this.units = this.units.filter(u => !u.isDead);
+            this.buildings = this.buildings.filter(b => !b.isDead);
+            this.enemies = this.enemies.filter(e => !e.isDead);
 
-        // Actualizar population count
-        this.population = this.units.filter(u => u.team === 'player').length;
+            // Remover de selección las entidades muertas
+            this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
 
-        // Remover de selección las entidades muertas
-        this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
+            // Verificar condiciones de victoria/derrota
+            this.checkGameOver();
+        }
 
-        // Verificar condiciones de victoria/derrota
-        this.checkGameOver();
+        // Actualizar population count (fuera del condicional para detectar spawns)
+        // Usamos reduce para evitar crear array intermedio con filter cada frame
+        this.population = this.units.reduce((count, u) =>
+            count + (u.team === 'player' ? 1 : 0), 0);
 
         // Actualizar UI
         this.updateUI();
     }
 
     checkGameOver() {
-        const playerTownCenters = this.buildings.filter(b =>
-            b.type === 'townCenter' && b.team === 'player' && !b.isDead
-        );
+        let hasPlayerTC = false;
+        let hasEnemyTC = false;
 
-        const enemyTownCenters = this.buildings.filter(b =>
-            b.type === 'townCenter' && b.team === 'enemy' && !b.isDead
-        );
+        // Iteración simple sin alocación de memoria
+        for (const b of this.buildings) {
+            if (b.type === 'townCenter' && !b.isDead) {
+                if (b.team === 'player') hasPlayerTC = true;
+                if (b.team === 'enemy') hasEnemyTC = true;
+            }
+            // Si ambos tienen TC, no necesitamos seguir buscando
+            if (hasPlayerTC && hasEnemyTC) break;
+        }
 
-        if (playerTownCenters.length === 0) {
+        if (!hasPlayerTC) {
             this.gameOver(false);
-        } else if (enemyTownCenters.length === 0) {
+        } else if (!hasEnemyTC) {
             this.gameOver(true);
         }
     }

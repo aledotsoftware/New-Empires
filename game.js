@@ -1637,42 +1637,58 @@ class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
+        // Clear content safely
+        while (content.firstChild) {
+            content.removeChild(content.firstChild);
+        }
+
         if (this.selectedEntities.length === 0) {
-            content.innerHTML = '';
             return;
         }
 
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'selection-info';
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'selection-icon';
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'selection-details';
+
+        const h3 = document.createElement('h3');
+        const statsDiv = document.createElement('div');
+        statsDiv.className = 'selection-stats';
+
         if (this.selectedEntities.length === 1) {
             const entity = this.selectedEntities[0];
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        ${entity.icon}
-                    </div>
-                    <div class="selection-details">
-                        <h3>${entity.name}</h3>
-                        <div class="selection-stats">
-                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
-                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+
+            iconDiv.textContent = entity.icon;
+            h3.textContent = entity.name;
+
+            const hpDiv = document.createElement('div');
+            hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+            statsDiv.appendChild(hpDiv);
+
+            if (entity.attackDamage) {
+                const atkDiv = document.createElement('div');
+                atkDiv.textContent = `Ataque: ${entity.attackDamage}`;
+                statsDiv.appendChild(atkDiv);
+            }
         } else {
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        👥
-                    </div>
-                    <div class="selection-details">
-                        <h3>${this.selectedEntities.length} Unidades</h3>
-                        <div class="selection-stats">
-                            <div>Selección múltiple</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            iconDiv.textContent = '👥';
+            h3.textContent = `${this.selectedEntities.length} Unidades`;
+
+            const multiDiv = document.createElement('div');
+            multiDiv.textContent = 'Selección múltiple';
+            statsDiv.appendChild(multiDiv);
         }
+
+        detailsDiv.appendChild(h3);
+        detailsDiv.appendChild(statsDiv);
+        infoDiv.appendChild(iconDiv);
+        infoDiv.appendChild(detailsDiv);
+
+        content.appendChild(infoDiv);
     }
 
     updateActionsPanel() {
@@ -1797,15 +1813,29 @@ class Game {
                     }
                 };
 
-                btn.innerHTML = `
-                    <div class="btn-icon">${buttonData.icon}</div>
-                    <div class="btn-label">${buttonData.label}</div>
-                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
-                `;
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+                iconDiv.textContent = buttonData.icon;
+                btn.appendChild(iconDiv);
+
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'btn-label';
+                labelDiv.textContent = buttonData.label;
+                btn.appendChild(labelDiv);
+
+                if (buttonData.cost) {
+                    const costDiv = document.createElement('div');
+                    costDiv.className = 'btn-cost';
+                    costDiv.textContent = buttonData.cost;
+                    btn.appendChild(costDiv);
+                }
             } else {
                 // Botón vacío
                 btn.classList.add('disabled');
-                btn.innerHTML = '<div class="btn-icon"></div>';
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+                btn.appendChild(iconDiv);
             }
 
             grid.appendChild(btn);
@@ -1828,6 +1858,8 @@ class Game {
 
     showNotification(message, type = 'info') {
         const container = document.getElementById('notifications');
+        if (!container) return;
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
 
@@ -1837,10 +1869,16 @@ class Game {
             success: '✅'
         };
 
-        notification.innerHTML = `
-            <div class="notification-icon">${icons[type]}</div>
-            <div class="notification-text">${message}</div>
-        `;
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'notification-icon';
+        iconDiv.textContent = icons[type] || icons.info;
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'notification-text';
+        textDiv.textContent = message;
+
+        notification.appendChild(iconDiv);
+        notification.appendChild(textDiv);
 
         container.appendChild(notification);
 

@@ -1539,7 +1539,8 @@ export class Game {
                 }
 
                 buttons.push({
-                    icon: getBtnIcon(techIconKey, tech.icon || techFallback),
+                    iconKey: techIconKey,
+                    iconFallback: tech.icon || techFallback,
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: tech.cost,

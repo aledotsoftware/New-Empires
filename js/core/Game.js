@@ -148,6 +148,11 @@ export class Game {
         document.body.appendChild(this.cursorElement);
         document.body.style.cursor = 'none';
 
+        // Variables para optimización de UI
+        this.lastUITime = 0;
+        this.lastActionsStateKey = '';
+        this.lastSelectionStateKey = '';
+
         this.initializeGame();
         this.updateUI();
     }
@@ -927,8 +932,12 @@ export class Game {
         this.population = this.units.reduce((count, u) =>
             count + (u.team === 'player' ? 1 : 0), 0);
 
-        // Actualizar UI
-        this.updateUI();
+        // Actualizar UI (Throttled to 10 FPS)
+        const now = Date.now();
+        if (now - this.lastUITime > 100) {
+            this.updateUI();
+            this.lastUITime = now;
+        }
     }
 
     checkGameOver() {
@@ -1282,6 +1291,22 @@ export class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
+        // Generar clave de estado para evitar actualizaciones innecesarias del DOM
+        let stateKey = '';
+        if (this.selectedEntities.length === 0) {
+            stateKey = 'empty';
+        } else if (this.selectedEntities.length === 1) {
+            const ent = this.selectedEntities[0];
+            // Incluir HP y otros estados cambiantes en la clave
+            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}`;
+        } else {
+            stateKey = `multi:${this.selectedEntities.length}`;
+        }
+
+        // Si el estado no ha cambiado, no tocar el DOM
+        if (this.lastSelectionStateKey === stateKey) return;
+        this.lastSelectionStateKey = stateKey;
+
         // Limpiar contenido previo
         while (content.firstChild) {
             content.removeChild(content.firstChild);
@@ -1398,80 +1423,37 @@ export class Game {
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
-        // Limpiar contenido previo
-        while (grid.firstChild) {
-            grid.removeChild(grid.firstChild);
-        }
-
-        // Si no hay selección o es múltiple, mostrar panel vacío
-        if (this.selectedEntities.length !== 1) {
-            this.renderEmptyGrid(grid);
-            return;
-        }
-
-        const entity = this.selectedEntities[0];
-
-        // Solo mostrar acciones si es del jugador
-        if (entity.team !== 'player') {
-            this.renderEmptyGrid(grid);
-            return;
-        }
-
+        // Preparar datos de botones primero (lógica pura, sin DOM)
         const buttons = [];
-
-        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',  // Fila 1
             'A', 'S', 'D', 'F', 'G',  // Fila 2
             'Z', 'X', 'C', 'V', 'B'   // Fila 3
         ];
 
-        const buttons = [];
+        let shouldRenderEmpty = true;
+        let entity = null;
 
-        // Helper para crear elementos
-        const createIconElement = (key, fallback) => {
-            if (typeof assetLoader !== 'undefined') {
-                const src = assetLoader.getSrc(key);
-                if (src) {
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.className = 'icon-small';
-                    return img;
-                }
+        if (this.selectedEntities.length === 1) {
+            entity = this.selectedEntities[0];
+            if (entity.team === 'player') {
+                shouldRenderEmpty = false;
             }
-            return fallback;
-        };
+        }
 
-        const createCostElement = (costObj) => {
-            const container = document.createElement('div');
-            container.className = 'btn-cost';
+        // Si hay que renderizar vacío, comprobamos si ya estaba vacío
+        if (shouldRenderEmpty) {
+            if (this.lastActionsStateKey === 'empty') return;
 
-            for (let [res, amount] of Object.entries(costObj)) {
-                const span = document.createElement('span');
-                span.textContent = amount;
-                container.appendChild(span);
+            // Renderizar vacío y salir
+            while (grid.firstChild) grid.removeChild(grid.firstChild);
+            this.renderEmptyGrid(grid);
+            this.lastActionsStateKey = 'empty';
+            return;
+        }
 
-                if (typeof assetLoader !== 'undefined') {
-                    const src = assetLoader.getSrc(res);
-                    if (src) {
-                        const img = document.createElement('img');
-                        img.src = src;
-                        img.className = 'icon-tiny';
-                        img.style.width = '16px';
-                        img.style.height = '16px';
-                        img.style.verticalAlign = 'middle';
-                        container.appendChild(img);
-                    } else {
-                        const iconSpan = document.createElement('span');
-                        iconSpan.textContent = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                        container.appendChild(iconSpan);
-                    }
-                }
-                const space = document.createTextNode(' ');
-                container.appendChild(space);
-            }
-            return container;
-        };
+        // --- LÓGICA DE GENERACIÓN DE BOTONES ---
+        // (Movemos la lógica de botones aquí para calcular el hash antes de tocar el DOM)
 
         if (entity.type === 'villager') {
             buttons.push({
@@ -1550,7 +1532,8 @@ export class Game {
                 }
 
                 buttons.push({
-                    icon: getBtnIcon(techIconKey, tech.icon || techFallback),
+                    iconKey: techIconKey,
+                    iconFallback: tech.icon || techFallback,
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: tech.cost,
@@ -1559,6 +1542,77 @@ export class Game {
                 });
             }
         }
+
+        // --- VERIFICACIÓN DE ESTADO ---
+        // Generar una clave única para este estado de botones
+        // Incluimos: ID entidad + (label+enabled) de cada botón
+        const stateKeyParts = [entity.id];
+        for (let b of buttons) {
+            stateKeyParts.push(`${b.label}:${b.enabled ? 1 : 0}`);
+        }
+        const stateKey = stateKeyParts.join('|');
+
+        if (this.lastActionsStateKey === stateKey) {
+            return; // No hay cambios visuales necesarios
+        }
+        this.lastActionsStateKey = stateKey;
+
+        // --- RENDERIZADO DOM ---
+
+        // Limpiar contenido previo
+        while (grid.firstChild) {
+            grid.removeChild(grid.firstChild);
+        }
+
+        // Helper para crear elementos
+        const createIconElement = (key, fallback) => {
+            if (typeof assetLoader !== 'undefined') {
+                const src = assetLoader.getSrc(key);
+                if (src) {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.className = 'icon-small';
+                    return img;
+                }
+            }
+            // Retornar siempre un elemento DOM, no un string
+            const span = document.createElement('span');
+            span.textContent = fallback;
+            span.className = 'icon-fallback';
+            return span;
+        };
+
+        const createCostElement = (costObj) => {
+            const container = document.createElement('div');
+            container.className = 'btn-cost';
+
+            for (let [res, amount] of Object.entries(costObj)) {
+                const span = document.createElement('span');
+                span.textContent = amount;
+                container.appendChild(span);
+
+                if (typeof assetLoader !== 'undefined') {
+                    const src = assetLoader.getSrc(res);
+                    if (src) {
+                        const img = document.createElement('img');
+                        img.src = src;
+                        img.className = 'icon-tiny';
+                        img.style.width = '16px';
+                        img.style.height = '16px';
+                        img.style.verticalAlign = 'middle';
+                        container.appendChild(img);
+                    } else {
+                        const iconSpan = document.createElement('span');
+                        iconSpan.textContent = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
+                        container.appendChild(iconSpan);
+                    }
+                }
+                const space = document.createTextNode(' ');
+                container.appendChild(space);
+            }
+            return container;
+        };
+
 
         // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
         for (let i = 0; i < 15; i++) {

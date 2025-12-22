@@ -1398,9 +1398,21 @@ export class Game {
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
-        // Limpiar contenido previo
-        while (grid.firstChild) {
-            grid.removeChild(grid.firstChild);
+        // OPTIMIZATION: Initialize grid only once
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
+        ];
+
+        if (grid.childElementCount !== 15) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'action-btn disabled';
+                btn.setAttribute('data-hotkey', hotkeys[i]);
+                grid.appendChild(btn);
+            }
         }
 
         // Si no hay selección o es múltiple, mostrar panel vacío
@@ -1416,15 +1428,6 @@ export class Game {
             this.renderEmptyGrid(grid);
             return;
         }
-
-        const buttons = [];
-
-        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
-        const hotkeys = [
-            'Q', 'W', 'E', 'R', 'T',  // Fila 1
-            'A', 'S', 'D', 'F', 'G',  // Fila 2
-            'Z', 'X', 'C', 'V', 'B'   // Fila 3
-        ];
 
         const buttons = [];
 
@@ -1560,61 +1563,85 @@ export class Game {
             }
         }
 
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        // OPTIMIZATION: Reuse DOM elements
+        const gridButtons = Array.from(grid.children);
+
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.setAttribute('data-hotkey', hotkeys[i]);
+            const btn = gridButtons[i];
+            const hotkey = hotkeys[i];
 
             if (i < buttons.length) {
                 const buttonData = buttons[i];
+                const costString = buttonData.cost ? JSON.stringify(buttonData.cost) : '';
+                const newStateKey = `active|${buttonData.label}|${buttonData.enabled}|${costString}|${buttonData.iconKey}`;
 
-                // ACCESIBILIDAD: Atributos ARIA
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
-                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
+                // Check if update is needed
+                if (btn.dataset.stateKey !== newStateKey) {
+                    btn.innerHTML = ''; // Clear content
+                    btn.className = 'action-btn'; // Reset class
 
-                if (!buttonData.enabled) {
-                    btn.classList.add('disabled');
-                    btn.setAttribute('aria-disabled', 'true');
+                    // ACCESIBILIDAD
+                    btn.setAttribute('aria-keyshortcuts', hotkey);
+                    btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+
+                    if (!buttonData.enabled) {
+                        btn.classList.add('disabled');
+                        btn.setAttribute('aria-disabled', 'true');
+                    } else {
+                        btn.onclick = buttonData.action;
+                        btn.removeAttribute('aria-disabled');
+                    }
+
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+                    const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
+                    if (iconEl) iconDiv.appendChild(iconEl);
+
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'btn-label';
+                    labelDiv.textContent = buttonData.label;
+
+                    btn.appendChild(iconDiv);
+                    btn.appendChild(labelDiv);
+
+                    if (buttonData.cost) {
+                        const costDiv = createCostElement(buttonData.cost);
+                        btn.appendChild(costDiv);
+                    }
+
+                    btn.dataset.stateKey = newStateKey;
                 } else {
-                    btn.onclick = buttonData.action;
-                }
-
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
-                const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
-                if (iconEl) iconDiv.appendChild(iconEl);
-
-                const labelDiv = document.createElement('div');
-                labelDiv.className = 'btn-label';
-                labelDiv.textContent = buttonData.label;
-
-                btn.appendChild(iconDiv);
-                btn.appendChild(labelDiv);
-
-                if (buttonData.cost) {
-                    const costDiv = createCostElement(buttonData.cost);
-                    btn.appendChild(costDiv);
+                    // Even if visual state is same, update action closure just in case (cheap)
+                    if (buttonData.enabled) {
+                        btn.onclick = buttonData.action;
+                    }
                 }
             } else {
-                btn.classList.add('disabled');
-                // ACCESIBILIDAD: Atributos ARIA para botones vacíos en panel activo
-                btn.setAttribute('aria-disabled', 'true');
-                btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+                const newStateKey = `empty|${hotkey}`;
 
-                const hotkeyDiv = document.createElement('div');
-                hotkeyDiv.className = 'btn-hotkey';
-                hotkeyDiv.textContent = hotkeys[i];
+                if (btn.dataset.stateKey !== newStateKey) {
+                    btn.innerHTML = '';
+                    btn.className = 'action-btn disabled';
+                    btn.onclick = null;
 
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
+                    // ACCESIBILIDAD
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
+                    btn.setAttribute('aria-keyshortcuts', hotkey);
 
-                btn.appendChild(hotkeyDiv);
-                btn.appendChild(iconDiv);
+                    const hotkeyDiv = document.createElement('div');
+                    hotkeyDiv.className = 'btn-hotkey';
+                    hotkeyDiv.textContent = hotkey;
+
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+
+                    btn.appendChild(hotkeyDiv);
+                    btn.appendChild(iconDiv);
+
+                    btn.dataset.stateKey = newStateKey;
+                }
             }
-
-            grid.appendChild(btn);
         }
     }
 
@@ -1625,24 +1652,43 @@ export class Game {
             'Z', 'X', 'C', 'V', 'B'
         ];
 
+        // Ensure grid has 15 children
+        if (grid.childElementCount !== 15) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                grid.appendChild(document.createElement('button'));
+            }
+        }
+
+        const gridButtons = Array.from(grid.children);
+
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn disabled';
-            // ACCESIBILIDAD: Atributos ARIA para botones vacíos
-            btn.setAttribute('aria-disabled', 'true');
-            btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
-            btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+            const btn = gridButtons[i];
+            const hotkey = hotkeys[i];
+            const newStateKey = `empty|${hotkey}`;
 
-            const hotkeyDiv = document.createElement('div');
-            hotkeyDiv.className = 'btn-hotkey';
-            hotkeyDiv.textContent = hotkeys[i];
+            if (btn.dataset.stateKey !== newStateKey) {
+                btn.innerHTML = '';
+                btn.className = 'action-btn disabled';
+                btn.onclick = null;
 
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'btn-icon';
+                // ACCESIBILIDAD
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
+                btn.setAttribute('aria-keyshortcuts', hotkey);
 
-            btn.appendChild(hotkeyDiv);
-            btn.appendChild(iconDiv);
-            grid.appendChild(btn);
+                const hotkeyDiv = document.createElement('div');
+                hotkeyDiv.className = 'btn-hotkey';
+                hotkeyDiv.textContent = hotkey;
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+
+                btn.appendChild(hotkeyDiv);
+                btn.appendChild(iconDiv);
+
+                btn.dataset.stateKey = newStateKey;
+            }
         }
     }
 

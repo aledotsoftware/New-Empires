@@ -1620,17 +1620,10 @@ class Game {
         document.getElementById('gameTime').textContent =
             `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-        // Controlar visibilidad del panel unificado
-        const controlPanel = document.getElementById('unitControlPanel');
-        if (controlPanel) {
-            if (this.selectedEntities.length > 0) {
-                controlPanel.classList.remove('hidden');
-                this.updateSelectionPanel();
-                this.updateActionsPanel();
-            } else {
-                controlPanel.classList.add('hidden');
-            }
-        }
+        // Actualizar paneles de selección y acciones
+        // Eliminado chequeo de unitControlPanel (legacy) para soportar el nuevo HUD
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
     }
 
     updateSelectionPanel() {
@@ -1638,7 +1631,12 @@ class Game {
         if (!content) return;
 
         if (this.selectedEntities.length === 0) {
-            content.innerHTML = '';
+            content.innerHTML = `
+                <div class="selection-empty-state" role="status" aria-live="polite" aria-disabled="true" aria-label="Nada seleccionado">
+                    <div class="selection-empty-icon" aria-hidden="true">👆</div>
+                    <div>Selecciona una unidad o edificio</div>
+                </div>
+            `;
             return;
         }
 

@@ -1,5 +1,6 @@
 // Imports de módulos creados
 import { CONFIG, TILE_SIZE, TERRAIN_TYPES } from './constants.js';
+import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';

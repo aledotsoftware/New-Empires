@@ -1080,19 +1080,21 @@ export class Game {
         const startX = Math.floor(this.camera.x / gridSize) * gridSize;
         const startY = Math.floor(this.camera.y / gridSize) * gridSize;
 
+        // OPTIMIZATION: Batch all grid lines into a single path to reduce draw calls
+        // from ~45/frame to 1/frame.
+        this.ctx.beginPath();
+
         for (let x = startX; x < this.camera.x + this.viewWidth; x += gridSize) {
-            this.ctx.beginPath();
             this.ctx.moveTo(x - this.camera.x, 0);
             this.ctx.lineTo(x - this.camera.x, this.viewHeight);
-            this.ctx.stroke();
         }
 
         for (let y = startY; y < this.camera.y + this.viewHeight; y += gridSize) {
-            this.ctx.beginPath();
             this.ctx.moveTo(0, y - this.camera.y);
             this.ctx.lineTo(this.viewWidth, y - this.camera.y);
-            this.ctx.stroke();
         }
+
+        this.ctx.stroke();
     }
 
     drawResourceNodes() {

@@ -148,6 +148,11 @@ export class Game {
         document.body.appendChild(this.cursorElement);
         document.body.style.cursor = 'none';
 
+        // Variables para optimización de UI
+        this.lastUITime = 0;
+        this.lastActionsStateKey = '';
+        this.lastSelectionStateKey = '';
+
         this.initializeGame();
         this.updateUI();
     }
@@ -927,8 +932,12 @@ export class Game {
         this.population = this.units.reduce((count, u) =>
             count + (u.team === 'player' ? 1 : 0), 0);
 
-        // Actualizar UI
-        this.updateUI();
+        // Actualizar UI (Throttled to 10 FPS)
+        const now = Date.now();
+        if (now - this.lastUITime > 100) {
+            this.updateUI();
+            this.lastUITime = now;
+        }
     }
 
     checkGameOver() {
@@ -1282,6 +1291,22 @@ export class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
+        // Generar clave de estado para evitar actualizaciones innecesarias del DOM
+        let stateKey = '';
+        if (this.selectedEntities.length === 0) {
+            stateKey = 'empty';
+        } else if (this.selectedEntities.length === 1) {
+            const ent = this.selectedEntities[0];
+            // Incluir HP y otros estados cambiantes en la clave
+            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}`;
+        } else {
+            stateKey = `multi:${this.selectedEntities.length}`;
+        }
+
+        // Si el estado no ha cambiado, no tocar el DOM
+        if (this.lastSelectionStateKey === stateKey) return;
+        this.lastSelectionStateKey = stateKey;
+
         // Limpiar contenido previo
         while (content.firstChild) {
             content.removeChild(content.firstChild);
@@ -1442,39 +1467,21 @@ export class Game {
                     return img;
                 }
             }
-            return fallback;
-        };
+        }
 
-        const createCostElement = (costObj) => {
-            const container = document.createElement('div');
-            container.className = 'btn-cost';
+        // Si hay que renderizar vacío, comprobamos si ya estaba vacío
+        if (shouldRenderEmpty) {
+            if (this.lastActionsStateKey === 'empty') return;
 
-            for (let [res, amount] of Object.entries(costObj)) {
-                const span = document.createElement('span');
-                span.textContent = amount;
-                container.appendChild(span);
+            // Renderizar vacío y salir
+            while (grid.firstChild) grid.removeChild(grid.firstChild);
+            this.renderEmptyGrid(grid);
+            this.lastActionsStateKey = 'empty';
+            return;
+        }
 
-                if (typeof assetLoader !== 'undefined') {
-                    const src = assetLoader.getSrc(res);
-                    if (src) {
-                        const img = document.createElement('img');
-                        img.src = src;
-                        img.className = 'icon-tiny';
-                        img.style.width = '16px';
-                        img.style.height = '16px';
-                        img.style.verticalAlign = 'middle';
-                        container.appendChild(img);
-                    } else {
-                        const iconSpan = document.createElement('span');
-                        iconSpan.textContent = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                        container.appendChild(iconSpan);
-                    }
-                }
-                const space = document.createTextNode(' ');
-                container.appendChild(space);
-            }
-            return container;
-        };
+        // --- LÓGICA DE GENERACIÓN DE BOTONES ---
+        // (Movemos la lógica de botones aquí para calcular el hash antes de tocar el DOM)
 
         if (entity.type === 'villager') {
             buttons.push({
@@ -1553,7 +1560,8 @@ export class Game {
                 }
 
                 buttons.push({
-                    icon: getBtnIcon(techIconKey, tech.icon || techFallback),
+                    iconKey: techIconKey,
+                    iconFallback: tech.icon || techFallback,
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: tech.cost,

@@ -626,7 +626,16 @@ export class Game {
     }
 
     openBuildMenu() {
-        document.getElementById('buildMenu').classList.remove('hidden');
+        const menu = document.getElementById('buildMenu');
+        this.lastFocusedElement = document.activeElement;
+
+        menu.classList.remove('hidden');
+
+        // Mover foco al botón de cerrar
+        const closeBtn = menu.querySelector('.btn-close');
+        if (closeBtn) {
+            closeBtn.focus();
+        }
 
         // Setup build options
         const buildOptions = document.querySelectorAll('.build-option');
@@ -641,6 +650,16 @@ export class Game {
 
     closeBuildMenu() {
         document.getElementById('buildMenu').classList.add('hidden');
+
+        // Restaurar foco al canvas para continuar jugando
+        // Preferimos el canvas sobre el último elemento (que podría ser un botón de UI)
+        // para que el jugador pueda usar atajos inmediatamente
+        if (this.canvas) {
+            this.canvas.focus();
+        } else if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+        }
+        this.lastFocusedElement = null;
     }
 
     startBuildMode(buildingType) {

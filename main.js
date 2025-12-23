@@ -28,6 +28,9 @@ let game = null;
 let selectedCivilization = 'sumeria';
 let selectedMapSize = 'normal';
 
+// Focus management variable
+let lastFocusedElement = null;
+
 // ===== FUNCIONES DE UI (expuestas globalmente) =====
 
 /**
@@ -36,7 +39,19 @@ let selectedMapSize = 'normal';
 window.showTechTree = function () {
     debugLogger.info('Abriendo árbol de tecnologías', 'ui');
     const screen = document.getElementById('techTreeScreen');
+
+    // Guardar foco actual
+    lastFocusedElement = document.activeElement;
+
     screen.classList.remove('hidden');
+
+    // Mover foco al botón de cerrar o al primer elemento interactivo
+    const closeBtn = screen.querySelector('.btn-close');
+    if (closeBtn) {
+        closeBtn.focus();
+    } else {
+        screen.focus();
+    }
 
     // Renderizar tech tree si el juego está activo
     if (game && game.techManager) {
@@ -52,6 +67,12 @@ window.showTechTree = function () {
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
     document.getElementById('techTreeScreen').classList.add('hidden');
+
+    // Restaurar foco
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 };
 
 /**
@@ -59,7 +80,20 @@ window.hideTechTree = function () {
  */
 window.showSettings = function () {
     debugLogger.info('Abriendo configuración', 'ui');
-    document.getElementById('settingsScreen').classList.remove('hidden');
+    const screen = document.getElementById('settingsScreen');
+
+    // Guardar foco actual
+    lastFocusedElement = document.activeElement;
+
+    screen.classList.remove('hidden');
+
+    // Mover foco al botón de cerrar
+    const closeBtn = screen.querySelector('.btn-close');
+    if (closeBtn) {
+        closeBtn.focus();
+    } else {
+        screen.focus();
+    }
 };
 
 /**
@@ -68,6 +102,12 @@ window.showSettings = function () {
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
     document.getElementById('settingsScreen').classList.add('hidden');
+
+    // Restaurar foco
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+        lastFocusedElement.focus();
+        lastFocusedElement = null;
+    }
 };
 
 /**

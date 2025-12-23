@@ -86,10 +86,10 @@
     </div>
 
     <!-- Modal del Árbol de Tecnologías -->
-    <div id="techTreeScreen" class="modal-overlay hidden">
+    <div id="techTreeScreen" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="techTreeTitle" tabindex="-1">
         <div class="modal-content tech-tree-modal">
             <div class="modal-header">
-                <h2><img src="assets/icons/tech.png" onerror="this.style.display='none'"
+                <h2 id="techTreeTitle"><img src="assets/icons/tech.png" onerror="this.style.display='none'"
                         style="width:24px;vertical-align:middle" alt=""> Árbol de Tecnologías</h2>
                 <button class="btn-close" onclick="hideTechTree()" aria-label="Cerrar">✕</button>
             </div>
@@ -189,10 +189,10 @@
         </div>
 
         <!-- Menú de Construcción (Modal) -->
-        <div id="buildMenu" class="modal-overlay hidden">
+        <div id="buildMenu" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="buildMenuTitle" tabindex="-1">
             <div class="modal-content build-menu">
                 <div class="modal-header">
-                    <h2><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
+                    <h2 id="buildMenuTitle"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
                     <button class="btn-close" onclick="closeBuildMenu()" aria-label="Cerrar">✕</button>
                 </div>
@@ -290,10 +290,10 @@
         </div>
 
         <!-- Pantalla de Configuración -->
-        <div id="settingsScreen" class="modal-overlay hidden">
+        <div id="settingsScreen" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" tabindex="-1">
             <div class="modal-content settings-modal" style="max-width: 500px;">
                 <div class="modal-header">
-                    <h2><img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                    <h2 id="settingsTitle"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
                     <button class="btn-close" onclick="hideSettings()" aria-label="Cerrar">✕</button>
                 </div>
@@ -377,16 +377,6 @@
                     </div>
                 </div>
             </div>
-            <div class="game-time">
-                <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'"
-                        style="width:20px;height:20px;"></span>
-                <span id="gameTime">00:00</span>
-            </div>
-            <button class="btn-secondary" onclick="showSettings()"
-                style="margin-left: 15px; padding: 8px 16px; background: rgba(212, 175, 55, 0.2); border: 1px solid rgba(212, 175, 55, 0.5);">
-                <img src="assets/icons/settings.png" onerror="this.style.display='none'"
-                    style="width:20px;height:20px;"> Config
-            </button>
         </div>
 
         <!-- Canvas del Juego -->

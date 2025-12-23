@@ -12,6 +12,7 @@ import { Game } from './js/core/Game.js';
 
 // Utils
 import { debugLogger } from './js/utils/DebugLogger.js';
+import { FocusManager } from './js/utils/FocusManager.js';
 
 // Managers
 import { assetLoader } from './js/managers/AssetLoader.js';
@@ -35,6 +36,8 @@ let selectedMapSize = 'normal';
  */
 window.showTechTree = function () {
     debugLogger.info('Abriendo árbol de tecnologías', 'ui');
+    FocusManager.saveFocus();
+
     const screen = document.getElementById('techTreeScreen');
     screen.classList.remove('hidden');
 
@@ -44,6 +47,9 @@ window.showTechTree = function () {
     } else {
         renderStaticTechTree();
     }
+
+    // Mover foco al modal
+    setTimeout(() => FocusManager.focusFirst(screen), 50);
 };
 
 /**
@@ -52,6 +58,7 @@ window.showTechTree = function () {
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
     document.getElementById('techTreeScreen').classList.add('hidden');
+    FocusManager.restoreFocus();
 };
 
 /**
@@ -59,7 +66,13 @@ window.hideTechTree = function () {
  */
 window.showSettings = function () {
     debugLogger.info('Abriendo configuración', 'ui');
-    document.getElementById('settingsScreen').classList.remove('hidden');
+    FocusManager.saveFocus();
+
+    const screen = document.getElementById('settingsScreen');
+    screen.classList.remove('hidden');
+
+    // Mover foco al modal (botón cerrar o primer input)
+    setTimeout(() => FocusManager.focusFirst(screen), 50);
 };
 
 /**
@@ -68,6 +81,7 @@ window.showSettings = function () {
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
     document.getElementById('settingsScreen').classList.add('hidden');
+    FocusManager.restoreFocus();
 };
 
 /**
@@ -82,17 +96,24 @@ window.updateGridSetting = function (enabled) {
 
 // Compatibilidad: función global legacy usada en HTML
 window.toggleGrid = function () {
+    let newState = false;
     if (window.game) {
         window.game.showGrid = !window.game.showGrid;
-        const toggleElement = document.getElementById('gridToggleValue');
-        if (toggleElement) toggleElement.textContent = window.game.showGrid ? 'Activada' : 'Desactivada';
+        newState = window.game.showGrid;
     } else {
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
-            const isActive = toggleElement.textContent === 'Activada';
-            toggleElement.textContent = isActive ? 'Desactivada' : 'Activada';
+            newState = toggleElement.textContent !== 'Activada';
         }
     }
+
+    // Update UI
+    const toggleElement = document.getElementById('gridToggleValue');
+    if (toggleElement) toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
+
+    // Update ARIA
+    const btn = document.getElementById('gridToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 /**

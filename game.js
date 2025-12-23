@@ -3091,16 +3091,24 @@ window.toggleIdleVillagerCycle = function () {
 // ==========================================
 window.toggleSound = function () {
     console.log('🔊 Toggle Sound llamado');
+    let newState = false;
+
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
+        newState = soundManager.enabled;
+
         const toggleElement = document.getElementById('soundToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
-            toggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
+            toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = newState ? '#48bb78' : '#f56565';
         }
     } else {
         console.error('❌ soundManager no está definido');
     }
+
+    // Update ARIA
+    const btn = document.getElementById('soundToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 window.updateSoundVolume = function (value) {

@@ -1620,17 +1620,10 @@ class Game {
         document.getElementById('gameTime').textContent =
             `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-        // Controlar visibilidad del panel unificado
-        const controlPanel = document.getElementById('unitControlPanel');
-        if (controlPanel) {
-            if (this.selectedEntities.length > 0) {
-                controlPanel.classList.remove('hidden');
-                this.updateSelectionPanel();
-                this.updateActionsPanel();
-            } else {
-                controlPanel.classList.add('hidden');
-            }
-        }
+        // Actualizar paneles de selección y acciones
+        // Eliminado chequeo de unitControlPanel (legacy) para soportar el nuevo HUD
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
     }
 
     updateSelectionPanel() {
@@ -1638,7 +1631,12 @@ class Game {
         if (!content) return;
 
         if (this.selectedEntities.length === 0) {
-            content.innerHTML = '';
+            content.innerHTML = `
+                <div class="selection-empty-state" role="status" aria-live="polite" aria-disabled="true" aria-label="Nada seleccionado">
+                    <div class="selection-empty-icon" aria-hidden="true">👆</div>
+                    <div>Selecciona una unidad o edificio</div>
+                </div>
+            `;
             return;
         }
 
@@ -3093,16 +3091,24 @@ window.toggleIdleVillagerCycle = function () {
 // ==========================================
 window.toggleSound = function () {
     console.log('🔊 Toggle Sound llamado');
+    let newState = false;
+
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
+        newState = soundManager.enabled;
+
         const toggleElement = document.getElementById('soundToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
-            toggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
+            toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = newState ? '#48bb78' : '#f56565';
         }
     } else {
         console.error('❌ soundManager no está definido');
     }
+
+    // Update ARIA
+    const btn = document.getElementById('soundToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 window.updateSoundVolume = function (value) {

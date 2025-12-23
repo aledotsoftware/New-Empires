@@ -149,6 +149,11 @@ export class Game {
         document.body.appendChild(this.cursorElement);
         document.body.style.cursor = 'none';
 
+        // Variables para optimización de UI
+        this.lastUITime = 0;
+        this.lastActionsStateKey = '';
+        this.lastSelectionStateKey = '';
+
         this.initializeGame();
         this.updateUI();
     }
@@ -903,41 +908,56 @@ export class Game {
         }
 
         // Actualizar todas las entidades
+        let hasDeadEntities = false;
         for (let entity of this.entities) {
             entity.update(deltaTime, this);
+            if (entity.isDead) hasDeadEntities = true;
         }
 
-        // Remover entidades muertas
-        this.entities = this.entities.filter(e => !e.isDead);
-        this.units = this.units.filter(u => !u.isDead);
-        this.buildings = this.buildings.filter(b => !b.isDead);
-        this.enemies = this.enemies.filter(e => !e.isDead);
+        // Remover entidades muertas (solo si es necesario para evitar GC)
+        if (hasDeadEntities) {
+            this.entities = this.entities.filter(e => !e.isDead);
+            this.units = this.units.filter(u => !u.isDead);
+            this.buildings = this.buildings.filter(b => !b.isDead);
+            this.enemies = this.enemies.filter(e => !e.isDead);
 
-        // Actualizar population count
-        this.population = this.units.filter(u => u.team === 'player').length;
+            // Remover de selección las entidades muertas
+            this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
 
-        // Remover de selección las entidades muertas
-        this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
+            // Verificar condiciones de victoria/derrota
+            this.checkGameOver();
+        }
 
-        // Verificar condiciones de victoria/derrota
-        this.checkGameOver();
+        // Actualizar population count (fuera del condicional para detectar spawns)
+        // Usamos reduce para evitar crear array intermedio con filter cada frame
+        this.population = this.units.reduce((count, u) =>
+            count + (u.team === 'player' ? 1 : 0), 0);
 
-        // Actualizar UI
-        this.updateUI();
+        // Actualizar UI (Throttled to 10 FPS)
+        const now = Date.now();
+        if (now - this.lastUITime > 100) {
+            this.updateUI();
+            this.lastUITime = now;
+        }
     }
 
     checkGameOver() {
-        const playerTownCenters = this.buildings.filter(b =>
-            b.type === 'townCenter' && b.team === 'player' && !b.isDead
-        );
+        let hasPlayerTC = false;
+        let hasEnemyTC = false;
 
-        const enemyTownCenters = this.buildings.filter(b =>
-            b.type === 'townCenter' && b.team === 'enemy' && !b.isDead
-        );
+        // Iteración simple sin alocación de memoria
+        for (const b of this.buildings) {
+            if (b.type === 'townCenter' && !b.isDead) {
+                if (b.team === 'player') hasPlayerTC = true;
+                if (b.team === 'enemy') hasEnemyTC = true;
+            }
+            // Si ambos tienen TC, no necesitamos seguir buscando
+            if (hasPlayerTC && hasEnemyTC) break;
+        }
 
-        if (playerTownCenters.length === 0) {
+        if (!hasPlayerTC) {
             this.gameOver(false);
-        } else if (enemyTownCenters.length === 0) {
+        } else if (!hasEnemyTC) {
             this.gameOver(true);
         }
     }
@@ -1272,6 +1292,22 @@ export class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
+        // Generar clave de estado para evitar actualizaciones innecesarias del DOM
+        let stateKey = '';
+        if (this.selectedEntities.length === 0) {
+            stateKey = 'empty';
+        } else if (this.selectedEntities.length === 1) {
+            const ent = this.selectedEntities[0];
+            // Incluir HP y otros estados cambiantes en la clave
+            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}`;
+        } else {
+            stateKey = `multi:${this.selectedEntities.length}`;
+        }
+
+        // Si el estado no ha cambiado, no tocar el DOM
+        if (this.lastSelectionStateKey === stateKey) return;
+        this.lastSelectionStateKey = stateKey;
+
         // Limpiar contenido previo
         while (content.firstChild) {
             content.removeChild(content.firstChild);
@@ -1388,9 +1424,21 @@ export class Game {
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
-        // Limpiar contenido previo
-        while (grid.firstChild) {
-            grid.removeChild(grid.firstChild);
+        // OPTIMIZATION: Initialize grid only once
+        const hotkeys = [
+            'Q', 'W', 'E', 'R', 'T',
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
+        ];
+
+        if (grid.childElementCount !== 15) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'action-btn disabled';
+                btn.setAttribute('data-hotkey', hotkeys[i]);
+                grid.appendChild(btn);
+            }
         }
 
         // Si no hay selección o es múltiple, mostrar panel vacío
@@ -1409,15 +1457,6 @@ export class Game {
 
         const buttons = [];
 
-        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
-        const hotkeys = [
-            'Q', 'W', 'E', 'R', 'T',  // Fila 1
-            'A', 'S', 'D', 'F', 'G',  // Fila 2
-            'Z', 'X', 'C', 'V', 'B'   // Fila 3
-        ];
-
-        const buttons = [];
-
         // Helper para crear elementos
         const createIconElement = (key, fallback) => {
             if (typeof assetLoader !== 'undefined') {
@@ -1429,41 +1468,21 @@ export class Game {
                     return img;
                 }
             }
-            const span = document.createElement('span');
-            span.textContent = fallback;
-            return span;
-        };
+        }
 
-        const createCostElement = (costObj) => {
-            const container = document.createElement('div');
-            container.className = 'btn-cost';
+        // Si hay que renderizar vacío, comprobamos si ya estaba vacío
+        if (shouldRenderEmpty) {
+            if (this.lastActionsStateKey === 'empty') return;
 
-            for (let [res, amount] of Object.entries(costObj)) {
-                const span = document.createElement('span');
-                span.textContent = amount;
-                container.appendChild(span);
+            // Renderizar vacío y salir
+            while (grid.firstChild) grid.removeChild(grid.firstChild);
+            this.renderEmptyGrid(grid);
+            this.lastActionsStateKey = 'empty';
+            return;
+        }
 
-                if (typeof assetLoader !== 'undefined') {
-                    const src = assetLoader.getSrc(res);
-                    if (src) {
-                        const img = document.createElement('img');
-                        img.src = src;
-                        img.className = 'icon-tiny';
-                        img.style.width = '16px';
-                        img.style.height = '16px';
-                        img.style.verticalAlign = 'middle';
-                        container.appendChild(img);
-                    } else {
-                        const iconSpan = document.createElement('span');
-                        iconSpan.textContent = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                        container.appendChild(iconSpan);
-                    }
-                }
-                const space = document.createTextNode(' ');
-                container.appendChild(space);
-            }
-            return container;
-        };
+        // --- LÓGICA DE GENERACIÓN DE BOTONES ---
+        // (Movemos la lógica de botones aquí para calcular el hash antes de tocar el DOM)
 
         if (entity.type === 'villager') {
             buttons.push({
@@ -1553,51 +1572,85 @@ export class Game {
             }
         }
 
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
+        // OPTIMIZATION: Reuse DOM elements
+        const gridButtons = Array.from(grid.children);
+
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.setAttribute('data-hotkey', hotkeys[i]);
+            const btn = gridButtons[i];
+            const hotkey = hotkeys[i];
 
             if (i < buttons.length) {
                 const buttonData = buttons[i];
+                const costString = buttonData.cost ? JSON.stringify(buttonData.cost) : '';
+                const newStateKey = `active|${buttonData.label}|${buttonData.enabled}|${costString}|${buttonData.iconKey}`;
 
-                if (!buttonData.enabled) {
-                    btn.classList.add('disabled');
+                // Check if update is needed
+                if (btn.dataset.stateKey !== newStateKey) {
+                    btn.innerHTML = ''; // Clear content
+                    btn.className = 'action-btn'; // Reset class
+
+                    // ACCESIBILIDAD
+                    btn.setAttribute('aria-keyshortcuts', hotkey);
+                    btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+
+                    if (!buttonData.enabled) {
+                        btn.classList.add('disabled');
+                        btn.setAttribute('aria-disabled', 'true');
+                    } else {
+                        btn.onclick = buttonData.action;
+                        btn.removeAttribute('aria-disabled');
+                    }
+
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+                    const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
+                    if (iconEl) iconDiv.appendChild(iconEl);
+
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'btn-label';
+                    labelDiv.textContent = buttonData.label;
+
+                    btn.appendChild(iconDiv);
+                    btn.appendChild(labelDiv);
+
+                    if (buttonData.cost) {
+                        const costDiv = createCostElement(buttonData.cost);
+                        btn.appendChild(costDiv);
+                    }
+
+                    btn.dataset.stateKey = newStateKey;
                 } else {
-                    btn.onclick = buttonData.action;
-                }
-
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
-                const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
-                if (iconEl) iconDiv.appendChild(iconEl);
-
-                const labelDiv = document.createElement('div');
-                labelDiv.className = 'btn-label';
-                labelDiv.textContent = buttonData.label;
-
-                btn.appendChild(iconDiv);
-                btn.appendChild(labelDiv);
-
-                if (buttonData.cost) {
-                    const costDiv = createCostElement(buttonData.cost);
-                    btn.appendChild(costDiv);
+                    // Even if visual state is same, update action closure just in case (cheap)
+                    if (buttonData.enabled) {
+                        btn.onclick = buttonData.action;
+                    }
                 }
             } else {
-                btn.classList.add('disabled');
-                const hotkeyDiv = document.createElement('div');
-                hotkeyDiv.className = 'btn-hotkey';
-                hotkeyDiv.textContent = hotkeys[i];
+                const newStateKey = `empty|${hotkey}`;
 
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
+                if (btn.dataset.stateKey !== newStateKey) {
+                    btn.innerHTML = '';
+                    btn.className = 'action-btn disabled';
+                    btn.onclick = null;
 
-                btn.appendChild(hotkeyDiv);
-                btn.appendChild(iconDiv);
+                    // ACCESIBILIDAD
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
+                    btn.setAttribute('aria-keyshortcuts', hotkey);
+
+                    const hotkeyDiv = document.createElement('div');
+                    hotkeyDiv.className = 'btn-hotkey';
+                    hotkeyDiv.textContent = hotkey;
+
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+
+                    btn.appendChild(hotkeyDiv);
+                    btn.appendChild(iconDiv);
+
+                    btn.dataset.stateKey = newStateKey;
+                }
             }
-
-            grid.appendChild(btn);
         }
     }
 
@@ -1608,20 +1661,43 @@ export class Game {
             'Z', 'X', 'C', 'V', 'B'
         ];
 
+        // Ensure grid has 15 children
+        if (grid.childElementCount !== 15) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                grid.appendChild(document.createElement('button'));
+            }
+        }
+
+        const gridButtons = Array.from(grid.children);
+
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn disabled';
+            const btn = gridButtons[i];
+            const hotkey = hotkeys[i];
+            const newStateKey = `empty|${hotkey}`;
 
-            const hotkeyDiv = document.createElement('div');
-            hotkeyDiv.className = 'btn-hotkey';
-            hotkeyDiv.textContent = hotkeys[i];
+            if (btn.dataset.stateKey !== newStateKey) {
+                btn.innerHTML = '';
+                btn.className = 'action-btn disabled';
+                btn.onclick = null;
 
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'btn-icon';
+                // ACCESIBILIDAD
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
+                btn.setAttribute('aria-keyshortcuts', hotkey);
 
-            btn.appendChild(hotkeyDiv);
-            btn.appendChild(iconDiv);
-            grid.appendChild(btn);
+                const hotkeyDiv = document.createElement('div');
+                hotkeyDiv.className = 'btn-hotkey';
+                hotkeyDiv.textContent = hotkey;
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+
+                btn.appendChild(hotkeyDiv);
+                btn.appendChild(iconDiv);
+
+                btn.dataset.stateKey = newStateKey;
+            }
         }
     }
 
@@ -1630,15 +1706,31 @@ export class Game {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
 
-        const icons = {
-            info: 'ℹ️',
-            error: '❌',
-            success: '✅'
+        // Map types to asset filenames
+        const iconFiles = {
+            info: 'info.png',
+            error: 'error.png',
+            success: 'check.png'
         };
 
         const iconDiv = document.createElement('div');
         iconDiv.className = 'notification-icon';
-        iconDiv.textContent = icons[type] || icons.info;
+
+        // Use image asset with alt text for accessibility
+        const img = document.createElement('img');
+        img.src = `assets/icons/${iconFiles[type] || 'info.png'}`;
+        img.alt = type === 'success' ? 'Éxito' : type === 'error' ? 'Error' : 'Información';
+        img.style.width = '24px';
+        img.style.height = '24px';
+        img.style.objectFit = 'contain';
+
+        // Add error handler for image loading failure
+        img.onerror = () => {
+            img.style.display = 'none';
+            iconDiv.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+        };
+
+        iconDiv.appendChild(img);
 
         const textDiv = document.createElement('div');
         textDiv.className = 'notification-text';

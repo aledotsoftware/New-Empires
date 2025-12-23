@@ -1073,3 +1073,11 @@ body {
     filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.9));
     border-color: var(--primary-gold);
 }
+/* ==========================================
+   ACCESIBILIDAD
+   ========================================== */
+:focus-visible {
+    outline: 3px solid var(--primary-gold);
+    outline-offset: 2px;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+}

@@ -626,7 +626,16 @@ export class Game {
     }
 
     openBuildMenu() {
-        document.getElementById('buildMenu').classList.remove('hidden');
+        const menu = document.getElementById('buildMenu');
+        this.lastFocusedElement = document.activeElement;
+
+        menu.classList.remove('hidden');
+
+        // Mover foco al botón de cerrar
+        const closeBtn = menu.querySelector('.btn-close');
+        if (closeBtn) {
+            closeBtn.focus();
+        }
 
         // Setup build options
         const buildOptions = document.querySelectorAll('.build-option');
@@ -641,6 +650,16 @@ export class Game {
 
     closeBuildMenu() {
         document.getElementById('buildMenu').classList.add('hidden');
+
+        // Restaurar foco al canvas para continuar jugando
+        // Preferimos el canvas sobre el último elemento (que podría ser un botón de UI)
+        // para que el jugador pueda usar atajos inmediatamente
+        if (this.canvas) {
+            this.canvas.focus();
+        } else if (this.lastFocusedElement) {
+            this.lastFocusedElement.focus();
+        }
+        this.lastFocusedElement = null;
     }
 
     startBuildMode(buildingType) {
@@ -1061,19 +1080,21 @@ export class Game {
         const startX = Math.floor(this.camera.x / gridSize) * gridSize;
         const startY = Math.floor(this.camera.y / gridSize) * gridSize;
 
+        // OPTIMIZATION: Batch all grid lines into a single path to reduce draw calls
+        // from ~45/frame to 1/frame.
+        this.ctx.beginPath();
+
         for (let x = startX; x < this.camera.x + this.viewWidth; x += gridSize) {
-            this.ctx.beginPath();
             this.ctx.moveTo(x - this.camera.x, 0);
             this.ctx.lineTo(x - this.camera.x, this.viewHeight);
-            this.ctx.stroke();
         }
 
         for (let y = startY; y < this.camera.y + this.viewHeight; y += gridSize) {
-            this.ctx.beginPath();
             this.ctx.moveTo(0, y - this.camera.y);
             this.ctx.lineTo(this.viewWidth, y - this.camera.y);
-            this.ctx.stroke();
         }
+
+        this.ctx.stroke();
     }
 
     drawResourceNodes() {

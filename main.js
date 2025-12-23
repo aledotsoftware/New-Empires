@@ -29,6 +29,9 @@ let game = null;
 let selectedCivilization = 'sumeria';
 let selectedMapSize = 'normal';
 
+// Focus management variable
+let lastFocusedElement = null;
+
 // ===== FUNCIONES DE UI (expuestas globalmente) =====
 
 /**
@@ -39,7 +42,19 @@ window.showTechTree = function () {
     FocusManager.saveFocus();
 
     const screen = document.getElementById('techTreeScreen');
+
+    // Guardar foco actual
+    lastFocusedElement = document.activeElement;
+
     screen.classList.remove('hidden');
+
+    // Mover foco al botón de cerrar o al primer elemento interactivo
+    const closeBtn = screen.querySelector('.btn-close');
+    if (closeBtn) {
+        closeBtn.focus();
+    } else {
+        screen.focus();
+    }
 
     // Renderizar tech tree si el juego está activo
     if (game && game.techManager) {

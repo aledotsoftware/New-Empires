@@ -52,9 +52,18 @@ export class SpatialGrid {
         }
     }
 
-    // Devuelve entidades en las celdas cercanas
-    query(x, y, radius) {
-        const entities = [];
+    /**
+     * Devuelve entidades en las celdas cercanas
+     * @param {number} x - Coordenada X central
+     * @param {number} y - Coordenada Y central
+     * @param {number} radius - Radio de búsqueda
+     * @param {Array} result - (Opcional) Array para almacenar resultados y evitar alocación
+     */
+    query(x, y, radius, result = []) {
+        // Optimización: Limpiar array existente en lugar de crear uno nuevo
+        // Esto reduce significativamente la presión del GC en llamadas frecuentes
+        result.length = 0;
+
         const cellRadius = Math.ceil(radius / this.cellSize);
         const centerCol = Math.floor(x / this.cellSize);
         const centerRow = Math.floor(y / this.cellSize);
@@ -71,16 +80,15 @@ export class SpatialGrid {
             for (let c = startCol; c <= endCol; c++) {
                 const index = rowBase + c;
                 const bucket = this.buckets[index];
-                // Loop unrolling manual si fuera crítico, pero spread es legible
-                // Sin embargo, spread puede ser lento si el bucket es gigante.
-                // Usamos push loop mejor.
+
+                // Iterar bucket y agregar a resultados
                 const len = bucket.length;
                 for(let i = 0; i < len; i++) {
-                    entities.push(bucket[i]);
+                    result.push(bucket[i]);
                 }
             }
         }
 
-        return entities;
+        return result;
     }
 }

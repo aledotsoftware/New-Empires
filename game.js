@@ -3098,9 +3098,11 @@ window.toggleIdleVillagerCycle = function () {
 window.toggleSound = function () {
     console.log('🔊 Toggle Sound llamado');
     let newState = false;
+
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
         newState = soundManager.enabled;
+
         const toggleElement = document.getElementById('soundToggleValue');
         if (toggleElement) {
             toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
@@ -3110,8 +3112,8 @@ window.toggleSound = function () {
         console.error('❌ soundManager no está definido');
     }
 
-    // ACCESIBILIDAD: Actualizar estado visual y semántico
-    const btn = document.querySelector('button[onclick="toggleSound()"]');
+    // Update ARIA
+    const btn = document.getElementById('soundToggleBtn');
     if (btn) btn.setAttribute('aria-pressed', newState);
 };
 

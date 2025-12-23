@@ -46,6 +46,15 @@
 }
 
 /* ==========================================
+   ACCESIBILIDAD (FOCUS-VISIBLE)
+   ========================================== */
+:focus-visible {
+    outline: 2px solid var(--primary-gold);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+}
+
+/* ==========================================
    ESTILOS GENERALES
    ========================================== */
 body {
@@ -903,6 +912,13 @@ body {
     margin: 2rem 0;
 }
 
+.btn-secondary[aria-pressed="true"] {
+    background: rgba(72, 187, 120, 0.2);
+    border-color: #48bb78;
+    color: #48bb78;
+    box-shadow: 0 0 10px rgba(72, 187, 120, 0.2) inset;
+}
+
 /* ==========================================
    MODAL DEL ÁRBOL DE TECNOLOGÍAS
    ========================================== */
@@ -1072,4 +1088,12 @@ body {
 .civ-icon-large:hover {
     filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.9));
     border-color: var(--primary-gold);
+}
+/* ==========================================
+   ACCESIBILIDAD
+   ========================================== */
+:focus-visible {
+    outline: 3px solid var(--primary-gold);
+    outline-offset: 2px;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
 }

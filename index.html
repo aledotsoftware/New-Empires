@@ -136,7 +136,7 @@
             <div class="resources-panel">
                 <div class="resource-item">
                     <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;"></div>
+                            style="width:24px;height:24px;" alt="Madera"></div>
                     <div class="resource-info">
                         <div class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
@@ -144,7 +144,7 @@
                 </div>
                 <div class="resource-item">
                     <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;"></div>
+                            style="width:24px;height:24px;" alt="Comida"></div>
                     <div class="resource-info">
                         <div class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
@@ -152,7 +152,7 @@
                 </div>
                 <div class="resource-item">
                     <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;"></div>
+                            style="width:24px;height:24px;" alt="Oro"></div>
                     <div class="resource-info">
                         <div class="resource-label">Oro</div>
                         <div id="goldCount" class="resource-value">0</div>
@@ -160,7 +160,7 @@
                 </div>
                 <div class="resource-item">
                     <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;"></div>
+                            style="width:24px;height:24px;" alt="Piedra"></div>
                     <div class="resource-info">
                         <div class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
@@ -168,7 +168,7 @@
                 </div>
                 <div class="resource-item resource-population">
                     <div class="resource-icon"><img src="assets/icons/population.png"
-                            onerror="this.style.display='none'" style="width:24px;height:24px;"></div>
+                            onerror="this.style.display='none'" style="width:24px;height:24px;" alt="Población"></div>
                     <div class="resource-info">
                         <div class="resource-label">Población</div>
                         <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
@@ -306,8 +306,8 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Efectos de Sonido: <span id="soundToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
-                            <button class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;"
-                                aria-label="Alternar sonido">
+                            <button id="soundToggleBtn" class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;"
+                                aria-label="Alternar sonido" aria-pressed="true">
                                 Alternar
                             </button>
                         </div>
@@ -331,8 +331,8 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
                             </label>
-                            <button class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;"
-                                aria-label="Alternar cuadrícula">
+                            <button id="gridToggleBtn" class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;"
+                                aria-label="Alternar cuadrícula" aria-pressed="true">
                                 Alternar
                             </button>
                         </div>

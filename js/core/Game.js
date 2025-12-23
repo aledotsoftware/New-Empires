@@ -1423,21 +1423,49 @@ export class Game {
         const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
-        // Preparar datos de botones primero (lógica pura, sin DOM)
-        const buttons = [];
+        // OPTIMIZATION: Initialize grid only once
         const hotkeys = [
-            'Q', 'W', 'E', 'R', 'T',  // Fila 1
-            'A', 'S', 'D', 'F', 'G',  // Fila 2
-            'Z', 'X', 'C', 'V', 'B'   // Fila 3
+            'Q', 'W', 'E', 'R', 'T',
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
         ];
 
-        let shouldRenderEmpty = true;
-        let entity = null;
+        if (grid.childElementCount !== 15) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'action-btn disabled';
+                btn.setAttribute('data-hotkey', hotkeys[i]);
+                grid.appendChild(btn);
+            }
+        }
 
-        if (this.selectedEntities.length === 1) {
-            entity = this.selectedEntities[0];
-            if (entity.team === 'player') {
-                shouldRenderEmpty = false;
+        // Si no hay selección o es múltiple, mostrar panel vacío
+        if (this.selectedEntities.length !== 1) {
+            this.renderEmptyGrid(grid);
+            return;
+        }
+
+        const entity = this.selectedEntities[0];
+
+        // Solo mostrar acciones si es del jugador
+        if (entity.team !== 'player') {
+            this.renderEmptyGrid(grid);
+            return;
+        }
+
+        const buttons = [];
+
+        // Helper para crear elementos
+        const createIconElement = (key, fallback) => {
+            if (typeof assetLoader !== 'undefined') {
+                const src = assetLoader.getSrc(key);
+                if (src) {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.className = 'icon-small';
+                    return img;
+                }
             }
         }
 
@@ -1543,132 +1571,85 @@ export class Game {
             }
         }
 
-        // --- VERIFICACIÓN DE ESTADO ---
-        // Generar una clave única para este estado de botones
-        // Incluimos: ID entidad + (label+enabled) de cada botón
-        const stateKeyParts = [entity.id];
-        for (let b of buttons) {
-            stateKeyParts.push(`${b.label}:${b.enabled ? 1 : 0}`);
-        }
-        const stateKey = stateKeyParts.join('|');
+        // OPTIMIZATION: Reuse DOM elements
+        const gridButtons = Array.from(grid.children);
 
-        if (this.lastActionsStateKey === stateKey) {
-            return; // No hay cambios visuales necesarios
-        }
-        this.lastActionsStateKey = stateKey;
-
-        // --- RENDERIZADO DOM ---
-
-        // Limpiar contenido previo
-        while (grid.firstChild) {
-            grid.removeChild(grid.firstChild);
-        }
-
-        // Helper para crear elementos
-        const createIconElement = (key, fallback) => {
-            if (typeof assetLoader !== 'undefined') {
-                const src = assetLoader.getSrc(key);
-                if (src) {
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.className = 'icon-small';
-                    return img;
-                }
-            }
-            // Retornar siempre un elemento DOM, no un string
-            const span = document.createElement('span');
-            span.textContent = fallback;
-            span.className = 'icon-fallback';
-            return span;
-        };
-
-        const createCostElement = (costObj) => {
-            const container = document.createElement('div');
-            container.className = 'btn-cost';
-
-            for (let [res, amount] of Object.entries(costObj)) {
-                const span = document.createElement('span');
-                span.textContent = amount;
-                container.appendChild(span);
-
-                if (typeof assetLoader !== 'undefined') {
-                    const src = assetLoader.getSrc(res);
-                    if (src) {
-                        const img = document.createElement('img');
-                        img.src = src;
-                        img.className = 'icon-tiny';
-                        img.style.width = '16px';
-                        img.style.height = '16px';
-                        img.style.verticalAlign = 'middle';
-                        container.appendChild(img);
-                    } else {
-                        const iconSpan = document.createElement('span');
-                        iconSpan.textContent = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                        container.appendChild(iconSpan);
-                    }
-                }
-                const space = document.createTextNode(' ');
-                container.appendChild(space);
-            }
-            return container;
-        };
-
-
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn';
-            btn.setAttribute('data-hotkey', hotkeys[i]);
+            const btn = gridButtons[i];
+            const hotkey = hotkeys[i];
 
             if (i < buttons.length) {
                 const buttonData = buttons[i];
+                const costString = buttonData.cost ? JSON.stringify(buttonData.cost) : '';
+                const newStateKey = `active|${buttonData.label}|${buttonData.enabled}|${costString}|${buttonData.iconKey}`;
 
-                // ACCESIBILIDAD: Atributos ARIA
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
-                btn.setAttribute('aria-label', `${buttonData.label} (${hotkeys[i]})`);
+                // Check if update is needed
+                if (btn.dataset.stateKey !== newStateKey) {
+                    btn.innerHTML = ''; // Clear content
+                    btn.className = 'action-btn'; // Reset class
 
-                if (!buttonData.enabled) {
-                    btn.classList.add('disabled');
-                    btn.setAttribute('aria-disabled', 'true');
+                    // ACCESIBILIDAD
+                    btn.setAttribute('aria-keyshortcuts', hotkey);
+                    btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+
+                    if (!buttonData.enabled) {
+                        btn.classList.add('disabled');
+                        btn.setAttribute('aria-disabled', 'true');
+                    } else {
+                        btn.onclick = buttonData.action;
+                        btn.removeAttribute('aria-disabled');
+                    }
+
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+                    const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
+                    if (iconEl) iconDiv.appendChild(iconEl);
+
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'btn-label';
+                    labelDiv.textContent = buttonData.label;
+
+                    btn.appendChild(iconDiv);
+                    btn.appendChild(labelDiv);
+
+                    if (buttonData.cost) {
+                        const costDiv = createCostElement(buttonData.cost);
+                        btn.appendChild(costDiv);
+                    }
+
+                    btn.dataset.stateKey = newStateKey;
                 } else {
-                    btn.onclick = buttonData.action;
-                }
-
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
-                const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);
-                if (iconEl) iconDiv.appendChild(iconEl);
-
-                const labelDiv = document.createElement('div');
-                labelDiv.className = 'btn-label';
-                labelDiv.textContent = buttonData.label;
-
-                btn.appendChild(iconDiv);
-                btn.appendChild(labelDiv);
-
-                if (buttonData.cost) {
-                    const costDiv = createCostElement(buttonData.cost);
-                    btn.appendChild(costDiv);
+                    // Even if visual state is same, update action closure just in case (cheap)
+                    if (buttonData.enabled) {
+                        btn.onclick = buttonData.action;
+                    }
                 }
             } else {
-                btn.classList.add('disabled');
-                // ACCESIBILIDAD: Atributos ARIA para botones vacíos en panel activo
-                btn.setAttribute('aria-disabled', 'true');
-                btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
-                btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+                const newStateKey = `empty|${hotkey}`;
 
-                const hotkeyDiv = document.createElement('div');
-                hotkeyDiv.className = 'btn-hotkey';
-                hotkeyDiv.textContent = hotkeys[i];
+                if (btn.dataset.stateKey !== newStateKey) {
+                    btn.innerHTML = '';
+                    btn.className = 'action-btn disabled';
+                    btn.onclick = null;
 
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'btn-icon';
+                    // ACCESIBILIDAD
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
+                    btn.setAttribute('aria-keyshortcuts', hotkey);
 
-                btn.appendChild(hotkeyDiv);
-                btn.appendChild(iconDiv);
+                    const hotkeyDiv = document.createElement('div');
+                    hotkeyDiv.className = 'btn-hotkey';
+                    hotkeyDiv.textContent = hotkey;
+
+                    const iconDiv = document.createElement('div');
+                    iconDiv.className = 'btn-icon';
+
+                    btn.appendChild(hotkeyDiv);
+                    btn.appendChild(iconDiv);
+
+                    btn.dataset.stateKey = newStateKey;
+                }
             }
-
-            grid.appendChild(btn);
         }
     }
 
@@ -1679,24 +1660,43 @@ export class Game {
             'Z', 'X', 'C', 'V', 'B'
         ];
 
+        // Ensure grid has 15 children
+        if (grid.childElementCount !== 15) {
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                grid.appendChild(document.createElement('button'));
+            }
+        }
+
+        const gridButtons = Array.from(grid.children);
+
         for (let i = 0; i < 15; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'action-btn disabled';
-            // ACCESIBILIDAD: Atributos ARIA para botones vacíos
-            btn.setAttribute('aria-disabled', 'true');
-            btn.setAttribute('aria-label', `Ranura vacía ${hotkeys[i]}`);
-            btn.setAttribute('aria-keyshortcuts', hotkeys[i]);
+            const btn = gridButtons[i];
+            const hotkey = hotkeys[i];
+            const newStateKey = `empty|${hotkey}`;
 
-            const hotkeyDiv = document.createElement('div');
-            hotkeyDiv.className = 'btn-hotkey';
-            hotkeyDiv.textContent = hotkeys[i];
+            if (btn.dataset.stateKey !== newStateKey) {
+                btn.innerHTML = '';
+                btn.className = 'action-btn disabled';
+                btn.onclick = null;
 
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'btn-icon';
+                // ACCESIBILIDAD
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
+                btn.setAttribute('aria-keyshortcuts', hotkey);
 
-            btn.appendChild(hotkeyDiv);
-            btn.appendChild(iconDiv);
-            grid.appendChild(btn);
+                const hotkeyDiv = document.createElement('div');
+                hotkeyDiv.className = 'btn-hotkey';
+                hotkeyDiv.textContent = hotkey;
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+
+                btn.appendChild(hotkeyDiv);
+                btn.appendChild(iconDiv);
+
+                btn.dataset.stateKey = newStateKey;
+            }
         }
     }
 

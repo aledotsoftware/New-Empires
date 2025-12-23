@@ -2984,13 +2984,19 @@ window.backToMapSize = function () {
 // FUNCIÓN DE CONFIGURACIÓN - Toggle Grid
 // ==========================================
 window.toggleGrid = function () {
+    let newState = false;
     if (game) {
         game.showGrid = !game.showGrid;
+        newState = game.showGrid;
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+            toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
         }
     }
+
+    // ACCESIBILIDAD: Actualizar estado visual y semántico
+    const btn = document.querySelector('button[onclick="toggleGrid()"]');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 }
 
 window.showSettings = function () {

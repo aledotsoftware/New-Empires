@@ -903,6 +903,13 @@ body {
     margin: 2rem 0;
 }
 
+.btn-secondary[aria-pressed="true"] {
+    background: rgba(72, 187, 120, 0.2);
+    border-color: #48bb78;
+    color: #48bb78;
+    box-shadow: 0 0 10px rgba(72, 187, 120, 0.2) inset;
+}
+
 /* ==========================================
    MODAL DEL ÁRBOL DE TECNOLOGÍAS
    ========================================== */

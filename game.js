@@ -2984,13 +2984,19 @@ window.backToMapSize = function () {
 // FUNCIÓN DE CONFIGURACIÓN - Toggle Grid
 // ==========================================
 window.toggleGrid = function () {
+    let newState = false;
     if (game) {
         game.showGrid = !game.showGrid;
+        newState = game.showGrid;
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+            toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
         }
     }
+
+    // ACCESIBILIDAD: Actualizar estado visual y semántico
+    const btn = document.querySelector('button[onclick="toggleGrid()"]');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 }
 
 window.showSettings = function () {
@@ -3091,16 +3097,22 @@ window.toggleIdleVillagerCycle = function () {
 // ==========================================
 window.toggleSound = function () {
     console.log('🔊 Toggle Sound llamado');
+    let newState = false;
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
+        newState = soundManager.enabled;
         const toggleElement = document.getElementById('soundToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
-            toggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
+            toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = newState ? '#48bb78' : '#f56565';
         }
     } else {
         console.error('❌ soundManager no está definido');
     }
+
+    // ACCESIBILIDAD: Actualizar estado visual y semántico
+    const btn = document.querySelector('button[onclick="toggleSound()"]');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 window.updateSoundVolume = function (value) {

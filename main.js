@@ -82,17 +82,24 @@ window.updateGridSetting = function (enabled) {
 
 // Compatibilidad: función global legacy usada en HTML
 window.toggleGrid = function () {
+    let newState = false;
     if (window.game) {
         window.game.showGrid = !window.game.showGrid;
-        const toggleElement = document.getElementById('gridToggleValue');
-        if (toggleElement) toggleElement.textContent = window.game.showGrid ? 'Activada' : 'Desactivada';
+        newState = window.game.showGrid;
     } else {
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
             const isActive = toggleElement.textContent === 'Activada';
-            toggleElement.textContent = isActive ? 'Desactivada' : 'Activada';
+            newState = !isActive;
         }
     }
+
+    const toggleElement = document.getElementById('gridToggleValue');
+    if (toggleElement) toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
+
+    // ACCESIBILIDAD: Actualizar estado visual y semántico
+    const btn = document.querySelector('button[onclick="toggleGrid()"]');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 /**

@@ -857,7 +857,7 @@ class Game {
         if (hotkeyActions.hasOwnProperty(key)) {
             console.log('🔑 Hotkey detectado:', key, '-> botón índice', hotkeyActions[key]);
             const btnIndex = hotkeyActions[key];
-            const actionsGrid = document.getElementById('actionsGrid');
+            const actionsGrid = document.getElementById('commandPanel');
             if (actionsGrid) {
                 const buttons = actionsGrid.querySelectorAll('.action-btn');
                 console.log('📊 Total botones encontrados:', buttons.length);
@@ -870,7 +870,7 @@ class Game {
                     console.log('⚠️ Botón', btnIndex, 'no disponible o deshabilitado');
                 }
             } else {
-                console.log('❌ actionsGrid no encontrado');
+                console.log('❌ commandPanel no encontrado');
             }
         }
 
@@ -1674,7 +1674,7 @@ class Game {
     }
 
     updateActionsPanel() {
-        const grid = document.getElementById('actionsGrid');
+        const grid = document.getElementById('commandPanel');
         if (!grid) return;
 
         grid.innerHTML = '';
@@ -1774,14 +1774,19 @@ class Game {
         for (let i = 0; i < 15; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn';
-            btn.setAttribute('data-hotkey', hotkeys[i]);
+            const hotkey = hotkeys[i];
+            btn.setAttribute('data-hotkey', hotkey);
+            btn.setAttribute('aria-keyshortcuts', hotkey);
 
             if (i < buttons.length) {
                 const buttonData = buttons[i];
 
                 if (!buttonData.enabled) {
                     btn.classList.add('disabled');
+                    btn.setAttribute('aria-disabled', 'true');
                 }
+
+                btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
 
                 btn.onclick = () => {
                     console.log('🖱️ Click en botón', i, 'disabled:', btn.classList.contains('disabled'), 'hasAction:', !!buttonData.action);
@@ -1803,6 +1808,8 @@ class Game {
             } else {
                 // Botón vacío
                 btn.classList.add('disabled');
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
                 btn.innerHTML = '<div class="btn-icon"></div>';
             }
 
@@ -2984,13 +2991,19 @@ window.backToMapSize = function () {
 // FUNCIÓN DE CONFIGURACIÓN - Toggle Grid
 // ==========================================
 window.toggleGrid = function () {
+    let newState = false;
     if (game) {
         game.showGrid = !game.showGrid;
+        newState = game.showGrid;
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+            toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
         }
     }
+
+    // ACCESIBILIDAD: Actualizar estado visual y semántico
+    const btn = document.querySelector('button[onclick="toggleGrid()"]');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 }
 
 window.showSettings = function () {
@@ -3091,16 +3104,24 @@ window.toggleIdleVillagerCycle = function () {
 // ==========================================
 window.toggleSound = function () {
     console.log('🔊 Toggle Sound llamado');
+    let newState = false;
+
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
+        newState = soundManager.enabled;
+
         const toggleElement = document.getElementById('soundToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = soundManager.enabled ? 'Activado' : 'Desactivado';
-            toggleElement.style.color = soundManager.enabled ? '#48bb78' : '#f56565';
+            toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = newState ? '#48bb78' : '#f56565';
         }
     } else {
         console.error('❌ soundManager no está definido');
     }
+
+    // Update ARIA
+    const btn = document.getElementById('soundToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 window.updateSoundVolume = function (value) {

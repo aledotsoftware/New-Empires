@@ -12,6 +12,7 @@ import { Game } from './js/core/Game.js';
 
 // Utils
 import { debugLogger } from './js/utils/DebugLogger.js';
+import { FocusManager } from './js/utils/FocusManager.js';
 
 // Managers
 import { assetLoader } from './js/managers/AssetLoader.js';
@@ -38,6 +39,8 @@ let lastFocusedElement = null;
  */
 window.showTechTree = function () {
     debugLogger.info('Abriendo árbol de tecnologías', 'ui');
+    FocusManager.saveFocus();
+
     const screen = document.getElementById('techTreeScreen');
 
     // Guardar foco actual
@@ -59,6 +62,9 @@ window.showTechTree = function () {
     } else {
         renderStaticTechTree();
     }
+
+    // Mover foco al modal
+    setTimeout(() => FocusManager.focusFirst(screen), 50);
 };
 
 /**
@@ -67,12 +73,7 @@ window.showTechTree = function () {
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
     document.getElementById('techTreeScreen').classList.add('hidden');
-
-    // Restaurar foco
-    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
-        lastFocusedElement.focus();
-        lastFocusedElement = null;
-    }
+    FocusManager.restoreFocus();
 };
 
 /**
@@ -80,20 +81,13 @@ window.hideTechTree = function () {
  */
 window.showSettings = function () {
     debugLogger.info('Abriendo configuración', 'ui');
+    FocusManager.saveFocus();
+
     const screen = document.getElementById('settingsScreen');
-
-    // Guardar foco actual
-    lastFocusedElement = document.activeElement;
-
     screen.classList.remove('hidden');
 
-    // Mover foco al botón de cerrar
-    const closeBtn = screen.querySelector('.btn-close');
-    if (closeBtn) {
-        closeBtn.focus();
-    } else {
-        screen.focus();
-    }
+    // Mover foco al modal (botón cerrar o primer input)
+    setTimeout(() => FocusManager.focusFirst(screen), 50);
 };
 
 /**
@@ -102,12 +96,7 @@ window.showSettings = function () {
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
     document.getElementById('settingsScreen').classList.add('hidden');
-
-    // Restaurar foco
-    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
-        lastFocusedElement.focus();
-        lastFocusedElement = null;
-    }
+    FocusManager.restoreFocus();
 };
 
 /**
@@ -122,17 +111,24 @@ window.updateGridSetting = function (enabled) {
 
 // Compatibilidad: función global legacy usada en HTML
 window.toggleGrid = function () {
+    let newState = false;
     if (window.game) {
         window.game.showGrid = !window.game.showGrid;
-        const toggleElement = document.getElementById('gridToggleValue');
-        if (toggleElement) toggleElement.textContent = window.game.showGrid ? 'Activada' : 'Desactivada';
+        newState = window.game.showGrid;
     } else {
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
-            const isActive = toggleElement.textContent === 'Activada';
-            toggleElement.textContent = isActive ? 'Desactivada' : 'Activada';
+            newState = toggleElement.textContent !== 'Activada';
         }
     }
+
+    // Update UI
+    const toggleElement = document.getElementById('gridToggleValue');
+    if (toggleElement) toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
+
+    // Update ARIA
+    const btn = document.getElementById('gridToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 };
 
 /**
@@ -420,7 +416,7 @@ function populateMapSizes() {
     const mapSizeGrid = document.getElementById('mapSizeGrid');
     if (!mapSizeGrid) return;
 
-    mapSizeGrid.innerHTML = ''; // Limpiar contenido existente
+    mapSizeGrid.textContent = ''; // Limpiar contenido existente de forma segura
 
     // Generar botones desde MAP_SIZES
     for (let [key, mapData] of Object.entries(MAP_SIZES)) {
@@ -428,14 +424,26 @@ function populateMapSizes() {
         option.className = 'map-size-option';
         option.dataset.size = key;
 
-        // Remove emoji 🗺️. Use a generic icon or shape.
-        const mapIcon = `<div style="width:40px;height:40px;background:#444;border:1px solid #666;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#888;">Map</div>`;
+        // Icono seguro usando DOM
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'size-icon';
 
-        option.innerHTML = `
-            <div class="size-icon">${mapIcon}</div>
-            <div class="size-name">${mapData.name}</div>
-            <div class="size-desc">${mapData.width}×${mapData.height}</div>
-        `;
+        const mapIconDiv = document.createElement('div');
+        mapIconDiv.style.cssText = 'width:40px;height:40px;background:#444;border:1px solid #666;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#888;';
+        mapIconDiv.textContent = 'Map';
+        iconDiv.appendChild(mapIconDiv);
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'size-name';
+        nameDiv.textContent = mapData.name;
+
+        const descDiv = document.createElement('div');
+        descDiv.className = 'size-desc';
+        descDiv.textContent = `${mapData.width}×${mapData.height}`;
+
+        option.appendChild(iconDiv);
+        option.appendChild(nameDiv);
+        option.appendChild(descDiv);
 
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
@@ -454,24 +462,52 @@ function populateMapSizes() {
 }
 
 /**
- * Helper function to render an icon as img or fallback
+ * Helper function to create an icon element safely (DOM node)
  * @param {string} iconPath - The icon path or emoji
  * @param {string} alt - Alt text for the image
  * @param {string} size - Size of the icon (default 64px)
- * @returns {string} HTML string
+ * @returns {HTMLElement} DOM Element
  */
-function renderIconAsImage(iconPath, alt = '', size = '64px') {
+function createSafeIconElement(iconPath, alt = '', size = '64px') {
     if (!iconPath) {
-        return `<div class="civ-icon-placeholder" style="font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};">${alt.substring(0, 1)}</div>`;
+        const placeholder = document.createElement('div');
+        placeholder.className = 'civ-icon-placeholder';
+        placeholder.style.cssText = `font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};`;
+        placeholder.textContent = alt.substring(0, 1);
+        return placeholder;
     }
 
     // Check if it's an image path (contains / or . typical of file paths)
     if (iconPath.includes('/') || iconPath.includes('.png') || iconPath.includes('.jpg') || iconPath.includes('.svg')) {
-        return `<img src="${iconPath}" alt="${alt}" class="civ-icon-img" style="width:${size};height:${size};object-fit:contain;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><span style="display:none;font-size:30px;">${alt.substring(0, 1)}</span>`;
+        const wrapper = document.createElement('div');
+        // Usar display inline-block para comportarse como imagen en flujo
+        wrapper.style.display = 'inline-block';
+
+        const img = document.createElement('img');
+        img.src = iconPath;
+        img.alt = alt;
+        img.className = 'civ-icon-img';
+        img.style.cssText = `width:${size};height:${size};object-fit:contain;`;
+
+        const fallback = document.createElement('span');
+        fallback.style.cssText = 'display:none;font-size:30px;';
+        fallback.textContent = alt.substring(0, 1);
+
+        img.onerror = () => {
+            img.style.display = 'none';
+            fallback.style.display = 'block';
+        };
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(fallback);
+        return wrapper;
     }
 
-    // Return as-is for emojis (should not happen after migration, but as fallback)
-    return `<span style="font-size:48px;">${iconPath}</span>`;
+    // Return as-is for emojis (wrapped in span)
+    const span = document.createElement('span');
+    span.style.fontSize = '48px';
+    span.textContent = iconPath;
+    return span;
 }
 
 /**
@@ -484,13 +520,16 @@ function populateCivilizations() {
         return;
     }
 
-    civGrid.innerHTML = ''; // Limpiar contenido existente
+    civGrid.textContent = ''; // Limpiar contenido existente de forma segura
 
     const civilizations = dataLoader.getAllCivilizations();
 
     if (!civilizations || civilizations.length === 0) {
         debugLogger.warn('No hay civilizaciones disponibles', 'data');
-        civGrid.innerHTML = '<p style="color: white; text-align: center;">No se pudieron cargar las civilizaciones.</p>';
+        const errorMsg = document.createElement('p');
+        errorMsg.style.cssText = 'color: white; text-align: center;';
+        errorMsg.textContent = 'No se pudieron cargar las civilizaciones.';
+        civGrid.appendChild(errorMsg);
         return;
     }
 
@@ -499,14 +538,21 @@ function populateCivilizations() {
         option.className = 'civ-option';
         option.dataset.civ = civ.civilizationId;
 
-        // Use the icon from the JSON directly - render as image if it's a path
-        const iconHtml = renderIconAsImage(civ.icon, civ.name, '80px');
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'civ-icon';
+        iconDiv.appendChild(createSafeIconElement(civ.icon, civ.name, '80px'));
 
-        option.innerHTML = `
-            <div class="civ-icon">${iconHtml}</div>
-            <div class="civ-name">${civ.name}</div>
-            <div class="civ-desc">${civ.description}</div>
-        `;
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'civ-name';
+        nameDiv.textContent = civ.name;
+
+        const descDiv = document.createElement('div');
+        descDiv.className = 'civ-desc';
+        descDiv.textContent = civ.description;
+
+        option.appendChild(iconDiv);
+        option.appendChild(nameDiv);
+        option.appendChild(descDiv);
 
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
@@ -535,7 +581,7 @@ function populateCivilizations() {
 
 // ===== EVENT LISTENERS =====
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initApp = async () => {
     debugLogger.info('DOM cargado, inicializando juego...', 'game');
 
     // Generar opciones de tamaño de mapa dinámicamente
@@ -686,7 +732,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderStaticTechTree();
 
     debugLogger.success('Inicialización completada', 'game');
-});
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 // ===== EXPORTS (para debugging en consola) =====
 window.debugLogger = debugLogger;

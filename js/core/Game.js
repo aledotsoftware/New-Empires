@@ -1,5 +1,6 @@
 // Imports de módulos creados
 import { CONFIG, TILE_SIZE, TERRAIN_TYPES } from './constants.js';
+import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';
@@ -1100,6 +1101,13 @@ export class Game {
 
             const screenX = node.x - this.camera.x;
             const screenY = node.y - this.camera.y;
+
+            // OPTIMIZATION: Frustum culling
+            // Skip drawing if outside of view (with margin for radius)
+            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
+                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
+                continue;
+            }
 
             // Círculo de fondo
             this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';

@@ -23,6 +23,9 @@ export class Unit extends Entity {
 
         this.aiTimer = Math.random() * 0.5;
         this.aiCheckInterval = 0.5;
+
+        // Optimización: Cache para consultas espaciales
+        this._nearbyCache = [];
     }
 
     update(deltaTime, game) {
@@ -66,8 +69,8 @@ export class Unit extends Entity {
     findNearbyEnemy(game) {
         const searchRadius = 200;
 
-        // OPTIMIZACIÓN: Usar Spatial Grid
-        const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius);
+        // OPTIMIZACIÓN: Usar Spatial Grid reutilizando array
+        const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache);
 
         for (let entity of nearbyEntities) {
             if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {

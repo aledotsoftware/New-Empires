@@ -1012,6 +1012,16 @@ export class Game {
         const endCol = Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE);
         const endRow = Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE);
 
+        // OPTIMIZATION: Batch terrain rendering by type to reduce draw calls
+        // from ~2000 calls/frame to ~6 calls/frame.
+        const paths = {};
+
+        // Initialize paths for each terrain type
+        for (const type in TERRAIN_TYPES) {
+            paths[type] = new Path2D();
+        }
+
+        // Build paths
         for (let row = startRow; row < endRow; row++) {
             for (let col = startCol; col < endCol; col++) {
                 if (col < 0 || col >= this.terrainMap.cols || row < 0 || row >= this.terrainMap.rows) {
@@ -1020,17 +1030,23 @@ export class Game {
 
                 const index = this.terrainMap.getIndex(col, row);
                 const terrainType = this.terrainMap.grid[index];
-                const terrainData = TERRAIN_TYPES[terrainType] || TERRAIN_TYPES.grassland;
 
+                // Use fallback to 'grassland' if type is invalid, preserving original logic
+                const validTerrainType = paths[terrainType] ? terrainType : 'grassland';
+
+                // Add rect to the specific path
                 const x = Math.floor(col * TILE_SIZE - this.camera.x);
                 const y = Math.floor(row * TILE_SIZE - this.camera.y);
+                paths[validTerrainType].rect(x, y, TILE_SIZE, TILE_SIZE);
+            }
+        }
 
+        // Draw paths (one call per terrain type)
+        for (const type in paths) {
+            const terrainData = TERRAIN_TYPES[type];
+            if (terrainData) {
                 this.ctx.fillStyle = terrainData.color;
-                this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-
-                // Dibujar borde sutil para distinguir tiles
-                // this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-                // this.ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                this.ctx.fill(paths[type]);
             }
         }
     }

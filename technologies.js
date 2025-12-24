@@ -5,7 +5,15 @@
 // Variables globales que se llenarán desde DataLoader
 // Variables globales que se llenarán desde DataLoader
 var AGES = {};
-var TECH_CATEGORIES = {};
+var TECH_CATEGORIES = {
+    ECONOMY: 'Economía',
+    MILITARY: 'Militar',
+    DEFENSE: 'Defensa',
+    TOOLS: 'Herramientas',
+    AGRICULTURE: 'Agricultura',
+    ARCHITECTURE: 'Arquitectura',
+    CULTURE: 'Cultura'
+};
 var TECHNOLOGIES = {};
 
 // Función para inicializar datos desde DataLoader

@@ -1012,6 +1012,15 @@ export class Game {
         const endCol = Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE);
         const endRow = Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE);
 
+        // OPTIMIZATION: Batch draw calls by terrain type
+        // Reduces draw calls from ~2000/frame to ~6/frame
+        const paths = {};
+        for (const type in TERRAIN_TYPES) {
+            paths[type] = new Path2D();
+        }
+        // Fallback path just in case
+        paths['fallback'] = new Path2D();
+
         for (let row = startRow; row < endRow; row++) {
             for (let col = startCol; col < endCol; col++) {
                 if (col < 0 || col >= this.terrainMap.cols || row < 0 || row >= this.terrainMap.rows) {
@@ -1020,17 +1029,27 @@ export class Game {
 
                 const index = this.terrainMap.getIndex(col, row);
                 const terrainType = this.terrainMap.grid[index];
-                const terrainData = TERRAIN_TYPES[terrainType] || TERRAIN_TYPES.grassland;
-
                 const x = Math.floor(col * TILE_SIZE - this.camera.x);
                 const y = Math.floor(row * TILE_SIZE - this.camera.y);
 
-                this.ctx.fillStyle = terrainData.color;
-                this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                if (paths[terrainType]) {
+                    paths[terrainType].rect(x, y, TILE_SIZE, TILE_SIZE);
+                } else {
+                    paths['fallback'].rect(x, y, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
 
-                // Dibujar borde sutil para distinguir tiles
-                // this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-                // this.ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+        // Draw batched paths
+        for (const type in paths) {
+            // TERRAIN_TYPES[type] might be undefined for 'fallback' key
+            const terrainData = TERRAIN_TYPES[type];
+            if (terrainData) {
+                this.ctx.fillStyle = terrainData.color;
+                this.ctx.fill(paths[type]);
+            } else if (type === 'fallback') {
+                 this.ctx.fillStyle = TERRAIN_TYPES.grassland.color;
+                 this.ctx.fill(paths[type]);
             }
         }
     }

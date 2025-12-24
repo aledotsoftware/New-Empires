@@ -445,6 +445,19 @@ function populateMapSizes() {
         option.appendChild(nameDiv);
         option.appendChild(descDiv);
 
+        // Accessibility attributes
+        option.setAttribute('role', 'button');
+        option.setAttribute('tabindex', '0');
+        option.setAttribute('aria-label', `Seleccionar mapa ${mapData.name} (${mapData.width} por ${mapData.height} casillas)`);
+
+        // Keyboard support
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                option.click();
+            }
+        });
+
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
             selectedMapSize = key;
@@ -452,7 +465,11 @@ function populateMapSizes() {
 
             // Ir a selección de civilización
             document.getElementById('mapSizeScreen').classList.add('hidden');
-            document.getElementById('civSelectionScreen').classList.remove('hidden');
+            const civScreen = document.getElementById('civSelectionScreen');
+            civScreen.classList.remove('hidden');
+
+            // Move focus to civ screen
+            setTimeout(() => FocusManager.focusFirst(civScreen), 50);
         });
 
         mapSizeGrid.appendChild(option);
@@ -553,6 +570,19 @@ function populateCivilizations() {
         option.appendChild(iconDiv);
         option.appendChild(nameDiv);
         option.appendChild(descDiv);
+
+        // Accessibility attributes
+        option.setAttribute('role', 'button');
+        option.setAttribute('tabindex', '0');
+        option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+
+        // Keyboard support
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                option.click();
+            }
+        });
 
         // Agregar event listener al crear el elemento
         option.addEventListener('click', () => {
@@ -675,7 +705,11 @@ const initApp = async () => {
         startButton.addEventListener('click', () => {
             debugLogger.info('Mostrando selección de tamaño de mapa', 'ui');
             document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('mapSizeScreen').classList.remove('hidden');
+            const mapScreen = document.getElementById('mapSizeScreen');
+            mapScreen.classList.remove('hidden');
+
+            // Move focus
+            setTimeout(() => FocusManager.focusFirst(mapScreen), 50);
         });
     }
 

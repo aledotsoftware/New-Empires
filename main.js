@@ -445,14 +445,36 @@ function populateMapSizes() {
         option.appendChild(nameDiv);
         option.appendChild(descDiv);
 
-        // Agregar event listener al crear el elemento
-        option.addEventListener('click', () => {
+        // Make accessible
+        option.setAttribute('role', 'button');
+        option.setAttribute('tabindex', '0');
+        option.setAttribute('aria-label', `Seleccionar mapa ${mapData.name} (${mapData.width}x${mapData.height})`);
+
+        // Handler function for both click and keyboard
+        const handleMapSelect = () => {
             selectedMapSize = key;
             debugLogger.info(`Tamaño de mapa seleccionado: ${key}`, 'ui');
 
             // Ir a selección de civilización
             document.getElementById('mapSizeScreen').classList.add('hidden');
             document.getElementById('civSelectionScreen').classList.remove('hidden');
+
+            // Move focus to first civ option for continuity
+            setTimeout(() => {
+                const firstCiv = document.querySelector('.civ-option');
+                if (firstCiv) firstCiv.focus();
+            }, 100);
+        };
+
+        // Agregar event listener al crear el elemento
+        option.addEventListener('click', handleMapSelect);
+
+        // Keyboard support
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault(); // Prevent scrolling on Space
+                handleMapSelect();
+            }
         });
 
         mapSizeGrid.appendChild(option);
@@ -554,8 +576,13 @@ function populateCivilizations() {
         option.appendChild(nameDiv);
         option.appendChild(descDiv);
 
-        // Agregar event listener al crear el elemento
-        option.addEventListener('click', () => {
+        // Make accessible
+        option.setAttribute('role', 'button');
+        option.setAttribute('tabindex', '0');
+        option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+
+        // Handler function
+        const handleCivSelect = () => {
             selectedCivilization = civ.civilizationId;
             debugLogger.info(`Civilizacion seleccionada: ${civ.civilizationId}`, 'ui');
 
@@ -570,6 +597,17 @@ function populateCivilizations() {
                 biome: 'grassland',
                 style: 'continental'
             });
+        };
+
+        // Agregar event listener al crear el elemento
+        option.addEventListener('click', handleCivSelect);
+
+        // Keyboard support
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleCivSelect();
+            }
         });
 
         civGrid.appendChild(option);

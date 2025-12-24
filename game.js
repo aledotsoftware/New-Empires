@@ -2614,7 +2614,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     createParticles();
 
     // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
-    // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
+    // MODIFICADO: Esta logica ha sido movida a main.js para evitar conflictos
+    // Se comenta para prevenir que game.js sobrescriba la UI generada por main.js
+    /*
     if (startButton) {
         startButton.addEventListener('click', () => {
             startScreen.classList.add('hidden');
@@ -2626,6 +2628,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('❌ startButton no encontrado en el DOM');
     }
+    */
 
     // Volver al inicio desde selección de tamaño
     backToStartButton.addEventListener('click', () => {

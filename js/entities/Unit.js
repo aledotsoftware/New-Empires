@@ -92,8 +92,8 @@ export class Unit extends Entity {
             // Obtener modificador de terreno
             let speedModifier = 1.0;
             if (game && game.terrainMap) {
-                const terrain = game.terrainMap.getTerrainAt(this.x, this.y);
-                const terrainData = game.terrainMap.getTerrainData(terrain);
+                // OPTIMIZACIÓN: Usar acceso directo a datos de terreno
+                const terrainData = game.terrainMap.getTerrainDataAt(this.x, this.y);
                 speedModifier = terrainData.movementSpeed;
             }
 
@@ -153,16 +153,15 @@ export class Unit extends Entity {
             // Aplicar bonificaciones de terreno si el juego está disponible
             if (game && game.terrainMap) {
                 // Bonificación del atacante
-                const myTerrain = game.terrainMap.getTerrainAt(this.x, this.y);
-                const myTerrainData = game.terrainMap.getTerrainData(myTerrain);
+                // OPTIMIZACIÓN: Usar acceso directo a datos de terreno
+                const myTerrainData = game.terrainMap.getTerrainDataAt(this.x, this.y);
 
                 if (myTerrainData.combatBonus[this.type]) {
                     damage *= myTerrainData.combatBonus[this.type];
                 }
 
                 // Bonificación defensiva del objetivo
-                const targetTerrain = game.terrainMap.getTerrainAt(target.x, target.y);
-                const targetTerrainData = game.terrainMap.getTerrainData(targetTerrain);
+                const targetTerrainData = game.terrainMap.getTerrainDataAt(target.x, target.y);
 
                 if (targetTerrainData.combatBonus.defense) {
                     damage /= targetTerrainData.combatBonus.defense;

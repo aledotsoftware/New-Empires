@@ -599,4 +599,87 @@
     .selection-panel,
     .actions-panel {
         display: none !important;
+    }.notification {
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-gold);
+    box-shadow: var(--shadow-strong);
+    animation: slideInDown 0.5s ease-out; /* Removed auto fadeOut animation to handle it via JS */
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    margin-bottom: 8px; /* Added spacing */
+    min-width: 320px;
+    max-width: 400px;
+}
+
+.notification.fading-out {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+.notification:hover {
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    transform: translateY(-2px);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.notification-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    transition: all 0.2s ease;
+}
+
+.notification-close-btn:hover, .notification-close-btn:focus-visible {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+}
+
+.notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    width: 100%;
+    transform-origin: left;
+}
+
+.notification-progress-bar {
+    height: 100%;
+    background: var(--primary-gold);
+    width: 100%;
+    transform-origin: left;
+    /* Animation duration will be set via JS inline style */
+    animation: progressLinear linear forwards;
+}
+
+.notification:hover .notification-progress-bar {
+    animation-play-state: paused;
+}
+
+@keyframes progressLinear {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(20px);
     }
+}

@@ -1769,6 +1769,7 @@ export class Game {
         const container = document.getElementById('notifications');
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
+        notification.setAttribute('role', 'status');
 
         // Map types to asset filenames
         const iconFiles = {
@@ -1800,13 +1801,72 @@ export class Game {
         textDiv.className = 'notification-text';
         textDiv.textContent = message;
 
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'notification-close-btn';
+        closeBtn.innerHTML = '×';
+        closeBtn.setAttribute('aria-label', 'Cerrar notificación');
+        closeBtn.onclick = () => removeNotification();
+
+        // Progress bar
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'notification-progress';
+        const progressBar = document.createElement('div');
+        progressBar.className = 'notification-progress-bar';
+        const duration = 4000; // 4 seconds
+        progressBar.style.animationDuration = `${duration}ms`;
+        progressContainer.appendChild(progressBar);
+
         notification.appendChild(iconDiv);
         notification.appendChild(textDiv);
+        notification.appendChild(closeBtn);
+        notification.appendChild(progressContainer);
 
         container.appendChild(notification);
 
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+        // Logic for auto-removal with pause on hover
+        let remainingTime = duration;
+        let startTime = Date.now();
+        let timerId = null;
+        let isPaused = false;
+
+        const startTimer = () => {
+            startTime = Date.now();
+            timerId = setTimeout(() => {
+                removeNotification();
+            }, remainingTime);
+            progressBar.style.animationPlayState = 'running';
+        };
+
+        const pauseTimer = () => {
+            clearTimeout(timerId);
+            const elapsed = Date.now() - startTime;
+            remainingTime -= elapsed;
+            isPaused = true;
+            progressBar.style.animationPlayState = 'paused';
+        };
+
+        const removeNotification = () => {
+            notification.classList.add('fading-out');
+            notification.addEventListener('animationend', () => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            });
+            // Fallback just in case animationend doesn't fire
+            setTimeout(() => {
+                if (notification.parentElement) notification.remove();
+            }, 550);
+        };
+
+        notification.addEventListener('mouseenter', pauseTimer);
+        notification.addEventListener('mouseleave', () => {
+            if (isPaused) {
+                isPaused = false;
+                startTimer();
+            }
+        });
+
+        // Start initial timer
+        startTimer();
     }
 }

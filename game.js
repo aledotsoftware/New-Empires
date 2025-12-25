@@ -2722,6 +2722,19 @@ window.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
 
+            // Accessibility attributes
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+
+            // Keyboard support
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    startGame(civ.id);
+                }
+            });
+
             card.onclick = () => startGame(civ.id);
             civGrid.appendChild(card);
         });
@@ -2987,6 +3000,19 @@ window.showMapSizeSelection = function () {
             ${isRecommended ? '<div class="map-size-badge">Recomendado</div>' : ''}
         `;
 
+        // Accessibility attributes
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `Seleccionar mapa ${mapSize.name} (${mapSize.tiles} por ${mapSize.tiles} casillas)`);
+
+        // Keyboard support
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+            }
+        });
+
         card.addEventListener('click', () => selectMapSize(key));
         mapSizeGrid.appendChild(card);
     }
@@ -3246,8 +3272,21 @@ function renderCivilizationSelection() {
             <ul class="civ-bonuses">
                 ${bonusesHtml}
             </ul>
-            <button class="btn-select-civ">Seleccionar</button>
+            <button class="btn-select-civ" tabindex="-1">Seleccionar</button>
         `;
+
+        // Accessibility attributes
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+
+        // Keyboard support
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+            }
+        });
 
         card.addEventListener('click', () => selectCivilization(civ));
         civGrid.appendChild(card);

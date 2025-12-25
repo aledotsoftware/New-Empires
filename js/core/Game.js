@@ -154,6 +154,9 @@ export class Game {
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
 
+        // Cache para renderizado (evita alocación de arrays en cada frame)
+        this._renderCache = [];
+
         this.initializeGame();
         this.updateUI();
     }
@@ -1070,7 +1073,21 @@ export class Game {
         this.drawResourceNodes();
 
         // Dibujar entidades
-        for (let entity of this.entities) {
+        // OPTIMIZACIÓN: Frustum Culling usando SpatialGrid
+        // Solo renderizamos entidades que están visiblemente dentro de la cámara (con margen)
+        const centerX = this.camera.x + this.viewWidth / 2;
+        const centerY = this.camera.y + this.viewHeight / 2;
+        // Radio cubre la diagonal del viewport + margen de seguridad (100px)
+        const radius = Math.hypot(this.viewWidth / 2, this.viewHeight / 2) + 100;
+
+        // Reutilizamos _renderCache para evitar GC
+        this.spatialGrid.query(centerX, centerY, radius, this._renderCache);
+
+        // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
+        // Esto corrige problemas de superposición que el SpatialGrid podría introducir
+        this._renderCache.sort((a, b) => a.y - b.y);
+
+        for (let entity of this._renderCache) {
             entity.render(this.ctx, this.camera);
         }
 

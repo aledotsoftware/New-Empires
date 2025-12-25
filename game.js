@@ -1728,6 +1728,7 @@ class Game {
                 icon: '🏗️',
                 label: 'Construir',
                 hotkey: 'Q',
+                description: 'Construye edificios para expandir tu imperio',
                 action: () => this.openBuildMenu(),
                 enabled: true
             });
@@ -1740,6 +1741,7 @@ class Game {
                 label: 'Aldeano',
                 hotkey: 'Q',
                 cost: `${cost.food}🌾`,
+                description: 'Trabajador básico. Recolecta madera, comida, oro y piedra',
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
                 enabled: canAfford
             });
@@ -1754,6 +1756,7 @@ class Game {
                 label: 'Guerrero',
                 hotkey: 'Q',
                 cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
+                description: 'Unidad de infantería básica. Fuerte en combate cuerpo a cuerpo',
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
                 enabled: canAffordWarrior
             });
@@ -1763,6 +1766,7 @@ class Game {
                 label: 'Arquero',
                 hotkey: 'W',
                 cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
+                description: 'Unidad de ataque a distancia. Fuerte contra infantería ligera',
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
                 enabled: canAffordArcher
             });
@@ -1787,6 +1791,7 @@ class Game {
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: costString.trim(),
+                    description: tech.description,
                     action: () => this.techManager.startResearch(tech.id),
                     enabled: canAfford
                 });
@@ -1812,6 +1817,12 @@ class Game {
                 }
 
                 btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+
+                // Add rich tooltip with description and cost
+                let tooltip = `${buttonData.label} (${hotkey})`;
+                if (buttonData.description) tooltip += `\n${buttonData.description}`;
+                if (buttonData.cost) tooltip += `\nCosto: ${buttonData.cost}`;
+                btn.title = tooltip;
 
                 btn.onclick = () => {
                     console.log('🖱️ Click en botón', i, 'disabled:', btn.classList.contains('disabled'), 'hasAction:', !!buttonData.action);
@@ -2793,6 +2804,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             card.setAttribute('role', 'button');
             card.setAttribute('tabindex', '0');
             card.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+            card.title = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
 
             // Keyboard support
             card.addEventListener('keydown', (e) => {
@@ -3072,6 +3084,14 @@ window.showMapSizeSelection = function () {
         card.setAttribute('tabindex', '0');
         card.setAttribute('aria-label', `Seleccionar mapa ${mapSize.name} (${mapSize.tiles} por ${mapSize.tiles} casillas)`);
 
+        // Tooltip description
+        let sizeDesc = '';
+        if (mapSize.tiles <= 144) sizeDesc = 'Mapa rápido para partidas cortas.';
+        else if (mapSize.tiles <= 200) sizeDesc = 'Tamaño estándar equilibrado.';
+        else sizeDesc = 'Mapa extenso para partidas largas.';
+
+        card.title = `${mapSize.name}: ${mapSize.tiles}x${mapSize.tiles} casillas.\n${sizeDesc}`;
+
         // Keyboard support
         card.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -3346,6 +3366,7 @@ function renderCivilizationSelection() {
         card.setAttribute('role', 'button');
         card.setAttribute('tabindex', '0');
         card.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+        card.title = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
 
         // Keyboard support
         card.addEventListener('keydown', (e) => {

@@ -1010,21 +1010,46 @@ class Game {
     }
 
     openBuildMenu() {
-        document.getElementById('buildMenu').classList.remove('hidden');
+        const buildMenu = document.getElementById('buildMenu');
+        buildMenu.classList.remove('hidden');
 
         // Setup build options
         const buildOptions = document.querySelectorAll('.build-option');
-        buildOptions.forEach(option => {
-            option.onclick = () => {
+        buildOptions.forEach((option, index) => {
+            const selectOption = () => {
                 const buildingType = option.dataset.building;
                 this.startBuildMode(buildingType);
                 this.closeBuildMenu();
             };
+
+            option.onclick = selectOption;
+
+            // Keyboard support for selecting options
+            option.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectOption();
+                }
+            };
         });
+
+        // Focus the first option for accessibility
+        if (buildOptions.length > 0) {
+            // Tiny timeout to ensure visibility transition doesn't interfere with focus
+            setTimeout(() => {
+                buildOptions[0].focus();
+            }, 100);
+        }
     }
 
     closeBuildMenu() {
-        document.getElementById('buildMenu').classList.add('hidden');
+        const buildMenu = document.getElementById('buildMenu');
+        buildMenu.classList.add('hidden');
+
+        // Restore focus to game canvas or previous element if possible
+        if (this.canvas) {
+            this.canvas.focus();
+        }
     }
 
     startBuildMode(buildingType) {
@@ -2614,7 +2639,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     createParticles();
 
     // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
-    // Click en "Comenzar Juego" -> Ir a selección de tamaño de mapa
+    // MODIFICADO: Esta logica ha sido movida a main.js para evitar conflictos
+    // Se comenta para prevenir que game.js sobrescriba la UI generada por main.js
+    /*
     if (startButton) {
         startButton.addEventListener('click', () => {
             startScreen.classList.add('hidden');
@@ -2626,6 +2653,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     } else {
         console.error('❌ startButton no encontrado en el DOM');
     }
+    */
 
     // Volver al inicio desde selección de tamaño
     backToStartButton.addEventListener('click', () => {

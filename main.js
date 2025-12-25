@@ -423,6 +423,9 @@ function populateMapSizes() {
         const option = document.createElement('div');
         option.className = 'map-size-option';
         option.dataset.size = key;
+        option.setAttribute('role', 'button');
+        option.setAttribute('tabindex', '0');
+        option.setAttribute('aria-label', `${mapData.name} - ${mapData.width}x${mapData.height}`);
 
         // Icono seguro usando DOM
         const iconDiv = document.createElement('div');
@@ -459,17 +462,27 @@ function populateMapSizes() {
         });
 
         // Agregar event listener al crear el elemento
-        option.addEventListener('click', () => {
+        const selectMapSize = () => {
             selectedMapSize = key;
             debugLogger.info(`Tamaño de mapa seleccionado: ${key}`, 'ui');
 
             // Ir a selección de civilización
             document.getElementById('mapSizeScreen').classList.add('hidden');
-            const civScreen = document.getElementById('civSelectionScreen');
-            civScreen.classList.remove('hidden');
+            document.getElementById('civSelectionScreen').classList.remove('hidden');
 
-            // Move focus to civ screen
-            setTimeout(() => FocusManager.focusFirst(civScreen), 50);
+            // Focus management: focus first element in next screen
+            setTimeout(() => {
+                const civScreen = document.getElementById('civSelectionScreen');
+                FocusManager.focusFirst(civScreen);
+            }, 50);
+        };
+
+        option.addEventListener('click', selectMapSize);
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectMapSize();
+            }
         });
 
         mapSizeGrid.appendChild(option);
@@ -554,6 +567,9 @@ function populateCivilizations() {
         const option = document.createElement('div');
         option.className = 'civ-option';
         option.dataset.civ = civ.civilizationId;
+        option.setAttribute('role', 'button');
+        option.setAttribute('tabindex', '0');
+        option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
 
         const iconDiv = document.createElement('div');
         iconDiv.className = 'civ-icon';
@@ -585,7 +601,7 @@ function populateCivilizations() {
         });
 
         // Agregar event listener al crear el elemento
-        option.addEventListener('click', () => {
+        const selectCiv = () => {
             selectedCivilization = civ.civilizationId;
             debugLogger.info(`Civilizacion seleccionada: ${civ.civilizationId}`, 'ui');
 
@@ -600,6 +616,14 @@ function populateCivilizations() {
                 biome: 'grassland',
                 style: 'continental'
             });
+        };
+
+        option.addEventListener('click', selectCiv);
+        option.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectCiv();
+            }
         });
 
         civGrid.appendChild(option);

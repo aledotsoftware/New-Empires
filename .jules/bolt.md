@@ -14,3 +14,7 @@
 ## 2024-05-25 - Spatial Grid Memory Optimization
 **Learning:** In high-frequency game loops, even small array allocations (like those returned from `SpatialGrid.query`) accumulate rapidly, causing GC stutter. For 100 units checking nearby enemies every 0.5s, this generated hundreds of arrays per second.
 **Action:** Refactored `SpatialGrid.query` to accept an optional `result` array. Modified `Unit` class to maintain a persistent `_nearbyCache` array. This eliminates array allocation during the AI update loop completely (0 allocs vs N allocs).
+
+## 2024-05-26 - Canvas Draw Batching
+**Learning:** Issuing thousands of `fillRect` calls per frame (one for each tile) creates significant CPU overhead due to context switching and state management in the 2D Context API, even if the "state" (color) is technically the same.
+**Action:** Refactored `drawTerrain` to use `Path2D` for batching. Instead of 2000+ draw calls, we now accumulate tile rectangles into paths (one per terrain type) and render them with a single `fill()` call each. This reduces draw calls by >99% (from ~2040 to ~6 per frame).

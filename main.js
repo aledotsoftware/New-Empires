@@ -453,6 +453,14 @@ function populateMapSizes() {
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar mapa ${mapData.name} (${mapData.width} por ${mapData.height} casillas)`);
 
+        // Tooltip description
+        let sizeDesc = '';
+        if (mapData.width * mapData.height <= 144 * 144) sizeDesc = 'Mapa rápido para partidas cortas.';
+        else if (mapData.width * mapData.height <= 200 * 200) sizeDesc = 'Tamaño estándar equilibrado.';
+        else sizeDesc = 'Mapa extenso para partidas largas.';
+
+        option.title = `${mapData.name}: ${mapData.width}x${mapData.height} casillas.\n${sizeDesc}`;
+
         // Keyboard support
         option.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -591,6 +599,7 @@ function populateCivilizations() {
         option.setAttribute('role', 'button');
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
+        option.title = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
 
         // Keyboard support
         option.addEventListener('keydown', (e) => {

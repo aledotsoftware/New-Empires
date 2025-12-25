@@ -606,7 +606,7 @@
     border-radius: 10px;
     border-left: 4px solid var(--primary-gold);
     box-shadow: var(--shadow-strong);
-    animation: slideInDown 0.5s ease-out; /* Removed auto fadeOut animation to handle it via JS */
+    animation: slideInDown 0.5s ease-out forwards; /* Added forwards to keep end state */
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -614,6 +614,7 @@
     margin-bottom: 8px; /* Added spacing */
     min-width: 320px;
     max-width: 400px;
+    opacity: 1; /* Explicitly set opacity */
 }
 
 .notification.fading-out {

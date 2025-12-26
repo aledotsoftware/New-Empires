@@ -643,10 +643,24 @@ export class Game {
         // Setup build options
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
-            option.onclick = () => {
+            // Ensure accessibility attributes are present
+            if (!option.hasAttribute('tabindex')) option.setAttribute('tabindex', '0');
+            if (!option.getAttribute('role')) option.setAttribute('role', 'button');
+
+            const handleSelect = () => {
                 const buildingType = option.dataset.building;
                 this.startBuildMode(buildingType);
                 this.closeBuildMenu();
+            };
+
+            option.onclick = handleSelect;
+
+            // Accessibility: Allow keyboard activation for div[role="button"]
+            option.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleSelect();
+                }
             };
         });
     }

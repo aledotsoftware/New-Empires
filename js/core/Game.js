@@ -643,10 +643,20 @@ export class Game {
         // Setup build options
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
-            option.onclick = () => {
+            const handleAction = () => {
                 const buildingType = option.dataset.building;
                 this.startBuildMode(buildingType);
                 this.closeBuildMenu();
+            };
+
+            option.onclick = handleAction;
+
+            // Accessibility: Allow keyboard activation with Enter or Space
+            option.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault(); // Prevent scrolling for Space
+                    handleAction();
+                }
             };
         });
     }

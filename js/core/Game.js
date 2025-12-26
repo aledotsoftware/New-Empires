@@ -116,6 +116,9 @@ export class Game {
         // OPTIMIZACIÓN: Inicializar Spatial Grid
         this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
 
+        // OPTIMIZACIÓN: Spatial Grid para recursos estáticos (evita iterar miles de recursos por frame)
+        this.resourceGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+
         // SISTEMA DE GRID (Cuadrícula de construcción y colisiones)
         this.gridMap = new GridMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
 
@@ -156,6 +159,7 @@ export class Game {
 
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
+        this._resourceRenderCache = [];
 
         this.initializeGame();
         this.updateUI();
@@ -222,6 +226,20 @@ export class Game {
             console.log('⚠️ Generador procedural no disponible, usando generación simple');
             this.generateSimpleMap();
         }
+
+        // Inicializar el grid espacial de recursos
+        this.updateResourceGrid();
+    }
+
+    updateResourceGrid() {
+        if (!this.resourceGrid) return;
+
+        this.resourceGrid.clear();
+        for (const node of this.resourceNodes) {
+            if (node.amount > 0) {
+                this.resourceGrid.add(node);
+            }
+        }
     }
 
     applyProceduralTerrain(generatedMap) {
@@ -253,6 +271,9 @@ export class Game {
                 playerId: res.playerId || null
             });
         }
+
+        // Actualizar grid espacial con los nuevos recursos
+        this.updateResourceGrid();
     }
 
     generateSimpleMap() {
@@ -1144,14 +1165,21 @@ export class Game {
     }
 
     drawResourceNodes() {
-        for (let node of this.resourceNodes) {
+        // OPTIMIZACIÓN: Usar SpatialGrid para recursos
+        // En lugar de iterar todos los recursos, solo consultamos los cercanos
+        const centerX = this.camera.x + this.viewWidth / 2;
+        const centerY = this.camera.y + this.viewHeight / 2;
+        const radius = Math.hypot(this.viewWidth / 2, this.viewHeight / 2) + 50;
+
+        this.resourceGrid.query(centerX, centerY, radius, this._resourceRenderCache);
+
+        for (let node of this._resourceRenderCache) {
             if (node.amount <= 0) continue;
 
             const screenX = node.x - this.camera.x;
             const screenY = node.y - this.camera.y;
 
-            // OPTIMIZATION: Frustum culling
-            // Skip drawing if outside of view (with margin for radius)
+            // OPTIMIZATION: Frustum culling (aún necesario para precisión fina)
             if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
                 screenY < -node.radius || screenY > this.viewHeight + node.radius) {
                 continue;

@@ -1041,10 +1041,12 @@ export class Game {
     drawTerrain() {
         if (!this.terrainMap) return;
 
-        const startCol = Math.floor(this.camera.x / TILE_SIZE);
-        const startRow = Math.floor(this.camera.y / TILE_SIZE);
-        const endCol = Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE);
-        const endRow = Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE);
+        // OPTIMIZATION: Clamp bounds and hoist variables
+        // Avoids boundary checks inside the loop and repetitive function calls
+        const startCol = Math.max(0, Math.floor(this.camera.x / TILE_SIZE));
+        const startRow = Math.max(0, Math.floor(this.camera.y / TILE_SIZE));
+        const endCol = Math.min(this.terrainMap.cols, Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE));
+        const endRow = Math.min(this.terrainMap.rows, Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE));
 
         // OPTIMIZATION: Batch draw calls by terrain type
         // Reduces draw calls from ~2000/frame to ~6/frame
@@ -1055,22 +1057,33 @@ export class Game {
         // Fallback path just in case
         paths['fallback'] = new Path2D();
 
+        // Hoist properties for faster access inside loop
+        const mapCols = this.terrainMap.cols;
+        const grid = this.terrainMap.grid;
+        const idToName = this.terrainMap._idToName;
+
         for (let row = startRow; row < endRow; row++) {
+            // Calculate row base index
+            let index = row * mapCols + startCol;
+            // Pre-calculate base Y for the row
+            const y = Math.floor(row * TILE_SIZE - this.camera.y);
+
             for (let col = startCol; col < endCol; col++) {
-                if (col < 0 || col >= this.terrainMap.cols || row < 0 || row >= this.terrainMap.rows) {
-                    continue;
-                }
+                // No need to check bounds here thanks to initial clamping
 
-                const index = this.terrainMap.getIndex(col, row);
-                const terrainType = this.terrainMap.grid[index];
+                const terrainId = grid[index];
+                const terrainType = idToName[terrainId]; // Optimization: get string name from ID directly
+
                 const x = Math.floor(col * TILE_SIZE - this.camera.x);
-                const y = Math.floor(row * TILE_SIZE - this.camera.y);
 
+                // Use terrain name to find the path
                 if (paths[terrainType]) {
                     paths[terrainType].rect(x, y, TILE_SIZE, TILE_SIZE);
                 } else {
                     paths['fallback'].rect(x, y, TILE_SIZE, TILE_SIZE);
                 }
+
+                index++;
             }
         }
 

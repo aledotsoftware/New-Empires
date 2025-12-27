@@ -185,159 +185,213 @@ window.loadMainMenu = function () {
 };
 
 /**
- * Renderiza el árbol de tecnologías (estático, sin juego activo)
+ * Helper para renderizar un item de tecnología
  */
-function renderStaticTechTree() {
+function createTechItemElement(tech, status, isInteractive) {
+    let statusClass = 'locked';
+    if (status.researched) statusClass = 'researched';
+    else if (status.researching) statusClass = 'researching';
+    else if (status.available) statusClass = 'available'; // Simplified status mapping
+
+    const techItem = document.createElement('div');
+    techItem.className = `tech-item ${statusClass}`;
+
+    // Interaction attributes
+    techItem.setAttribute('role', isInteractive && statusClass === 'available' ? 'button' : 'article');
+    techItem.setAttribute('tabindex', isInteractive && statusClass === 'available' ? '0' : '0'); // Always focusable for tooltip reading
+    if (!isInteractive) techItem.setAttribute('tabindex', '0'); // Even static items should be focusable to read description if we treat them as tooltips
+
+    let ariaLabel = `${tech.name}`;
+    if (status.researched) ariaLabel += ' (Investigado)';
+    else if (status.researching) ariaLabel += ' (Investigando)';
+    else if (status.available) ariaLabel += ' (Disponible para investigar)';
+    else ariaLabel += ' (Bloqueado)';
+
+    techItem.setAttribute('aria-label', ariaLabel);
+
+    if (statusClass === 'locked') {
+        techItem.setAttribute('aria-disabled', 'true');
+    }
+
+    // Icon
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'tech-icon';
+    if (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id)) {
+        const img = document.createElement('img');
+        img.src = assetLoader.getSrc(tech.id);
+        img.className = 'tech-icon-img';
+        img.alt = '';
+        iconDiv.appendChild(img);
+    } else {
+            const placeholder = document.createElement('div');
+        placeholder.className = 'tech-icon-placeholder';
+        if (!tech.icon) placeholder.textContent = 'T';
+        else if (tech.icon.length < 5) placeholder.textContent = tech.icon;
+        else placeholder.textContent = 'T'; // fallback
+        iconDiv.appendChild(placeholder);
+    }
+    techItem.appendChild(iconDiv);
+
+    // Name
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'tech-name';
+    nameDiv.textContent = tech.name;
+    techItem.appendChild(nameDiv);
+
+    // Desc
+    const descDiv = document.createElement('div');
+    descDiv.className = 'tech-desc';
+    descDiv.textContent = tech.description;
+    techItem.appendChild(descDiv);
+
+    // Cost
+    const costDiv = document.createElement('div');
+    costDiv.className = 'tech-cost';
+        if (tech.cost) {
+        for (let [res, amount] of Object.entries(tech.cost)) {
+            const costSpan = document.createElement('span');
+            costSpan.style.cssText = 'display:inline-flex;align-items:center;margin-right:5px;';
+
+            if (assetLoader && assetLoader.getSrc) {
+                const src = assetLoader.getSrc(res);
+                if (src) {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.style.cssText = 'width:16px;height:16px;vertical-align:middle;margin-right:2px;';
+                    img.alt = res;
+                    costSpan.appendChild(img);
+                } else {
+                        const txt = document.createElement('span');
+                        txt.style.fontSize = '10px';
+                        txt.textContent = res.substring(0, 1).toUpperCase();
+                        costSpan.appendChild(txt);
+                }
+            } else {
+                    const txt = document.createElement('span');
+                    txt.style.fontSize = '10px';
+                    txt.textContent = res.substring(0, 1).toUpperCase();
+                    costSpan.appendChild(txt);
+            }
+
+            const amountText = document.createTextNode(amount);
+            costSpan.appendChild(amountText);
+            costDiv.appendChild(costSpan);
+        }
+    }
+    techItem.appendChild(costDiv);
+
+    if (status.researching) {
+        const progDiv = document.createElement('div');
+        progDiv.className = 'tech-progress';
+        progDiv.textContent = 'Investigando...';
+        techItem.appendChild(progDiv);
+    }
+
+    return techItem;
+}
+
+function renderTechTreeCommon(isInteractive) {
     const content = document.getElementById('techTreeContent');
     if (!content) return;
 
-    // Verificar si TECHNOLOGIES está disponible y es iterable
-    if (typeof TECHNOLOGIES === 'undefined' || !Array.isArray(TECHNOLOGIES)) {
-        content.innerHTML = '<p style="text-align: center; color: #999;">Árbol de tecnologías no disponible</p>';
+    // Convert to array if it's an object
+    let techArray = [];
+    if (typeof TECHNOLOGIES !== 'undefined') {
+        techArray = Array.isArray(TECHNOLOGIES) ? TECHNOLOGIES : Object.values(TECHNOLOGIES);
+    }
+
+    if (techArray.length === 0) {
+        content.innerHTML = '<p style="text-align: center; color: #999;">Árbol de tecnologías vacío o no disponible</p>';
         return;
     }
 
-    // Agrupar por categoría
-    const categories = {
-        economy: [],
-        military: [],
-        defense: []
-    };
+    content.textContent = ''; // Clear content safely
 
-    for (let tech of TECHNOLOGIES) {
-        if (categories[tech.category]) {
-            categories[tech.category].push(tech);
-        }
+    const categories = { economy: [], military: [], defense: [], other: [] };
+    const categoryMapping = {
+        'Economía': 'economy', 'ECONOMY': 'economy',
+        'Militar': 'military', 'MILITARY': 'military',
+        'Defensa': 'defense', 'DEFENSE': 'defense'
+    };
+    const categoryNames = { economy: 'Economía', military: 'Militar', defense: 'Defensa', other: 'Otros' };
+
+    for (let tech of techArray) {
+        const catKey = categoryMapping[tech.category] || 'other';
+        if (categories[catKey]) categories[catKey].push(tech);
+        else categories.other.push(tech);
     }
 
-    let html = '';
-
-    // Renderizar cada categoría
-    for (let [category, techs] of Object.entries(categories)) {
+    for (let [categoryKey, techs] of Object.entries(categories)) {
         if (techs.length === 0) continue;
 
-        const categoryNames = {
-            economy: 'Economía',
-            military: 'Militar',
-            defense: 'Defensa'
-        };
+        const catDiv = document.createElement('div');
+        catDiv.className = 'tech-category';
 
-        html += `<div class="tech-category">`;
-        html += `<h3>${categoryNames[category]}</h3>`;
-        html += `<div class="tech-grid">`;
+        const h3 = document.createElement('h3');
+        h3.textContent = categoryNames[categoryKey] || categoryKey;
+        catDiv.appendChild(h3);
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'tech-grid';
 
         for (let tech of techs) {
-            // Helper for resources icons
-            const getResIcon = (res) => {
-                if (assetLoader && assetLoader.getSrc) {
-                    const src = assetLoader.getSrc(res);
-                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+            let status = { researched: false, researching: false, available: false };
+
+            if (isInteractive && game && game.techManager) {
+                if (game.techManager.getResearchStatus) {
+                    status = game.techManager.getResearchStatus(tech.id);
+                } else {
+                    status = {
+                        researched: game.techManager.isResearched(tech.id),
+                        researching: game.techManager.isResearching(tech.id),
+                        available: game.techManager.canResearch(tech.id)
+                    };
                 }
-                // fallback if assetLoader not ready (unlikely here) or no asset
-                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
-            };
+            }
 
-            const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                : `<div class="tech-icon-placeholder">T</div>`;
+            const techItem = createTechItemElement(tech, status, isInteractive);
 
-            html += `
-                <div class="tech-item locked">
-                    <div class="tech-icon">${techIcon}</div>
-                    <div class="tech-name">${tech.name}</div>
-                    <div class="tech-desc">${tech.description}</div>
-                    <div class="tech-cost">
-                        ${Object.entries(tech.cost).map(([res, amount]) => {
-                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-            }).join(' ')}
-                    </div>
-                </div>
-            `;
+            if (isInteractive && status.available) {
+                const handleResearch = () => {
+                        if(game && game.techManager && game.techManager.canResearch(tech.id)) {
+                            // Save focus ID if possible?
+                            const id = `tech-${tech.id}`;
+                            techItem.id = id;
+                            game.techManager.startResearch(tech.id);
+                            renderTechTree();
+                            // Attempt to refocus after re-render (needs smarter re-render logic or ID persistence)
+                        }
+                };
+
+                techItem.onclick = handleResearch;
+                techItem.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleResearch();
+                    }
+                };
+            }
+
+            gridDiv.appendChild(techItem);
         }
 
-        html += `</div></div>`;
+        catDiv.appendChild(gridDiv);
+        content.appendChild(catDiv);
     }
+}
 
-    content.innerHTML = html;
+/**
+ * Renderiza el árbol de tecnologías (estático, sin juego activo)
+ */
+function renderStaticTechTree() {
+    renderTechTreeCommon(false);
 }
 
 /**
  * Renderiza el árbol de tecnologías con estado del juego
  */
 function renderTechTree() {
-    const content = document.getElementById('techTreeContent');
-    if (!content || !game || !game.techManager) return;
-
-    const categories = {
-        economy: [],
-        military: [],
-        defense: []
-    };
-
-    for (let tech of TECHNOLOGIES) {
-        if (categories[tech.category]) {
-            categories[tech.category].push(tech);
-        }
-    }
-
-    let html = '';
-
-    for (let [category, techs] of Object.entries(categories)) {
-        if (techs.length === 0) continue;
-
-        const categoryNames = {
-            economy: 'Economía',
-            military: 'Militar',
-            defense: 'Defensa'
-        };
-
-        html += `<div class="tech-category">`;
-        html += `<h3>${categoryNames[category]}</h3>`;
-        html += `<div class="tech-grid">`;
-
-        for (let tech of techs) {
-            const status = game.techManager.getResearchStatus(tech.id);
-            const canResearch = game.techManager.canResearch(tech.id);
-
-            let statusClass = 'locked';
-            if (status.researched) statusClass = 'researched';
-            else if (status.researching) statusClass = 'researching';
-            else if (canResearch) statusClass = 'available';
-
-            // Helper for resources icons
-            const getResIcon = (res) => {
-                if (assetLoader && assetLoader.getSrc) {
-                    const src = assetLoader.getSrc(res);
-                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                }
-                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
-            };
-
-            const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                : `<div class="tech-icon-placeholder">T</div>`;
-
-
-            html += `
-                <div class="tech-item ${statusClass}" 
-                     onclick="if(game && game.techManager && game.techManager.canResearch('${tech.id}')) { game.techManager.startResearch('${tech.id}'); renderTechTree(); }">
-                    <div class="tech-icon">${techIcon}</div>
-                    <div class="tech-name">${tech.name}</div>
-                    <div class="tech-desc">${tech.description}</div>
-                    <div class="tech-cost">
-                        ${Object.entries(tech.cost).map(([res, amount]) => {
-                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-            }).join(' ')}
-                    </div>
-                    ${status.researching ? `<div class="tech-progress">Investigando...</div>` : ''}
-                </div>
-            `;
-        }
-
-        html += `</div></div>`;
-    }
-
-    content.innerHTML = html;
+    renderTechTreeCommon(true);
 }
 
 /**

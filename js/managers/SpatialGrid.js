@@ -5,10 +5,12 @@
  * OPTIMIZACIÓN:
  * - Se reemplazó Map<string, Array> por Array<Array> plano (1D) para evitar String allocs.
  * - Se reutilizan los arrays de los buckets para evitar GC pressure.
+ * - Se usa multiplicación por inverso del tamaño de celda para evitar divisiones costosas.
  */
 export class SpatialGrid {
     constructor(width, height, cellSize) {
         this.cellSize = cellSize;
+        this.invCellSize = 1 / cellSize; // Pre-calculate inverse for faster multiplication
         this.cols = Math.ceil(width / cellSize);
         this.rows = Math.ceil(height / cellSize);
 
@@ -35,8 +37,9 @@ export class SpatialGrid {
     }
 
     add(entity) {
-        const col = Math.floor(entity.x / this.cellSize);
-        const row = Math.floor(entity.y / this.cellSize);
+        // OPTIMIZACIÓN: Multiplicación es más rápida que división
+        const col = Math.floor(entity.x * this.invCellSize);
+        const row = Math.floor(entity.y * this.invCellSize);
 
         // Verificación de límites simple
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
@@ -64,9 +67,10 @@ export class SpatialGrid {
         // Esto reduce significativamente la presión del GC en llamadas frecuentes
         result.length = 0;
 
-        const cellRadius = Math.ceil(radius / this.cellSize);
-        const centerCol = Math.floor(x / this.cellSize);
-        const centerRow = Math.floor(y / this.cellSize);
+        // OPTIMIZACIÓN: Multiplicación es más rápida que división
+        const cellRadius = Math.ceil(radius * this.invCellSize);
+        const centerCol = Math.floor(x * this.invCellSize);
+        const centerRow = Math.floor(y * this.invCellSize);
 
         // Clamping para no salir de los bordes al iterar
         const startRow = Math.max(0, centerRow - cellRadius);

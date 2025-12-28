@@ -3139,11 +3139,12 @@ window.toggleGrid = function () {
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
             toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
+            toggleElement.style.color = newState ? '#48bb78' : '#f56565';
         }
     }
 
     // ACCESIBILIDAD: Actualizar estado visual y semántico
-    const btn = document.querySelector('button[onclick="toggleGrid()"]');
+    const btn = document.getElementById('gridToggleBtn');
     if (btn) btn.setAttribute('aria-pressed', newState);
 }
 
@@ -3152,10 +3153,13 @@ window.showSettings = function () {
     if (modal) {
         modal.classList.remove('hidden');
         // Actualizar estado actual
-        const toggleElement = document.getElementById('gridToggleValue');
-        if (toggleElement && game) {
-            toggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+        const gridToggleElement = document.getElementById('gridToggleValue');
+        if (gridToggleElement && game) {
+            gridToggleElement.textContent = game.showGrid ? 'Activada' : 'Desactivada';
+            gridToggleElement.style.color = game.showGrid ? '#48bb78' : '#f56565';
         }
+        const gridBtn = document.getElementById('gridToggleBtn');
+        if (gridBtn && game) gridBtn.setAttribute('aria-pressed', game.showGrid);
 
         // Sincronizar toggle de aldeanos inactivos
         const idleToggleElement = document.getElementById('idleVillagerToggleValue');
@@ -3163,6 +3167,8 @@ window.showSettings = function () {
             idleToggleElement.textContent = game.enableIdleVillagerCycle ? 'Activado' : 'Desactivado';
             idleToggleElement.style.color = game.enableIdleVillagerCycle ? '#48bb78' : '#f56565';
         }
+        const idleBtn = document.getElementById('idleVillagerToggleBtn');
+        if (idleBtn && game) idleBtn.setAttribute('aria-pressed', game.enableIdleVillagerCycle);
 
         // Sincronizar sliders de cámara
         if (game && game.cameraConfig) {
@@ -3227,14 +3233,21 @@ window.hideSettings = function () {
 }
 
 window.toggleIdleVillagerCycle = function () {
+    let newState = false;
     if (game) {
         game.enableIdleVillagerCycle = !game.enableIdleVillagerCycle;
+        newState = game.enableIdleVillagerCycle;
+
         const toggleElement = document.getElementById('idleVillagerToggleValue');
         if (toggleElement) {
-            toggleElement.textContent = game.enableIdleVillagerCycle ? 'Activado' : 'Desactivado';
-            toggleElement.style.color = game.enableIdleVillagerCycle ? '#48bb78' : '#f56565';
+            toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+            toggleElement.style.color = newState ? '#48bb78' : '#f56565';
         }
     }
+
+    // ACCESIBILIDAD: Actualizar estado visual y semántico
+    const btn = document.getElementById('idleVillagerToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
 }
 
 // ==========================================

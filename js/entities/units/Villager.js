@@ -47,7 +47,10 @@ export class Villager extends Unit {
             case 'MOVING':
                 if (this.targetX !== null) {
                     this.moveTowardsTarget(this.targetX, this.targetY, deltaTime);
-                    if (Math.hypot(this.x - this.targetX, this.y - this.targetY) < 5) {
+                    // OPTIMIZACIÓN: Distancia al cuadrado (5^2 = 25)
+                    const dx = this.x - this.targetX;
+                    const dy = this.y - this.targetY;
+                    if ((dx * dx + dy * dy) < 25) {
                         this.targetX = null;
                         this.state = 'IDLE';
                     }
@@ -60,8 +63,12 @@ export class Villager extends Unit {
                     this.currentResourceNode = null;
                     break;
                 }
-                const distRes = Math.hypot(this.x - this.currentResourceNode.x, this.y - this.currentResourceNode.y);
-                if (distRes > 30) {
+                // OPTIMIZACIÓN: Distancia al cuadrado (30^2 = 900)
+                const dxRes = this.x - this.currentResourceNode.x;
+                const dyRes = this.y - this.currentResourceNode.y;
+                const distSqRes = dxRes * dxRes + dyRes * dyRes;
+
+                if (distSqRes > 900) {
                     this.moveTowardsTarget(this.currentResourceNode.x, this.currentResourceNode.y, deltaTime);
                 } else {
                     this.gatherTimer += deltaTime;
@@ -88,8 +95,13 @@ export class Villager extends Unit {
                         break;
                     }
                 }
-                const distDrop = Math.hypot(this.x - this.dropOffTarget.x, this.y - this.dropOffTarget.y);
-                if (distDrop > this.dropOffTarget.size + 10) {
+                // OPTIMIZACIÓN: Distancia al cuadrado
+                const dxDrop = this.x - this.dropOffTarget.x;
+                const dyDrop = this.y - this.dropOffTarget.y;
+                const distSqDrop = dxDrop * dxDrop + dyDrop * dyDrop;
+                const targetDist = this.dropOffTarget.size + 10;
+
+                if (distSqDrop > targetDist * targetDist) {
                     this.moveTowardsTarget(this.dropOffTarget.x, this.dropOffTarget.y, deltaTime);
                 } else {
                     game.resources[this.carryType] += this.carryAmount;
@@ -110,8 +122,13 @@ export class Villager extends Unit {
                     this.buildTarget = null;
                     break;
                 }
-                const distBuild = Math.hypot(this.x - this.buildTarget.x, this.y - this.buildTarget.y);
-                if (distBuild > this.buildTarget.size + 20) {
+                // OPTIMIZACIÓN: Distancia al cuadrado
+                const dxBuild = this.x - this.buildTarget.x;
+                const dyBuild = this.y - this.buildTarget.y;
+                const distSqBuild = dxBuild * dxBuild + dyBuild * dyBuild;
+                const buildRange = this.buildTarget.size + 20;
+
+                if (distSqBuild > buildRange * buildRange) {
                     this.moveTowardsTarget(this.buildTarget.x, this.buildTarget.y, deltaTime);
                 } else {
                     let buildSpeed = 50;
@@ -172,12 +189,16 @@ export class Villager extends Unit {
 
     findDropOffAndGo(game) {
         let nearest = null;
-        let minDist = Infinity;
+        let minDistSq = Infinity;
         const dropOffs = game.buildings.filter(b => (b.type === 'townCenter' || b.type === 'storage') && b.team === this.team);
         for (let b of dropOffs) {
-            const dist = Math.hypot(this.x - b.x, this.y - b.y);
-            if (dist < minDist) {
-                minDist = dist;
+            // OPTIMIZACIÓN: Distancia al cuadrado
+            const dx = this.x - b.x;
+            const dy = this.y - b.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
                 nearest = b;
             }
         }

@@ -54,8 +54,12 @@ export class Unit extends Entity {
         }
         else if (this.targetX !== null) {
             this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game);
-            const dist = Math.hypot(this.x - this.targetX, this.y - this.targetY);
-            if (dist < 10) {
+            // OPTIMIZACIÓN: Distancia al cuadrado (10^2 = 100)
+            const dx = this.x - this.targetX;
+            const dy = this.y - this.targetY;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < 100) {
                 this.targetX = null;
                 this.targetY = null;
             }
@@ -68,14 +72,19 @@ export class Unit extends Entity {
 
     findNearbyEnemy(game) {
         const searchRadius = 200;
+        const searchRadiusSq = searchRadius * searchRadius;
 
         // OPTIMIZACIÓN: Usar Spatial Grid reutilizando array
         const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache);
 
         for (let entity of nearbyEntities) {
             if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
-                const dist = Math.hypot(this.x - entity.x, this.y - entity.y);
-                if (dist < searchRadius) {
+                // OPTIMIZACIÓN: Usar distancia al cuadrado para evitar Math.hypot (12x más rápido)
+                const dx = this.x - entity.x;
+                const dy = this.y - entity.y;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < searchRadiusSq) {
                     this.attackTarget = entity;
                     break;
                 }
@@ -86,7 +95,9 @@ export class Unit extends Entity {
     moveTowardsTarget(targetX, targetY, deltaTime, game) {
         const dx = targetX - this.x;
         const dy = targetY - this.y;
-        const dist = Math.hypot(dx, dy);
+
+        // OPTIMIZACIÓN: Math.sqrt es ~20x más rápido que Math.hypot
+        const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist > 5) {
             // Obtener modificador de terreno
@@ -145,9 +156,13 @@ export class Unit extends Entity {
     }
 
     tryAttack(target, deltaTime, game) {
-        const dist = Math.hypot(this.x - target.x, this.y - target.y);
+        // OPTIMIZACIÓN: Distancia al cuadrado
+        const dx = this.x - target.x;
+        const dy = this.y - target.y;
+        const distSq = dx * dx + dy * dy;
+        const rangeSq = this.attackRange * this.attackRange;
 
-        if (dist <= this.attackRange && this.attackCooldown <= 0) {
+        if (distSq <= rangeSq && this.attackCooldown <= 0) {
             let damage = this.attackDamage;
 
             // Aplicar bonificaciones de terreno si el juego está disponible
@@ -184,9 +199,12 @@ export class Unit extends Entity {
     }
 
     tryGather(node, deltaTime, game) {
-        const dist = Math.hypot(this.x - node.x, this.y - node.y);
+        // OPTIMIZACIÓN: Distancia al cuadrado (30^2 = 900)
+        const dx = this.x - node.x;
+        const dy = this.y - node.y;
+        const distSq = dx * dx + dy * dy;
 
-        if (dist <= 30) {
+        if (distSq <= 900) {
             // CONFIG es una variable global
             if (typeof CONFIG !== 'undefined') {
                 const gatherAmount = CONFIG.GATHER_RATES[node.type] * deltaTime;

@@ -185,15 +185,44 @@ window.loadMainMenu = function () {
 };
 
 /**
+ * Helper para crear iconos de recursos de forma segura (sin innerHTML)
+ */
+function createResourceIconElement(res) {
+    if (assetLoader && assetLoader.getSrc) {
+        const src = assetLoader.getSrc(res);
+        if (src) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.style.width = '16px';
+            img.style.height = '16px';
+            img.style.verticalAlign = 'middle';
+            img.style.marginRight = '2px';
+            img.alt = res;
+            return img;
+        }
+    }
+    const span = document.createElement('span');
+    span.style.fontSize = '10px';
+    span.textContent = res.substring(0, 1);
+    return span;
+}
+
+/**
  * Renderiza el árbol de tecnologías (estático, sin juego activo)
  */
 function renderStaticTechTree() {
     const content = document.getElementById('techTreeContent');
     if (!content) return;
 
+    content.textContent = ''; // Limpiar contenido de forma segura
+
     // Verificar si TECHNOLOGIES está disponible y es iterable
     if (typeof TECHNOLOGIES === 'undefined' || !Array.isArray(TECHNOLOGIES)) {
-        content.innerHTML = '<p style="text-align: center; color: #999;">Árbol de tecnologías no disponible</p>';
+        const p = document.createElement('p');
+        p.style.textAlign = 'center';
+        p.style.color = '#999';
+        p.textContent = 'Árbol de tecnologías no disponible';
+        content.appendChild(p);
         return;
     }
 
@@ -210,55 +239,81 @@ function renderStaticTechTree() {
         }
     }
 
-    let html = '';
+    const categoryNames = {
+        economy: 'Economía',
+        military: 'Militar',
+        defense: 'Defensa'
+    };
 
     // Renderizar cada categoría
     for (let [category, techs] of Object.entries(categories)) {
         if (techs.length === 0) continue;
 
-        const categoryNames = {
-            economy: 'Economía',
-            military: 'Militar',
-            defense: 'Defensa'
-        };
+        const catDiv = document.createElement('div');
+        catDiv.className = 'tech-category';
 
-        html += `<div class="tech-category">`;
-        html += `<h3>${categoryNames[category]}</h3>`;
-        html += `<div class="tech-grid">`;
+        const h3 = document.createElement('h3');
+        h3.textContent = categoryNames[category];
+        catDiv.appendChild(h3);
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'tech-grid';
 
         for (let tech of techs) {
-            // Helper for resources icons
-            const getResIcon = (res) => {
-                if (assetLoader && assetLoader.getSrc) {
-                    const src = assetLoader.getSrc(res);
-                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
-                }
-                // fallback if assetLoader not ready (unlikely here) or no asset
-                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
-            };
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'tech-item locked';
 
-            const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                : `<div class="tech-icon-placeholder">T</div>`;
+            // Icono
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'tech-icon';
+            if (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id)) {
+                const img = document.createElement('img');
+                img.src = assetLoader.getSrc(tech.id);
+                img.className = 'tech-icon-img';
+                img.alt = tech.name;
+                iconDiv.appendChild(img);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'tech-icon-placeholder';
+                placeholder.textContent = 'T';
+                iconDiv.appendChild(placeholder);
+            }
+            itemDiv.appendChild(iconDiv);
 
-            html += `
-                <div class="tech-item locked">
-                    <div class="tech-icon">${techIcon}</div>
-                    <div class="tech-name">${tech.name}</div>
-                    <div class="tech-desc">${tech.description}</div>
-                    <div class="tech-cost">
-                        ${Object.entries(tech.cost).map(([res, amount]) => {
-                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-            }).join(' ')}
-                    </div>
-                </div>
-            `;
+            // Nombre
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'tech-name';
+            nameDiv.textContent = tech.name;
+            itemDiv.appendChild(nameDiv);
+
+            // Descripción
+            const descDiv = document.createElement('div');
+            descDiv.className = 'tech-desc';
+            descDiv.textContent = tech.description;
+            itemDiv.appendChild(descDiv);
+
+            // Costo
+            const costDiv = document.createElement('div');
+            costDiv.className = 'tech-cost';
+            Object.entries(tech.cost).forEach(([res, amount]) => {
+                const costSpan = document.createElement('span');
+                costSpan.style.display = 'inline-flex';
+                costSpan.style.alignItems = 'center';
+                costSpan.style.marginRight = '5px';
+
+                costSpan.appendChild(document.createTextNode(amount));
+                costSpan.appendChild(createResourceIconElement(res));
+
+                costDiv.appendChild(costSpan);
+            });
+            itemDiv.appendChild(costDiv);
+
+            gridDiv.appendChild(itemDiv);
         }
 
-        html += `</div></div>`;
+        catDiv.appendChild(gridDiv);
+        content.appendChild(catDiv);
     }
-
-    content.innerHTML = html;
 }
 
 /**
@@ -267,6 +322,8 @@ function renderStaticTechTree() {
 function renderTechTree() {
     const content = document.getElementById('techTreeContent');
     if (!content || !game || !game.techManager) return;
+
+    content.textContent = ''; // Limpiar contenido de forma segura
 
     const categories = {
         economy: [],
@@ -280,20 +337,24 @@ function renderTechTree() {
         }
     }
 
-    let html = '';
+    const categoryNames = {
+        economy: 'Economía',
+        military: 'Militar',
+        defense: 'Defensa'
+    };
 
     for (let [category, techs] of Object.entries(categories)) {
         if (techs.length === 0) continue;
 
-        const categoryNames = {
-            economy: 'Economía',
-            military: 'Militar',
-            defense: 'Defensa'
-        };
+        const catDiv = document.createElement('div');
+        catDiv.className = 'tech-category';
 
-        html += `<div class="tech-category">`;
-        html += `<h3>${categoryNames[category]}</h3>`;
-        html += `<div class="tech-grid">`;
+        const h3 = document.createElement('h3');
+        h3.textContent = categoryNames[category];
+        catDiv.appendChild(h3);
+
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'tech-grid';
 
         for (let tech of techs) {
             const status = game.techManager.getResearchStatus(tech.id);
@@ -304,40 +365,89 @@ function renderTechTree() {
             else if (status.researching) statusClass = 'researching';
             else if (canResearch) statusClass = 'available';
 
-            // Helper for resources icons
-            const getResIcon = (res) => {
-                if (assetLoader && assetLoader.getSrc) {
-                    const src = assetLoader.getSrc(res);
-                    if (src) return `<img src="${src}" style="width:16px;height:16px;vertical-align:middle;margin-right:2px;">`;
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `tech-item ${statusClass}`;
+
+            // Event Listener seguro
+            itemDiv.onclick = () => {
+                if (game && game.techManager && game.techManager.canResearch(tech.id)) {
+                    game.techManager.startResearch(tech.id);
+                    renderTechTree();
                 }
-                return `<span style="font-size:10px">${res.substring(0, 1)}</span>`;
             };
 
-            const techIcon = (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id))
-                ? `<img src="${assetLoader.getSrc(tech.id)}" class="tech-icon-img">`
-                : `<div class="tech-icon-placeholder">T</div>`;
+            // Accesibilidad para teclado
+            if (canResearch) {
+                itemDiv.setAttribute('role', 'button');
+                itemDiv.setAttribute('tabindex', '0');
+                itemDiv.setAttribute('aria-label', `Investigar ${tech.name}`);
+                itemDiv.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        itemDiv.click();
+                    }
+                };
+            }
 
+            // Icono
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'tech-icon';
+            if (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id)) {
+                const img = document.createElement('img');
+                img.src = assetLoader.getSrc(tech.id);
+                img.className = 'tech-icon-img';
+                img.alt = tech.name;
+                iconDiv.appendChild(img);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'tech-icon-placeholder';
+                placeholder.textContent = 'T';
+                iconDiv.appendChild(placeholder);
+            }
+            itemDiv.appendChild(iconDiv);
 
-            html += `
-                <div class="tech-item ${statusClass}" 
-                     onclick="if(game && game.techManager && game.techManager.canResearch('${tech.id}')) { game.techManager.startResearch('${tech.id}'); renderTechTree(); }">
-                    <div class="tech-icon">${techIcon}</div>
-                    <div class="tech-name">${tech.name}</div>
-                    <div class="tech-desc">${tech.description}</div>
-                    <div class="tech-cost">
-                        ${Object.entries(tech.cost).map(([res, amount]) => {
-                return `<span style="display:inline-flex;align-items:center;margin-right:5px;">${amount}${getResIcon(res)}</span>`;
-            }).join(' ')}
-                    </div>
-                    ${status.researching ? `<div class="tech-progress">Investigando...</div>` : ''}
-                </div>
-            `;
+            // Nombre
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'tech-name';
+            nameDiv.textContent = tech.name;
+            itemDiv.appendChild(nameDiv);
+
+            // Descripción
+            const descDiv = document.createElement('div');
+            descDiv.className = 'tech-desc';
+            descDiv.textContent = tech.description;
+            itemDiv.appendChild(descDiv);
+
+            // Costo
+            const costDiv = document.createElement('div');
+            costDiv.className = 'tech-cost';
+            Object.entries(tech.cost).forEach(([res, amount]) => {
+                const costSpan = document.createElement('span');
+                costSpan.style.display = 'inline-flex';
+                costSpan.style.alignItems = 'center';
+                costSpan.style.marginRight = '5px';
+
+                costSpan.appendChild(document.createTextNode(amount));
+                costSpan.appendChild(createResourceIconElement(res));
+
+                costDiv.appendChild(costSpan);
+            });
+            itemDiv.appendChild(costDiv);
+
+            // Progreso
+            if (status.researching) {
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'tech-progress';
+                progressDiv.textContent = 'Investigando...';
+                itemDiv.appendChild(progressDiv);
+            }
+
+            gridDiv.appendChild(itemDiv);
         }
 
-        html += `</div></div>`;
+        catDiv.appendChild(gridDiv);
+        content.appendChild(catDiv);
     }
-
-    content.innerHTML = html;
 }
 
 /**

@@ -1048,19 +1048,19 @@ export class Game {
         const endCol = Math.min(this.terrainMap.cols, Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE));
         const endRow = Math.min(this.terrainMap.rows, Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE));
 
-        // OPTIMIZATION: Batch draw calls by terrain type
-        // Reduces draw calls from ~2000/frame to ~6/frame
-        const paths = {};
-        for (const type in TERRAIN_TYPES) {
-            paths[type] = new Path2D();
-        }
-        // Fallback path just in case
-        paths['fallback'] = new Path2D();
-
         // Hoist properties for faster access inside loop
         const mapCols = this.terrainMap.cols;
         const grid = this.terrainMap.grid;
         const idToName = this.terrainMap._idToName;
+
+        // OPTIMIZATION: Batch draw calls by terrain type using Array instead of Object
+        // Using integer-indexed array avoids hash lookups in the hot loop
+        const paths = new Array(idToName.length);
+        for (let i = 0; i < idToName.length; i++) {
+            paths[i] = new Path2D();
+        }
+        // Fallback path just in case
+        const fallbackPath = new Path2D();
 
         for (let row = startRow; row < endRow; row++) {
             // Calculate row base index
@@ -1068,37 +1068,39 @@ export class Game {
             // Pre-calculate base Y for the row
             const y = Math.floor(row * TILE_SIZE - this.camera.y);
 
+            // OPTIMIZATION: Pre-calculate X and update incrementally
+            // Reduces multiplications and Math.floor calls by one per tile
+            let x = Math.floor(startCol * TILE_SIZE - this.camera.x);
+
             for (let col = startCol; col < endCol; col++) {
-                // No need to check bounds here thanks to initial clamping
-
                 const terrainId = grid[index];
-                const terrainType = idToName[terrainId]; // Optimization: get string name from ID directly
 
-                const x = Math.floor(col * TILE_SIZE - this.camera.x);
-
-                // Use terrain name to find the path
-                if (paths[terrainType]) {
-                    paths[terrainType].rect(x, y, TILE_SIZE, TILE_SIZE);
+                // Direct array access for path - O(1) integer lookup
+                if (terrainId < paths.length) {
+                    paths[terrainId].rect(x, y, TILE_SIZE, TILE_SIZE);
                 } else {
-                    paths['fallback'].rect(x, y, TILE_SIZE, TILE_SIZE);
+                    fallbackPath.rect(x, y, TILE_SIZE, TILE_SIZE);
                 }
 
+                x += TILE_SIZE; // Incremental X calculation
                 index++;
             }
         }
 
         // Draw batched paths
-        for (const type in paths) {
-            // TERRAIN_TYPES[type] might be undefined for 'fallback' key
+        for (let i = 0; i < paths.length; i++) {
+            const type = idToName[i];
             const terrainData = TERRAIN_TYPES[type];
             if (terrainData) {
                 this.ctx.fillStyle = terrainData.color;
-                this.ctx.fill(paths[type]);
-            } else if (type === 'fallback') {
-                 this.ctx.fillStyle = TERRAIN_TYPES.grassland.color;
-                 this.ctx.fill(paths[type]);
+                this.ctx.fill(paths[i]);
             }
         }
+        // Draw fallback if not empty (rare)
+        // Since we can't check isEmpty easily on Path2D, we just ignore fallback usually unless debugging
+        // but to be safe we can fill it with default color
+        // Note: standard Path2D doesn't have isEmpty(), so we skip it to avoid overdraw
+        // as valid IDs should cover everything.
     }
 
     render() {

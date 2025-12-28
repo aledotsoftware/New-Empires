@@ -124,10 +124,38 @@ window.toggleGrid = function () {
 
     // Update UI
     const toggleElement = document.getElementById('gridToggleValue');
-    if (toggleElement) toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
+    if (toggleElement) {
+        toggleElement.textContent = newState ? 'Activada' : 'Desactivada';
+        toggleElement.style.color = newState ? '#48bb78' : '#f56565';
+    }
 
     // Update ARIA
     const btn = document.getElementById('gridToggleBtn');
+    if (btn) btn.setAttribute('aria-pressed', newState);
+};
+
+// Toggle para ciclo de aldeanos inactivos (sincronizado con game.js)
+window.toggleIdleVillagerCycle = function () {
+    let newState = false;
+    if (window.game) {
+        window.game.enableIdleVillagerCycle = !window.game.enableIdleVillagerCycle;
+        newState = window.game.enableIdleVillagerCycle;
+    } else {
+        const toggleElement = document.getElementById('idleVillagerToggleValue');
+        if (toggleElement) {
+            newState = toggleElement.textContent !== 'Activado';
+        }
+    }
+
+    // Update UI
+    const toggleElement = document.getElementById('idleVillagerToggleValue');
+    if (toggleElement) {
+        toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+        toggleElement.style.color = newState ? '#48bb78' : '#f56565';
+    }
+
+    // Update ARIA
+    const btn = document.getElementById('idleVillagerToggleBtn');
     if (btn) btn.setAttribute('aria-pressed', newState);
 };
 

@@ -20,6 +20,9 @@ export class SpatialGrid {
             this.buckets[i] = [];
         }
 
+        // Optimización: Cache inverso para usar multiplicación en lugar de división
+        this.invCellSize = 1 / cellSize;
+
         // Optimización: Rastrear índices activos para limpiar solo lo necesario
         this.activeIndices = [];
     }
@@ -35,8 +38,9 @@ export class SpatialGrid {
     }
 
     add(entity) {
-        const col = Math.floor(entity.x / this.cellSize);
-        const row = Math.floor(entity.y / this.cellSize);
+        // Optimización: usar multiplicación es ligeramente más rápido que división
+        const col = Math.floor(entity.x * this.invCellSize);
+        const row = Math.floor(entity.y * this.invCellSize);
 
         // Verificación de límites simple
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
@@ -64,9 +68,10 @@ export class SpatialGrid {
         // Esto reduce significativamente la presión del GC en llamadas frecuentes
         result.length = 0;
 
-        const cellRadius = Math.ceil(radius / this.cellSize);
-        const centerCol = Math.floor(x / this.cellSize);
-        const centerRow = Math.floor(y / this.cellSize);
+        // Optimización: usar multiplicación
+        const cellRadius = Math.ceil(radius * this.invCellSize);
+        const centerCol = Math.floor(x * this.invCellSize);
+        const centerRow = Math.floor(y * this.invCellSize);
 
         // Clamping para no salir de los bordes al iterar
         const startRow = Math.max(0, centerRow - cellRadius);
@@ -82,9 +87,17 @@ export class SpatialGrid {
                 const bucket = this.buckets[index];
 
                 // Iterar bucket y agregar a resultados
-                const len = bucket.length;
-                for(let i = 0; i < len; i++) {
-                    result.push(bucket[i]);
+                const bLen = bucket.length;
+                if (bLen > 0) {
+                    // OPTIMIZACIÓN: Usar push.apply es más rápido para arrays medianos,
+                    // pero volvemos al loop si es demasiado grande para evitar stack overflow (>32k)
+                    if (bLen < 32000) {
+                        Array.prototype.push.apply(result, bucket);
+                    } else {
+                        for(let i = 0; i < bLen; i++) {
+                            result.push(bucket[i]);
+                        }
+                    }
                 }
             }
         }

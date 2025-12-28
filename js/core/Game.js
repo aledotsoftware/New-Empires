@@ -1583,10 +1583,37 @@ export class Game {
                     return img;
                 }
             }
+            // Return fallback if no image
+            const span = document.createElement('span');
+            span.textContent = fallback || '';
+            return span;
         }
 
+        // Helper para crear elementos de costo
+        const createCostElement = (cost) => {
+            const costDiv = document.createElement('div');
+            costDiv.className = 'btn-cost';
+
+            const parts = [];
+            for (const [res, amount] of Object.entries(cost)) {
+                if (amount > 0) {
+                    // Usar iniciales: W (Wood), F (Food), G (Gold), S (Stone)
+                    let initial = res.charAt(0).toUpperCase();
+                    // Traducción simple para visualización
+                    if (res === 'wood') initial = 'W'; // Madera
+                    else if (res === 'food') initial = 'F'; // Comida
+                    else if (res === 'gold') initial = 'G'; // Oro
+                    else if (res === 'stone') initial = 'S'; // Piedra
+
+                    parts.push(`${initial}:${amount}`);
+                }
+            }
+            costDiv.textContent = parts.join(' ');
+            return costDiv;
+        };
+
         // Si hay que renderizar vacío, comprobamos si ya estaba vacío
-        if (shouldRenderEmpty) {
+        if (typeof shouldRenderEmpty !== 'undefined' && shouldRenderEmpty) {
             if (this.lastActionsStateKey === 'empty') return;
 
             // Renderizar vacío y salir
@@ -1704,9 +1731,21 @@ export class Game {
                     btn.innerHTML = ''; // Clear content
                     btn.className = 'action-btn'; // Reset class
 
-                    // ACCESIBILIDAD
+                    // Construir texto de costo para tooltip y accesibilidad
+                    let costText = '';
+                    if (buttonData.cost) {
+                        const parts = [];
+                        for (const [res, amount] of Object.entries(buttonData.cost)) {
+                            if (amount > 0) parts.push(`${amount} ${res}`);
+                        }
+                        if (parts.length > 0) costText = `Cost: ${parts.join(', ')}`;
+                    }
+
+                    // ACCESIBILIDAD Y TOOLTIP
                     btn.setAttribute('aria-keyshortcuts', hotkey);
-                    btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+                    const label = `${buttonData.label} (${hotkey})`;
+                    btn.setAttribute('aria-label', costText ? `${label}. ${costText}` : label);
+                    btn.title = costText ? `${label}\n${costText}` : label;
 
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');

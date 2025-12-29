@@ -1816,13 +1816,14 @@ class Game {
                     btn.setAttribute('aria-disabled', 'true');
                 }
 
-                btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+                // Palette: Enhanced Accessibility & Tooltips
+                let ariaLabel = `${buttonData.label} (${hotkey})`;
+                if (buttonData.description) ariaLabel += `. ${buttonData.description}`;
+                if (buttonData.cost) ariaLabel += `. Costo: ${buttonData.cost}`;
+                btn.setAttribute('aria-label', ariaLabel);
 
-                // Add rich tooltip with description and cost
-                let tooltip = `${buttonData.label} (${hotkey})`;
-                if (buttonData.description) tooltip += `\n${buttonData.description}`;
-                if (buttonData.cost) tooltip += `\nCosto: ${buttonData.cost}`;
-                btn.title = tooltip;
+                // No native title to avoid double tooltips and poor a11y
+                btn.removeAttribute('title');
 
                 btn.onclick = () => {
                     console.log('🖱️ Click en botón', i, 'disabled:', btn.classList.contains('disabled'), 'hasAction:', !!buttonData.action);
@@ -1836,10 +1837,38 @@ class Game {
                     }
                 };
 
+                // Palette: Custom Tooltip HTML
+                let costHtml = '';
+                if (buttonData.cost) {
+                    costHtml = '<div class="tooltip-cost">';
+                    if (typeof buttonData.cost === 'string') {
+                        // Legacy string cost (e.g. from hardcoded buttons)
+                        costHtml += buttonData.cost;
+                    } else if (typeof buttonData.cost === 'object') {
+                        // Object cost (e.g. from Tech)
+                        for (const [res, amount] of Object.entries(buttonData.cost)) {
+                            let icon = '';
+                            if (res === 'food') icon = '🌾';
+                            else if (res === 'wood') icon = '🌲';
+                            else if (res === 'gold') icon = '💰';
+                            else if (res === 'stone') icon = '🪨';
+                            else icon = res; // Fallback
+                            costHtml += `<span>${icon} ${amount}</span>`;
+                        }
+                    }
+                    costHtml += '</div>';
+                }
+
+                const tooltipHtml = `
+                    <div class="tooltip-header">${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span></div>
+                    ${buttonData.description ? `<div class="tooltip-desc">${buttonData.description}</div>` : ''}
+                    ${costHtml}
+                `;
+
                 btn.innerHTML = `
                     <div class="btn-icon">${buttonData.icon}</div>
                     <div class="btn-label">${buttonData.label}</div>
-                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
+                    <div class="btn-tooltip" role="tooltip">${tooltipHtml}</div>
                 `;
             } else {
                 // Botón vacío

@@ -1591,27 +1591,14 @@ export class Game {
             return span;
         }
 
-        // Helper para crear elementos de costo
-        const createCostElement = (cost) => {
-            const costDiv = document.createElement('div');
-            costDiv.className = 'btn-cost';
-
-            const parts = [];
+        // Helper para crear elementos de costo (Legacy for internal cost text generation if needed)
+        // Updated to use full names for better a11y text generation
+        const getCostText = (cost) => {
+             const parts = [];
             for (const [res, amount] of Object.entries(cost)) {
-                if (amount > 0) {
-                    // Usar iniciales: W (Wood), F (Food), G (Gold), S (Stone)
-                    let initial = res.charAt(0).toUpperCase();
-                    // Traducción simple para visualización
-                    if (res === 'wood') initial = 'W'; // Madera
-                    else if (res === 'food') initial = 'F'; // Comida
-                    else if (res === 'gold') initial = 'G'; // Oro
-                    else if (res === 'stone') initial = 'S'; // Piedra
-
-                    parts.push(`${initial}:${amount}`);
-                }
+                if (amount > 0) parts.push(`${amount} ${res}`);
             }
-            costDiv.textContent = parts.join(' ');
-            return costDiv;
+            return parts.length > 0 ? `Costo: ${parts.join(', ')}` : '';
         };
 
         // Si hay que renderizar vacío, comprobamos si ya estaba vacío
@@ -1733,21 +1720,21 @@ export class Game {
                     btn.innerHTML = ''; // Clear content
                     btn.className = 'action-btn'; // Reset class
 
-                    // Construir texto de costo para tooltip y accesibilidad
+                    // Construir texto de costo para accesibilidad
                     let costText = '';
                     if (buttonData.cost) {
-                        const parts = [];
-                        for (const [res, amount] of Object.entries(buttonData.cost)) {
-                            if (amount > 0) parts.push(`${amount} ${res}`);
-                        }
-                        if (parts.length > 0) costText = `Cost: ${parts.join(', ')}`;
+                        costText = getCostText(buttonData.cost);
                     }
 
-                    // ACCESIBILIDAD Y TOOLTIP
+                    // ACCESIBILIDAD (Palette Improved)
                     btn.setAttribute('aria-keyshortcuts', hotkey);
                     const label = `${buttonData.label} (${hotkey})`;
-                    btn.setAttribute('aria-label', costText ? `${label}. ${costText}` : label);
-                    btn.title = costText ? `${label}\n${costText}` : label;
+                    // Include description if available (Game.js structure might not have it in buttonData yet, but good to add)
+                    const fullLabel = costText ? `${label}. ${costText}` : label;
+                    btn.setAttribute('aria-label', fullLabel);
+
+                    // Remove native tooltip
+                    btn.removeAttribute('title');
 
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');
@@ -1769,10 +1756,43 @@ export class Game {
                     btn.appendChild(iconDiv);
                     btn.appendChild(labelDiv);
 
-                    if (buttonData.cost) {
-                        const costDiv = createCostElement(buttonData.cost);
-                        btn.appendChild(costDiv);
+                    // Palette: Custom Tooltip Construction
+                    const tooltipDiv = document.createElement('div');
+                    tooltipDiv.className = 'btn-tooltip';
+                    tooltipDiv.setAttribute('role', 'tooltip');
+
+                    const tooltipHeader = document.createElement('div');
+                    tooltipHeader.className = 'tooltip-header';
+                    tooltipHeader.innerHTML = `${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span>`;
+                    tooltipDiv.appendChild(tooltipHeader);
+
+                    if (buttonData.description) {
+                        const descDiv = document.createElement('div');
+                        descDiv.className = 'tooltip-desc';
+                        descDiv.textContent = buttonData.description;
+                        tooltipDiv.appendChild(descDiv);
                     }
+
+                    if (buttonData.cost) {
+                        const costTooltip = document.createElement('div');
+                        costTooltip.className = 'tooltip-cost';
+
+                         for (const [res, amount] of Object.entries(buttonData.cost)) {
+                             const resSpan = document.createElement('span');
+                             let icon = '';
+                             if (res === 'food') icon = '🌾';
+                             else if (res === 'wood') icon = '🌲';
+                             else if (res === 'gold') icon = '💰';
+                             else if (res === 'stone') icon = '🪨';
+                             else icon = res; // Fallback
+
+                             resSpan.textContent = `${icon} ${amount}`;
+                             costTooltip.appendChild(resSpan);
+                         }
+                         tooltipDiv.appendChild(costTooltip);
+                    }
+
+                    btn.appendChild(tooltipDiv);
 
                     btn.dataset.stateKey = newStateKey;
                 } else {

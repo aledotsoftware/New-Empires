@@ -817,14 +817,36 @@ const initApp = async () => {
     // Botón de inicio - ir a selección de tamaño de mapa
     const startButton = document.getElementById('startButton');
     if (startButton) {
-        startButton.addEventListener('click', () => {
-            debugLogger.info('Mostrando selección de tamaño de mapa', 'ui');
-            document.getElementById('startScreen').classList.add('hidden');
-            const mapScreen = document.getElementById('mapSizeScreen');
-            mapScreen.classList.remove('hidden');
+        startButton.addEventListener('click', (e) => {
+            // Prevenir múltiples clics
+            if (startButton.classList.contains('btn-loading')) return;
 
-            // Move focus
-            setTimeout(() => FocusManager.focusFirst(mapScreen), 50);
+            // Guardar contenido original
+            const originalContent = startButton.innerHTML;
+
+            // Estado de carga
+            startButton.classList.add('btn-loading');
+            startButton.setAttribute('aria-busy', 'true');
+            startButton.disabled = true;
+            startButton.innerHTML = '<span class="spinner"></span> Cargando...';
+
+            debugLogger.info('Mostrando selección de tamaño de mapa', 'ui');
+
+            // Simular carga breve para feedback visual (UX)
+            setTimeout(() => {
+                document.getElementById('startScreen').classList.add('hidden');
+                const mapScreen = document.getElementById('mapSizeScreen');
+                mapScreen.classList.remove('hidden');
+
+                // Restaurar botón (por si el usuario vuelve atrás)
+                startButton.classList.remove('btn-loading');
+                startButton.removeAttribute('aria-busy');
+                startButton.disabled = false;
+                startButton.innerHTML = originalContent;
+
+                // Move focus with a small tick to ensure visibility
+                setTimeout(() => FocusManager.focusFirst(mapScreen), 0);
+            }, 600);
         });
     }
 

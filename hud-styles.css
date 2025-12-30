@@ -76,6 +76,7 @@
     padding: 0 20px;
     max-width: 600px; /* Limit width */
     margin: 0 auto;
+    overflow: visible; /* Ensure tooltips aren't clipped */
 }
 
 .action-btn {
@@ -250,4 +251,19 @@
 /* Hide legacy panels */
 .unit-control-panel {
     display: none !important;
+}
+
+/* Cost Display (Overlay) */
+.btn-cost {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 1px 3px;
+    border-radius: 3px;
+    color: #fbbf24;
+    pointer-events: none;
+    z-index: 10;
+    display: block; /* Always visible */
 }

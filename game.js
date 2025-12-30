@@ -1819,7 +1819,15 @@ class Game {
                 // Palette: Enhanced Accessibility & Tooltips
                 let ariaLabel = `${buttonData.label} (${hotkey})`;
                 if (buttonData.description) ariaLabel += `. ${buttonData.description}`;
-                if (buttonData.cost) ariaLabel += `. Costo: ${buttonData.cost}`;
+                if (buttonData.cost) {
+                    let costStr = buttonData.cost;
+                    if (typeof buttonData.cost === 'object') {
+                         costStr = Object.entries(buttonData.cost)
+                            .map(([k, v]) => `${v} ${k}`)
+                            .join(', ');
+                    }
+                    ariaLabel += `. Costo: ${costStr}`;
+                }
                 btn.setAttribute('aria-label', ariaLabel);
 
                 // No native title to avoid double tooltips and poor a11y
@@ -1839,13 +1847,16 @@ class Game {
 
                 // Palette: Custom Tooltip HTML
                 let costHtml = '';
+                // Also create visible cost overlay
+                let visibleCostHtml = '';
+
                 if (buttonData.cost) {
+                    // 1. Tooltip Cost
                     costHtml = '<div class="tooltip-cost">';
                     if (typeof buttonData.cost === 'string') {
-                        // Legacy string cost (e.g. from hardcoded buttons)
                         costHtml += buttonData.cost;
+                        visibleCostHtml = `<div class="btn-cost">${buttonData.cost}</div>`;
                     } else if (typeof buttonData.cost === 'object') {
-                        // Object cost (e.g. from Tech)
                         for (const [res, amount] of Object.entries(buttonData.cost)) {
                             let icon = '';
                             if (res === 'food') icon = '🌾';
@@ -1855,6 +1866,14 @@ class Game {
                             else icon = res; // Fallback
                             costHtml += `<span>${icon} ${amount}</span>`;
                         }
+                        // For visible overlay, show simplified text or just gold/wood/food
+                         let simpleCost = '';
+                         if (buttonData.cost.gold) simpleCost = `💰${buttonData.cost.gold}`;
+                         else if (buttonData.cost.wood) simpleCost = `🌲${buttonData.cost.wood}`;
+                         else if (buttonData.cost.food) simpleCost = `🌾${buttonData.cost.food}`;
+                         else simpleCost = Object.values(buttonData.cost)[0] || '';
+
+                         visibleCostHtml = `<div class="btn-cost">${simpleCost}</div>`;
                     }
                     costHtml += '</div>';
                 }
@@ -1868,6 +1887,7 @@ class Game {
                 btn.innerHTML = `
                     <div class="btn-icon">${buttonData.icon}</div>
                     <div class="btn-label">${buttonData.label}</div>
+                    ${visibleCostHtml}
                     <div class="btn-tooltip" role="tooltip">${tooltipHtml}</div>
                 `;
             } else {

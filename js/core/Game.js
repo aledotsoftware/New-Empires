@@ -1594,6 +1594,7 @@ export class Game {
         // Helper para crear elementos de costo (Legacy for internal cost text generation if needed)
         // Updated to use full names for better a11y text generation
         const getCostText = (cost) => {
+             if (typeof cost === 'string') return `Costo: ${cost}`;
              const parts = [];
             for (const [res, amount] of Object.entries(cost)) {
                 if (amount > 0) parts.push(`${amount} ${res}`);
@@ -1773,23 +1774,47 @@ export class Game {
                         tooltipDiv.appendChild(descDiv);
                     }
 
+                    // Visible Cost Overlay
+                    let visibleCostText = '';
+
                     if (buttonData.cost) {
                         const costTooltip = document.createElement('div');
                         costTooltip.className = 'tooltip-cost';
 
-                         for (const [res, amount] of Object.entries(buttonData.cost)) {
-                             const resSpan = document.createElement('span');
-                             let icon = '';
-                             if (res === 'food') icon = '🌾';
-                             else if (res === 'wood') icon = '🌲';
-                             else if (res === 'gold') icon = '💰';
-                             else if (res === 'stone') icon = '🪨';
-                             else icon = res; // Fallback
+                        if (typeof buttonData.cost === 'string') {
+                             // Legacy string handling
+                             costTooltip.textContent = buttonData.cost;
+                             visibleCostText = buttonData.cost;
+                        } else {
+                             // Standard object handling
+                             for (const [res, amount] of Object.entries(buttonData.cost)) {
+                                 const resSpan = document.createElement('span');
+                                 let icon = '';
+                                 if (res === 'food') icon = '🌾';
+                                 else if (res === 'wood') icon = '🌲';
+                                 else if (res === 'gold') icon = '💰';
+                                 else if (res === 'stone') icon = '🪨';
+                                 else icon = res; // Fallback
 
-                             resSpan.textContent = `${icon} ${amount}`;
-                             costTooltip.appendChild(resSpan);
-                         }
-                         tooltipDiv.appendChild(costTooltip);
+                                 resSpan.textContent = `${icon} ${amount}`;
+                                 costTooltip.appendChild(resSpan);
+                             }
+
+                             // Determine simple visible cost (prioritize gold > wood > food)
+                             if (buttonData.cost.gold) visibleCostText = `💰${buttonData.cost.gold}`;
+                             else if (buttonData.cost.wood) visibleCostText = `🌲${buttonData.cost.wood}`;
+                             else if (buttonData.cost.food) visibleCostText = `🌾${buttonData.cost.food}`;
+                             else visibleCostText = Object.values(buttonData.cost)[0] || '';
+                        }
+                        tooltipDiv.appendChild(costTooltip);
+                    }
+
+                    // Create and append visible cost overlay
+                    if (visibleCostText) {
+                        const costOverlay = document.createElement('div');
+                        costOverlay.className = 'btn-cost';
+                        costOverlay.textContent = visibleCostText;
+                        btn.appendChild(costOverlay);
                     }
 
                     btn.appendChild(tooltipDiv);

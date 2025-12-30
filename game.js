@@ -1837,6 +1837,7 @@ class Game {
                 };
 
                 btn.innerHTML = `
+                    <div class="btn-hotkey">${hotkey}</div>
                     <div class="btn-icon">${buttonData.icon}</div>
                     <div class="btn-label">${buttonData.label}</div>
                     ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
@@ -1846,7 +1847,10 @@ class Game {
                 btn.classList.add('disabled');
                 btn.setAttribute('aria-disabled', 'true');
                 btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
-                btn.innerHTML = '<div class="btn-icon"></div>';
+                btn.innerHTML = `
+                    <div class="btn-hotkey">${hotkey}</div>
+                    <div class="btn-icon"></div>
+                `;
             }
 
             grid.appendChild(btn);

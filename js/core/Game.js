@@ -1757,6 +1757,11 @@ export class Game {
                         btn.removeAttribute('aria-disabled');
                     }
 
+                    const hotkeyDiv = document.createElement('div');
+                    hotkeyDiv.className = 'btn-hotkey';
+                    hotkeyDiv.textContent = hotkey;
+                    btn.appendChild(hotkeyDiv);
+
                     const iconDiv = document.createElement('div');
                     iconDiv.className = 'btn-icon';
                     const iconEl = createIconElement(buttonData.iconKey, buttonData.iconFallback);

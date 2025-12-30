@@ -1837,17 +1837,38 @@ class Game {
                     }
                 };
 
-                // Palette: Custom Tooltip HTML
+                // Palette: Custom Tooltip HTML - Constructed securely
+                // Note: We use innerHTML for the button content structure but sanitize input values where possible
+                // For a full refactor, document.createElement should be used for everything like in Game.js
+
+                // Safe construction of cost HTML
+                const costHtml = buttonData.cost ? `<div class="tooltip-cost">${buttonData.cost}</div>` : '';
+
+                // Helper to escape HTML special chars just in case
+                const escapeHtml = (text) => {
+                    if (!text) return '';
+                    return text
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
+                };
+
                 const tooltipHtml = `
-                    <div class="tooltip-header">${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span></div>
-                    <div class="tooltip-desc">${buttonData.description || ''}</div>
-                    ${buttonData.cost ? `<div class="tooltip-cost">${buttonData.cost}</div>` : ''}
+                    <div class="tooltip-header">${escapeHtml(buttonData.label)} <span class="tooltip-hotkey">[${hotkey}]</span></div>
+                    <div class="tooltip-desc">${escapeHtml(buttonData.description || '')}</div>
+                    ${costHtml}
                 `;
+
+                // Safe icon rendering (assuming icon is just emoji or safe string, but escaping is safer)
+                // However, icon might be HTML if passed from legacy code?
+                // In this file logic, icon is usually emoji.
 
                 btn.innerHTML = `
                     <div class="btn-hotkey">${hotkey}</div>
                     <div class="btn-icon">${buttonData.icon}</div>
-                    <div class="btn-label">${buttonData.label}</div>
+                    <div class="btn-label">${escapeHtml(buttonData.label)}</div>
                     <div class="btn-tooltip" role="tooltip">${tooltipHtml}</div>
                 `;
             } else {

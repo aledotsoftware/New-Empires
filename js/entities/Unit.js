@@ -68,14 +68,18 @@ export class Unit extends Entity {
 
     findNearbyEnemy(game) {
         const searchRadius = 200;
+        const searchRadiusSq = searchRadius * searchRadius;
 
         // OPTIMIZACIÓN: Usar Spatial Grid reutilizando array
         const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache);
 
         for (let entity of nearbyEntities) {
             if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
-                const dist = Math.hypot(this.x - entity.x, this.y - entity.y);
-                if (dist < searchRadius) {
+                const dx = this.x - entity.x;
+                const dy = this.y - entity.y;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < searchRadiusSq) {
                     this.attackTarget = entity;
                     break;
                 }
@@ -86,7 +90,8 @@ export class Unit extends Entity {
     moveTowardsTarget(targetX, targetY, deltaTime, game) {
         const dx = targetX - this.x;
         const dy = targetY - this.y;
-        const dist = Math.hypot(dx, dy);
+        // OPTIMIZATION: Math.sqrt is faster than Math.hypot for simple 2D distance
+        const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist > 5) {
             // Obtener modificador de terreno
@@ -145,9 +150,12 @@ export class Unit extends Entity {
     }
 
     tryAttack(target, deltaTime, game) {
-        const dist = Math.hypot(this.x - target.x, this.y - target.y);
+        const dx = this.x - target.x;
+        const dy = this.y - target.y;
+        const distSq = dx * dx + dy * dy;
+        const attackRangeSq = this.attackRange * this.attackRange;
 
-        if (dist <= this.attackRange && this.attackCooldown <= 0) {
+        if (distSq <= attackRangeSq && this.attackCooldown <= 0) {
             let damage = this.attackDamage;
 
             // Aplicar bonificaciones de terreno si el juego está disponible
@@ -184,9 +192,12 @@ export class Unit extends Entity {
     }
 
     tryGather(node, deltaTime, game) {
-        const dist = Math.hypot(this.x - node.x, this.y - node.y);
+        const dx = this.x - node.x;
+        const dy = this.y - node.y;
+        const distSq = dx * dx + dy * dy;
 
-        if (dist <= 30) {
+        // 30 * 30 = 900
+        if (distSq <= 900) {
             // CONFIG es una variable global
             if (typeof CONFIG !== 'undefined') {
                 const gatherAmount = CONFIG.GATHER_RATES[node.type] * deltaTime;

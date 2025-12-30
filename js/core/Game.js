@@ -304,12 +304,18 @@ export class Game {
             const y = Math.random() * CONFIG.CANVAS_HEIGHT;
 
             // Evitar spawn cerca del centro inicial (jugador)
-            const distanceFromPlayer = Math.hypot(x - 400, y - 400);
-            // Evitar spawn cerca de la base enemiga
-            const distanceFromEnemy = Math.hypot(x - (CONFIG.CANVAS_WIDTH - 400), y - (CONFIG.CANVAS_HEIGHT - 400));
+            // OPTIMIZATION: Squared distance check
+            const dxPlayer = x - 400;
+            const dyPlayer = y - 400;
+            const distSqPlayer = dxPlayer * dxPlayer + dyPlayer * dyPlayer;
 
-            // Solo colocar si está lejos de ambas bases (mínimo 200 unidades)
-            if (distanceFromPlayer > 200 && distanceFromEnemy > 200) {
+            // Evitar spawn cerca de la base enemiga
+            const dxEnemy = x - (CONFIG.CANVAS_WIDTH - 400);
+            const dyEnemy = y - (CONFIG.CANVAS_HEIGHT - 400);
+            const distSqEnemy = dxEnemy * dxEnemy + dyEnemy * dyEnemy;
+
+            // Solo colocar si está lejos de ambas bases (mínimo 200 unidades, 200^2 = 40000)
+            if (distSqPlayer > 40000 && distSqEnemy > 40000) {
                 this.resourceNodes.push({
                     x, y,
                     type: resType.type,
@@ -426,15 +432,19 @@ export class Game {
             Math.abs(this.dragStart.y - this.mouse.worldY) < 10) {
 
             let closest = null;
-            let closestDist = Infinity;
+            let closestDistSq = Infinity;
 
             for (let entity of this.entities) {
                 if (entity.team !== 'player') continue;
 
-                const dist = Math.hypot(entity.x - this.mouse.worldX, entity.y - this.mouse.worldY);
-                if (dist < entity.size && dist < closestDist) {
+                const dx = entity.x - this.mouse.worldX;
+                const dy = entity.y - this.mouse.worldY;
+                const distSq = dx * dx + dy * dy;
+                const sizeSq = entity.size * entity.size;
+
+                if (distSq < sizeSq && distSq < closestDistSq) {
                     closest = entity;
-                    closestDist = dist;
+                    closestDistSq = distSq;
                 }
             }
 
@@ -498,8 +508,11 @@ export class Game {
         // Verificar si clickeó en un enemigo
         let targetEnemy = null;
         for (let enemy of this.enemies) {
-            const dist = Math.hypot(enemy.x - this.mouse.worldX, enemy.y - this.mouse.worldY);
-            if (dist < enemy.size) {
+            const dx = enemy.x - this.mouse.worldX;
+            const dy = enemy.y - this.mouse.worldY;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < enemy.size * enemy.size) {
                 targetEnemy = enemy;
                 break;
             }
@@ -508,8 +521,11 @@ export class Game {
         // Verificar si clickeó en un nodo de recursos
         let targetResource = null;
         for (let node of this.resourceNodes) {
-            const dist = Math.hypot(node.x - this.mouse.worldX, node.y - this.mouse.worldY);
-            if (dist < node.radius) {
+            const dx = node.x - this.mouse.worldX;
+            const dy = node.y - this.mouse.worldY;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < node.radius * node.radius) {
                 targetResource = node;
                 break;
             }
@@ -519,9 +535,13 @@ export class Game {
         let targetBuilding = null;
         for (let building of this.buildings) {
             if (building.team === 'player' && building.isUnderConstruction) {
-                const dist = Math.hypot(building.x - this.mouse.worldX, building.y - this.mouse.worldY);
+                const dx = building.x - this.mouse.worldX;
+                const dy = building.y - this.mouse.worldY;
+                const distSq = dx * dx + dy * dy;
+
                 // Usar un radio aproximado basado en el tamaño del edificio
-                if (dist < building.size / 2 + 20) {
+                const checkRadius = building.size / 2 + 20;
+                if (distSq < checkRadius * checkRadius) {
                     targetBuilding = building;
                     break;
                 }
@@ -894,7 +914,8 @@ export class Game {
 
         // Normalizar vector de teclado si es diagonal
         if (dx !== 0 || dy !== 0) {
-            const length = Math.hypot(dx, dy);
+            // OPTIMIZATION: Math.sqrt is faster than Math.hypot
+            const length = Math.sqrt(dx * dx + dy * dy);
             dx = (dx / length) * this.cameraConfig.baseSpeed;
             dy = (dy / length) * this.cameraConfig.baseSpeed;
         }

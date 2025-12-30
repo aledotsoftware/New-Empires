@@ -1799,7 +1799,16 @@ export class Game {
 
                     const tooltipHeader = document.createElement('div');
                     tooltipHeader.className = 'tooltip-header';
-                    tooltipHeader.innerHTML = `${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span>`;
+
+                    // Securely create tooltip header without innerHTML
+                    const labelText = document.createTextNode(`${buttonData.label} `);
+                    const hotkeySpan = document.createElement('span');
+                    hotkeySpan.className = 'tooltip-hotkey';
+                    hotkeySpan.textContent = `[${hotkey}]`;
+
+                    tooltipHeader.appendChild(labelText);
+                    tooltipHeader.appendChild(hotkeySpan);
+
                     tooltipDiv.appendChild(tooltipHeader);
 
                     // Description (if we had it in buttonData, currently tech tree items have desc, unit buttons might not)

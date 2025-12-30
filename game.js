@@ -2816,7 +2816,11 @@ window.addEventListener('DOMContentLoaded', async () => {
             card.setAttribute('role', 'button');
             card.setAttribute('tabindex', '0');
             card.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
-            card.title = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
+            // Palette: Custom Tooltip instead of native title
+            const tooltip = document.createElement('div');
+            tooltip.className = 'card-tooltip';
+            tooltip.textContent = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
+            card.appendChild(tooltip);
 
             // Keyboard support
             card.addEventListener('keydown', (e) => {
@@ -3102,7 +3106,11 @@ window.showMapSizeSelection = function () {
         else if (mapSize.tiles <= 200) sizeDesc = 'Tamaño estándar equilibrado.';
         else sizeDesc = 'Mapa extenso para partidas largas.';
 
-        card.title = `${mapSize.name}: ${mapSize.tiles}x${mapSize.tiles} casillas.\n${sizeDesc}`;
+        // Palette: Custom Tooltip instead of native title
+        const tooltip = document.createElement('div');
+        tooltip.className = 'card-tooltip';
+        tooltip.textContent = `${mapSize.name}: ${mapSize.tiles}x${mapSize.tiles} casillas.\n${sizeDesc}`;
+        card.appendChild(tooltip);
 
         // Keyboard support
         card.addEventListener('keydown', (e) => {
@@ -3391,7 +3399,11 @@ function renderCivilizationSelection() {
         card.setAttribute('role', 'button');
         card.setAttribute('tabindex', '0');
         card.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
-        card.title = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
+        // Palette: Custom Tooltip instead of native title
+        const tooltip = document.createElement('div');
+        tooltip.className = 'card-tooltip';
+        tooltip.textContent = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
+        card.appendChild(tooltip);
 
         // Keyboard support
         card.addEventListener('keydown', (e) => {

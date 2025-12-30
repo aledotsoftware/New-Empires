@@ -684,3 +684,74 @@
         transform: translateX(20px);
     }
 }
+
+/* Palette: Custom Card Tooltip */
+.card-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(20, 20, 30, 0.95);
+    color: #e2e8f0;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 100;
+    width: max-content;
+    max-width: 250px;
+    border: 1px solid #d4af37;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    text-align: left;
+    line-height: 1.4;
+    visibility: hidden;
+}
+
+/* Show tooltip on hover or focus-visible */
+.map-size-card:hover .card-tooltip,
+.map-size-card:focus-visible .card-tooltip,
+.civ-card:hover .card-tooltip,
+.civ-card:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* Arrow for the tooltip */
+.card-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #d4af37 transparent transparent transparent;
+}
+
+/* Palette: Map Size Option Tooltip Support */
+.map-size-option {
+    position: relative;
+}
+
+.map-size-option:hover .card-tooltip,
+.map-size-option:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* Palette: Civ Option Tooltip Support */
+.civ-option {
+    position: relative;
+}
+
+.civ-option:hover .card-tooltip,
+.civ-option:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-10px);
+}

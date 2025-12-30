@@ -133,42 +133,42 @@
 
         <!-- Top HUD: recursos, población, tiempo y settings -->
         <div class="top-panel">
-            <div class="resources-panel">
-                <div class="resource-item">
+            <div class="resources-panel" role="region" aria-label="Recursos">
+                <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount">
                     <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Madera"></div>
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Madera</div>
+                        <div id="woodLabel" class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item">
+                <div class="resource-item" role="group" aria-labelledby="foodLabel foodCount">
                     <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Comida"></div>
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Comida</div>
+                        <div id="foodLabel" class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item">
+                <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount">
                     <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Oro"></div>
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Oro</div>
+                        <div id="goldLabel" class="resource-label">Oro</div>
                         <div id="goldCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item">
+                <div class="resource-item" role="group" aria-labelledby="stoneLabel stoneCount">
                     <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Piedra"></div>
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Piedra</div>
+                        <div id="stoneLabel" class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item resource-population">
+                <div class="resource-item resource-population" role="group" aria-label="Población">
                     <div class="resource-icon"><img src="assets/icons/population.png"
-                            onerror="this.style.display='none'" style="width:24px;height:24px;" alt="Población"></div>
+                            onerror="this.style.display='none'" style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div class="resource-label">Población</div>
                         <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>

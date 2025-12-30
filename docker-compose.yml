@@ -55,12 +55,11 @@ services:
 
     networks:
       - dokploy-network
-      - default
+    
 
-# Networks
 networks:
   dokploy-network:
     external: true
   default:
-    name: newempire-network
+    name: tudex-network
     driver: bridge

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  newempire:
+    image: newempire-game
+    build: .
+    container_name: newempire-game
+    restart: always
+    ports:
+      - "8080:80"
+    networks:
+      - newempire-net
+
+networks:
+  newempire-net:
+    driver: bridge

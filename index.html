@@ -133,45 +133,45 @@
 
         <!-- Top HUD: recursos, población, tiempo y settings -->
         <div class="top-panel">
-            <div class="resources-panel">
-                <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Madera"></div>
+            <div class="resources-panel" role="region" aria-label="Recursos">
+                <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount">
+                    <div class="resource-icon" aria-hidden="true"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Madera</div>
+                        <div id="woodLabel" class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Comida"></div>
+                <div class="resource-item" role="group" aria-labelledby="foodLabel foodCount">
+                    <div class="resource-icon" aria-hidden="true"><img src="assets/icons/food.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Comida</div>
+                        <div id="foodLabel" class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Oro"></div>
+                <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount">
+                    <div class="resource-icon" aria-hidden="true"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Oro</div>
+                        <div id="goldLabel" class="resource-label">Oro</div>
                         <div id="goldCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item">
-                    <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
-                            style="width:24px;height:24px;" alt="Piedra"></div>
+                <div class="resource-item" role="group" aria-labelledby="stoneLabel stoneCount">
+                    <div class="resource-icon" aria-hidden="true"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
+                            style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Piedra</div>
+                        <div id="stoneLabel" class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
                     </div>
                 </div>
-                <div class="resource-item resource-population">
-                    <div class="resource-icon"><img src="assets/icons/population.png"
-                            onerror="this.style.display='none'" style="width:24px;height:24px;" alt="Población"></div>
+                <div class="resource-item resource-population" role="group" aria-labelledby="popLabel popValue">
+                    <div class="resource-icon" aria-hidden="true"><img src="assets/icons/population.png"
+                            onerror="this.style.display='none'" style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
-                        <div class="resource-label">Población</div>
-                        <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
+                        <div id="popLabel" class="resource-label">Población</div>
+                        <div id="popValue"><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
                     </div>
                 </div>
             </div>
@@ -411,7 +411,7 @@
 
             <!-- 3. Minimapa (Derecha) -->
             <div id="minimapPanel">
-                <div class="minimap-container">
+                <div class="minimap-container" role="img" aria-label="Minimapa del mundo">
                     <canvas id="minimapCanvas"></canvas>
                 </div>
             </div>

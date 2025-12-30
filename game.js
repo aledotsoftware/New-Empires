@@ -1816,13 +1816,14 @@ class Game {
                     btn.setAttribute('aria-disabled', 'true');
                 }
 
-                btn.setAttribute('aria-label', `${buttonData.label} (${hotkey})`);
+                // Palette: Enhanced Accessibility & Tooltips
+                let ariaLabel = `${buttonData.label} (${hotkey})`;
+                if (buttonData.description) ariaLabel += `. ${buttonData.description}`;
+                if (buttonData.cost) ariaLabel += `. Costo: ${buttonData.cost}`;
+                btn.setAttribute('aria-label', ariaLabel);
 
-                // Add rich tooltip with description and cost
-                let tooltip = `${buttonData.label} (${hotkey})`;
-                if (buttonData.description) tooltip += `\n${buttonData.description}`;
-                if (buttonData.cost) tooltip += `\nCosto: ${buttonData.cost}`;
-                btn.title = tooltip;
+                // No native title to avoid double tooltips and poor a11y
+                btn.removeAttribute('title');
 
                 btn.onclick = () => {
                     console.log('🖱️ Click en botón', i, 'disabled:', btn.classList.contains('disabled'), 'hasAction:', !!buttonData.action);
@@ -1836,11 +1837,18 @@ class Game {
                     }
                 };
 
+                // Palette: Custom Tooltip HTML
+                const tooltipHtml = `
+                    <div class="tooltip-header">${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span></div>
+                    <div class="tooltip-desc">${buttonData.description || ''}</div>
+                    ${buttonData.cost ? `<div class="tooltip-cost">${buttonData.cost}</div>` : ''}
+                `;
+
                 btn.innerHTML = `
                     <div class="btn-hotkey">${hotkey}</div>
                     <div class="btn-icon">${buttonData.icon}</div>
                     <div class="btn-label">${buttonData.label}</div>
-                    ${buttonData.cost ? `<div class="btn-cost">${buttonData.cost}</div>` : ''}
+                    <div class="btn-tooltip" role="tooltip">${tooltipHtml}</div>
                 `;
             } else {
                 // Botón vacío

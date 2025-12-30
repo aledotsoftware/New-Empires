@@ -1,16 +1,66 @@
-version: '3.8'
+# ===========================================
+# New Empires - Docker Compose for Dockploy
+# Strategy Game - Static Site Deployment
+# ===========================================
 
 services:
-  newempire:
-    image: newempire-game
-    build: .
-    container_name: newempire-game
-    restart: always
-    ports:
-      - "8080:80"
-    networks:
-      - newempire-net
+  newempire-pss-txn-01:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: newempire-pss-txn-01
+    restart: unless-stopped
 
+    # Exposed port
+    ports:
+      - "${PORT:-3000}:80"
+
+    # Environment variables
+    environment:
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Resources (Optimized for static site)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Labels for Dockploy/Traefik
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
+        - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
+        - "traefik.http.routers.newempire-pss-txn-01.priority=100"
+        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=80"
+
+    networks:
+      - dokploy-network
+      - default
+
+# Networks
 networks:
-  newempire-net:
+  dokploy-network:
+    external: true
+  default:
+    name: newempire-network
     driver: bridge

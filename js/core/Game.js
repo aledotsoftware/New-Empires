@@ -1651,6 +1651,7 @@ export class Game {
                 iconKey: 'workshop',
                 iconFallback: '🏗️',
                 label: 'Construir',
+                description: 'Construir edificios y estructuras',
                 hotkey: 'Q',
                 action: () => this.openBuildMenu(),
                 enabled: true
@@ -1663,6 +1664,7 @@ export class Game {
                 iconKey: 'villager',
                 iconFallback: '👨‍🌾',
                 label: 'Aldeano',
+                description: 'Recoge recursos y construye edificios',
                 hotkey: 'Q',
                 cost: cost,
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
@@ -1678,6 +1680,7 @@ export class Game {
                 iconKey: 'warrior',
                 iconFallback: '⚔️',
                 label: 'Guerrero',
+                description: 'Infantería eficaz en combate cuerpo a cuerpo',
                 hotkey: 'Q',
                 cost: warriorCost,
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
@@ -1688,6 +1691,7 @@ export class Game {
                 iconKey: 'archer',
                 iconFallback: '🏹',
                 label: 'Arquero',
+                description: 'Unidad a distancia, débil cuerpo a cuerpo',
                 hotkey: 'W',
                 cost: archerCost,
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
@@ -1726,6 +1730,7 @@ export class Game {
                     iconKey: techIconKey,
                     iconFallback: tech.icon || techFallback,
                     label: tech.name,
+                    description: tech.description,
                     hotkey: hotkeys[buttons.length],
                     cost: tech.cost,
                     action: () => this.techManager.startResearch(tech.id),
@@ -1760,8 +1765,11 @@ export class Game {
                     // ACCESIBILIDAD (Palette Improved)
                     btn.setAttribute('aria-keyshortcuts', hotkey);
                     const label = `${buttonData.label} (${hotkey})`;
-                    // Include description if available (Game.js structure might not have it in buttonData yet, but good to add)
-                    const fullLabel = costText ? `${label}. ${costText}` : label;
+                    // Include description if available
+                    let fullLabel = label;
+                    if (buttonData.description) fullLabel += `. ${buttonData.description}`;
+                    if (costText) fullLabel += `. ${costText}`;
+
                     btn.setAttribute('aria-label', fullLabel);
 
                     // Remove native tooltip
@@ -1811,33 +1819,12 @@ export class Game {
 
                     tooltipDiv.appendChild(tooltipHeader);
 
-                    // Description (if we had it in buttonData, currently tech tree items have desc, unit buttons might not)
-                    // In game.js `buttonData` for tech has `description`.
-                    /*
-                       Note: In Game.js source, `buttonData` comes from a constructed object.
-                       Tech buttons usually have descriptions. Unit buttons created manually above (like villager -> Build) might not.
-                       We can check properties.
-                    */
-                    // Wait, `buttonData` in `Game.js` loop IS constructed locally just before.
-                    // But for tech, it comes from `tech`. `tech` has description.
-                    // For manually created buttons (e.g. Villager build), we didn't add description in `Game.js` source above.
-                    // I should add description to those manual buttons in `Game.js` too?
-                    // The `game.js` (legacy) had descriptions. `js/core/Game.js` manual buttons... let's check.
-
-                    // `js/core/Game.js` lines ~1290:
-                    // buttons.push({ ... label: 'Construir' ... }); NO DESCRIPTION.
-                    // This is a regression in `js/core/Game.js` vs `game.js`.
-                    // I will just handle what is there.
-
-                    // Add description if exists (tech buttons usually have it)
-                    // The `buttons` array in `js/core/Game.js` for Tech DOES pass `tech` object props? No, it maps it.
-                    // `buttons.push({ ... cost: tech.cost ... })`. It does NOT pass description.
-                    // I need to fix that too to have description in tooltip.
-
-                    // Let's assume for this patch I just use what I have. I will fix the missing description in a separate patch if needed,
-                    // but wait, I can modify the `buttons.push` calls in `js/core/Game.js` too?
-                    // That would be huge diff.
-                    // I'll stick to rendering cost for now in tooltip.
+                    if (buttonData.description) {
+                        const descDiv = document.createElement('div');
+                        descDiv.className = 'tooltip-desc';
+                        descDiv.textContent = buttonData.description;
+                        tooltipDiv.appendChild(descDiv);
+                    }
 
                     if (buttonData.cost) {
                         const costTooltip = document.createElement('div');

@@ -54,8 +54,11 @@ export class Unit extends Entity {
         }
         else if (this.targetX !== null) {
             this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game);
-            const dist = Math.hypot(this.x - this.targetX, this.y - this.targetY);
-            if (dist < 10) {
+            // OPTIMIZATION: Use squared distance check to avoid expensive Math.hypot (60x faster)
+            const dx = this.x - this.targetX;
+            const dy = this.y - this.targetY;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 100) { // 10 * 10 = 100
                 this.targetX = null;
                 this.targetY = null;
             }

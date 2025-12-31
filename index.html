@@ -280,12 +280,12 @@
         </div>
 
         <!-- Pantalla de Game Over -->
-        <div id="gameOverScreen" class="game-over-screen hidden">
+        <div id="gameOverScreen" class="game-over-screen hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" tabindex="-1">
             <div class="game-over-content">
                 <h1 id="gameOverTitle" class="game-over-title">Victoria</h1>
                 <p id="gameOverMessage" class="game-over-message"></p>
                 <div class="game-over-stats" id="gameOverStats"></div>
-                <button id="restartButton" class="btn-restart" onclick="location.reload()">Jugar de Nuevo</button>
+                <button id="restartButton" class="btn-restart">Jugar de Nuevo</button>
             </div>
         </div>
 

@@ -1184,7 +1184,8 @@ export class Game {
         this._renderCache.sort((a, b) => a.y - b.y);
 
         for (let entity of this._renderCache) {
-            entity.render(this.ctx, this.camera);
+            // OPTIMIZATION: Pass viewport size to Entity.render for fine-grained culling
+            entity.render(this.ctx, this.camera, this.viewWidth, this.viewHeight);
         }
 
         // Dibujar selección

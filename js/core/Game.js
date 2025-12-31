@@ -171,6 +171,12 @@ export class Game {
         this.canvas.height = container.clientHeight;
         this.viewWidth = this.canvas.width;
         this.viewHeight = this.canvas.height;
+
+        // OPTIMIZATION: Pre-calculate culling radius to avoid Math.hypot in render loop
+        // Diagonal / 2 + margin (100px)
+        const halfWidth = this.viewWidth / 2;
+        const halfHeight = this.viewHeight / 2;
+        this.cullingRadius = Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight) + 100;
     }
 
     initializeGame() {
@@ -1168,11 +1174,10 @@ export class Game {
         // Solo renderizamos entidades que están visiblemente dentro de la cámara (con margen)
         const centerX = this.camera.x + this.viewWidth / 2;
         const centerY = this.camera.y + this.viewHeight / 2;
-        // Radio cubre la diagonal del viewport + margen de seguridad (100px)
-        const radius = Math.hypot(this.viewWidth / 2, this.viewHeight / 2) + 100;
 
         // Reutilizamos _renderCache para evitar GC
-        this.spatialGrid.query(centerX, centerY, radius, this._renderCache);
+        // OPTIMIZATION: Use pre-calculated cullingRadius
+        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache);
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
         // Esto corrige problemas de superposición que el SpatialGrid podría introducir
@@ -1229,9 +1234,9 @@ export class Game {
         // En lugar de iterar todos los recursos, solo consultamos los cercanos
         const centerX = this.camera.x + this.viewWidth / 2;
         const centerY = this.camera.y + this.viewHeight / 2;
-        const radius = Math.hypot(this.viewWidth / 2, this.viewHeight / 2) + 50;
 
-        this.resourceGrid.query(centerX, centerY, radius, this._resourceRenderCache);
+        // OPTIMIZATION: Use pre-calculated cullingRadius (slightly larger than needed but efficient)
+        this.resourceGrid.query(centerX, centerY, this.cullingRadius, this._resourceRenderCache);
 
         for (let node of this._resourceRenderCache) {
             if (node.amount <= 0) continue;

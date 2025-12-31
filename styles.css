@@ -233,13 +233,24 @@ body {
 
 .control-key {
     padding: 0.5rem 1rem;
-    background: var(--primary-gold);
+    background: linear-gradient(180deg, var(--primary-gold-light) 0%, var(--primary-gold) 100%);
     color: var(--bg-dark);
     border-radius: 6px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.9rem;
-    min-width: 100px;
+    min-width: 80px;
     text-align: center;
+    box-shadow: 0 4px 0 var(--primary-gold-dark), 0 5px 10px rgba(0,0,0,0.4);
+    transform: translateY(0);
+    transition: transform 0.1s, box-shadow 0.1s;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    border: 1px solid var(--primary-gold-dark);
+}
+
+.control-item:active .control-key {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--primary-gold-dark), 0 3px 6px rgba(0,0,0,0.3);
 }
 
 .control-desc {

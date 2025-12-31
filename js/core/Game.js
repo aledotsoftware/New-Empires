@@ -1067,6 +1067,20 @@ export class Game {
         }
 
         screen.classList.remove('hidden');
+
+        // Manage Focus for Accessibility
+        const restartBtn = document.getElementById('restartButton');
+        if (restartBtn) {
+            // Restore click functionality if missing (safety net for SPA logic)
+            restartBtn.onclick = () => {
+                if (window.loadMainMenu) {
+                    window.loadMainMenu();
+                } else {
+                    location.reload();
+                }
+            };
+            setTimeout(() => restartBtn.focus(), 50);
+        }
     }
 
     drawTerrain() {

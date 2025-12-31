@@ -230,10 +230,23 @@ function createTechItemElement(tech, status, isInteractive) {
     if (!isInteractive) techItem.setAttribute('tabindex', '0'); // Even static items should be focusable to read description if we treat them as tooltips
 
     let ariaLabel = `${tech.name}`;
+    // Accessibility: Include description and cost in the label
+    if (tech.description) ariaLabel += `. ${tech.description}`;
+
     if (status.researched) ariaLabel += ' (Investigado)';
     else if (status.researching) ariaLabel += ' (Investigando)';
     else if (status.available) ariaLabel += ' (Disponible para investigar)';
     else ariaLabel += ' (Bloqueado)';
+
+    if (tech.cost) {
+        const costParts = [];
+        for (const [res, amount] of Object.entries(tech.cost)) {
+            costParts.push(`${amount} ${res}`);
+        }
+        if (costParts.length > 0) {
+            ariaLabel += `. Costo: ${costParts.join(', ')}`;
+        }
+    }
 
     techItem.setAttribute('aria-label', ariaLabel);
 

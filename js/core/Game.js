@@ -1164,8 +1164,13 @@ export class Game {
         // Esto corrige problemas de superposición que el SpatialGrid podría introducir
         this._renderCache.sort((a, b) => a.y - b.y);
 
+        // OPTIMIZACIÓN: Pasar dimensiones del viewport para culling más preciso
+        // Evita usar CONFIG.CANVAS_WIDTH que es el tamaño del mapa
+        const viewWidth = this.viewWidth;
+        const viewHeight = this.viewHeight;
+
         for (let entity of this._renderCache) {
-            entity.render(this.ctx, this.camera);
+            entity.render(this.ctx, this.camera, viewWidth, viewHeight);
         }
 
         // Dibujar selección

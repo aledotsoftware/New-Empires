@@ -15,3 +15,7 @@
 ## 2024-05-22 - Canvas Batching
 **Learning:** `ctx.stroke()` and `ctx.fill()` are expensive. Batching geometry into a single `Path2D` or reducing call count is critical.
 **Action:** Aggregate draw calls where possible (e.g. Grid drawing).
+
+## 2024-05-22 - View Frustum Culling
+**Learning:** Checking entities against `CONFIG.CANVAS_WIDTH` for culling is ineffective if that constant represents Map Size, not Viewport Size.
+**Action:** Always pass `viewWidth` and `viewHeight` (viewport dimensions) to render methods for precise culling.

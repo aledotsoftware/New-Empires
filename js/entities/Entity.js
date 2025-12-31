@@ -46,14 +46,24 @@ export class Entity {
         // Override en subclases
     }
 
-    render(ctx, camera) {
+    render(ctx, camera, viewWidth, viewHeight) {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
 
-        // CONFIG es una variable global disponible
-        if (typeof CONFIG !== 'undefined') {
-            if (screenX < -this.size || screenX > CONFIG.CANVAS_WIDTH + this.size ||
-                screenY < -this.size || screenY > CONFIG.CANVAS_HEIGHT + this.size) {
+        // OPTIMIZACIÓN: Culling preciso usando dimensiones del viewport
+        // Si no se pasan dimensiones (viewWidth/Height), usar CONFIG como fallback
+        let limitWidth, limitHeight;
+        if (viewWidth && viewHeight) {
+            limitWidth = viewWidth;
+            limitHeight = viewHeight;
+        } else if (typeof CONFIG !== 'undefined') {
+            limitWidth = CONFIG.CANVAS_WIDTH;
+            limitHeight = CONFIG.CANVAS_HEIGHT;
+        }
+
+        if (limitWidth) {
+            if (screenX < -this.size || screenX > limitWidth + this.size ||
+                screenY < -this.size || screenY > limitHeight + this.size) {
                 return;
             }
         }

@@ -150,7 +150,7 @@
 .btn-tooltip {
     display: none;
     position: absolute;
-    bottom: 100%;
+    bottom: 120%; /* Moved up slightly */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(20, 20, 30, 0.98);
@@ -175,6 +175,14 @@
     border-width: 6px;
     border-style: solid;
     border-color: #d4af37 transparent transparent transparent;
+}
+
+/* Focus visible styles for buttons */
+.action-btn:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.3);
+    z-index: 10;
 }
 
 .tooltip-header {

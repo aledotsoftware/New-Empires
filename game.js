@@ -2791,47 +2791,82 @@ window.addEventListener('DOMContentLoaded', async () => {
             card.className = 'civ-card';
             card.style.setProperty('--civ-color', civ.color);
 
-            // Generar lista de bonificaciones
-            let bonusesHtml = '<ul>';
-            if (civ.bonuses.buildSpeed > 1) bonusesHtml += `<li>Construccion +${Math.round((civ.bonuses.buildSpeed - 1) * 100)}% rapida</li>`;
-            if (civ.bonuses.buildingHp > 1) bonusesHtml += `<li>Edificios +${Math.round((civ.bonuses.buildingHp - 1) * 100)}% HP</li>`;
-            if (civ.bonuses.unitSpeed > 1) bonusesHtml += `<li>Unidades +${Math.round((civ.bonuses.unitSpeed - 1) * 100)}% velocidad</li>`;
-            if (civ.bonuses.unitAttack > 1) bonusesHtml += `<li>Unidades +${Math.round((civ.bonuses.unitAttack - 1) * 100)}% ataque</li>`;
-            if (civ.bonuses.gatherSpeed > 1) bonusesHtml += `<li>Recoleccion +${Math.round((civ.bonuses.gatherSpeed - 1) * 100)}% rapida</li>`;
-            bonusesHtml += '</ul>';
-
-            // Render icon - check if it's an image path
-            const displayIcon = civ.iconEmoji || civ.icon;
-            let iconHtml;
-            if (displayIcon && (displayIcon.includes('/') || displayIcon.includes('.png'))) {
-                iconHtml = `<img src="${displayIcon}" alt="${civ.name}" style="width:64px;height:64px;object-fit:contain;">`;
-            } else {
-                iconHtml = displayIcon || civ.name.substring(0, 1);
-            }
-
-            // Render unique unit icon
-            let unitIconHtml = '';
-            if (civ.uniqueUnit && civ.uniqueUnit.icon) {
-                if (civ.uniqueUnit.icon.includes('/') || civ.uniqueUnit.icon.includes('.png')) {
-                    unitIconHtml = `<img src="${civ.uniqueUnit.icon}" alt="${civ.uniqueUnit.name}" style="width:20px;height:20px;vertical-align:middle;">`;
-                } else {
-                    unitIconHtml = civ.uniqueUnit.icon;
+            // Helper for icons (duplicate of global one for local scope)
+            const createLocalIcon = (iconPath, alt, size = '64px') => {
+                 if (!iconPath) {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = `font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};`;
+                    placeholder.textContent = alt.substring(0, 1);
+                    return placeholder;
                 }
-            }
+                if (iconPath.includes('/') || iconPath.includes('.png')) {
+                    const img = document.createElement('img');
+                    img.src = iconPath;
+                    img.alt = alt;
+                    img.style.cssText = `width:${size};height:${size};object-fit:contain;`;
+                    if (size === '20px') img.style.verticalAlign = 'middle';
+                    return img;
+                }
+                const span = document.createElement('span');
+                span.style.fontSize = size === '64px' ? '48px' : '16px';
+                span.textContent = iconPath;
+                return span;
+            };
 
-            card.innerHTML = `
-            <div class="civ-icon-large">${iconHtml}</div>
-            <h3>${civ.name}</h3>
-            <p>${civ.description}</p>
-            <div class="civ-bonuses">
-                <strong>Bonificaciones:</strong>
-                ${bonusesHtml}
-            </div>
-            <div class="civ-bonuses" style="margin-top: 10px;">
-                <strong>Unidad Unica:</strong>
-                <ul><li>${unitIconHtml} ${civ.uniqueUnit.name}</li></ul>
-            </div>
-        `;
+            // 1. Icon
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'civ-icon-large';
+            const displayIcon = civ.iconEmoji || civ.icon;
+            iconDiv.appendChild(createLocalIcon(displayIcon, civ.name, '64px'));
+            card.appendChild(iconDiv);
+
+            // 2. Name
+            const h3 = document.createElement('h3');
+            h3.textContent = civ.name;
+            card.appendChild(h3);
+
+            // 3. Description
+            const p = document.createElement('p');
+            p.textContent = civ.description;
+            card.appendChild(p);
+
+            // 4. Bonuses
+            const bonusesDiv = document.createElement('div');
+            bonusesDiv.className = 'civ-bonuses';
+            const bStrong = document.createElement('strong');
+            bStrong.textContent = 'Bonificaciones:';
+            bonusesDiv.appendChild(bStrong);
+
+            const ul = document.createElement('ul');
+            if (civ.bonuses.buildSpeed > 1) { const li = document.createElement('li'); li.textContent = `Construccion +${Math.round((civ.bonuses.buildSpeed - 1) * 100)}% rapida`; ul.appendChild(li); }
+            if (civ.bonuses.buildingHp > 1) { const li = document.createElement('li'); li.textContent = `Edificios +${Math.round((civ.bonuses.buildingHp - 1) * 100)}% HP`; ul.appendChild(li); }
+            if (civ.bonuses.unitSpeed > 1) { const li = document.createElement('li'); li.textContent = `Unidades +${Math.round((civ.bonuses.unitSpeed - 1) * 100)}% velocidad`; ul.appendChild(li); }
+            if (civ.bonuses.unitAttack > 1) { const li = document.createElement('li'); li.textContent = `Unidades +${Math.round((civ.bonuses.unitAttack - 1) * 100)}% ataque`; ul.appendChild(li); }
+            if (civ.bonuses.gatherSpeed > 1) { const li = document.createElement('li'); li.textContent = `Recoleccion +${Math.round((civ.bonuses.gatherSpeed - 1) * 100)}% rapida`; ul.appendChild(li); }
+            bonusesDiv.appendChild(ul);
+            card.appendChild(bonusesDiv);
+
+            // 5. Unique Unit
+            if (civ.uniqueUnit) {
+                const uniqueDiv = document.createElement('div');
+                uniqueDiv.className = 'civ-bonuses';
+                uniqueDiv.style.marginTop = '10px';
+
+                const uStrong = document.createElement('strong');
+                uStrong.textContent = 'Unidad Unica:';
+                uniqueDiv.appendChild(uStrong);
+
+                const uUl = document.createElement('ul');
+                const uLi = document.createElement('li');
+
+                uLi.appendChild(createLocalIcon(civ.uniqueUnit.icon, civ.uniqueUnit.name, '20px'));
+                const uText = document.createTextNode(` ${civ.uniqueUnit.name}`);
+                uLi.appendChild(uText);
+
+                uUl.appendChild(uLi);
+                uniqueDiv.appendChild(uUl);
+                card.appendChild(uniqueDiv);
+            }
 
             // Accessibility attributes
             card.setAttribute('role', 'button');
@@ -3340,19 +3375,33 @@ window.updateSoundVolume = function (value) {
 
 /**
  * Helper function to render an icon as img or fallback
+ * Returns a DOM element instead of HTML string for security
  */
-function renderIconElement(iconPath, alt = '', size = '64px') {
+function createSafeIconElement(iconPath, alt = '', size = '64px') {
     if (!iconPath) {
-        return `<div class="civ-icon-placeholder" style="font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};">${alt.substring(0, 1)}</div>`;
+        const placeholder = document.createElement('div');
+        placeholder.className = 'civ-icon-placeholder';
+        placeholder.style.cssText = `font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};`;
+        placeholder.textContent = alt.substring(0, 1);
+        return placeholder;
     }
 
     // Check if it's an image path
     if (iconPath.includes('/') || iconPath.includes('.png') || iconPath.includes('.jpg') || iconPath.includes('.svg')) {
-        return `<img src="${iconPath}" alt="${alt}" class="civ-icon-img" style="width:${size};height:${size};object-fit:contain;" onerror="this.style.display='none';">`;
+        const img = document.createElement('img');
+        img.src = iconPath;
+        img.alt = alt; // Secure as attribute
+        img.className = 'civ-icon-img';
+        img.style.cssText = `width:${size};height:${size};object-fit:contain;`;
+        img.onerror = function() { this.style.display = 'none'; };
+        return img;
     }
 
-    // Return as-is for emojis
-    return `<span style="font-size:48px;">${iconPath}</span>`;
+    // Return as-is for emojis (safe text)
+    const span = document.createElement('span');
+    span.style.fontSize = '48px';
+    span.textContent = iconPath;
+    return span;
 }
 
 function renderCivilizationSelection() {
@@ -3363,7 +3412,10 @@ function renderCivilizationSelection() {
     const civilizaciones = dataLoader.getAllCivilizations();
 
     if (civilizaciones.length === 0) {
-        civGrid.innerHTML = '<p style="color:white; text-align:center;">No se pudieron cargar las civilizaciones.</p>';
+        const p = document.createElement('p');
+        p.style.cssText = 'color:white; text-align:center;';
+        p.textContent = 'No se pudieron cargar las civilizaciones.';
+        civGrid.appendChild(p);
         return;
     }
 
@@ -3371,8 +3423,45 @@ function renderCivilizationSelection() {
         const card = document.createElement('div');
         card.className = 'civ-card';
 
-        // Bonus list HTML - bonuses es un objeto, no un array
-        let bonusesHtml = '';
+        // 1. Icon
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'civ-icon';
+        iconDiv.appendChild(createSafeIconElement(civ.icon, civ.name, '64px'));
+        card.appendChild(iconDiv);
+
+        // 2. Name
+        const nameH3 = document.createElement('h3');
+        nameH3.className = 'civ-name';
+        nameH3.textContent = civ.name; // Safe against XSS
+        card.appendChild(nameH3);
+
+        // 3. Description
+        const descDiv = document.createElement('div');
+        descDiv.className = 'civ-description';
+        descDiv.textContent = civ.description; // Safe against XSS
+        card.appendChild(descDiv);
+
+        // 4. Unique Unit
+        if (civ.uniqueUnit) {
+            const unitDiv = document.createElement('div');
+            unitDiv.className = 'civ-unique-unit';
+
+            const strong = document.createElement('strong');
+            strong.textContent = 'Unidad Unica: ';
+            unitDiv.appendChild(strong);
+
+            unitDiv.appendChild(createSafeIconElement(civ.uniqueUnit.icon, civ.uniqueUnit.name, '24px'));
+
+            const unitNameText = document.createTextNode(` ${civ.uniqueUnit.name}`);
+            unitDiv.appendChild(unitNameText);
+
+            card.appendChild(unitDiv);
+        }
+
+        // 5. Bonuses
+        const bonusesUl = document.createElement('ul');
+        bonusesUl.className = 'civ-bonuses';
+
         if (civ.bonuses && typeof civ.bonuses === 'object') {
             const bonusDescriptions = {
                 buildSpeed: 'Velocidad de construccion',
@@ -3382,39 +3471,22 @@ function renderCivilizationSelection() {
                 militaryBonus: 'Bonus militar'
             };
 
-            bonusesHtml = Object.entries(civ.bonuses)
-                .map(([key, value]) => {
-                    const label = bonusDescriptions[key] || key;
-                    const percent = ((value - 1) * 100).toFixed(0);
-                    return `<li>${label}: +${percent}%</li>`;
-                })
-                .join('');
+            Object.entries(civ.bonuses).forEach(([key, value]) => {
+                const li = document.createElement('li');
+                const label = bonusDescriptions[key] || key;
+                const percent = ((value - 1) * 100).toFixed(0);
+                li.textContent = `${label}: +${percent}%`;
+                bonusesUl.appendChild(li);
+            });
         }
+        card.appendChild(bonusesUl);
 
-        // Unique unit info
-        let uniqueUnitHtml = '';
-        if (civ.uniqueUnit) {
-            const unitIcon = renderIconElement(civ.uniqueUnit.icon, civ.uniqueUnit.name, '24px');
-            uniqueUnitHtml = `
-                <div class="civ-unique-unit">
-                    <strong>Unidad Unica:</strong> ${unitIcon} ${civ.uniqueUnit.name}
-                </div>
-            `;
-        }
-
-        // Render civilization icon
-        const civIcon = renderIconElement(civ.icon, civ.name, '64px');
-
-        card.innerHTML = `
-            <div class="civ-icon">${civIcon}</div>
-            <h3 class="civ-name">${civ.name}</h3>
-            <div class="civ-description">${civ.description}</div>
-            ${uniqueUnitHtml}
-            <ul class="civ-bonuses">
-                ${bonusesHtml}
-            </ul>
-            <button class="btn-select-civ" tabindex="-1">Seleccionar</button>
-        `;
+        // 6. Select Button
+        const btn = document.createElement('button');
+        btn.className = 'btn-select-civ';
+        btn.setAttribute('tabindex', '-1');
+        btn.textContent = 'Seleccionar';
+        card.appendChild(btn);
 
         // Accessibility attributes
         card.setAttribute('role', 'button');

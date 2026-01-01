@@ -46,16 +46,18 @@ export class Entity {
         // Override en subclases
     }
 
-    render(ctx, camera) {
+    render(ctx, camera, viewWidth, viewHeight) {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
 
-        // CONFIG es una variable global disponible
-        if (typeof CONFIG !== 'undefined') {
-            if (screenX < -this.size || screenX > CONFIG.CANVAS_WIDTH + this.size ||
-                screenY < -this.size || screenY > CONFIG.CANVAS_HEIGHT + this.size) {
-                return;
-            }
+        // OPTIMIZATION: Removed redundant global CONFIG check and loose culling.
+        // Game.js handles frustum culling via SpatialGrid before calling this.
+        // But if viewWidth/viewHeight are passed, we can do a cheap fine-grained check.
+        if (viewWidth && viewHeight) {
+             if (screenX < -this.size || screenX > viewWidth + this.size ||
+                 screenY < -this.size || screenY > viewHeight + this.size) {
+                 return;
+             }
         }
 
         // Dibujar fondo cuadrado en lugar de redondo

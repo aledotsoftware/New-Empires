@@ -1239,23 +1239,46 @@ export class Game {
         // OPTIMIZATION: Use pre-calculated cullingRadius (slightly larger than needed but efficient)
         this.resourceGrid.query(centerX, centerY, this.cullingRadius, this._resourceRenderCache);
 
-        for (let node of this._resourceRenderCache) {
+        // OPTIMIZATION: Batch background circles to reduce draw calls
+        // from ~N calls to 1 call.
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.beginPath();
+
+        const nodesLen = this._resourceRenderCache.length;
+
+        // Pass 1: Build batched path for backgrounds
+        for (let i = 0; i < nodesLen; i++) {
+            const node = this._resourceRenderCache[i];
             if (node.amount <= 0) continue;
 
             const screenX = node.x - this.camera.x;
             const screenY = node.y - this.camera.y;
 
-            // OPTIMIZATION: Frustum culling (aún necesario para precisión fina)
+            // Frustum culling
             if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
                 screenY < -node.radius || screenY > this.viewHeight + node.radius) {
                 continue;
             }
 
-            // Círculo de fondo
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-            this.ctx.beginPath();
+            // Move to start of arc to prevent connecting lines
+            this.ctx.moveTo(screenX + node.radius, screenY);
             this.ctx.arc(screenX, screenY, node.radius, 0, Math.PI * 2);
-            this.ctx.fill();
+        }
+        this.ctx.fill();
+
+        // Pass 2: Draw icons
+        for (let i = 0; i < nodesLen; i++) {
+            const node = this._resourceRenderCache[i];
+            if (node.amount <= 0) continue;
+
+            const screenX = node.x - this.camera.x;
+            const screenY = node.y - this.camera.y;
+
+            // Frustum culling (same check, cost is negligible compared to draw calls)
+            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
+                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
+                continue;
+            }
 
             // Icon
             if (typeof assetLoader !== 'undefined') {

@@ -1878,25 +1878,84 @@ class Game {
                     ${costHtml}
                 `;
 
-                // Safe icon rendering (assuming icon is just emoji or safe string, but escaping is safer)
-                // However, icon might be HTML if passed from legacy code?
-                // In this file logic, icon is usually emoji.
+                // Safe icon rendering using DOM methods
+                btn.innerHTML = ''; // Clear existing content
 
-                btn.innerHTML = `
-                    <div class="btn-hotkey">${hotkey}</div>
-                    <div class="btn-icon">${buttonData.icon}</div>
-                    <div class="btn-label">${escapeHtml(buttonData.label)}</div>
-                    <div class="btn-tooltip" role="tooltip">${tooltipHtml}</div>
-                `;
+                const hotkeyDiv = document.createElement('div');
+                hotkeyDiv.className = 'btn-hotkey';
+                hotkeyDiv.textContent = hotkey;
+                btn.appendChild(hotkeyDiv);
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+                // Check if icon is an emoji or path/HTML, but treat as text or use createSafeIconElement if available
+                // In this context buttonData.icon is often an emoji, but could be malicious if from tech data.
+                // We will use a safe approach.
+                if (buttonData.icon && (buttonData.icon.includes('/') || buttonData.icon.includes('.'))) {
+                     // Assume image path
+                     const img = document.createElement('img');
+                     img.src = buttonData.icon;
+                     img.alt = buttonData.label;
+                     img.className = 'icon-small';
+                     img.onerror = function() { this.style.display = 'none'; }; // Hide if fails
+                     iconDiv.appendChild(img);
+                } else {
+                     // Assume text/emoji
+                     iconDiv.textContent = buttonData.icon;
+                }
+                btn.appendChild(iconDiv);
+
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'btn-label';
+                labelDiv.textContent = buttonData.label;
+                btn.appendChild(labelDiv);
+
+                // Tooltip construction using DOM
+                const tooltipDiv = document.createElement('div');
+                tooltipDiv.className = 'btn-tooltip';
+                tooltipDiv.setAttribute('role', 'tooltip');
+
+                const tooltipHeader = document.createElement('div');
+                tooltipHeader.className = 'tooltip-header';
+
+                // Safe text node for header
+                tooltipHeader.appendChild(document.createTextNode(buttonData.label + ' '));
+
+                const tooltipHotkey = document.createElement('span');
+                tooltipHotkey.className = 'tooltip-hotkey';
+                tooltipHotkey.textContent = `[${hotkey}]`;
+                tooltipHeader.appendChild(tooltipHotkey);
+                tooltipDiv.appendChild(tooltipHeader);
+
+                const tooltipDesc = document.createElement('div');
+                tooltipDesc.className = 'tooltip-desc';
+                tooltipDesc.textContent = buttonData.description || '';
+                tooltipDiv.appendChild(tooltipDesc);
+
+                if (buttonData.cost) {
+                    const tooltipCost = document.createElement('div');
+                    tooltipCost.className = 'tooltip-cost';
+                    tooltipCost.textContent = buttonData.cost; // cost is string here
+                    tooltipDiv.appendChild(tooltipCost);
+                }
+
+                btn.appendChild(tooltipDiv);
+
             } else {
                 // Botón vacío
                 btn.classList.add('disabled');
                 btn.setAttribute('aria-disabled', 'true');
                 btn.setAttribute('aria-label', `Ranura vacía ${hotkey}`);
-                btn.innerHTML = `
-                    <div class="btn-hotkey">${hotkey}</div>
-                    <div class="btn-icon"></div>
-                `;
+
+                btn.innerHTML = '';
+                const hotkeyDiv = document.createElement('div');
+                hotkeyDiv.className = 'btn-hotkey';
+                hotkeyDiv.textContent = hotkey;
+                btn.appendChild(hotkeyDiv);
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'btn-icon';
+                btn.appendChild(iconDiv);
             }
 
             grid.appendChild(btn);

@@ -1741,6 +1741,7 @@ class Game {
                 label: 'Aldeano',
                 hotkey: 'Q',
                 cost: `${cost.food}🌾`,
+                costObj: cost, // Palette: Added raw cost object
                 description: 'Trabajador básico. Recolecta madera, comida, oro y piedra',
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
                 enabled: canAfford
@@ -1756,6 +1757,7 @@ class Game {
                 label: 'Guerrero',
                 hotkey: 'Q',
                 cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
+                costObj: warriorCost, // Palette: Added raw cost object
                 description: 'Unidad de infantería básica. Fuerte en combate cuerpo a cuerpo',
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
                 enabled: canAffordWarrior
@@ -1766,6 +1768,7 @@ class Game {
                 label: 'Arquero',
                 hotkey: 'W',
                 cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
+                costObj: archerCost, // Palette: Added raw cost object
                 description: 'Unidad de ataque a distancia. Fuerte contra infantería ligera',
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
                 enabled: canAffordArcher
@@ -1791,6 +1794,7 @@ class Game {
                     label: tech.name,
                     hotkey: hotkeys[buttons.length],
                     cost: costString.trim(),
+                    costObj: tech.cost, // Palette: Added raw cost object
                     description: tech.description,
                     action: () => this.techManager.startResearch(tech.id),
                     enabled: canAfford
@@ -1842,7 +1846,20 @@ class Game {
                 // For a full refactor, document.createElement should be used for everything like in Game.js
 
                 // Safe construction of cost HTML
-                const costHtml = buttonData.cost ? `<div class="tooltip-cost">${buttonData.cost}</div>` : '';
+                let costHtml = '';
+                if (buttonData.costObj) {
+                     // Palette: Generate enhanced HTML with red color for missing resources
+                     costHtml = '<div class="tooltip-cost">';
+                     for (let [res, amount] of Object.entries(buttonData.costObj)) {
+                         const icon = res === 'food' ? '🌾' : res === 'wood' ? '🌲' : res === 'gold' ? '💰' : '🪨';
+                         const isMissing = this.resources[res] < amount;
+                         const style = isMissing ? 'style="color: var(--accent-red);"' : '';
+                         costHtml += `<span ${style}>${amount}${icon}</span> `;
+                     }
+                     costHtml += '</div>';
+                } else if (buttonData.cost) {
+                    costHtml = `<div class="tooltip-cost">${buttonData.cost}</div>`;
+                }
 
                 // Helper to escape HTML special chars just in case
                 const escapeHtml = (text) => {

@@ -17,6 +17,9 @@ export class Entity {
         this.isUnit = false;
         this.isBuilding = false;
 
+        // Optimización: Cache de color
+        this.color = null;
+
         // Sistema de imágenes
         this.image = null;
         // Intentar cargar imagen automáticamente en el próximo ciclo
@@ -61,7 +64,10 @@ export class Entity {
         }
 
         // Dibujar fondo cuadrado en lugar de redondo
-        ctx.fillStyle = this.getTeamColor();
+        if (!this.color) {
+            this.color = this.getTeamColor();
+        }
+        ctx.fillStyle = this.color;
         ctx.fillRect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
 
         if (this.image && this.image.complete && this.image.naturalWidth !== 0) {

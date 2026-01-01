@@ -1859,6 +1859,12 @@ export class Game {
                              else if (res === 'stone') icon = '🪨';
 
                              resSpan.textContent = `${icon} ${amount}`;
+
+                             // Palette: Highlight missing resources
+                             if (this.resources[res] < amount) {
+                                 resSpan.style.color = 'var(--accent-red)';
+                             }
+
                              costTooltip.appendChild(resSpan);
                          }
                          tooltipDiv.appendChild(costTooltip);

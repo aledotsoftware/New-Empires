@@ -1,3 +1,3 @@
-## 2024-05-22 - Resource Panel Accessibility
-**Learning:** Native `title` attributes are insufficient for screen readers and keyboard users as they often don't appear on focus and can't be styled.
-**Action:** Replace native tooltips with custom DOM-based tooltips or persistent visible labels where possible. For resource panels, adding `aria-label` to the container provides immediate context without requiring interaction.
+## 2024-05-23 - Visual Feedback for Disabled States
+**Learning:** Providing specific visual feedback on *why* an action is disabled (e.g., highlighting missing resources in red within the tooltip) significantly improves user understanding compared to a generic disabled state.
+**Action:** When disabling UI elements due to resource constraints, dynamically style the cost display to indicate exactly which resources are insufficient.

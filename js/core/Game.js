@@ -157,6 +157,20 @@ export class Game {
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
 
+        // OPTIMIZACIÓN: Cache de elementos DOM para UI
+        this.uiElements = {
+            woodCount: document.getElementById('woodCount'),
+            foodCount: document.getElementById('foodCount'),
+            goldCount: document.getElementById('goldCount'),
+            stoneCount: document.getElementById('stoneCount'),
+            currentPopulation: document.getElementById('currentPopulation'),
+            maxPopulation: document.getElementById('maxPopulation'),
+            gameTime: document.getElementById('gameTime'),
+            selectionContent: document.getElementById('selectionContent'),
+            commandPanel: document.getElementById('commandPanel'),
+            notifications: document.getElementById('notifications')
+        };
+
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
         this._resourceRenderCache = [];
@@ -1436,28 +1450,29 @@ export class Game {
 
     updateUI() {
         // Actualizar recursos
-        document.getElementById('woodCount').textContent = Math.floor(this.resources.wood);
-        document.getElementById('foodCount').textContent = Math.floor(this.resources.food);
-        document.getElementById('goldCount').textContent = Math.floor(this.resources.gold);
-        document.getElementById('stoneCount').textContent = Math.floor(this.resources.stone);
+        // OPTIMIZACIÓN: Usar elementos cacheados
+        if (this.uiElements.woodCount) this.uiElements.woodCount.textContent = Math.floor(this.resources.wood);
+        if (this.uiElements.foodCount) this.uiElements.foodCount.textContent = Math.floor(this.resources.food);
+        if (this.uiElements.goldCount) this.uiElements.goldCount.textContent = Math.floor(this.resources.gold);
+        if (this.uiElements.stoneCount) this.uiElements.stoneCount.textContent = Math.floor(this.resources.stone);
 
         // Actualizar población
-        document.getElementById('currentPopulation').textContent = Math.floor(this.population);
-        document.getElementById('maxPopulation').textContent = this.maxPopulation;
+        if (this.uiElements.currentPopulation) this.uiElements.currentPopulation.textContent = Math.floor(this.population);
+        if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.maxPopulation;
 
         // Actualizar tiempo de juego
         const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
         const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
         const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-        const timeElement = document.getElementById('gameTime');
-        if (timeElement) timeElement.textContent = `${minutes}:${seconds}`;
+        if (this.uiElements.gameTime) this.uiElements.gameTime.textContent = `${minutes}:${seconds}`;
 
         this.updateSelectionPanel();
         this.updateActionsPanel();
     }
 
     updateSelectionPanel() {
-        const content = document.getElementById('selectionContent');
+        // OPTIMIZACIÓN: Usar elemento cacheado
+        const content = this.uiElements.selectionContent || document.getElementById('selectionContent');
         if (!content) return;
 
         // Generar clave de estado para evitar actualizaciones innecesarias del DOM
@@ -1589,7 +1604,8 @@ export class Game {
 
     updateActionsPanel() {
         // Usar el nuevo ID commandPanel
-        const grid = document.getElementById('commandPanel');
+        // OPTIMIZACIÓN: Usar elemento cacheado
+        const grid = this.uiElements.commandPanel || document.getElementById('commandPanel');
         if (!grid) return;
 
         // OPTIMIZATION: Initialize grid only once
@@ -1950,7 +1966,10 @@ export class Game {
     }
 
     showNotification(message, type = 'info') {
-        const container = document.getElementById('notifications');
+        // OPTIMIZACIÓN: Usar elemento cacheado
+        const container = this.uiElements.notifications || document.getElementById('notifications');
+        if (!container) return; // Defensive check
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.setAttribute('role', 'status');

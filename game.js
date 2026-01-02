@@ -1655,48 +1655,92 @@ class Game {
         const content = document.getElementById('selectionContent');
         if (!content) return;
 
+        // Clear content safely
+        content.innerHTML = '';
+
         if (this.selectedEntities.length === 0) {
-            content.innerHTML = `
-                <div class="selection-empty-state" role="status" aria-live="polite" aria-disabled="true" aria-label="Nada seleccionado">
-                    <div class="selection-empty-icon" aria-hidden="true">👆</div>
-                    <div>Selecciona una unidad o edificio</div>
-                    <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 4px;">(Arrastra para selección múltiple)</div>
-                </div>
-            `;
+            const emptyState = document.createElement('div');
+            emptyState.className = 'selection-empty-state';
+            emptyState.setAttribute('role', 'status');
+            emptyState.setAttribute('aria-live', 'polite');
+            emptyState.setAttribute('aria-disabled', 'true');
+            emptyState.setAttribute('aria-label', 'Nada seleccionado');
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'selection-empty-icon';
+            iconDiv.setAttribute('aria-hidden', 'true');
+            iconDiv.textContent = '👆';
+            emptyState.appendChild(iconDiv);
+
+            const textDiv = document.createElement('div');
+            textDiv.textContent = 'Selecciona una unidad o edificio';
+            emptyState.appendChild(textDiv);
+
+            const hintDiv = document.createElement('div');
+            hintDiv.style.fontSize = '0.75rem';
+            hintDiv.style.opacity = '0.6';
+            hintDiv.style.marginTop = '4px';
+            hintDiv.textContent = '(Arrastra para selección múltiple)';
+            emptyState.appendChild(hintDiv);
+
+            content.appendChild(emptyState);
             return;
         }
 
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'selection-info';
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'selection-icon';
+
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'selection-details';
+
         if (this.selectedEntities.length === 1) {
             const entity = this.selectedEntities[0];
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        ${entity.icon}
-                    </div>
-                    <div class="selection-details">
-                        <h3>${entity.name}</h3>
-                        <div class="selection-stats">
-                            <div>HP: ${Math.floor(entity.hp)}/${entity.maxHp}</div>
-                            ${entity.attackDamage ? `<div>Ataque: ${entity.attackDamage}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+
+            // Icon - use textContent to prevent XSS (assuming emoji)
+            iconDiv.textContent = entity.icon;
+
+            // Name
+            const nameH3 = document.createElement('h3');
+            nameH3.textContent = entity.name;
+            detailsDiv.appendChild(nameH3);
+
+            // Stats
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'selection-stats';
+
+            const hpDiv = document.createElement('div');
+            hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+            statsDiv.appendChild(hpDiv);
+
+            if (entity.attackDamage) {
+                const attackDiv = document.createElement('div');
+                attackDiv.textContent = `Ataque: ${entity.attackDamage}`;
+                statsDiv.appendChild(attackDiv);
+            }
+            detailsDiv.appendChild(statsDiv);
+
         } else {
-            content.innerHTML = `
-                <div class="selection-info">
-                    <div class="selection-icon">
-                        👥
-                    </div>
-                    <div class="selection-details">
-                        <h3>${this.selectedEntities.length} Unidades</h3>
-                        <div class="selection-stats">
-                            <div>Selección múltiple</div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            // Multiple selection
+            iconDiv.textContent = '👥';
+
+            const nameH3 = document.createElement('h3');
+            nameH3.textContent = `${this.selectedEntities.length} Unidades`;
+            detailsDiv.appendChild(nameH3);
+
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'selection-stats';
+            const multiDiv = document.createElement('div');
+            multiDiv.textContent = 'Selección múltiple';
+            statsDiv.appendChild(multiDiv);
+            detailsDiv.appendChild(statsDiv);
         }
+
+        infoDiv.appendChild(iconDiv);
+        infoDiv.appendChild(detailsDiv);
+        content.appendChild(infoDiv);
     }
 
     updateActionsPanel() {

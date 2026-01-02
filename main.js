@@ -920,6 +920,47 @@ const initApp = async () => {
         }
     }
 
+    // Global Keydown Handler for Escape (UX Improvement)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const settings = document.getElementById('settingsScreen');
+            const techTree = document.getElementById('techTreeScreen');
+            const mapSize = document.getElementById('mapSizeScreen');
+            const civSelection = document.getElementById('civSelectionScreen');
+            const gameScreen = document.getElementById('gameScreen');
+
+            // 1. Close Modals (Settings, Tech Tree)
+            if (settings && !settings.classList.contains('hidden')) {
+                hideSettings();
+                e.stopImmediatePropagation();
+                return;
+            }
+            if (techTree && !techTree.classList.contains('hidden')) {
+                hideTechTree();
+                e.stopImmediatePropagation();
+                return;
+            }
+
+            // 2. Navigation Back (Only if NOT in game)
+            if (gameScreen && gameScreen.classList.contains('hidden')) {
+                if (civSelection && !civSelection.classList.contains('hidden')) {
+                    // Back to Map Size
+                    const backBtn = document.getElementById('backToMapSizeButton');
+                    if (backBtn) backBtn.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                if (mapSize && !mapSize.classList.contains('hidden')) {
+                    // Back to Start
+                    const backBtn = document.getElementById('backToStartButton');
+                    if (backBtn) backBtn.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+            }
+        }
+    });
+
     // Renderizar tech tree estático para preview
     renderStaticTechTree();
 

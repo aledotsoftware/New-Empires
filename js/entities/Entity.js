@@ -49,7 +49,7 @@ export class Entity {
         // Override en subclases
     }
 
-    render(ctx, camera, viewWidth, viewHeight) {
+    render(ctx, camera, viewWidth, viewHeight, drawHp = true) {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
 
@@ -79,18 +79,45 @@ export class Entity {
             ctx.fillText(this.icon, screenX, screenY);
         }
 
-        if (this.hp < this.maxHp) {
-            const barWidth = this.size * 2;
-            const barHeight = 4;
-            const barX = screenX - barWidth / 2;
-            const barY = screenY - this.size - 10;
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(barX, barY, barWidth, barHeight);
-
-            ctx.fillStyle = '#48bb78';
-            ctx.fillRect(barX, barY, barWidth * (this.hp / this.maxHp), barHeight);
+        if (drawHp && this.hp < this.maxHp) {
+            this.drawHpBar(ctx, camera);
         }
+    }
+
+    drawHpBar(ctx, camera) {
+        const screenX = this.x - camera.x;
+        const screenY = this.y - camera.y;
+        const barWidth = this.size * 2;
+        const barHeight = 4;
+        const barX = screenX - barWidth / 2;
+        const barY = screenY - this.size - 10;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        ctx.fillStyle = '#48bb78';
+        ctx.fillRect(barX, barY, barWidth * (this.hp / this.maxHp), barHeight);
+    }
+
+    // OPTIMIZATION: Batching support methods for HP bars
+    addHpBarBackgroundToPath(ctx, camera) {
+        const screenX = this.x - camera.x;
+        const screenY = this.y - camera.y;
+        const barWidth = this.size * 2;
+        const barHeight = 4;
+        const barX = screenX - barWidth / 2;
+        const barY = screenY - this.size - 10;
+        ctx.rect(barX, barY, barWidth, barHeight);
+    }
+
+    addHpBarForegroundToPath(ctx, camera) {
+        const screenX = this.x - camera.x;
+        const screenY = this.y - camera.y;
+        const barWidth = this.size * 2;
+        const barHeight = 4;
+        const barX = screenX - barWidth / 2;
+        const barY = screenY - this.size - 10;
+        ctx.rect(barX, barY, barWidth * (this.hp / this.maxHp), barHeight);
     }
 
     getTeamColor() {

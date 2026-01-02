@@ -1660,6 +1660,7 @@ class Game {
                 <div class="selection-empty-state" role="status" aria-live="polite" aria-disabled="true" aria-label="Nada seleccionado">
                     <div class="selection-empty-icon" aria-hidden="true">👆</div>
                     <div>Selecciona una unidad o edificio</div>
+                    <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 4px;">(Arrastra para selección múltiple)</div>
                 </div>
             `;
             return;

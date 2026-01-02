@@ -1548,13 +1548,33 @@ export class Game {
         }
 
         if (this.selectedEntities.length === 0) {
-            const emptyDiv = document.createElement('div');
-            emptyDiv.style.display = 'flex';
-            emptyDiv.style.alignItems = 'center';
-            emptyDiv.style.height = '100%';
-            emptyDiv.style.color = '#888';
-            emptyDiv.textContent = 'Nada seleccionado';
-            content.appendChild(emptyDiv);
+            const emptyState = document.createElement('div');
+            emptyState.className = 'selection-empty-state';
+            emptyState.setAttribute('role', 'status');
+            emptyState.setAttribute('aria-live', 'polite');
+
+            // Icon
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'selection-empty-icon';
+            iconDiv.textContent = '👆';
+            iconDiv.setAttribute('aria-hidden', 'true');
+
+            // Text
+            const textDiv = document.createElement('div');
+            textDiv.textContent = 'Selecciona una unidad o edificio';
+
+            // Hint (Palette touch)
+            const hintDiv = document.createElement('div');
+            hintDiv.style.fontSize = '0.75rem';
+            hintDiv.style.opacity = '0.6';
+            hintDiv.style.marginTop = '4px';
+            hintDiv.textContent = '(Arrastra para selección múltiple)';
+
+            emptyState.appendChild(iconDiv);
+            emptyState.appendChild(textDiv);
+            emptyState.appendChild(hintDiv);
+
+            content.appendChild(emptyState);
             return;
         }
 

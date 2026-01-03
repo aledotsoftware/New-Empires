@@ -114,7 +114,11 @@ export class Game {
         this.setupEventListeners();
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
+        // Se divide en dos grids para optimizar: uno para entidades dinámicas (se limpia cada frame)
+        // y otro para edificios estáticos (se actualiza solo al construir/destruir)
         this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.buildingGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.needsBuildingGridUpdate = false;
 
         // OPTIMIZACIÓN: Spatial Grid para recursos estáticos (evita iterar miles de recursos por frame)
         this.resourceGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
@@ -260,6 +264,20 @@ export class Game {
                 this.resourceGrid.add(node);
             }
         }
+    }
+
+    rebuildBuildingGrid() {
+        if (!this.buildingGrid) return;
+
+        this.buildingGrid.clear();
+        const len = this.buildings.length;
+        for (let i = 0; i < len; i++) {
+            const building = this.buildings[i];
+            if (!building.isDead) {
+                this.buildingGrid.add(building);
+            }
+        }
+        this.needsBuildingGridUpdate = false;
     }
 
     applyProceduralTerrain(generatedMap) {
@@ -826,6 +844,12 @@ export class Game {
             this.buildings.push(building);
             this.entities.push(building);
 
+            // OPTIMIZACIÓN: Agregar al grid de edificios
+            // No necesitamos reconstruir todo, solo agregar este
+            if (this.buildingGrid) {
+                this.buildingGrid.add(building);
+            }
+
             // Reproducir sonido de inicio de construcción (variable global temporal)
             if (typeof soundManager !== 'undefined') {
                 soundManager.play('buildStart');
@@ -995,17 +1019,29 @@ export class Game {
         if (this.techManager) this.techManager.update(deltaTime);
 
         // OPTIMIZACIÓN: Actualizar Spatial Grid
-        // Limpiar y reinsertar todas las entidades vivas
+        // Limpiar y reinsertar SOLO entidades dinámicas (unidades)
+        // Los edificios están en buildingGrid y no necesitan reinsertarse cada frame
         this.spatialGrid.clear();
-        // OPTIMIZACIÓN: Usar loop for tradicional es más rápido que for..of (~1.3x)
-        const entitiesLen = this.entities.length;
-        for (let i = 0; i < entitiesLen; i++) {
-            this.spatialGrid.add(this.entities[i]);
+
+        // Reconstruir building grid si es necesario (ej. edificios destruidos)
+        if (this.needsBuildingGridUpdate) {
+            this.rebuildBuildingGrid();
         }
 
-        // Actualizar todas las entidades
+        // OPTIMIZACIÓN: Usar loop for tradicional es más rápido que for..of (~1.3x)
+        const entitiesLen = this.entities.length;
+
+        // PASO 1: Poblar spatialGrid con entidades dinámicas (antes de update)
+        // Esto asegura que cuando las entidades busquen objetivos, el grid esté completo
+        for (let i = 0; i < entitiesLen; i++) {
+            const entity = this.entities[i];
+            if (!entity.isDead && !entity.isBuilding) {
+                this.spatialGrid.add(entity);
+            }
+        }
+
+        // PASO 2: Actualizar todas las entidades
         let hasDeadEntities = false;
-        // OPTIMIZACIÓN: Loop for tradicional para evitar asignación de iteradores en hot path
         for (let i = 0; i < entitiesLen; i++) {
             const entity = this.entities[i];
             entity.update(deltaTime, this);
@@ -1014,10 +1050,17 @@ export class Game {
 
         // Remover entidades muertas (solo si es necesario para evitar GC)
         if (hasDeadEntities) {
+            const prevBuildingsCount = this.buildings.length;
+
             this.entities = this.entities.filter(e => !e.isDead);
             this.units = this.units.filter(u => !u.isDead);
             this.buildings = this.buildings.filter(b => !b.isDead);
             this.enemies = this.enemies.filter(e => !e.isDead);
+
+            // Si murieron edificios, marcar el grid estático para reconstrucción
+            if (this.buildings.length < prevBuildingsCount) {
+                this.needsBuildingGridUpdate = true;
+            }
 
             // Remover de selección las entidades muertas
             this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
@@ -1219,7 +1262,12 @@ export class Game {
 
         // Reutilizamos _renderCache para evitar GC
         // OPTIMIZATION: Use pre-calculated cullingRadius
-        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache);
+
+        // 1. Obtener unidades dinámicas (limpiando cache previo)
+        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, true);
+
+        // 2. Agregar edificios estáticos (sin limpiar, append)
+        this.buildingGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, false);
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
         // Esto corrige problemas de superposición que el SpatialGrid podría introducir

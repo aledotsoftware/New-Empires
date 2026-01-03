@@ -74,7 +74,16 @@ export class Unit extends Entity {
         const searchRadiusSq = searchRadius * searchRadius;
 
         // OPTIMIZACIÓN: Usar Spatial Grid reutilizando array
-        const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache);
+        // Solo consultamos el grid dinámico porque la lógica original filtraba por isUnit
+        // y queremos preservar el comportamiento exacto (aunque sea subóptimo para gameplay)
+        const nearbyEntities = game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache, true);
+
+        // Si quisiéramos atacar edificios, descomentaríamos esto:
+        /*
+        if (game.buildingGrid) {
+            game.buildingGrid.query(this.x, this.y, searchRadius, this._nearbyCache, false);
+        }
+        */
 
         // OPTIMIZACIÓN: Loop for tradicional para evitar iterator allocation
         const len = nearbyEntities.length;

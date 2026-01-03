@@ -704,6 +704,45 @@ export class Game {
         // Setup build options
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
+            const type = option.dataset.building;
+            const cost = CONFIG.COSTS[type];
+
+            // Palette: Visual affordability check
+            if (cost) {
+                // Reset state
+                option.classList.remove('disabled');
+                option.removeAttribute('aria-disabled');
+                option.style.opacity = '1';
+                option.style.cursor = 'pointer';
+
+                // Check specific resource costs
+                const costSpans = option.querySelectorAll('.build-cost span');
+                costSpans.forEach(span => {
+                    span.style.color = ''; // Reset
+                    const img = span.querySelector('img');
+                    if (img) {
+                        const src = img.src.toLowerCase();
+                        let resource = null;
+                        if (src.includes('wood')) resource = 'wood';
+                        else if (src.includes('food')) resource = 'food';
+                        else if (src.includes('gold')) resource = 'gold';
+                        else if (src.includes('stone')) resource = 'stone';
+
+                        if (resource && cost[resource] && this.resources[resource] < cost[resource]) {
+                            span.style.color = 'var(--accent-red)';
+                        }
+                    }
+                });
+
+                // Check total affordability
+                if (!this.canAfford(cost)) {
+                    option.classList.add('disabled');
+                    option.setAttribute('aria-disabled', 'true');
+                    option.style.opacity = '0.6';
+                    option.style.cursor = 'not-allowed';
+                }
+            }
+
             const handleAction = () => {
                 const buildingType = option.dataset.building;
                 this.startBuildMode(buildingType);

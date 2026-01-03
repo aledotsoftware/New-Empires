@@ -3216,20 +3216,42 @@ function createCompactTechCard(tech, techManager, categoryColor) {
     card.setAttribute('data-status', status);
     card.style.borderTopColor = categoryColor;
 
-    // Generar string de costos compacto
-    let costHTML = '';
-    const costIcons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
-    for (let [resource, amount] of Object.entries(tech.cost)) {
-        const icon = costIcons[resource] || resource;
-        costHTML += `<span class="cost-mini">${icon}${amount}</span>`;
+    // 1. Icon
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'tech-icon-compact';
+    // Use textContent to prevent XSS. If tech.icon is an emoji/text, this is safe.
+    // If it's a path, createSafeIconElement should be used, but keeping simple for this specific function as it usually receives emojis in this context
+    iconDiv.textContent = tech.icon;
+    card.appendChild(iconDiv);
+
+    // 2. Name
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'tech-name-compact';
+    nameDiv.title = tech.name;
+    nameDiv.textContent = tech.name;
+    card.appendChild(nameDiv);
+
+    // 3. Status Icon
+    if (statusIcon) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'tech-status-icon';
+        statusDiv.textContent = statusIcon;
+        card.appendChild(statusDiv);
     }
 
-    card.innerHTML = `
-        <div class="tech-icon-compact">${tech.icon}</div>
-        <div class="tech-name-compact" title="${tech.name}">${tech.name}</div>
-        ${statusIcon ? `<div class="tech-status-icon">${statusIcon}</div>` : ''}
-        <div class="tech-cost-compact">${costHTML}</div>
-    `;
+    // 4. Cost
+    const costDiv = document.createElement('div');
+    costDiv.className = 'tech-cost-compact';
+    const costIcons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
+
+    for (let [resource, amount] of Object.entries(tech.cost)) {
+        const span = document.createElement('span');
+        span.className = 'cost-mini';
+        const icon = costIcons[resource] || resource;
+        span.textContent = `${icon}${amount}`;
+        costDiv.appendChild(span);
+    }
+    card.appendChild(costDiv);
 
     // Tooltip con información completa
     card.title = `${tech.name}\n${tech.description}\nTiempo: ${tech.researchTime}s`;

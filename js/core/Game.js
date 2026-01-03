@@ -114,7 +114,12 @@ export class Game {
         this.setupEventListeners();
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
+        // this.spatialGrid ahora solo contendrá unidades dinámicas
         this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+
+        // OPTIMIZACIÓN: Spatial Grid separado para edificios (estáticos)
+        // Evita reinsertar edificios estáticos cada frame (~80% menos inserciones)
+        this.buildingGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
 
         // OPTIMIZACIÓN: Spatial Grid para recursos estáticos (evita iterar miles de recursos por frame)
         this.resourceGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
@@ -201,6 +206,7 @@ export class Game {
         const townCenter = new TownCenter(400, 400, 'player');
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
+        this.buildingGrid.add(townCenter);
 
         // Crear aldeanos iniciales
         for (let i = 0; i < 3; i++) {
@@ -365,6 +371,7 @@ export class Game {
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
+        this.buildingGrid.add(enemyTC);
     }
 
     setupEventListeners() {
@@ -825,6 +832,7 @@ export class Game {
 
             this.buildings.push(building);
             this.entities.push(building);
+            this.buildingGrid.add(building);
 
             // Reproducir sonido de inicio de construcción (variable global temporal)
             if (typeof soundManager !== 'undefined') {
@@ -995,17 +1003,18 @@ export class Game {
         if (this.techManager) this.techManager.update(deltaTime);
 
         // OPTIMIZACIÓN: Actualizar Spatial Grid
-        // Limpiar y reinsertar todas las entidades vivas
+        // Limpiar y reinsertar SOLO unidades dinámicas
         this.spatialGrid.clear();
         // OPTIMIZACIÓN: Usar loop for tradicional es más rápido que for..of (~1.3x)
-        const entitiesLen = this.entities.length;
-        for (let i = 0; i < entitiesLen; i++) {
-            this.spatialGrid.add(this.entities[i]);
+        const unitsLen = this.units.length;
+        for (let i = 0; i < unitsLen; i++) {
+            this.spatialGrid.add(this.units[i]);
         }
 
         // Actualizar todas las entidades
         let hasDeadEntities = false;
         // OPTIMIZACIÓN: Loop for tradicional para evitar asignación de iteradores en hot path
+        const entitiesLen = this.entities.length;
         for (let i = 0; i < entitiesLen; i++) {
             const entity = this.entities[i];
             entity.update(deltaTime, this);
@@ -1016,7 +1025,14 @@ export class Game {
         if (hasDeadEntities) {
             this.entities = this.entities.filter(e => !e.isDead);
             this.units = this.units.filter(u => !u.isDead);
+
+            // Reconstruir grid de edificios solo si murió alguno
+            const prevBuildingCount = this.buildings.length;
             this.buildings = this.buildings.filter(b => !b.isDead);
+            if (this.buildings.length !== prevBuildingCount) {
+                this.rebuildBuildingGrid();
+            }
+
             this.enemies = this.enemies.filter(e => !e.isDead);
 
             // Remover de selección las entidades muertas
@@ -1042,6 +1058,15 @@ export class Game {
         if (now - this.lastUITime > 100) {
             this.updateUI();
             this.lastUITime = now;
+        }
+    }
+
+    rebuildBuildingGrid() {
+        if (!this.buildingGrid) return;
+        this.buildingGrid.clear();
+        const len = this.buildings.length;
+        for (let i = 0; i < len; i++) {
+            this.buildingGrid.add(this.buildings[i]);
         }
     }
 
@@ -1219,7 +1244,9 @@ export class Game {
 
         // Reutilizamos _renderCache para evitar GC
         // OPTIMIZATION: Use pre-calculated cullingRadius
-        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache);
+        // Query both units (clearing cache) and buildings (appending)
+        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, true);
+        this.buildingGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, false);
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
         // Esto corrige problemas de superposición que el SpatialGrid podría introducir

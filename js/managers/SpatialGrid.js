@@ -62,11 +62,14 @@ export class SpatialGrid {
      * @param {number} y - Coordenada Y central
      * @param {number} radius - Radio de búsqueda
      * @param {Array} result - (Opcional) Array para almacenar resultados y evitar alocación
+     * @param {boolean} clearResult - (Opcional) Si true, limpia el array result antes de agregar. Default: true.
      */
-    query(x, y, radius, result = []) {
+    query(x, y, radius, result = [], clearResult = true) {
         // Optimización: Limpiar array existente en lugar de crear uno nuevo
         // Esto reduce significativamente la presión del GC en llamadas frecuentes
-        result.length = 0;
+        if (clearResult) {
+            result.length = 0;
+        }
 
         // Optimización: usar multiplicación
         const cellRadius = Math.ceil(radius * this.invCellSize);

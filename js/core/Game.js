@@ -149,6 +149,12 @@ export class Game {
         cursorImg.style.display = 'block';
         this.cursorElement.appendChild(cursorImg);
 
+        // Palette: Cursor Badge for Contextual Actions
+        this.cursorBadge = document.createElement('img');
+        this.cursorBadge.className = 'cursor-badge';
+        this.cursorBadge.alt = '';
+        this.cursorElement.appendChild(this.cursorBadge);
+
         document.body.appendChild(this.cursorElement);
         document.body.style.cursor = 'none';
 
@@ -156,6 +162,9 @@ export class Game {
         this.lastUITime = 0;
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
+
+        // Cache para queries de cursor
+        this._cursorQueryCache = [];
 
         // OPTIMIZACIÓN: Cache de elementos DOM para UI
         this.uiElements = {
@@ -1037,11 +1046,76 @@ export class Game {
         }
         this.population = popCount;
 
+        // Palette: Update Contextual Cursor
+        this.updateCursorState();
+
         // Actualizar UI (Throttled to 10 FPS)
         const now = Date.now();
         if (now - this.lastUITime > 100) {
             this.updateUI();
             this.lastUITime = now;
+        }
+    }
+
+    updateCursorState() {
+        if (!this.cursorBadge) return;
+
+        let showBadge = false;
+        let badgeIcon = '';
+
+        if (this.selectedEntities.length === 1) {
+            const entity = this.selectedEntities[0];
+            if (entity.team === 'player' && entity.isUnit) {
+                // Attack Cursor Logic
+                if (entity.canAttack) {
+                    this._cursorQueryCache.length = 0;
+                    const nearby = this.spatialGrid.query(this.mouse.worldX, this.mouse.worldY, 30);
+                    for (let i = 0; i < nearby.length; i++) {
+                        const other = nearby[i];
+                        if (other.team === 'enemy' && !other.isDead) {
+                            const distSq = (other.x - this.mouse.worldX)**2 + (other.y - this.mouse.worldY)**2;
+                            if (distSq < other.size * other.size) {
+                                badgeIcon = 'assets/icons/swords.png';
+                                showBadge = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Gather Cursor Logic (Villager only) - Lower priority than attack
+                if (!showBadge && entity.canGather && entity.type === 'villager' && this.resourceGrid) {
+                    // Reuse cache array for resources
+                    this._cursorQueryCache.length = 0;
+                    const resources = this.resourceGrid.query(this.mouse.worldX, this.mouse.worldY, 30);
+                    for (let i = 0; i < resources.length; i++) {
+                        const res = resources[i];
+                        if (res.amount > 0) {
+                            const distSq = (res.x - this.mouse.worldX)**2 + (res.y - this.mouse.worldY)**2;
+                            if (distSq < res.radius * res.radius) {
+                                // Map resource type to icon
+                                if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
+                                else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
+                                else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
+                                else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
+                                else badgeIcon = 'assets/icons/gold.png';
+
+                                showBadge = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showBadge) {
+            if (this.cursorBadge.src !== badgeIcon && !this.cursorBadge.src.endsWith(badgeIcon)) {
+                this.cursorBadge.src = badgeIcon;
+            }
+            this.cursorBadge.style.display = 'block';
+        } else {
+            this.cursorBadge.style.display = 'none';
         }
     }
 

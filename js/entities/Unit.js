@@ -119,9 +119,10 @@ export class Unit extends Entity {
                 const nextY = this.y + moveY;
 
                 // OPTIMIZATION: Inlined snapToGrid to avoid object allocation (10x faster)
-                const tileSize = game.gridMap.tileSize;
-                const col = Math.floor(nextX / tileSize);
-                const row = Math.floor(nextY / tileSize);
+                // Usamos multiplicación por inverso cacheado en lugar de división
+                const invTileSize = game.gridMap.invTileSize;
+                const col = Math.floor(nextX * invTileSize);
+                const row = Math.floor(nextY * invTileSize);
 
                 const cellIndex = game.gridMap.getIndex(col, row);
 
@@ -132,16 +133,16 @@ export class Unit extends Entity {
                     if (content && content.isBuilding) {
                         // Colisión simple: Intentar deslizarse
                         // Verificar movimiento solo en X
-                        const colX = Math.floor((this.x + moveX) / tileSize);
-                        const rowX = Math.floor(this.y / tileSize);
+                        const colX = Math.floor((this.x + moveX) * invTileSize);
+                        const rowX = Math.floor(this.y * invTileSize);
                         const contentX = game.gridMap.grid[game.gridMap.getIndex(colX, rowX)];
                         if (contentX && contentX.isBuilding) {
                             moveX = 0;
                         }
 
                         // Verificar movimiento solo en Y
-                        const colY = Math.floor(this.x / tileSize);
-                        const rowY = Math.floor((this.y + moveY) / tileSize);
+                        const colY = Math.floor(this.x * invTileSize);
+                        const rowY = Math.floor((this.y + moveY) * invTileSize);
                         const contentY = game.gridMap.grid[game.gridMap.getIndex(colY, rowY)];
                         if (contentY && contentY.isBuilding) {
                             moveY = 0;

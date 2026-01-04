@@ -3103,17 +3103,39 @@ function renderTechTree() {
     // Header con información de edad actual
     const headerSection = document.createElement('div');
     headerSection.className = 'tech-tree-header';
-    headerSection.innerHTML = `
-        <div class="current-age-info">
-            <h3>📜 Edad Actual: ${AGES[currentAge].name}</h3>
-            <p class="age-period">${AGES[currentAge].period} - ${AGES[currentAge].era}</p>
-        </div>
-        <div class="timeline-legend">
-            <div class="legend-item"><span class="legend-color past"></span> Edades Pasadas</div>
-            <div class="legend-item"><span class="legend-color current"></span> Edad Actual</div>
-            <div class="legend-item"><span class="legend-color future"></span> Edades Futuras</div>
-        </div>
-    `;
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'current-age-info';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = `📜 Edad Actual: ${AGES[currentAge].name}`;
+    infoDiv.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.className = 'age-period';
+    p.textContent = `${AGES[currentAge].period} - ${AGES[currentAge].era}`;
+    infoDiv.appendChild(p);
+
+    headerSection.appendChild(infoDiv);
+
+    const legendDiv = document.createElement('div');
+    legendDiv.className = 'timeline-legend';
+
+    const createLegendItem = (type, text) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        const span = document.createElement('span');
+        span.className = `legend-color ${type}`;
+        item.appendChild(span);
+        item.appendChild(document.createTextNode(` ${text}`));
+        return item;
+    };
+
+    legendDiv.appendChild(createLegendItem('past', 'Edades Pasadas'));
+    legendDiv.appendChild(createLegendItem('current', 'Edad Actual'));
+    legendDiv.appendChild(createLegendItem('future', 'Edades Futuras'));
+
+    headerSection.appendChild(legendDiv);
     content.appendChild(headerSection);
 
     // Categorías de tecnologías
@@ -3144,13 +3166,26 @@ function renderTechTree() {
         // Header de la edad
         const ageHeader = document.createElement('div');
         ageHeader.className = `age-column-header ${isCurrentAge ? 'current' : ''} ${isPastAge ? 'past' : ''} ${isFutureAge ? 'future' : ''}`;
-        ageHeader.innerHTML = `
-            <div class="age-number-badge">${age}</div>
-            <div class="age-info">
-                <div class="age-name-short">${ageInfo.name}</div>
-                <div class="age-period-short">${ageInfo.period}</div>
-            </div>
-        `;
+
+        const badgeDiv = document.createElement('div');
+        badgeDiv.className = 'age-number-badge';
+        badgeDiv.textContent = age;
+        ageHeader.appendChild(badgeDiv);
+
+        const ageInfoDiv = document.createElement('div');
+        ageInfoDiv.className = 'age-info';
+
+        const nameShortDiv = document.createElement('div');
+        nameShortDiv.className = 'age-name-short';
+        nameShortDiv.textContent = ageInfo.name;
+        ageInfoDiv.appendChild(nameShortDiv);
+
+        const periodShortDiv = document.createElement('div');
+        periodShortDiv.className = 'age-period-short';
+        periodShortDiv.textContent = ageInfo.period;
+        ageInfoDiv.appendChild(periodShortDiv);
+
+        ageHeader.appendChild(ageInfoDiv);
         ageColumn.appendChild(ageHeader);
 
         // Contenedor de tecnologías por categoría
@@ -3216,20 +3251,38 @@ function createCompactTechCard(tech, techManager, categoryColor) {
     card.setAttribute('data-status', status);
     card.style.borderTopColor = categoryColor;
 
-    // Generar string de costos compacto
-    let costHTML = '';
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'tech-icon-compact';
+    // Helper to determine if icon is emoji or text, similar to other refactors
+    // Assuming tech.icon is safe text/emoji for now as per previous logic, but textContent is safer
+    iconDiv.textContent = tech.icon;
+    card.appendChild(iconDiv);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'tech-name-compact';
+    nameDiv.title = tech.name;
+    nameDiv.textContent = tech.name;
+    card.appendChild(nameDiv);
+
+    if (statusIcon) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'tech-status-icon';
+        statusDiv.textContent = statusIcon;
+        card.appendChild(statusDiv);
+    }
+
+    const costDiv = document.createElement('div');
+    costDiv.className = 'tech-cost-compact';
+
     const costIcons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
     for (let [resource, amount] of Object.entries(tech.cost)) {
         const icon = costIcons[resource] || resource;
-        costHTML += `<span class="cost-mini">${icon}${amount}</span>`;
+        const span = document.createElement('span');
+        span.className = 'cost-mini';
+        span.textContent = `${icon}${amount}`;
+        costDiv.appendChild(span);
     }
-
-    card.innerHTML = `
-        <div class="tech-icon-compact">${tech.icon}</div>
-        <div class="tech-name-compact" title="${tech.name}">${tech.name}</div>
-        ${statusIcon ? `<div class="tech-status-icon">${statusIcon}</div>` : ''}
-        <div class="tech-cost-compact">${costHTML}</div>
-    `;
+    card.appendChild(costDiv);
 
     // Tooltip con información completa
     card.title = `${tech.name}\n${tech.description}\nTiempo: ${tech.researchTime}s`;
@@ -3265,12 +3318,28 @@ window.showMapSizeSelection = function () {
 
         const isRecommended = key === 'normal';
 
-        card.innerHTML = `
-            <div class="map-size-icon">🗺️</div>
-            <div class="map-size-name">${mapSize.name}</div>
-            <div class="map-size-info">${mapSize.tiles}×${mapSize.tiles} tiles</div>
-            ${isRecommended ? '<div class="map-size-badge">Recomendado</div>' : ''}
-        `;
+        // Secure DOM creation
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'map-size-icon';
+        iconDiv.textContent = '🗺️';
+        card.appendChild(iconDiv);
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'map-size-name';
+        nameDiv.textContent = mapSize.name;
+        card.appendChild(nameDiv);
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'map-size-info';
+        infoDiv.textContent = `${mapSize.tiles}×${mapSize.tiles} tiles`;
+        card.appendChild(infoDiv);
+
+        if (isRecommended) {
+            const badgeDiv = document.createElement('div');
+            badgeDiv.className = 'map-size-badge';
+            badgeDiv.textContent = 'Recomendado';
+            card.appendChild(badgeDiv);
+        }
 
         // Accessibility attributes
         card.setAttribute('role', 'button');

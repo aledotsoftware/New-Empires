@@ -877,6 +877,10 @@ const initApp = async () => {
         backToStartButton.addEventListener('click', () => {
             document.getElementById('mapSizeScreen').classList.add('hidden');
             document.getElementById('startScreen').classList.remove('hidden');
+
+            // Palette: Restore focus to Start Button
+            const startBtn = document.getElementById('startButton');
+            if (startBtn) setTimeout(() => startBtn.focus(), 50);
         });
     }
 
@@ -886,6 +890,24 @@ const initApp = async () => {
         backToMapSizeButton.addEventListener('click', () => {
             document.getElementById('civSelectionScreen').classList.add('hidden');
             document.getElementById('mapSizeScreen').classList.remove('hidden');
+
+            // Palette: Restore focus to Map Size options
+            // Try to focus the selected option, or fallback to container
+            let targetFocus = null;
+            if (typeof selectedMapSize !== 'undefined') {
+                targetFocus = document.querySelector(`.map-size-option[data-size="${selectedMapSize}"]`);
+            }
+            if (!targetFocus) {
+                targetFocus = document.getElementById('mapSizeScreen');
+            }
+
+            if (targetFocus) {
+                if (targetFocus.classList.contains('map-size-option')) {
+                    setTimeout(() => targetFocus.focus(), 50);
+                } else {
+                    setTimeout(() => FocusManager.focusFirst(targetFocus), 50);
+                }
+            }
         });
     }
 

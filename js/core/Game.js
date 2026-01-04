@@ -114,7 +114,11 @@ export class Game {
         this.setupEventListeners();
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
+        // Grid dinámico para unidades (se actualiza cada frame)
         this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+
+        // Grid estático para edificios (se actualiza solo al construir/destruir)
+        this.buildingGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
 
         // OPTIMIZACIÓN: Spatial Grid para recursos estáticos (evita iterar miles de recursos por frame)
         this.resourceGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
@@ -202,6 +206,9 @@ export class Game {
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
 
+        // Actualizar grid de edificios
+        this.buildingGrid.add(townCenter);
+
         // Crear aldeanos iniciales
         for (let i = 0; i < 3; i++) {
             const angle = (Math.PI * 2 / 3) * i;
@@ -258,6 +265,20 @@ export class Game {
         for (const node of this.resourceNodes) {
             if (node.amount > 0) {
                 this.resourceGrid.add(node);
+            }
+        }
+    }
+
+    updateBuildingGrid() {
+        if (!this.buildingGrid) return;
+
+        this.buildingGrid.clear();
+        // Solo añadir edificios vivos
+        // Asumimos que this.buildings ya ha sido filtrado de muertos antes de llamar a esto
+        const len = this.buildings.length;
+        for (let i = 0; i < len; i++) {
+            if (!this.buildings[i].isDead) {
+                this.buildingGrid.add(this.buildings[i]);
             }
         }
     }
@@ -365,6 +386,7 @@ export class Game {
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
+        this.buildingGrid.add(enemyTC);
     }
 
     setupEventListeners() {
@@ -825,6 +847,7 @@ export class Game {
 
             this.buildings.push(building);
             this.entities.push(building);
+            this.buildingGrid.add(building);
 
             // Reproducir sonido de inicio de construcción (variable global temporal)
             if (typeof soundManager !== 'undefined') {
@@ -995,21 +1018,28 @@ export class Game {
         if (this.techManager) this.techManager.update(deltaTime);
 
         // OPTIMIZACIÓN: Actualizar Spatial Grid
-        // Limpiar y reinsertar todas las entidades vivas
+        // Limpiar y reinsertar SOLO UNIDADES (los edificios son estáticos en su propio grid)
         this.spatialGrid.clear();
         // OPTIMIZACIÓN: Usar loop for tradicional es más rápido que for..of (~1.3x)
         const entitiesLen = this.entities.length;
         for (let i = 0; i < entitiesLen; i++) {
-            this.spatialGrid.add(this.entities[i]);
+            const entity = this.entities[i];
+            if (entity.isUnit) {
+                this.spatialGrid.add(entity);
+            }
         }
 
         // Actualizar todas las entidades
         let hasDeadEntities = false;
+        let hasDeadBuildings = false;
         // OPTIMIZACIÓN: Loop for tradicional para evitar asignación de iteradores en hot path
         for (let i = 0; i < entitiesLen; i++) {
             const entity = this.entities[i];
             entity.update(deltaTime, this);
-            if (entity.isDead) hasDeadEntities = true;
+            if (entity.isDead) {
+                hasDeadEntities = true;
+                if (entity.isBuilding) hasDeadBuildings = true;
+            }
         }
 
         // Remover entidades muertas (solo si es necesario para evitar GC)
@@ -1021,6 +1051,11 @@ export class Game {
 
             // Remover de selección las entidades muertas
             this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
+
+            // Si murieron edificios, reconstruir el grid estático
+            if (hasDeadBuildings) {
+                this.updateBuildingGrid();
+            }
 
             // Verificar condiciones de victoria/derrota
             this.checkGameOver();
@@ -1219,7 +1254,10 @@ export class Game {
 
         // Reutilizamos _renderCache para evitar GC
         // OPTIMIZATION: Use pre-calculated cullingRadius
-        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache);
+        // Query units (clearing cache)
+        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, true);
+        // Query buildings (appending)
+        this.buildingGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, false);
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
         // Esto corrige problemas de superposición que el SpatialGrid podría introducir

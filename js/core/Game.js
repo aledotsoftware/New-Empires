@@ -1065,28 +1065,39 @@ export class Game {
         // Actualizar tecnologías
         if (this.techManager) this.techManager.update(deltaTime);
 
-        // OPTIMIZACIÓN: Actualizar Spatial Grid
-        // Limpiar y reinsertar SOLO UNIDADES (los edificios son estáticos en su propio grid)
+        // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
+        // Separamos el bucle para iterar solo sobre unidades dinámicas (Jugador + Enemigos)
+        // Los edificios son estáticos y no necesitan update() ni reinserción en spatialGrid cada frame.
         this.spatialGrid.clear();
-        // OPTIMIZACIÓN: Usar loop for tradicional es más rápido que for..of (~1.3x)
-        const entitiesLen = this.entities.length;
-        for (let i = 0; i < entitiesLen; i++) {
-            const entity = this.entities[i];
-            if (entity.isUnit) {
-                this.spatialGrid.add(entity);
-            }
-        }
 
-        // Actualizar todas las entidades
         let hasDeadEntities = false;
         let hasDeadBuildings = false;
-        // OPTIMIZACIÓN: Loop for tradicional para evitar asignación de iteradores en hot path
-        for (let i = 0; i < entitiesLen; i++) {
-            const entity = this.entities[i];
-            entity.update(deltaTime, this);
-            if (entity.isDead) {
+
+        // 1. Actualizar Unidades del Jugador
+        const unitsLen = this.units.length;
+        for (let i = 0; i < unitsLen; i++) {
+            const unit = this.units[i];
+            this.spatialGrid.add(unit);
+            unit.update(deltaTime, this);
+            if (unit.isDead) hasDeadEntities = true;
+        }
+
+        // 2. Actualizar Enemigos
+        const enemiesLen = this.enemies.length;
+        for (let i = 0; i < enemiesLen; i++) {
+            const enemy = this.enemies[i];
+            this.spatialGrid.add(enemy);
+            enemy.update(deltaTime, this);
+            if (enemy.isDead) hasDeadEntities = true;
+        }
+
+        // 3. Verificar Edificios (Solo check de muerte, sin update ni grid overhead)
+        const buildingsLen = this.buildings.length;
+        for (let i = 0; i < buildingsLen; i++) {
+            const building = this.buildings[i];
+            if (building.isDead) {
                 hasDeadEntities = true;
-                if (entity.isBuilding) hasDeadBuildings = true;
+                hasDeadBuildings = true;
             }
         }
 

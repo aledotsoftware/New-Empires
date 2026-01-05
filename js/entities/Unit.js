@@ -77,10 +77,10 @@ export class Unit extends Entity {
         // Query units (clearing cache)
         game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache, true);
 
-        // Query buildings (appending) if grid exists
-        if (game.buildingGrid) {
-            game.buildingGrid.query(this.x, this.y, searchRadius, this._nearbyCache, false);
-        }
+        // OPTIMIZATION: Do NOT query buildingGrid here.
+        // This function is for finding enemy UNITS to auto-attack.
+        // Buildings are excluded by the `entity.isUnit` check in the loop below anyway.
+        // Removing the query avoids iterating hundreds of static buildings unnecessarily.
 
         const nearbyEntities = this._nearbyCache;
 

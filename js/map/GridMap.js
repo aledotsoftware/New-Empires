@@ -10,6 +10,8 @@ export class GridMap {
         this.cols = Math.ceil(width / tileSize);
         this.rows = Math.ceil(height / tileSize);
         this.grid = new Array(this.cols * this.rows).fill(null);
+        // Optimización: Cache inverso para usar multiplicación en lugar de división
+        this.invTileSize = 1 / tileSize;
     }
 
     getIndex(col, row) {
@@ -47,8 +49,9 @@ export class GridMap {
     }
 
     snapToGrid(x, y) {
-        const col = Math.floor(x / this.tileSize);
-        const row = Math.floor(y / this.tileSize);
+        // Optimización: usar multiplicación en lugar de división
+        const col = Math.floor(x * this.invTileSize);
+        const row = Math.floor(y * this.invTileSize);
         return {
             x: col * this.tileSize,
             y: row * this.tileSize,

@@ -127,9 +127,9 @@ export class Unit extends Entity {
                 const nextY = this.y + moveY;
 
                 // OPTIMIZATION: Inlined snapToGrid to avoid object allocation (10x faster)
-                const tileSize = game.gridMap.tileSize;
-                const col = Math.floor(nextX / tileSize);
-                const row = Math.floor(nextY / tileSize);
+                // Usar multiplicación por invTileSize en lugar de división (más rápido)
+                const col = Math.floor(nextX * game.gridMap.invTileSize);
+                const row = Math.floor(nextY * game.gridMap.invTileSize);
 
                 const cellIndex = game.gridMap.getIndex(col, row);
 
@@ -140,16 +140,16 @@ export class Unit extends Entity {
                     if (content && content.isBuilding) {
                         // Colisión simple: Intentar deslizarse
                         // Verificar movimiento solo en X
-                        const colX = Math.floor((this.x + moveX) / tileSize);
-                        const rowX = Math.floor(this.y / tileSize);
+                        const colX = Math.floor((this.x + moveX) * game.gridMap.invTileSize);
+                        const rowX = Math.floor(this.y * game.gridMap.invTileSize);
                         const contentX = game.gridMap.grid[game.gridMap.getIndex(colX, rowX)];
                         if (contentX && contentX.isBuilding) {
                             moveX = 0;
                         }
 
                         // Verificar movimiento solo en Y
-                        const colY = Math.floor(this.x / tileSize);
-                        const rowY = Math.floor((this.y + moveY) / tileSize);
+                        const colY = Math.floor(this.x * game.gridMap.invTileSize);
+                        const rowY = Math.floor((this.y + moveY) * game.gridMap.invTileSize);
                         const contentY = game.gridMap.grid[game.gridMap.getIndex(colY, rowY)];
                         if (contentY && contentY.isBuilding) {
                             moveY = 0;

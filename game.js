@@ -3103,17 +3103,45 @@ function renderTechTree() {
     // Header con información de edad actual
     const headerSection = document.createElement('div');
     headerSection.className = 'tech-tree-header';
-    headerSection.innerHTML = `
-        <div class="current-age-info">
-            <h3>📜 Edad Actual: ${AGES[currentAge].name}</h3>
-            <p class="age-period">${AGES[currentAge].period} - ${AGES[currentAge].era}</p>
-        </div>
-        <div class="timeline-legend">
-            <div class="legend-item"><span class="legend-color past"></span> Edades Pasadas</div>
-            <div class="legend-item"><span class="legend-color current"></span> Edad Actual</div>
-            <div class="legend-item"><span class="legend-color future"></span> Edades Futuras</div>
-        </div>
-    `;
+
+    // Info Container
+    const ageInfoDiv = document.createElement('div');
+    ageInfoDiv.className = 'current-age-info';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = `📜 Edad Actual: ${AGES[currentAge].name}`;
+
+    const pPeriod = document.createElement('p');
+    pPeriod.className = 'age-period';
+    pPeriod.textContent = `${AGES[currentAge].period} - ${AGES[currentAge].era}`;
+
+    ageInfoDiv.appendChild(h3);
+    ageInfoDiv.appendChild(pPeriod);
+
+    // Legend Container
+    const legendDiv = document.createElement('div');
+    legendDiv.className = 'timeline-legend';
+
+    const legendItems = [
+        { class: 'past', text: 'Edades Pasadas' },
+        { class: 'current', text: 'Edad Actual' },
+        { class: 'future', text: 'Edades Futuras' }
+    ];
+
+    legendItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'legend-item';
+
+        const span = document.createElement('span');
+        span.className = `legend-color ${item.class}`;
+
+        div.appendChild(span);
+        div.appendChild(document.createTextNode(` ${item.text}`));
+        legendDiv.appendChild(div);
+    });
+
+    headerSection.appendChild(ageInfoDiv);
+    headerSection.appendChild(legendDiv);
     content.appendChild(headerSection);
 
     // Categorías de tecnologías
@@ -3144,13 +3172,27 @@ function renderTechTree() {
         // Header de la edad
         const ageHeader = document.createElement('div');
         ageHeader.className = `age-column-header ${isCurrentAge ? 'current' : ''} ${isPastAge ? 'past' : ''} ${isFutureAge ? 'future' : ''}`;
-        ageHeader.innerHTML = `
-            <div class="age-number-badge">${age}</div>
-            <div class="age-info">
-                <div class="age-name-short">${ageInfo.name}</div>
-                <div class="age-period-short">${ageInfo.period}</div>
-            </div>
-        `;
+
+        const badgeDiv = document.createElement('div');
+        badgeDiv.className = 'age-number-badge';
+        badgeDiv.textContent = age;
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'age-info';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'age-name-short';
+        nameDiv.textContent = ageInfo.name;
+
+        const periodDiv = document.createElement('div');
+        periodDiv.className = 'age-period-short';
+        periodDiv.textContent = ageInfo.period;
+
+        infoDiv.appendChild(nameDiv);
+        infoDiv.appendChild(periodDiv);
+
+        ageHeader.appendChild(badgeDiv);
+        ageHeader.appendChild(infoDiv);
         ageColumn.appendChild(ageHeader);
 
         // Contenedor de tecnologías por categoría
@@ -3216,20 +3258,40 @@ function createCompactTechCard(tech, techManager, categoryColor) {
     card.setAttribute('data-status', status);
     card.style.borderTopColor = categoryColor;
 
-    // Generar string de costos compacto
-    let costHTML = '';
-    const costIcons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
-    for (let [resource, amount] of Object.entries(tech.cost)) {
-        const icon = costIcons[resource] || resource;
-        costHTML += `<span class="cost-mini">${icon}${amount}</span>`;
+    // 1. Icon
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'tech-icon-compact';
+    iconDiv.textContent = tech.icon;
+    card.appendChild(iconDiv);
+
+    // 2. Name
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'tech-name-compact';
+    nameDiv.title = tech.name;
+    nameDiv.textContent = tech.name;
+    card.appendChild(nameDiv);
+
+    // 3. Status Icon (optional)
+    if (statusIcon) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'tech-status-icon';
+        statusDiv.textContent = statusIcon;
+        card.appendChild(statusDiv);
     }
 
-    card.innerHTML = `
-        <div class="tech-icon-compact">${tech.icon}</div>
-        <div class="tech-name-compact" title="${tech.name}">${tech.name}</div>
-        ${statusIcon ? `<div class="tech-status-icon">${statusIcon}</div>` : ''}
-        <div class="tech-cost-compact">${costHTML}</div>
-    `;
+    // 4. Cost
+    const costDiv = document.createElement('div');
+    costDiv.className = 'tech-cost-compact';
+
+    const costIcons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
+    for (let [resource, amount] of Object.entries(tech.cost)) {
+        const span = document.createElement('span');
+        span.className = 'cost-mini';
+        const icon = costIcons[resource] || resource;
+        span.textContent = `${icon}${amount}`;
+        costDiv.appendChild(span);
+    }
+    card.appendChild(costDiv);
 
     // Tooltip con información completa
     card.title = `${tech.name}\n${tech.description}\nTiempo: ${tech.researchTime}s`;
@@ -3265,12 +3327,31 @@ window.showMapSizeSelection = function () {
 
         const isRecommended = key === 'normal';
 
-        card.innerHTML = `
-            <div class="map-size-icon">🗺️</div>
-            <div class="map-size-name">${mapSize.name}</div>
-            <div class="map-size-info">${mapSize.tiles}×${mapSize.tiles} tiles</div>
-            ${isRecommended ? '<div class="map-size-badge">Recomendado</div>' : ''}
-        `;
+        // 1. Icon
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'map-size-icon';
+        iconDiv.textContent = '🗺️';
+        card.appendChild(iconDiv);
+
+        // 2. Name
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'map-size-name';
+        nameDiv.textContent = mapSize.name;
+        card.appendChild(nameDiv);
+
+        // 3. Info
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'map-size-info';
+        infoDiv.textContent = `${mapSize.tiles}×${mapSize.tiles} tiles`;
+        card.appendChild(infoDiv);
+
+        // 4. Badge (optional)
+        if (isRecommended) {
+            const badgeDiv = document.createElement('div');
+            badgeDiv.className = 'map-size-badge';
+            badgeDiv.textContent = 'Recomendado';
+            card.appendChild(badgeDiv);
+        }
 
         // Accessibility attributes
         card.setAttribute('role', 'button');

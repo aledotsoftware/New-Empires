@@ -546,6 +546,19 @@ class Game {
         // SISTEMA DE TECNOLOGÍAS
         this.techManager = new TechManager(this);
 
+        // Palette: Cursor Badge for Contextual Actions
+        if (this.cursorElement) {
+             // Create badge if not exists
+             let badge = this.cursorElement.querySelector('.cursor-badge');
+             if (!badge) {
+                 badge = document.createElement('img');
+                 badge.className = 'cursor-badge';
+                 badge.alt = '';
+                 this.cursorElement.appendChild(badge);
+             }
+             this.cursorBadge = badge;
+        }
+
         this.initializeGame();
         this.updateUI();
     }
@@ -1333,11 +1346,82 @@ class Game {
         // Remover de selección las entidades muertas
         this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
 
+        // Palette: Update Contextual Cursor
+        this.updateCursorState();
+
         // Verificar condiciones de victoria/derrota
         this.checkGameOver();
 
         // Actualizar UI
         this.updateUI();
+    }
+
+    updateCursorState() {
+        // Fallback implementation for legacy game.js (no spatial grid caching for queries here, simple loops)
+        // Also cursorBadge might not be initialized if Game constructor differed, but we patched it.
+        // We need to re-fetch cursor element if this.cursorElement is not reliable or was created outside.
+
+        if (!this.cursorBadge) {
+             const cursor = document.getElementById('customCursor');
+             if (cursor) {
+                 let badge = cursor.querySelector('.cursor-badge');
+                 if (!badge) {
+                     badge = document.createElement('img');
+                     badge.className = 'cursor-badge';
+                     badge.alt = '';
+                     cursor.appendChild(badge);
+                 }
+                 this.cursorBadge = badge;
+             } else {
+                 return;
+             }
+        }
+
+        let showBadge = false;
+        let badgeIcon = '';
+
+        if (this.selectedEntities.length === 1) {
+            const entity = this.selectedEntities[0];
+            if (entity.team === 'player' && entity.isUnit) {
+                // Attack Cursor Logic
+                if (entity.canAttack) {
+                    for (let enemy of this.enemies) {
+                        const distSq = (enemy.x - this.mouse.worldX)**2 + (enemy.y - this.mouse.worldY)**2;
+                        if (distSq < enemy.size * enemy.size) {
+                            badgeIcon = 'assets/icons/swords.png';
+                            showBadge = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Gather Cursor Logic (Villager only)
+                if (!showBadge && entity.canGather && entity.type === 'villager') {
+                    for (let res of this.resourceNodes) {
+                        const distSq = (res.x - this.mouse.worldX)**2 + (res.y - this.mouse.worldY)**2;
+                        if (distSq < res.radius * res.radius) {
+                             if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
+                             else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
+                             else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
+                             else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
+                             else badgeIcon = 'assets/icons/gold.png';
+
+                             showBadge = true;
+                             break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showBadge) {
+            if (this.cursorBadge.src !== badgeIcon && !this.cursorBadge.src.endsWith(badgeIcon)) {
+                this.cursorBadge.src = badgeIcon;
+            }
+            this.cursorBadge.style.display = 'block';
+        } else {
+            this.cursorBadge.style.display = 'none';
+        }
     }
 
     checkGameOver() {

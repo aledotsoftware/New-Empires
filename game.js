@@ -2013,39 +2013,6 @@ class Game {
                 // Note: We use innerHTML for the button content structure but sanitize input values where possible
                 // For a full refactor, document.createElement should be used for everything like in Game.js
 
-                // Safe construction of cost HTML
-                let costHtml = '';
-                if (buttonData.costObj) {
-                     // Palette: Generate enhanced HTML with red color for missing resources
-                     costHtml = '<div class="tooltip-cost">';
-                     for (let [res, amount] of Object.entries(buttonData.costObj)) {
-                         const icon = res === 'food' ? '🌾' : res === 'wood' ? '🪵' : res === 'gold' ? '💰' : '🪨';
-                         const isMissing = this.resources[res] < amount;
-                         const style = isMissing ? 'style="color: var(--accent-red);"' : '';
-                         costHtml += `<span ${style}>${amount}${icon}</span> `;
-                     }
-                     costHtml += '</div>';
-                } else if (buttonData.cost) {
-                    costHtml = `<div class="tooltip-cost">${buttonData.cost}</div>`;
-                }
-
-                // Helper to escape HTML special chars just in case
-                const escapeHtml = (text) => {
-                    if (!text) return '';
-                    return text
-                        .replace(/&/g, "&amp;")
-                        .replace(/</g, "&lt;")
-                        .replace(/>/g, "&gt;")
-                        .replace(/"/g, "&quot;")
-                        .replace(/'/g, "&#039;");
-                };
-
-                const tooltipHtml = `
-                    <div class="tooltip-header">${escapeHtml(buttonData.label)} <span class="tooltip-hotkey">[${hotkey}]</span></div>
-                    <div class="tooltip-desc">${escapeHtml(buttonData.description || '')}</div>
-                    ${costHtml}
-                `;
-
                 // Safe icon rendering using DOM methods
                 btn.innerHTML = ''; // Clear existing content
 
@@ -2057,10 +2024,7 @@ class Game {
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'btn-icon';
                 // Check if icon is an emoji or path/HTML, but treat as text or use createSafeIconElement if available
-                // In this context buttonData.icon is often an emoji, but could be malicious if from tech data.
-                // We will use a safe approach.
                 if (buttonData.icon && (buttonData.icon.includes('/') || buttonData.icon.includes('.'))) {
-                     // Assume image path
                      const img = document.createElement('img');
                      img.src = buttonData.icon;
                      img.alt = buttonData.label;
@@ -2068,7 +2032,6 @@ class Game {
                      img.onerror = function() { this.style.display = 'none'; }; // Hide if fails
                      iconDiv.appendChild(img);
                 } else {
-                     // Assume text/emoji
                      iconDiv.textContent = buttonData.icon;
                 }
                 btn.appendChild(iconDiv);
@@ -2078,36 +2041,8 @@ class Game {
                 labelDiv.textContent = buttonData.label;
                 btn.appendChild(labelDiv);
 
-                // Tooltip construction using DOM
-                const tooltipDiv = document.createElement('div');
-                tooltipDiv.className = 'btn-tooltip';
-                tooltipDiv.setAttribute('role', 'tooltip');
-
-                const tooltipHeader = document.createElement('div');
-                tooltipHeader.className = 'tooltip-header';
-
-                // Safe text node for header
-                tooltipHeader.appendChild(document.createTextNode(buttonData.label + ' '));
-
-                const tooltipHotkey = document.createElement('span');
-                tooltipHotkey.className = 'tooltip-hotkey';
-                tooltipHotkey.textContent = `[${hotkey}]`;
-                tooltipHeader.appendChild(tooltipHotkey);
-                tooltipDiv.appendChild(tooltipHeader);
-
-                const tooltipDesc = document.createElement('div');
-                tooltipDesc.className = 'tooltip-desc';
-                tooltipDesc.textContent = buttonData.description || '';
-                tooltipDiv.appendChild(tooltipDesc);
-
-                if (buttonData.cost) {
-                    const tooltipCost = document.createElement('div');
-                    tooltipCost.className = 'tooltip-cost';
-                    tooltipCost.textContent = buttonData.cost; // cost is string here
-                    tooltipDiv.appendChild(tooltipCost);
-                }
-
-                btn.appendChild(tooltipDiv);
+                // Palette: Enhanced DOM-based Tooltip Construction
+                btn.appendChild(this.createButtonTooltip(buttonData, hotkey));
 
             } else {
                 // Botón vacío
@@ -2128,6 +2063,57 @@ class Game {
 
             grid.appendChild(btn);
         }
+    }
+
+    createButtonTooltip(buttonData, hotkey) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'btn-tooltip';
+        tooltip.setAttribute('role', 'tooltip');
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'tooltip-header';
+        header.innerHTML = `${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span>`;
+        tooltip.appendChild(header);
+
+        // Description
+        if (buttonData.description) {
+            const desc = document.createElement('div');
+            desc.className = 'tooltip-desc';
+            desc.textContent = buttonData.description;
+            tooltip.appendChild(desc);
+        }
+
+        // Cost
+        if (buttonData.costObj) {
+            const costDiv = document.createElement('div');
+            costDiv.className = 'tooltip-cost';
+            const icons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
+
+            for (let [res, amt] of Object.entries(buttonData.costObj)) {
+                const span = document.createElement('span');
+                span.className = 'cost-item';
+                span.textContent = `${icons[res] || ''} ${amt}`;
+
+                if (this.resources[res] < amt) {
+                    span.style.color = 'var(--accent-red)';
+                    span.setAttribute('aria-label', `${amt} ${res} (Insuficiente)`);
+                }
+                costDiv.appendChild(span);
+            }
+            tooltip.appendChild(costDiv);
+
+            // Error message
+            if (!buttonData.enabled && !this.canAfford(buttonData.costObj)) {
+                const err = document.createElement('div');
+                err.className = 'tooltip-error';
+                err.style.color = 'var(--accent-red)';
+                err.style.fontWeight = 'bold';
+                err.textContent = '❌ Recursos insuficientes';
+                tooltip.appendChild(err);
+            }
+        }
+        return tooltip;
     }
 
     openBuildMenu() {

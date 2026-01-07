@@ -1134,3 +1134,42 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ==========================================
+   PALETTE: SHORTCUT BADGES
+   ========================================== */
+.build-option {
+    position: relative; /* Ensure badge is positioned relative to the card */
+}
+
+.shortcut-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-panel) 100%);
+    border: 1px solid var(--primary-gold);
+    color: var(--primary-gold);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    pointer-events: none; /* Let clicks pass through */
+    transition: all 0.2s ease;
+}
+
+.build-option:hover .shortcut-badge,
+.build-option:focus-visible .shortcut-badge {
+    background: var(--primary-gold);
+    color: var(--bg-dark);
+    transform: scale(1.1);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+}
+
+/* Ensure focus ring is visible on top of badge */
+.build-option:focus-visible {
+    outline: 2px solid var(--primary-gold);
+    outline-offset: 2px;
+}

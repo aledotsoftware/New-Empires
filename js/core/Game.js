@@ -2160,22 +2160,55 @@ export class Game {
 
                          for (const [res, amount] of Object.entries(buttonData.cost)) {
                              const resSpan = document.createElement('span');
-                             let icon = '';
-                             if (res === 'food') icon = '🌾';
-                             else if (res === 'wood') icon = '🌲';
-                             else if (res === 'gold') icon = '💰';
-                             else if (res === 'stone') icon = '🪨';
+                             resSpan.className = 'cost-item';
 
-                             resSpan.textContent = `${icon} ${amount}`;
+                             // Palette: Use secure icon generation
+                             if (typeof assetLoader !== 'undefined' && assetLoader.getSrc) {
+                                 const iconSrc = assetLoader.getSrc(res);
+                                 if (iconSrc) {
+                                     const img = document.createElement('img');
+                                     img.src = iconSrc;
+                                     img.className = 'icon-tiny';
+                                     img.alt = res;
+                                     resSpan.appendChild(img);
+                                 } else {
+                                     resSpan.textContent = res.substring(0, 1).toUpperCase();
+                                 }
+                             } else {
+                                 let icon = '';
+                                 if (res === 'food') icon = '🌾';
+                                 else if (res === 'wood') icon = '🌲';
+                                 else if (res === 'gold') icon = '💰';
+                                 else if (res === 'stone') icon = '🪨';
+                                 resSpan.textContent = icon;
+                             }
+
+                             const amountText = document.createTextNode(` ${amount}`);
+                             resSpan.appendChild(amountText);
 
                              // Palette: Highlight missing resources
                              if (this.resources[res] < amount) {
                                  resSpan.style.color = 'var(--accent-red)';
+                                 resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
+                             } else {
+                                 resSpan.setAttribute('aria-label', `${amount} ${res}`);
                              }
 
                              costTooltip.appendChild(resSpan);
                          }
                          tooltipDiv.appendChild(costTooltip);
+                    }
+
+                    // Palette: Add "Insufficient Resources" label if disabled due to cost
+                    if (!buttonData.enabled && buttonData.cost && !this.canAfford(buttonData.cost)) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'tooltip-error';
+                        errorDiv.style.color = 'var(--accent-red)';
+                        errorDiv.style.marginTop = '4px';
+                        errorDiv.style.fontSize = '0.75rem';
+                        errorDiv.style.fontWeight = 'bold';
+                        errorDiv.textContent = '❌ Recursos insuficientes';
+                        tooltipDiv.appendChild(errorDiv);
                     }
 
                     btn.appendChild(tooltipDiv);

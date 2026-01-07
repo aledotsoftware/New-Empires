@@ -1802,9 +1802,40 @@ export class Game {
             const statsDiv = document.createElement('div');
             statsDiv.className = 'selection-stats';
 
-            const hpDiv = document.createElement('div');
-            hpDiv.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
-            statsDiv.appendChild(hpDiv);
+            // Palette: Visual Health Bar
+            const hpContainer = document.createElement('div');
+            hpContainer.className = 'hp-container';
+            hpContainer.style.marginBottom = '6px';
+
+            const hpText = document.createElement('div');
+            hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+            hpText.style.marginBottom = '2px';
+            hpText.style.fontSize = '0.8rem';
+
+            const hpBar = document.createElement('div');
+            hpBar.className = 'health-bar';
+            hpBar.style.height = '6px';
+            hpBar.style.background = 'rgba(255, 255, 255, 0.2)';
+            hpBar.setAttribute('role', 'progressbar');
+            hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
+            hpBar.setAttribute('aria-valuemin', '0');
+            hpBar.setAttribute('aria-valuemax', entity.maxHp);
+            hpBar.setAttribute('aria-label', `Salud de ${entity.name}`);
+
+            const hpFill = document.createElement('div');
+            hpFill.className = 'health-fill';
+            const hpPercent = Math.max(0, Math.min(100, (entity.hp / entity.maxHp) * 100));
+            hpFill.style.width = `${hpPercent}%`;
+
+            // Color logic based on health percentage
+            if (hpPercent < 25) hpFill.style.background = '#c53030'; // Red
+            else if (hpPercent < 50) hpFill.style.background = '#ecc94b'; // Yellow
+            else hpFill.style.background = '#48bb78'; // Green
+
+            hpBar.appendChild(hpFill);
+            hpContainer.appendChild(hpText);
+            hpContainer.appendChild(hpBar);
+            statsDiv.appendChild(hpContainer);
 
             if (entity.attackDamage) {
                 const attackDiv = document.createElement('div');

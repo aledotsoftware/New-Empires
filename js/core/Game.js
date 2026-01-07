@@ -188,6 +188,12 @@ export class Game {
         this._renderCache = [];
         this._resourceRenderCache = [];
 
+        // OPTIMIZACIÓN: Contadores de Centros Urbanos para checkGameOver O(1)
+        this.townCenterCounts = {
+            player: 0,
+            enemy: 0
+        };
+
         this.initializeGame();
         this.updateUI();
     }
@@ -207,6 +213,10 @@ export class Game {
     }
 
     initializeGame() {
+        // Reiniciar contadores
+        this.townCenterCounts.player = 0;
+        this.townCenterCounts.enemy = 0;
+
         // Crear mapa
         this.generateMap();
 
@@ -214,6 +224,9 @@ export class Game {
         const townCenter = new TownCenter(400, 400, 'player');
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
+
+        // OPTIMIZACIÓN: Actualizar contador
+        this.townCenterCounts.player++;
 
         // Actualizar grid de edificios
         this.buildingGrid.add(townCenter);
@@ -395,6 +408,10 @@ export class Game {
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
+
+        // OPTIMIZACIÓN: Actualizar contador
+        this.townCenterCounts.enemy++;
+
         this.buildingGrid.add(enemyTC);
     }
 
@@ -897,6 +914,11 @@ export class Game {
             this.entities.push(building);
             this.buildingGrid.add(building);
 
+            // OPTIMIZACIÓN: Actualizar contador si es Centro Urbano
+            if (building.type === 'townCenter') {
+                this.townCenterCounts[building.team]++;
+            }
+
             // Reproducir sonido de inicio de construcción (variable global temporal)
             if (typeof soundManager !== 'undefined') {
                 soundManager.play('buildStart');
@@ -1098,6 +1120,13 @@ export class Game {
             if (building.isDead) {
                 hasDeadEntities = true;
                 hasDeadBuildings = true;
+
+                // OPTIMIZACIÓN: Actualizar contadores O(1)
+                if (building.type === 'townCenter') {
+                    if (this.townCenterCounts[building.team] > 0) {
+                        this.townCenterCounts[building.team]--;
+                    }
+                }
             }
         }
 
@@ -1200,22 +1229,11 @@ export class Game {
     }
 
     checkGameOver() {
-        let hasPlayerTC = false;
-        let hasEnemyTC = false;
-
-        // Iteración simple sin alocación de memoria
-        for (const b of this.buildings) {
-            if (b.type === 'townCenter' && !b.isDead) {
-                if (b.team === 'player') hasPlayerTC = true;
-                if (b.team === 'enemy') hasEnemyTC = true;
-            }
-            // Si ambos tienen TC, no necesitamos seguir buscando
-            if (hasPlayerTC && hasEnemyTC) break;
-        }
-
-        if (!hasPlayerTC) {
+        // OPTIMIZACIÓN: Verificación O(1) usando contadores mantenidos
+        // Reemplaza la iteración O(N) sobre todos los edificios
+        if (this.townCenterCounts.player <= 0) {
             this.gameOver(false);
-        } else if (!hasEnemyTC) {
+        } else if (this.townCenterCounts.enemy <= 0) {
             this.gameOver(true);
         }
     }

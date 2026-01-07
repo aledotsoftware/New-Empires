@@ -771,6 +771,47 @@ export class Game {
                     option.setAttribute('aria-disabled', 'true');
                     option.style.opacity = '0.6';
                     option.style.cursor = 'not-allowed';
+
+                    // Palette: Add accessible feedback for missing resources
+                    const missing = [];
+                    for (let [resource, amount] of Object.entries(cost)) {
+                        if (this.resources[resource] < amount) {
+                            const diff = amount - this.resources[resource];
+                            missing.push(`${resource} (${diff})`);
+                        }
+                    }
+
+                    // Update aria-label with specific reason
+                    let originalLabel = option.getAttribute('aria-label');
+                    if (originalLabel.includes(' - Insuficiente:')) {
+                        originalLabel = originalLabel.split(' - Insuficiente:')[0];
+                    }
+
+                    if (missing.length > 0) {
+                        option.setAttribute('aria-label', `${originalLabel} - Insuficiente: ${missing.join(', ')}`);
+
+                        // Add visual warning (if not already present)
+                        if (!option.querySelector('.build-warning')) {
+                            const warning = document.createElement('div');
+                            warning.className = 'build-warning';
+                            warning.style.color = 'var(--accent-red)';
+                            warning.style.fontSize = '0.8rem';
+                            warning.style.marginTop = '4px';
+                            warning.style.fontWeight = 'bold';
+                            warning.textContent = '⚠️ Faltan recursos';
+                            option.appendChild(warning);
+                        }
+                    }
+                } else {
+                    // Remove warning if present
+                    const warning = option.querySelector('.build-warning');
+                    if (warning) warning.remove();
+
+                    // Restore original label (clean up "Insuficiente" suffix)
+                    const currentLabel = option.getAttribute('aria-label');
+                    if (currentLabel && currentLabel.includes(' - Insuficiente:')) {
+                        option.setAttribute('aria-label', currentLabel.split(' - Insuficiente:')[0]);
+                    }
                 }
             }
 

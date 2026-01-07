@@ -1580,17 +1580,26 @@ export class Game {
     }
 
     drawSelection() {
+        if (this.selectedEntities.length === 0) return;
+
         this.ctx.strokeStyle = '#48bb78';
         this.ctx.lineWidth = 2;
+
+        // OPTIMIZATION: Batch selection rings to reduce draw calls
+        // Reduces draw calls from N to 1
+        this.ctx.beginPath();
 
         for (let entity of this.selectedEntities) {
             const screenX = entity.x - this.camera.x;
             const screenY = entity.y - this.camera.y;
+            const radius = entity.size + 5;
 
-            this.ctx.beginPath();
-            this.ctx.arc(screenX, screenY, entity.size + 5, 0, Math.PI * 2);
-            this.ctx.stroke();
+            // Move to start of arc to prevent connecting lines
+            this.ctx.moveTo(screenX + radius, screenY);
+            this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
         }
+
+        this.ctx.stroke();
     }
 
     drawDragSelection() {

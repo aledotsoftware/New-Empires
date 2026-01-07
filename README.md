@@ -417,6 +417,7 @@ El proyecto incluye documentación exhaustiva en la carpeta `docs/`:
 - **[CIVILIZATIONS_README.md](CIVILIZATIONS_README.md)** - Sistema de civilizaciones y bonificaciones
 - **[TECH_TREE_README.md](TECH_TREE_README.md)** - Árbol de tecnologías histórico completo
 - **[TERRAIN_SYSTEM.md](TERRAIN_SYSTEM.md)** - Sistema de terrenos y efectos tácticos
+- **[ALGORITMOS_Y_MAPAS.md](docs/ALGORITMOS_Y_MAPAS.md)** - Documentación de algoritmos de generación y pathfinding
 - **[COMPLETE_SUMMARY.md](COMPLETE_SUMMARY.md)** - Resumen de modularización (76% completado)
 
 ### Guías Rápidas

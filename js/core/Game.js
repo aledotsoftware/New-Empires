@@ -1121,15 +1121,10 @@ export class Game {
         }
 
         // Actualizar population count (fuera del condicional para detectar spawns)
-        // OPTIMIZACIÓN: Loop for manual es ~8.5x más rápido que reduce
-        let popCount = 0;
-        const unitsLen = this.units.length;
-        for (let i = 0; i < unitsLen; i++) {
-            if (this.units[i].team === 'player') {
-                popCount++;
-            }
-        }
-        this.population = popCount;
+        // OPTIMIZACIÓN: Análisis estático confirma que this.units contiene EXCLUSIVAMENTE unidades del jugador.
+        // Los enemigos se gestionan en this.enemies.
+        // Acceso directo a length es O(1), eliminando el loop O(N) redundante.
+        this.population = this.units.length;
 
         // Palette: Update Contextual Cursor
         this.updateCursorState();

@@ -188,6 +188,13 @@ export class Game {
         this._renderCache = [];
         this._resourceRenderCache = [];
 
+        // OPTIMIZACIÓN: Rastreo de Centros Urbanos (O(1) CheckGameOver)
+        // Evita iterar todos los edificios para verificar condiciones de victoria
+        this.townCenterCounts = {
+            player: 0,
+            enemy: 0
+        };
+
         this.initializeGame();
         this.updateUI();
     }
@@ -207,6 +214,10 @@ export class Game {
     }
 
     initializeGame() {
+        // Reiniciar contadores
+        this.townCenterCounts.player = 0;
+        this.townCenterCounts.enemy = 0;
+
         // Crear mapa
         this.generateMap();
 
@@ -214,6 +225,7 @@ export class Game {
         const townCenter = new TownCenter(400, 400, 'player');
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
+        this.townCenterCounts.player++;
 
         // Actualizar grid de edificios
         this.buildingGrid.add(townCenter);
@@ -396,6 +408,7 @@ export class Game {
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
         this.buildingGrid.add(enemyTC);
+        this.townCenterCounts.enemy++;
     }
 
     setupEventListeners() {
@@ -771,6 +784,47 @@ export class Game {
                     option.setAttribute('aria-disabled', 'true');
                     option.style.opacity = '0.6';
                     option.style.cursor = 'not-allowed';
+
+                    // Palette: Add accessible feedback for missing resources
+                    const missing = [];
+                    for (let [resource, amount] of Object.entries(cost)) {
+                        if (this.resources[resource] < amount) {
+                            const diff = amount - this.resources[resource];
+                            missing.push(`${resource} (${diff})`);
+                        }
+                    }
+
+                    // Update aria-label with specific reason
+                    let originalLabel = option.getAttribute('aria-label');
+                    if (originalLabel.includes(' - Insuficiente:')) {
+                        originalLabel = originalLabel.split(' - Insuficiente:')[0];
+                    }
+
+                    if (missing.length > 0) {
+                        option.setAttribute('aria-label', `${originalLabel} - Insuficiente: ${missing.join(', ')}`);
+
+                        // Add visual warning (if not already present)
+                        if (!option.querySelector('.build-warning')) {
+                            const warning = document.createElement('div');
+                            warning.className = 'build-warning';
+                            warning.style.color = 'var(--accent-red)';
+                            warning.style.fontSize = '0.8rem';
+                            warning.style.marginTop = '4px';
+                            warning.style.fontWeight = 'bold';
+                            warning.textContent = '⚠️ Faltan recursos';
+                            option.appendChild(warning);
+                        }
+                    }
+                } else {
+                    // Remove warning if present
+                    const warning = option.querySelector('.build-warning');
+                    if (warning) warning.remove();
+
+                    // Restore original label (clean up "Insuficiente" suffix)
+                    const currentLabel = option.getAttribute('aria-label');
+                    if (currentLabel && currentLabel.includes(' - Insuficiente:')) {
+                        option.setAttribute('aria-label', currentLabel.split(' - Insuficiente:')[0]);
+                    }
                 }
             }
 
@@ -896,6 +950,13 @@ export class Game {
             this.buildings.push(building);
             this.entities.push(building);
             this.buildingGrid.add(building);
+
+            // Actualizar contadores si es un Centro Urbano
+            if (building.type === 'townCenter') {
+                if (this.townCenterCounts[building.team] !== undefined) {
+                    this.townCenterCounts[building.team]++;
+                }
+            }
 
             // Reproducir sonido de inicio de construcción (variable global temporal)
             if (typeof soundManager !== 'undefined') {
@@ -1098,6 +1159,13 @@ export class Game {
             if (building.isDead) {
                 hasDeadEntities = true;
                 hasDeadBuildings = true;
+
+                // Actualizar contadores de TC al morir
+                if (building.type === 'townCenter') {
+                    if (this.townCenterCounts[building.team] !== undefined) {
+                        this.townCenterCounts[building.team]--;
+                    }
+                }
             }
         }
 
@@ -1200,22 +1268,11 @@ export class Game {
     }
 
     checkGameOver() {
-        let hasPlayerTC = false;
-        let hasEnemyTC = false;
-
-        // Iteración simple sin alocación de memoria
-        for (const b of this.buildings) {
-            if (b.type === 'townCenter' && !b.isDead) {
-                if (b.team === 'player') hasPlayerTC = true;
-                if (b.team === 'enemy') hasEnemyTC = true;
-            }
-            // Si ambos tienen TC, no necesitamos seguir buscando
-            if (hasPlayerTC && hasEnemyTC) break;
-        }
-
-        if (!hasPlayerTC) {
+        // OPTIMIZACIÓN: Verificación O(1) usando contadores mantenidos
+        // Reemplaza la iteración O(N) sobre todos los edificios
+        if (this.townCenterCounts.player <= 0) {
             this.gameOver(false);
-        } else if (!hasEnemyTC) {
+        } else if (this.townCenterCounts.enemy <= 0) {
             this.gameOver(true);
         }
     }

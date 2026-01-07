@@ -2090,7 +2090,15 @@ class Game {
         // Header
         const header = document.createElement('div');
         header.className = 'tooltip-header';
-        header.innerHTML = `${buttonData.label} <span class="tooltip-hotkey">[${hotkey}]</span>`;
+
+        // Securely create tooltip header without innerHTML to prevent XSS
+        const labelText = document.createTextNode(`${buttonData.label} `);
+        const hotkeySpan = document.createElement('span');
+        hotkeySpan.className = 'tooltip-hotkey';
+        hotkeySpan.textContent = `[${hotkey}]`;
+
+        header.appendChild(labelText);
+        header.appendChild(hotkeySpan);
         tooltip.appendChild(header);
 
         // Description

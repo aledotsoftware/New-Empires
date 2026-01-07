@@ -1891,6 +1891,8 @@ class Game {
 
         const buttons = [];
 
+        const popFull = this.population >= this.maxPopulation;
+
         if (entity.type === 'villager') {
             buttons.push({
                 icon: '🏗️',
@@ -1903,6 +1905,10 @@ class Game {
         } else if (entity.type === 'townCenter') {
             const cost = CONFIG.UNIT_COSTS.villager;
             const canAfford = this.canAfford(cost);
+            const enabled = canAfford && !popFull;
+            let error = null;
+            if (!canAfford) error = 'Recursos insuficientes';
+            else if (popFull) error = 'Límite de población alcanzado';
 
             buttons.push({
                 icon: '👨‍🌾',
@@ -1912,13 +1918,22 @@ class Game {
                 costObj: cost, // Palette: Added raw cost object
                 description: 'Trabajador básico. Recolecta madera, comida, oro y piedra',
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
-                enabled: canAfford
+                enabled: enabled,
+                error: error
             });
         } else if (entity.type === 'barracks') {
             const warriorCost = CONFIG.UNIT_COSTS.warrior;
             const archerCost = CONFIG.UNIT_COSTS.archer;
             const canAffordWarrior = this.canAfford(warriorCost);
             const canAffordArcher = this.canAfford(archerCost);
+
+            let warriorError = null;
+            if (!canAffordWarrior) warriorError = 'Recursos insuficientes';
+            else if (popFull) warriorError = 'Límite de población alcanzado';
+
+            let archerError = null;
+            if (!canAffordArcher) archerError = 'Recursos insuficientes';
+            else if (popFull) archerError = 'Límite de población alcanzado';
 
             buttons.push({
                 icon: '⚔️',
@@ -1928,7 +1943,8 @@ class Game {
                 costObj: warriorCost, // Palette: Added raw cost object
                 description: 'Unidad de infantería básica. Fuerte en combate cuerpo a cuerpo',
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-                enabled: canAffordWarrior
+                enabled: canAffordWarrior && !popFull,
+                error: warriorError
             });
 
             buttons.push({
@@ -1939,7 +1955,8 @@ class Game {
                 costObj: archerCost, // Palette: Added raw cost object
                 description: 'Unidad de ataque a distancia. Fuerte contra infantería ligera',
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
-                enabled: canAffordArcher
+                enabled: canAffordArcher && !popFull,
+                error: archerError
             });
         }
 
@@ -2104,7 +2121,14 @@ class Game {
             tooltip.appendChild(costDiv);
 
             // Error message
-            if (!buttonData.enabled && !this.canAfford(buttonData.costObj)) {
+            if (!buttonData.enabled && buttonData.error) {
+                const err = document.createElement('div');
+                err.className = 'tooltip-error';
+                err.style.color = 'var(--accent-red)';
+                err.style.fontWeight = 'bold';
+                err.textContent = `❌ ${buttonData.error}`;
+                tooltip.appendChild(err);
+            } else if (!buttonData.enabled && !this.canAfford(buttonData.costObj)) {
                 const err = document.createElement('div');
                 err.className = 'tooltip-error';
                 err.style.color = 'var(--accent-red)';

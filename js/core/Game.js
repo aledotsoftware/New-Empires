@@ -1969,6 +1969,8 @@ export class Game {
         // --- LÓGICA DE GENERACIÓN DE BOTONES ---
         // (Movemos la lógica de botones aquí para calcular el hash antes de tocar el DOM)
 
+        const popFull = this.population >= this.maxPopulation;
+
         if (entity.type === 'villager') {
             buttons.push({
                 iconKey: 'workshop',
@@ -1982,6 +1984,10 @@ export class Game {
         } else if (entity.type === 'townCenter') {
             const cost = CONFIG.UNIT_COSTS.villager;
             const canAfford = this.canAfford(cost);
+            const enabled = canAfford && !popFull;
+            let error = null;
+            if (!canAfford) error = 'Recursos insuficientes';
+            else if (popFull) error = 'Límite de población alcanzado';
 
             buttons.push({
                 iconKey: 'villager',
@@ -1991,13 +1997,22 @@ export class Game {
                 hotkey: 'Q',
                 cost: cost,
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
-                enabled: canAfford
+                enabled: enabled,
+                error: error
             });
         } else if (entity.type === 'barracks') {
             const warriorCost = CONFIG.UNIT_COSTS.warrior;
             const archerCost = CONFIG.UNIT_COSTS.archer;
             const canAffordWarrior = this.canAfford(warriorCost);
             const canAffordArcher = this.canAfford(archerCost);
+
+            let warriorError = null;
+            if (!canAffordWarrior) warriorError = 'Recursos insuficientes';
+            else if (popFull) warriorError = 'Límite de población alcanzado';
+
+            let archerError = null;
+            if (!canAffordArcher) archerError = 'Recursos insuficientes';
+            else if (popFull) archerError = 'Límite de población alcanzado';
 
             buttons.push({
                 iconKey: 'warrior',
@@ -2007,7 +2022,8 @@ export class Game {
                 hotkey: 'Q',
                 cost: warriorCost,
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-                enabled: canAffordWarrior
+                enabled: canAffordWarrior && !popFull,
+                error: warriorError
             });
 
             buttons.push({
@@ -2018,7 +2034,8 @@ export class Game {
                 hotkey: 'W',
                 cost: archerCost,
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
-                enabled: canAffordArcher
+                enabled: canAffordArcher && !popFull,
+                error: archerError
             });
         }
 
@@ -2194,8 +2211,18 @@ export class Game {
                          tooltipDiv.appendChild(costTooltip);
                     }
 
-                    // Palette: Add "Insufficient Resources" label if disabled due to cost
-                    if (!buttonData.enabled && buttonData.cost && !this.canAfford(buttonData.cost)) {
+                    // Palette: Add generic error label (Population or Resources)
+                    if (!buttonData.enabled && buttonData.error) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'tooltip-error';
+                        errorDiv.style.color = 'var(--accent-red)';
+                        errorDiv.style.marginTop = '4px';
+                        errorDiv.style.fontSize = '0.75rem';
+                        errorDiv.style.fontWeight = 'bold';
+                        errorDiv.textContent = `❌ ${buttonData.error}`;
+                        tooltipDiv.appendChild(errorDiv);
+                    } else if (!buttonData.enabled && buttonData.cost && !this.canAfford(buttonData.cost)) {
+                        // Fallback for legacy items without explicit error
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'tooltip-error';
                         errorDiv.style.color = 'var(--accent-red)';

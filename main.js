@@ -522,33 +522,84 @@ function populateMapSizes() {
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `${mapData.name} - ${mapData.width}x${mapData.height}`);
 
-        // Icono seguro usando DOM
+        // Icono seguro usando DOM (Palette: Visual Grid)
         const iconDiv = document.createElement('div');
         iconDiv.className = 'size-icon';
 
-        const mapIconDiv = document.createElement('div');
-        mapIconDiv.style.cssText = 'width:40px;height:40px;background:#444;border:1px solid #666;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#888;';
-        mapIconDiv.textContent = 'Map';
-        iconDiv.appendChild(mapIconDiv);
+        // Determinar densidad del grid visual (2x2 hasta 8x8)
+        let gridDensity = 4; // Default normal
+        let recommendedText = '2-4 Jugadores';
+
+        // Defensive check: use tiles property or fallback to width calculation
+        // TILE_SIZE is 32, so width/32 should give tile count if tiles prop is missing
+        const tileCount = mapData.tiles || (mapData.width / 32);
+
+        if (tileCount <= 120) { gridDensity = 2; recommendedText = 'Duel (1v1)'; }
+        else if (tileCount <= 144) { gridDensity = 3; recommendedText = '2 Jugadores'; }
+        else if (tileCount <= 168) { gridDensity = 4; recommendedText = '2-4 Jugadores'; }
+        else if (tileCount <= 200) { gridDensity = 5; recommendedText = '4-6 Jugadores'; }
+        else if (tileCount <= 220) { gridDensity = 6; recommendedText = '6-8 Jugadores'; }
+        else { gridDensity = 7; recommendedText = '8+ Jugadores'; }
+
+        const mapVisual = document.createElement('div');
+        mapVisual.className = 'map-visual';
+        // Inline styles for grid visualization (Palette philosophy: avoid new CSS files if possible for small tweaks)
+        mapVisual.style.cssText = `
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            display: grid;
+            grid-template-columns: repeat(${gridDensity}, 1fr);
+            grid-template-rows: repeat(${gridDensity}, 1fr);
+            gap: 2px;
+            padding: 2px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+        `;
+
+        const totalCells = gridDensity * gridDensity;
+        for(let i=0; i<totalCells; i++) {
+            const cell = document.createElement('div');
+            // Random opacity to simulate terrain/density
+            const opacity = 0.3 + Math.random() * 0.5;
+            cell.style.background = `rgba(72, 187, 120, ${opacity})`;
+            cell.style.borderRadius = '1px';
+            mapVisual.appendChild(cell);
+        }
+
+        iconDiv.appendChild(mapVisual);
 
         const nameDiv = document.createElement('div');
         nameDiv.className = 'size-name';
         nameDiv.textContent = mapData.name;
+        nameDiv.style.fontWeight = 'bold';
+        nameDiv.style.color = '#d4af37';
 
         const descDiv = document.createElement('div');
         descDiv.className = 'size-desc';
         descDiv.textContent = `${mapData.width}×${mapData.height}`;
+        descDiv.style.fontSize = '0.85rem';
+        descDiv.style.color = '#a0aec0';
+
+        const recDiv = document.createElement('div');
+        recDiv.className = 'size-rec';
+        recDiv.textContent = recommendedText;
+        recDiv.style.fontSize = '0.75rem';
+        recDiv.style.color = '#48bb78';
+        recDiv.style.marginTop = '4px';
 
         option.appendChild(iconDiv);
         option.appendChild(nameDiv);
         option.appendChild(descDiv);
+        option.appendChild(recDiv);
 
         // Accessibility attributes
         option.setAttribute('role', 'button');
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar mapa ${mapData.name} (${mapData.width} por ${mapData.height} casillas)`);
 
-        // Tooltip description
+        // Tooltip description (preserved from legacy logic)
         let sizeDesc = '';
         if (mapData.width * mapData.height <= 144 * 144) sizeDesc = 'Mapa rápido para partidas cortas.';
         else if (mapData.width * mapData.height <= 200 * 200) sizeDesc = 'Tamaño estándar equilibrado.';
@@ -559,14 +610,6 @@ function populateMapSizes() {
         tooltip.className = 'card-tooltip';
         tooltip.textContent = `${mapData.name}: ${mapData.width}x${mapData.height} casillas.\n${sizeDesc}`;
         option.appendChild(tooltip);
-
-        // Keyboard support
-        option.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                option.click();
-            }
-        });
 
         // Agregar event listener al crear el elemento
         const selectMapSize = () => {
@@ -585,6 +628,7 @@ function populateMapSizes() {
         };
 
         option.addEventListener('click', selectMapSize);
+        // Palette: Restore Keyboard Accessibility
         option.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();

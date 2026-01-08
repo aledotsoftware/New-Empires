@@ -216,3 +216,10 @@
     opacity: 0.5;
     margin-bottom: 0.5rem;
 }
+
+.selection-empty-img {
+    width: 32px;
+    height: 32px;
+    opacity: 0.7;
+    object-fit: contain;
+}

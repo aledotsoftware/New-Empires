@@ -1425,15 +1425,15 @@ export class Game {
         // Dibujar entidades
         // OPTIMIZACIÓN: Frustum Culling usando SpatialGrid
         // Solo renderizamos entidades que están visiblemente dentro de la cámara (con margen)
-        const centerX = this.camera.x + this.viewWidth / 2;
-        const centerY = this.camera.y + this.viewHeight / 2;
+        const margin = 100;
 
         // Reutilizamos _renderCache para evitar GC
-        // OPTIMIZATION: Use pre-calculated cullingRadius
+        // OPTIMIZATION: Use queryRect for rectangular frustum culling
+        // Avoids querying buckets outside the viewport corners (saving ~40% bucket checks)
         // Query units (clearing cache)
-        this.spatialGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, true);
+        this.spatialGrid.queryRect(this.camera.x - margin, this.camera.y - margin, this.viewWidth + margin * 2, this.viewHeight + margin * 2, this._renderCache, true);
         // Query buildings (appending)
-        this.buildingGrid.query(centerX, centerY, this.cullingRadius, this._renderCache, false);
+        this.buildingGrid.queryRect(this.camera.x - margin, this.camera.y - margin, this.viewWidth + margin * 2, this.viewHeight + margin * 2, this._renderCache, false);
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
         // Esto corrige problemas de superposición que el SpatialGrid podría introducir
@@ -1517,11 +1517,10 @@ export class Game {
     drawResourceNodes() {
         // OPTIMIZACIÓN: Usar SpatialGrid para recursos
         // En lugar de iterar todos los recursos, solo consultamos los cercanos
-        const centerX = this.camera.x + this.viewWidth / 2;
-        const centerY = this.camera.y + this.viewHeight / 2;
 
-        // OPTIMIZATION: Use pre-calculated cullingRadius (slightly larger than needed but efficient)
-        this.resourceGrid.query(centerX, centerY, this.cullingRadius, this._resourceRenderCache);
+        // OPTIMIZATION: Use queryRect to match viewport exactly
+        const margin = 50;
+        this.resourceGrid.queryRect(this.camera.x - margin, this.camera.y - margin, this.viewWidth + margin * 2, this.viewHeight + margin * 2, this._resourceRenderCache);
 
         // OPTIMIZATION: Batch background circles to reduce draw calls
         // from ~N calls to 1 call.

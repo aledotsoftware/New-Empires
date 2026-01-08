@@ -1807,7 +1807,18 @@ export class Game {
             // Icon
             const iconDiv = document.createElement('div');
             iconDiv.className = 'selection-empty-icon';
-            iconDiv.textContent = '👆';
+
+            const iconImg = document.createElement('img');
+            iconImg.src = 'assets/icons/cursor.png';
+            iconImg.alt = '';
+            iconImg.className = 'selection-empty-img';
+            // Show fallback text if image fails (safety net for missing asset)
+            iconImg.onerror = () => {
+                iconImg.style.display = 'none';
+                iconDiv.textContent = '👆'; // Text fallback (better than nothing)
+            };
+
+            iconDiv.appendChild(iconImg);
             iconDiv.setAttribute('aria-hidden', 'true');
 
             // Text

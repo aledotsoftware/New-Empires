@@ -105,4 +105,36 @@ export class SpatialGrid {
 
         return result;
     }
+
+    /**
+     * Query entities within a rectangular region.
+     * Optimized for viewport culling as it avoids checking unnecessary buckets
+     * compared to the square bounding box of a circular radius.
+     */
+    queryRect(minX, minY, width, height, result = [], clearResult = true) {
+        if (clearResult) {
+            result.length = 0;
+        }
+
+        const startCol = Math.max(0, Math.floor(minX * this.invCellSize));
+        const endCol = Math.min(this.cols - 1, Math.floor((minX + width) * this.invCellSize));
+        const startRow = Math.max(0, Math.floor(minY * this.invCellSize));
+        const endRow = Math.min(this.rows - 1, Math.floor((minY + height) * this.invCellSize));
+
+        for (let r = startRow; r <= endRow; r++) {
+            const rowBase = r * this.cols;
+            for (let c = startCol; c <= endCol; c++) {
+                const index = rowBase + c;
+                const bucket = this.buckets[index];
+                const bLen = bucket.length;
+
+                if (bLen > 0) {
+                    for (let i = 0; i < bLen; i++) {
+                        result.push(bucket[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    }
 }

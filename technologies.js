@@ -1077,10 +1077,25 @@ class TechManager {
 
                 // Unit stat adjustments (supports additive or multiplier values)
                 if (eff.unitStats) {
+                    // SECURITY: Whitelist of allowed stats to prevent prototype pollution or method overwriting
+                    const ALLOWED_STATS = [
+                        'hp', 'maxHp', 'speed', 'attackDamage', 'attackRange', 'attackSpeed',
+                        'defense', 'carryCapacity', 'gatherSpeed', 'lineOfSight'
+                    ];
+
                     for (let [unitType, stats] of Object.entries(eff.unitStats)) {
                         for (let [statKey, val] of Object.entries(stats)) {
+                            // SECURITY CHECK
+                            if (!ALLOWED_STATS.includes(statKey)) {
+                                console.warn(`Security blocked: Attempt to modify restricted property '${statKey}' on unit '${unitType}'`);
+                                continue;
+                            }
+
                             for (let u of this.game.units) {
                                 if (u.type === unitType) {
+                                    // Extra safety: never overwrite a function
+                                    if (typeof u[statKey] === 'function') continue;
+
                                     // Heuristic: keys containing 'max' or 'hp' are additive if value is small integer
                                     const keyLower = statKey.toLowerCase();
                                     if ((keyLower.includes('max') || keyLower.includes('hp') || keyLower.includes('damage')) && Number.isInteger(val) && Math.abs(val) <= 100) {

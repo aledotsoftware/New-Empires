@@ -772,3 +772,20 @@
     display: none; /* Hidden by default */
     object-fit: contain;
 }
+.kbd-inline {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: var(--font-body);
+    color: var(--bg-dark);
+    background: linear-gradient(180deg, var(--primary-gold-light) 0%, var(--primary-gold) 100%);
+    border: 1px solid var(--primary-gold-dark);
+    border-radius: 4px;
+    box-shadow: 0 2px 0 var(--primary-gold-dark), 0 2px 4px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    position: relative;
+    top: -1px;
+}

@@ -8,3 +8,7 @@
 ## 2024-05-24 - Hidden Affordances
 **Learning:** Robust functionality (like keyboard shortcuts) often exists in the codebase but remains "dead code" to the user if not surfaced in the UI. Discovery is as important as implementation.
 **Action:** When auditing UI, always check input handlers (keydown listeners) for hidden features that can be surfaced with simple visual badges.
+
+## 2025-01-09 - Actionable Error Messages
+**Learning:** Generic error messages like "Insufficient resources" force users to calculate what they need. Providing the specific missing amount (e.g., "Missing: Food (50)") reduces cognitive load and makes the interface more actionable.
+**Action:** Always calculate and display the *delta* (what is missing) in error states involving quantitative constraints.

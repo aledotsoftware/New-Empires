@@ -10,5 +10,8 @@ RUN apk add --no-cache curl
 
 COPY . /usr/share/nginx/html/
 
+# Copy custom Nginx configuration for security headers
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80

@@ -179,10 +179,21 @@ export class Game {
             currentPopulation: document.getElementById('currentPopulation'),
             maxPopulation: document.getElementById('maxPopulation'),
             gameTime: document.getElementById('gameTime'),
+            idleVillagerBtn: document.getElementById('idleVillagerBtn'),
+            idleVillagerCount: document.getElementById('idleVillagerCount'),
             selectionContent: document.getElementById('selectionContent'),
             commandPanel: document.getElementById('commandPanel'),
             notifications: document.getElementById('notifications')
         };
+
+        // Palette: Attach listener for Idle Villager button
+        if (this.uiElements.idleVillagerBtn) {
+            this.uiElements.idleVillagerBtn.onclick = () => {
+                this.selectNextIdleVillager();
+                // Return focus to canvas for gameplay flow
+                setTimeout(() => this.canvas.focus(), 50);
+            };
+        }
 
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
@@ -1766,6 +1777,27 @@ export class Game {
         const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
         const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
         if (this.uiElements.gameTime) this.uiElements.gameTime.textContent = `${minutes}:${seconds}`;
+
+        // Palette: Update Idle Villager Indicator
+        if (this.uiElements.idleVillagerBtn && this.enableIdleVillagerCycle) {
+            const idleCount = this.units.filter(u => u.type === 'villager' && u.state === 'IDLE').length;
+
+            if (idleCount > 0) {
+                if (this.uiElements.idleVillagerBtn.classList.contains('hidden')) {
+                    this.uiElements.idleVillagerBtn.classList.remove('hidden');
+                    // Ensure proper flex display (overriding CSS class hidden)
+                    this.uiElements.idleVillagerBtn.style.display = 'flex';
+                }
+                if (this.uiElements.idleVillagerCount) {
+                    this.uiElements.idleVillagerCount.textContent = idleCount;
+                }
+            } else {
+                if (!this.uiElements.idleVillagerBtn.classList.contains('hidden')) {
+                    this.uiElements.idleVillagerBtn.classList.add('hidden');
+                    this.uiElements.idleVillagerBtn.style.display = 'none';
+                }
+            }
+        }
 
         this.updateSelectionPanel();
         this.updateActionsPanel();

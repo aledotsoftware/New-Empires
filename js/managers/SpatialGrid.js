@@ -52,7 +52,8 @@ export class SpatialGrid {
                 this.activeIndices.push(index);
             }
 
-            bucket.push(entity);
+            // OPTIMIZATION: Manual indexing is slightly faster than push in hot loops
+            bucket[bucket.length] = entity;
         }
     }
 

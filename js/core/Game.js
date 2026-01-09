@@ -1232,7 +1232,7 @@ export class Game {
                     for (let i = 0; i < nearby.length; i++) {
                         const other = nearby[i];
                         if (other.team === 'enemy' && !other.isDead) {
-                            const distSq = (other.x - this.mouse.worldX)**2 + (other.y - this.mouse.worldY)**2;
+                            const distSq = (other.x - this.mouse.worldX) ** 2 + (other.y - this.mouse.worldY) ** 2;
                             if (distSq < other.size * other.size) {
                                 badgeIcon = 'assets/icons/swords.png';
                                 showBadge = true;
@@ -1250,7 +1250,7 @@ export class Game {
                     for (let i = 0; i < resources.length; i++) {
                         const res = resources[i];
                         if (res.amount > 0) {
-                            const distSq = (res.x - this.mouse.worldX)**2 + (res.y - this.mouse.worldY)**2;
+                            const distSq = (res.x - this.mouse.worldX) ** 2 + (res.y - this.mouse.worldY) ** 2;
                             if (distSq < res.radius * res.radius) {
                                 // Map resource type to icon
                                 if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
@@ -1579,7 +1579,7 @@ export class Game {
                 const img = assetLoader.getImage(node.type);
                 if (img && img.complete) {
                     const size = node.radius * 1.5;
-                    this.ctx.drawImage(img, screenX - size/2, screenY - size/2, size, size);
+                    this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
                 } else {
                     // Fallback to square if image not ready
                     this.ctx.fillStyle = '#FFD700';
@@ -2006,13 +2006,12 @@ export class Game {
         // OPTIMIZATION: Initialize grid only once
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',
-            'A', 'S', 'D', 'F', 'G',
-            'Z', 'X', 'C', 'V', 'B'
+            'A', 'S', 'D', 'F', 'G'
         ];
 
-        if (grid.childElementCount !== 15) {
+        if (grid.childElementCount !== 10) {
             grid.innerHTML = '';
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 10; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'action-btn disabled';
                 btn.setAttribute('data-hotkey', hotkeys[i]);
@@ -2056,7 +2055,7 @@ export class Game {
         // Helper para crear elementos de costo (Legacy for internal cost text generation if needed)
         // Updated to use full names for better a11y text generation
         const getCostText = (cost) => {
-             const parts = [];
+            const parts = [];
             for (const [res, amount] of Object.entries(cost)) {
                 if (amount > 0) parts.push(`${amount} ${res}`);
             }
@@ -2152,7 +2151,7 @@ export class Game {
             const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
 
             for (let tech of availableTechs) {
-                if (buttons.length >= 15) break;
+                if (buttons.length >= 10) break;
 
                 const canAfford = this.techManager.canResearch(tech.id);
 
@@ -2190,7 +2189,7 @@ export class Game {
         // OPTIMIZATION: Reuse DOM elements
         const gridButtons = Array.from(grid.children);
 
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 10; i++) {
             const btn = gridButtons[i];
             const hotkey = hotkeys[i];
 
@@ -2278,45 +2277,45 @@ export class Game {
                         const costTooltip = document.createElement('div');
                         costTooltip.className = 'tooltip-cost';
 
-                         for (const [res, amount] of Object.entries(buttonData.cost)) {
-                             const resSpan = document.createElement('span');
-                             resSpan.className = 'cost-item';
+                        for (const [res, amount] of Object.entries(buttonData.cost)) {
+                            const resSpan = document.createElement('span');
+                            resSpan.className = 'cost-item';
 
-                             // Palette: Use secure icon generation
-                             if (typeof assetLoader !== 'undefined' && assetLoader.getSrc) {
-                                 const iconSrc = assetLoader.getSrc(res);
-                                 if (iconSrc) {
-                                     const img = document.createElement('img');
-                                     img.src = iconSrc;
-                                     img.className = 'icon-tiny';
-                                     img.alt = res;
-                                     resSpan.appendChild(img);
-                                 } else {
-                                     resSpan.textContent = res.substring(0, 1).toUpperCase();
-                                 }
-                             } else {
-                                 let icon = '';
-                                 if (res === 'food') icon = '🌾';
-                                 else if (res === 'wood') icon = '🌲';
-                                 else if (res === 'gold') icon = '💰';
-                                 else if (res === 'stone') icon = '🪨';
-                                 resSpan.textContent = icon;
-                             }
+                            // Palette: Use secure icon generation
+                            if (typeof assetLoader !== 'undefined' && assetLoader.getSrc) {
+                                const iconSrc = assetLoader.getSrc(res);
+                                if (iconSrc) {
+                                    const img = document.createElement('img');
+                                    img.src = iconSrc;
+                                    img.className = 'icon-tiny';
+                                    img.alt = res;
+                                    resSpan.appendChild(img);
+                                } else {
+                                    resSpan.textContent = res.substring(0, 1).toUpperCase();
+                                }
+                            } else {
+                                let icon = '';
+                                if (res === 'food') icon = '🌾';
+                                else if (res === 'wood') icon = '🌲';
+                                else if (res === 'gold') icon = '💰';
+                                else if (res === 'stone') icon = '🪨';
+                                resSpan.textContent = icon;
+                            }
 
-                             const amountText = document.createTextNode(` ${amount}`);
-                             resSpan.appendChild(amountText);
+                            const amountText = document.createTextNode(` ${amount}`);
+                            resSpan.appendChild(amountText);
 
-                             // Palette: Highlight missing resources
-                             if (this.resources[res] < amount) {
-                                 resSpan.style.color = 'var(--accent-red)';
-                                 resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
-                             } else {
-                                 resSpan.setAttribute('aria-label', `${amount} ${res}`);
-                             }
+                            // Palette: Highlight missing resources
+                            if (this.resources[res] < amount) {
+                                resSpan.style.color = 'var(--accent-red)';
+                                resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
+                            } else {
+                                resSpan.setAttribute('aria-label', `${amount} ${res}`);
+                            }
 
-                             costTooltip.appendChild(resSpan);
-                         }
-                         tooltipDiv.appendChild(costTooltip);
+                            costTooltip.appendChild(resSpan);
+                        }
+                        tooltipDiv.appendChild(costTooltip);
                     }
 
                     // Palette: Add generic error label (Population or Resources)
@@ -2387,16 +2386,16 @@ export class Game {
         ];
 
         // Ensure grid has 15 children
-        if (grid.childElementCount !== 15) {
+        if (grid.childElementCount !== 10) {
             grid.innerHTML = '';
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 10; i++) {
                 grid.appendChild(document.createElement('button'));
             }
         }
 
         const gridButtons = Array.from(grid.children);
 
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 10; i++) {
             const btn = gridButtons[i];
             const hotkey = hotkeys[i];
             const newStateKey = `empty|${hotkey}`;

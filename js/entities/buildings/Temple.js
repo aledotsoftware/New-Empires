@@ -7,7 +7,7 @@ import { Building } from '../Building.js';
 export class Temple extends Building {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '⛪';
+        this.icon = 'assets/icons/temple.png';
         this.name = 'Templo';
         this.type = 'temple';
         this.maxHp = 1500;

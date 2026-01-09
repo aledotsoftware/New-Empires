@@ -7,7 +7,7 @@ import { Unit } from '../Unit.js';
 export class Villager extends Unit {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '👨‍🌾';
+        this.icon = 'assets/icons/villager.png';
         this.name = 'Aldeano';
         this.type = 'villager';
         this.maxHp = 50;

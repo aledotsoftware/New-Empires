@@ -1,0 +1,1961 @@
+/* ================================================================
+   NEW EMPIRES - TEMA MEDIEVAL COMPLETO
+   Sistema de diseño desde cero para juego RTS medieval
+   ================================================================ */
+
+/* ==========================================
+   1. RESET Y VARIABLES GLOBALES
+   ========================================== */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* === COLORES PRIMARIOS MEDIEVALES === */
+    --gold: #c9a227;
+    --gold-dark: #8b6914;
+    --gold-light: #e8d48b;
+    --gold-bright: #ffd700;
+
+    /* === FONDOS DE PIEDRA Y MADERA === */
+    --stone-darkest: #1a1612;
+    --stone-dark: #2a2318;
+    --stone-medium: #3d352a;
+    --stone-light: #524a3a;
+    --wood-dark: #2c241c;
+    --wood-medium: #3a2f24;
+    --wood-light: #5c4d3d;
+
+    /* === COLORES DE ACENTO === */
+    --blood-red: #8b1a1a;
+    --blood-red-light: #b32d2d;
+    --royal-blue: #1a3a5c;
+    --royal-blue-light: #2a5a8c;
+    --forest-green: #2d4a2d;
+    --forest-green-light: #3d6a3d;
+
+    /* === PERGAMINO Y PAPEL === */
+    --parchment: #d4c4a8;
+    --parchment-dark: #b8a88a;
+    --parchment-light: #e8dcc8;
+
+    /* === METALES === */
+    --iron: #5a5a5a;
+    --iron-light: #7a7a7a;
+    --bronze: #cd7f32;
+    --copper: #b87333;
+
+    /* === TEXTOS === */
+    --text-gold: #e8d48b;
+    --text-light: #e8e0d0;
+    --text-medium: #b8a890;
+    --text-dark: #6a6050;
+    --text-shadow: #1a1510;
+
+    /* === RECURSOS === */
+    --wood-color: #8b5a2b;
+    --food-color: #7cb342;
+    --gold-color: #ffc107;
+    --stone-color: #78909c;
+
+    /* === FUENTES === */
+    --font-title: 'Cinzel', 'Times New Roman', serif;
+    --font-body: 'Crimson Text', 'Georgia', serif;
+    --font-ui: 'Inter', 'Segoe UI', sans-serif;
+
+    /* === DIMENSIONES === */
+    --border-thin: 2px;
+    --border-medium: 3px;
+    --border-thick: 4px;
+    --radius-small: 4px;
+    --radius-medium: 8px;
+    --radius-large: 12px;
+
+    /* === SOMBRAS === */
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-gold: 0 0 20px rgba(201, 162, 39, 0.3);
+
+    /* === Z-INDEX === */
+    --z-base: 1;
+    --z-hud: 100;
+    --z-modal: 500;
+    --z-overlay: 1000;
+    --z-notification: 1100;
+}
+
+/* Importar fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ==========================================
+   2. ESTILOS BASE DEL BODY
+   ========================================== */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text-light);
+    background: var(--stone-darkest);
+    line-height: 1.5;
+}
+
+/* Cursor medieval personalizado */
+body,
+.game-screen {
+    cursor: url('assets/icons/cursor.png'), default;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================
+   3. TEXTURAS Y PATRONES CSS
+   ========================================== */
+
+/* Textura de piedra */
+.texture-stone {
+    background:
+        linear-gradient(135deg, rgba(42, 35, 24, 0.9) 0%, rgba(61, 53, 42, 0.9) 50%, rgba(42, 35, 24, 0.9) 100%),
+        repeating-linear-gradient(45deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.1) 2px,
+            rgba(0, 0, 0, 0.1) 4px);
+}
+
+/* Textura de madera */
+.texture-wood {
+    background:
+        linear-gradient(90deg,
+            rgba(58, 47, 36, 1) 0%,
+            rgba(44, 36, 28, 1) 25%,
+            rgba(58, 47, 36, 1) 50%,
+            rgba(44, 36, 28, 1) 75%,
+            rgba(58, 47, 36, 1) 100%);
+    background-size: 20px 100%;
+}
+
+/* Textura de pergamino */
+.texture-parchment {
+    background:
+        linear-gradient(135deg, var(--parchment-light) 0%, var(--parchment) 50%, var(--parchment-dark) 100%);
+}
+
+/* ==========================================
+   4. COMPONENTES DE MARCO MEDIEVAL
+   ========================================== */
+
+/* Marco estilo piedra tallada */
+.frame-stone {
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: var(--border-thick) solid var(--stone-light);
+    border-radius: var(--radius-medium);
+    box-shadow:
+        var(--shadow-medium),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Marco estilo madera */
+.frame-wood {
+    background: linear-gradient(180deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+    border: var(--border-thick) solid var(--wood-light);
+    border-radius: var(--radius-medium);
+    box-shadow:
+        var(--shadow-medium),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Marco dorado decorativo */
+.frame-gold {
+    border: var(--border-medium) solid var(--gold);
+    box-shadow:
+        0 0 0 1px var(--gold-dark),
+        var(--shadow-gold),
+        var(--shadow-medium);
+}
+
+/* Esquinas decorativas */
+.ornate-corners {
+    position: relative;
+}
+
+.ornate-corners::before,
+.ornate-corners::after {
+    content: '◆';
+    position: absolute;
+    color: var(--gold);
+    font-size: 12px;
+    text-shadow: 0 0 4px var(--gold);
+}
+
+.ornate-corners::before {
+    top: -6px;
+    left: -6px;
+}
+
+.ornate-corners::after {
+    top: -6px;
+    right: -6px;
+}
+
+/* ==========================================
+   5. PANTALLA DE INICIO
+   ========================================== */
+.start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-overlay);
+
+    /* Fondo medieval con gradiente oscuro */
+    background:
+        radial-gradient(ellipse at center, rgba(42, 35, 24, 0.8) 0%, rgba(26, 22, 18, 0.95) 70%),
+        linear-gradient(180deg, var(--stone-darkest) 0%, var(--wood-dark) 100%);
+}
+
+/* Efecto de viñeta */
+.start-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+    pointer-events: none;
+}
+
+.start-content {
+    text-align: center;
+    z-index: 2;
+    padding: 2rem;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Título del juego */
+.game-title {
+    margin-bottom: 2rem;
+}
+
+.title-main {
+    display: block;
+    font-family: var(--font-title);
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow:
+        0 2px 0 var(--gold-dark),
+        0 4px 8px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(201, 162, 39, 0.4);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+    animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+    from {
+        text-shadow:
+            0 2px 0 var(--gold-dark),
+            0 4px 8px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(201, 162, 39, 0.3);
+    }
+
+    to {
+        text-shadow:
+            0 2px 0 var(--gold-dark),
+            0 4px 8px rgba(0, 0, 0, 0.5),
+            0 0 50px rgba(201, 162, 39, 0.6);
+    }
+}
+
+.title-sub {
+    display: block;
+    font-family: var(--font-title);
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-weight: 400;
+    color: var(--text-medium);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+}
+
+/* Descripción */
+.start-description {
+    margin: 2rem auto;
+    color: var(--text-medium);
+    font-size: 1.1rem;
+    max-width: 500px;
+    font-style: italic;
+}
+
+/* Botón principal de inicio */
+.btn-start {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.2rem 3rem;
+    font-family: var(--font-title);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--stone-darkest);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    border: none;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 0 var(--gold-dark),
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.btn-start:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 0 var(--gold-dark),
+        0 10px 30px rgba(201, 162, 39, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-start:active {
+    transform: translateY(2px);
+    box-shadow:
+        0 2px 0 var(--gold-dark),
+        0 4px 10px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-icon {
+    font-size: 1.5rem;
+}
+
+.btn-icon img {
+    width: 28px;
+    height: 28px;
+    filter: brightness(0) saturate(100%);
+}
+
+/* Botones secundarios */
+.start-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    font-family: var(--font-title);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--gold-dark);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+
+    box-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(180deg, var(--stone-light) 0%, var(--stone-medium) 100%);
+    border-color: var(--gold);
+    color: var(--gold-light);
+    box-shadow:
+        0 4px 12px rgba(201, 162, 39, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:active {
+    transform: translateY(1px);
+}
+
+.btn-secondary img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Panel de controles */
+.controls-info {
+    margin-top: 3rem;
+    padding: 1.5rem 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+
+    background: linear-gradient(180deg, rgba(42, 35, 24, 0.9) 0%, rgba(26, 22, 18, 0.95) 100%);
+    border: 2px solid var(--wood-light);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-medium);
+}
+
+.controls-info h3 {
+    font-family: var(--font-title);
+    color: var(--gold);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+}
+
+.control-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-small);
+    border-left: 3px solid var(--gold-dark);
+}
+
+.control-key {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    min-width: 70px;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--stone-darkest);
+
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    border-radius: 4px;
+    box-shadow:
+        0 2px 0 var(--gold-dark),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.control-desc {
+    color: var(--text-medium);
+    font-size: 0.9rem;
+}
+
+/* Partículas de fondo */
+.particles-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Kbd inline */
+.kbd-inline {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--stone-darkest);
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    border-radius: 3px;
+    box-shadow: 0 1px 0 var(--gold-dark);
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+/* ==========================================
+   6. SELECCIÓN DE MAPA Y CIVILIZACIÓN
+   ========================================== */
+
+/* Contenedor de contenido de selección */
+.civ-selection-content,
+.map-size-content {
+    max-width: 1000px;
+    width: 100%;
+    padding: 2rem;
+}
+
+/* Grid de tamaños de mapa */
+.map-size-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.map-size-option {
+    position: relative;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-soft);
+}
+
+.map-size-option:hover {
+    border-color: var(--gold);
+    transform: translateY(-4px);
+    box-shadow:
+        var(--shadow-medium),
+        0 0 20px rgba(201, 162, 39, 0.2);
+}
+
+.map-size-option:active {
+    transform: translateY(-2px);
+}
+
+.size-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.size-name {
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+}
+
+.size-desc {
+    color: var(--text-medium);
+    font-size: 0.85rem;
+}
+
+/* Grid de civilizaciones */
+.civ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.civ-option {
+    position: relative;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.civ-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.civ-option:hover {
+    border-color: var(--gold);
+    transform: translateY(-6px);
+    box-shadow:
+        var(--shadow-strong),
+        0 0 30px rgba(201, 162, 39, 0.3);
+}
+
+.civ-option:hover::before {
+    opacity: 1;
+}
+
+.civ-icon {
+    font-size: 3rem;
+    margin-bottom: 0.8rem;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.civ-name {
+    font-family: var(--font-title);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.civ-desc {
+    color: var(--text-medium);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    min-height: 2.8em;
+}
+
+/* ==========================================
+   7. PANTALLA DE JUEGO
+   ========================================== */
+.game-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--stone-darkest);
+}
+
+/* Canvas del juego */
+#gameCanvas {
+    flex: 1;
+    width: 100%;
+    display: block;
+    cursor: url('assets/icons/cursor.png'), crosshair;
+}
+
+/* ==========================================
+   8. PANEL SUPERIOR DE RECURSOS
+   ========================================== */
+.top-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    gap: 16px;
+
+    background: linear-gradient(180deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+    border-bottom: 3px solid var(--gold-dark);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    z-index: var(--z-hud);
+}
+
+.resources-panel {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.resource-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--stone-light);
+    border-radius: var(--radius-small);
+    transition: all 0.2s ease;
+}
+
+.resource-item:hover {
+    border-color: var(--gold-dark);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.resource-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resource-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.resource-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.resource-label {
+    font-size: 0.7rem;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.resource-value {
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-gold);
+}
+
+.resource-population {
+    border-color: var(--gold-dark);
+}
+
+/* Tiempo de juego */
+.game-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--stone-light);
+    border-radius: var(--radius-small);
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-gold);
+}
+
+.time-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.time-icon img {
+    width: 100%;
+    height: 100%;
+}
+
+/* ==========================================
+   9. HUD INFERIOR DEL JUEGO
+   ========================================== */
+#gameHUD {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 130px;
+
+    display: grid;
+    grid-template-columns: 200px 1fr 160px;
+    gap: 8px;
+    padding: 8px;
+
+    background: linear-gradient(180deg, var(--wood-dark) 0%, var(--stone-darkest) 100%);
+    border-top: 3px solid var(--gold-dark);
+    box-shadow:
+        0 -4px 20px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    z-index: var(--z-hud);
+}
+
+/* Panel de información (izquierda) */
+#infoPanel {
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-medium);
+    padding: 8px;
+    overflow: hidden;
+}
+
+#selectionContent {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.selection-icon {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border: 2px solid var(--gold-dark);
+    border-radius: var(--radius-small);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.selection-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.selection-details {
+    flex: 1;
+    overflow: hidden;
+}
+
+.selection-details h3 {
+    font-family: var(--font-title);
+    font-size: 0.95rem;
+    color: var(--gold);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selection-stats {
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    line-height: 1.3;
+}
+
+/* Estado vacío */
+.selection-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-dark);
+    text-align: center;
+    font-style: italic;
+}
+
+/* Panel de comandos (centro) - Grid 2x5 estilo Age of Empires */
+#commandPanel {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 3px;
+    padding: 4px;
+    max-width: 350px;
+    margin: 0 auto;
+
+    background: linear-gradient(180deg, var(--stone-dark) 0%, var(--stone-darkest) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-medium);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Botones de acción */
+.action-btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 3px 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 44px;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-small);
+    box-shadow:
+        0 2px 0 rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.action-btn:hover:not(.disabled) {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, var(--stone-light) 0%, var(--stone-medium) 100%);
+    transform: translateY(-2px);
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.4),
+        0 0 12px rgba(201, 162, 39, 0.3);
+}
+
+.action-btn:active:not(.disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Botones deshabilitados/vacíos */
+.action-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(180deg, var(--stone-dark) 0%, var(--stone-darkest) 100%);
+    border-color: rgba(92, 77, 61, 0.4);
+}
+
+/* Patrón visual para slots vacíos */
+.action-btn.disabled .btn-icon:empty::before {
+    content: '·';
+    font-size: 1.5rem;
+    color: var(--stone-light);
+    opacity: 0.3;
+}
+
+/* Contenedor del icono */
+.btn-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    margin-bottom: 1px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.btn-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Etiqueta del botón */
+.btn-label {
+    font-family: var(--font-ui);
+    font-size: 0.55rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    max-width: 60px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Badge de hotkey */
+.btn-hotkey {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    font-family: var(--font-ui);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--stone-darkest);
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    padding: 1px 4px;
+    border-radius: 2px;
+    box-shadow: 0 1px 0 var(--gold-dark);
+    line-height: 1.2;
+}
+
+/* Tooltip de acción */
+.btn-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    padding: 10px;
+
+    background: linear-gradient(180deg, var(--stone-dark) 0%, var(--stone-darkest) 100%);
+    border: 2px solid var(--gold-dark);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-strong);
+
+    text-align: left;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.btn-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--gold-dark);
+}
+
+.action-btn:hover .btn-tooltip,
+.action-btn:focus-visible .btn-tooltip {
+    display: block;
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.tooltip-header {
+    font-family: var(--font-title);
+    font-size: 0.9rem;
+    color: var(--gold);
+    border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tooltip-hotkey {
+    color: var(--text-dark);
+    font-size: 0.8rem;
+}
+
+.tooltip-desc {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.tooltip-cost {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    color: var(--gold-light);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 6px;
+    border-radius: 3px;
+}
+
+/* Panel del minimapa (derecha) */
+#minimapPanel {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.minimap-container {
+    width: 110px;
+    height: 110px;
+    position: relative;
+
+    background: rgba(0, 0, 0, 0.6);
+    border: 3px solid var(--gold-dark);
+    border-radius: var(--radius-small);
+    box-shadow:
+        var(--shadow-medium),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+#minimapCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+/* ==========================================
+   10. SISTEMA DE MODALES
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.8);
+    z-index: var(--z-modal);
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 3px solid var(--gold-dark);
+    border-radius: var(--radius-large);
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        var(--shadow-gold);
+
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+
+    background: linear-gradient(180deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+    border-bottom: 2px solid var(--gold-dark);
+}
+
+.modal-header h2 {
+    font-family: var(--font-title);
+    font-size: 1.4rem;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.modal-header h2 img {
+    width: 24px;
+    height: 24px;
+}
+
+.btn-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(139, 26, 26, 0.3);
+    border: 2px solid var(--blood-red);
+    border-radius: 50%;
+    color: var(--blood-red-light);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+    background: var(--blood-red);
+    color: white;
+}
+
+/* Menú de construcción */
+.build-menu {
+    max-width: 800px;
+}
+
+.build-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+@media (min-width: 600px) {
+    .build-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.build-option {
+    position: relative;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-medium);
+}
+
+.build-option:hover {
+    border-color: var(--gold);
+    background: rgba(201, 162, 39, 0.1);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.shortcut-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--stone-darkest);
+}
+
+.build-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.5rem;
+}
+
+.build-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.build-name {
+    font-family: var(--font-title);
+    font-size: 0.95rem;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+}
+
+.build-cost {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+}
+
+.build-cost span {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.75rem;
+    color: var(--text-medium);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.build-cost .icon-tiny {
+    width: 14px;
+    height: 14px;
+}
+
+.build-info {
+    font-size: 0.75rem;
+    color: var(--text-dark);
+    font-style: italic;
+}
+
+/* ==========================================
+   11. ÁRBOL DE TECNOLOGÍAS
+   ========================================== */
+.tech-tree-modal {
+    max-width: 95vw;
+    width: 1600px;
+    max-height: 90vh;
+}
+
+.tech-tree-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: calc(90vh - 80px);
+}
+
+.tech-tree-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-medium);
+    border: 1px solid var(--stone-light);
+}
+
+.current-age-info h3 {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin: 0;
+}
+
+.current-age-info .age-period {
+    font-size: 0.9rem;
+    color: var(--text-medium);
+    font-style: italic;
+}
+
+.timeline-legend {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-medium);
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.legend-color.past {
+    background: var(--stone-light);
+}
+
+.legend-color.current {
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+}
+
+.legend-color.future {
+    background: var(--stone-dark);
+    opacity: 0.5;
+}
+
+/* Timeline horizontal */
+.horizontal-timeline {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem;
+    flex: 1;
+
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-medium);
+}
+
+.horizontal-timeline::-webkit-scrollbar {
+    height: 10px;
+}
+
+.horizontal-timeline::-webkit-scrollbar-track {
+    background: var(--stone-dark);
+    border-radius: 5px;
+}
+
+.horizontal-timeline::-webkit-scrollbar-thumb {
+    background: var(--gold-dark);
+    border-radius: 5px;
+}
+
+.horizontal-timeline::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+.age-column {
+    flex-shrink: 0;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.age-column-header {
+    padding: 1rem;
+    text-align: center;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-medium);
+}
+
+.age-column-header.current {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(201, 162, 39, 0.3);
+}
+
+.age-column-header.past {
+    opacity: 0.6;
+}
+
+.age-column-header.future {
+    opacity: 0.4;
+}
+
+.age-number-badge {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    border-radius: 50%;
+
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--stone-darkest);
+}
+
+.age-name-short {
+    font-family: var(--font-title);
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+
+.age-period-short {
+    font-size: 0.75rem;
+    color: var(--text-dark);
+    font-style: italic;
+}
+
+.age-tech-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tech-card-compact {
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--stone-light);
+    border-radius: var(--radius-small);
+}
+
+.tech-card-compact:hover {
+    border-color: var(--gold);
+    background: rgba(201, 162, 39, 0.1);
+}
+
+.tech-icon-compact {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+}
+
+.tech-name-compact {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    line-height: 1.2;
+}
+
+.tech-cost-compact {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.cost-mini {
+    font-size: 0.7rem;
+    color: var(--text-medium);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+/* ==========================================
+   12. CONFIGURACIÓN
+   ========================================== */
+.settings-modal {
+    max-width: 500px;
+}
+
+.settings-content {
+    padding: 1.5rem;
+}
+
+.settings-content h3 {
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(201, 162, 39, 0.3);
+}
+
+.settings-content label {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.settings-content input[type="range"] {
+    width: 100%;
+    margin-top: 0.5rem;
+    accent-color: var(--gold);
+}
+
+/* ==========================================
+   13. PANTALLA DE GAME OVER
+   ========================================== */
+.game-over-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.9);
+    z-index: var(--z-overlay);
+}
+
+.game-over-content {
+    text-align: center;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.game-over-title {
+    font-family: var(--font-title);
+    font-size: clamp(3rem, 8vw, 5rem);
+    color: var(--gold);
+    text-shadow:
+        0 2px 0 var(--gold-dark),
+        0 4px 20px rgba(201, 162, 39, 0.5);
+    margin-bottom: 1rem;
+}
+
+.game-over-message {
+    font-size: 1.3rem;
+    color: var(--text-medium);
+    margin-bottom: 2rem;
+}
+
+.game-over-stats {
+    display: inline-block;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+
+    background: rgba(42, 35, 24, 0.8);
+    border: 2px solid var(--gold-dark);
+    border-radius: var(--radius-medium);
+}
+
+.btn-restart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2.5rem;
+
+    font-family: var(--font-title);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--stone-darkest);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    border: none;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 0 var(--gold-dark),
+        0 6px 20px rgba(0, 0, 0, 0.4);
+
+    transition: all 0.2s ease;
+}
+
+.btn-restart:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 0 var(--gold-dark),
+        0 10px 30px rgba(201, 162, 39, 0.4);
+}
+
+/* ==========================================
+   14. NOTIFICACIONES
+   ========================================== */
+.notifications {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-notification);
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 320px;
+    max-width: 420px;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--gold-dark);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-strong);
+
+    animation: notificationSlideIn 0.4s ease-out;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification.fading-out {
+    animation: notificationFadeOut 0.4s ease-out forwards;
+}
+
+@keyframes notificationFadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+.notification.error {
+    border-left-color: var(--blood-red);
+}
+
+.notification.success {
+    border-left-color: var(--forest-green-light);
+}
+
+.notification-icon {
+    font-size: 1.3rem;
+}
+
+.notification-text {
+    flex: 1;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.notification-close-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notification-close-btn:hover {
+    background: var(--blood-red);
+    color: white;
+}
+
+.notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.notification-progress-bar {
+    height: 100%;
+    background: var(--gold);
+    animation: progressShrink linear forwards;
+}
+
+@keyframes progressShrink {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+/* ==========================================
+   15. TOOLTIPS GENERALES
+   ========================================== */
+.card-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.8rem;
+    width: max-content;
+    max-width: 220px;
+
+    background: linear-gradient(180deg, var(--stone-dark) 0%, var(--stone-darkest) 100%);
+    border: 2px solid var(--gold-dark);
+    border-radius: var(--radius-small);
+    box-shadow: var(--shadow-strong);
+
+    font-size: 0.85rem;
+    color: var(--text-light);
+    text-align: left;
+    line-height: 1.4;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 100;
+}
+
+.card-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--gold-dark);
+}
+
+.map-size-option:hover .card-tooltip,
+.map-size-option:focus-visible .card-tooltip,
+.civ-option:hover .card-tooltip,
+.civ-option:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-4px);
+}
+
+/* ==========================================
+   16. SCROLLBAR PERSONALIZADO
+   ========================================== */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--stone-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gold-dark);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+/* ==========================================
+   17. FOCUS Y ACCESIBILIDAD
+   ========================================== */
+:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.3);
+}
+
+/* ==========================================
+   18. RESPONSIVE
+   ========================================== */
+@media (max-width: 1024px) {
+    #gameHUD {
+        height: 160px;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    #infoPanel {
+        display: none;
+    }
+
+    #commandPanel {
+        grid-column: 1;
+    }
+
+    #minimapPanel {
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .title-main {
+        font-size: 2.5rem;
+    }
+
+    .controls-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .start-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .map-size-grid,
+    .civ-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .build-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #gameHUD {
+        height: 140px;
+    }
+
+    #commandPanel {
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+    }
+
+    .minimap-container {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-panel {
+        padding: 6px 10px;
+    }
+
+    .resources-panel {
+        gap: 0.4rem;
+    }
+
+    .resource-item {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .resource-label {
+        display: none;
+    }
+}
+
+/* ==========================================
+   19. UTILIDADES
+   ========================================== */
+.icon-tiny {
+    width: 14px;
+    height: 14px;
+}
+
+.icon-small {
+    width: 20px;
+    height: 20px;
+}
+
+.icon-medium {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-large {
+    width: 48px;
+    height: 48px;
+}
+
+.text-gold {
+    color: var(--gold);
+}
+
+.text-light {
+    color: var(--text-light);
+}
+
+.text-medium {
+    color: var(--text-medium);
+}
+
+.text-dark {
+    color: var(--text-dark);
+}
+
+.bg-stone {
+    background: var(--stone-dark);
+}
+
+.bg-wood {
+    background: var(--wood-dark);
+}
+
+/* Ocultar paneles legacy */
+.unit-control-panel {
+    display: none !important;
+}

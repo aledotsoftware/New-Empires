@@ -7,7 +7,7 @@ import { Building } from '../Building.js';
 export class Barracks extends Building {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '⚔️';
+        this.icon = 'assets/icons/barracks.png';
         this.name = 'Cuartel';
         this.type = 'barracks';
         this.maxHp = 1200;

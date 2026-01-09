@@ -7,7 +7,7 @@ import { Building } from '../Building.js';
 export class TownCenter extends Building {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '🏰';
+        this.icon = 'assets/icons/townCenter.png';
         this.name = 'Centro Urbano';
         this.type = 'townCenter';
         this.maxHp = 2000;

@@ -182,6 +182,14 @@
                             style="width:20px;height:20px;" alt=""></span>
                     <span id="gameTime">00:00</span>
                 </div>
+                <!-- Palette: Idle Villager Indicator (Hidden by default) -->
+                <button id="idleVillagerBtn" class="btn-secondary hidden" style="padding:8px 12px; flex-direction:row; align-items:center; gap:8px; border-color:#f0ad4e; color:#f0ad4e;"
+                    aria-label="Seleccionar aldeano inactivo (Tab)">
+                    <img src="assets/icons/villager.png" style="width:20px;height:20px;object-fit:contain;" alt="">
+                    <span id="idleVillagerCount" style="font-weight:bold;">0</span>
+                    <span class="kbd-inline" style="font-size:0.7rem; padding:1px 4px; margin-left:0;">Tab</span>
+                </button>
+
                 <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
                     aria-label="Configuración"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
                         style="width:20px;height:20px;" alt=""></button>

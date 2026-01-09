@@ -789,3 +789,35 @@
     position: relative;
     top: -1px;
 }
+
+/* Palette: Resource Tooltips Configuration */
+.resource-item {
+    position: relative; /* Anchor for tooltip */
+}
+
+.resource-item .card-tooltip {
+    bottom: auto;
+    top: 100%;
+    margin-top: 12px;
+    width: 200px; /* Wider for text */
+    text-align: center;
+    /* Initial state for animation */
+    transform: translateX(-50%) translateY(-5px);
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Arrow pointing UP */
+.resource-item .card-tooltip::after {
+    top: auto;
+    bottom: 100%;
+    border-color: transparent transparent #d4af37 transparent;
+}
+
+/* Show state */
+.resource-item:hover .card-tooltip,
+.resource-item:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}

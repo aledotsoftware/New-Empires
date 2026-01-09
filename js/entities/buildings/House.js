@@ -7,7 +7,7 @@ import { Building } from '../Building.js';
 export class House extends Building {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '🏠';
+        this.icon = 'assets/icons/house.png';
         this.name = 'Casa';
         this.type = 'house';
         this.maxHp = 500;

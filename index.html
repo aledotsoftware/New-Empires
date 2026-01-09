@@ -18,14 +18,11 @@
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <!-- DEV MODE: Carga dinámica de estilos con timestamp para evitar caché -->
+    <!-- Tema Medieval Unificado -->
     <script>
         (function () {
             var v = Date.now();
-            var styles = ['styles.css', 'styles-patch.css', 'tech-tree-styles.css', 'control-panel.css', 'selection-styles.css', 'hud-styles.css'];
-            styles.forEach(function (href) {
-                document.write('<link rel="stylesheet" href="' + href + '?v=' + v + '">');
-            });
+            document.write('<link rel="stylesheet" href="medieval-theme.css?v=' + v + '">');
         })();
     </script>
 </head>

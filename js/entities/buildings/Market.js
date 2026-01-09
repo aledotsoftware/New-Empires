@@ -7,7 +7,7 @@ import { Building } from '../Building.js';
 export class Market extends Building {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '🏪';
+        this.icon = 'assets/icons/market.png';
         this.name = 'Mercado';
         this.type = 'market';
         this.maxHp = 1000;

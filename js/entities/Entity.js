@@ -11,7 +11,7 @@ export class Entity {
         this.maxHp = 100;
         this.size = 20;
         this.isDead = false;
-        this.icon = '❓';
+        this.icon = 'assets/icons/info.png';
         this.name = 'Entity';
         this.type = 'entity';
         this.isUnit = false;

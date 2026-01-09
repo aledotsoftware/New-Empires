@@ -7,7 +7,7 @@ import { Building } from '../Building.js';
 export class Storage extends Building {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '📦';
+        this.icon = 'assets/icons/storage.png';
         this.name = 'Depósito';
         this.type = 'storage';
         this.maxHp = 800;

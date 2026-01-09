@@ -7,7 +7,7 @@ import { Unit } from '../Unit.js';
 export class Warrior extends Unit {
     constructor(x, y, team) {
         super(x, y, team);
-        this.icon = '⚔️';
+        this.icon = 'assets/icons/warrior.png';
         this.name = 'Guerrero';
         this.type = 'warrior';
         this.maxHp = 100;

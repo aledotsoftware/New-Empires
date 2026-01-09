@@ -548,15 +548,15 @@ class Game {
 
         // Palette: Cursor Badge for Contextual Actions
         if (this.cursorElement) {
-             // Create badge if not exists
-             let badge = this.cursorElement.querySelector('.cursor-badge');
-             if (!badge) {
-                 badge = document.createElement('img');
-                 badge.className = 'cursor-badge';
-                 badge.alt = '';
-                 this.cursorElement.appendChild(badge);
-             }
-             this.cursorBadge = badge;
+            // Create badge if not exists
+            let badge = this.cursorElement.querySelector('.cursor-badge');
+            if (!badge) {
+                badge = document.createElement('img');
+                badge.className = 'cursor-badge';
+                badge.alt = '';
+                this.cursorElement.appendChild(badge);
+            }
+            this.cursorBadge = badge;
         }
 
         this.initializeGame();
@@ -1401,19 +1401,19 @@ class Game {
         // We need to re-fetch cursor element if this.cursorElement is not reliable or was created outside.
 
         if (!this.cursorBadge) {
-             const cursor = document.getElementById('customCursor');
-             if (cursor) {
-                 let badge = cursor.querySelector('.cursor-badge');
-                 if (!badge) {
-                     badge = document.createElement('img');
-                     badge.className = 'cursor-badge';
-                     badge.alt = '';
-                     cursor.appendChild(badge);
-                 }
-                 this.cursorBadge = badge;
-             } else {
-                 return;
-             }
+            const cursor = document.getElementById('customCursor');
+            if (cursor) {
+                let badge = cursor.querySelector('.cursor-badge');
+                if (!badge) {
+                    badge = document.createElement('img');
+                    badge.className = 'cursor-badge';
+                    badge.alt = '';
+                    cursor.appendChild(badge);
+                }
+                this.cursorBadge = badge;
+            } else {
+                return;
+            }
         }
 
         let showBadge = false;
@@ -1425,7 +1425,7 @@ class Game {
                 // Attack Cursor Logic
                 if (entity.canAttack) {
                     for (let enemy of this.enemies) {
-                        const distSq = (enemy.x - this.mouse.worldX)**2 + (enemy.y - this.mouse.worldY)**2;
+                        const distSq = (enemy.x - this.mouse.worldX) ** 2 + (enemy.y - this.mouse.worldY) ** 2;
                         if (distSq < enemy.size * enemy.size) {
                             badgeIcon = 'assets/icons/swords.png';
                             showBadge = true;
@@ -1437,16 +1437,16 @@ class Game {
                 // Gather Cursor Logic (Villager only)
                 if (!showBadge && entity.canGather && entity.type === 'villager') {
                     for (let res of this.resourceNodes) {
-                        const distSq = (res.x - this.mouse.worldX)**2 + (res.y - this.mouse.worldY)**2;
+                        const distSq = (res.x - this.mouse.worldX) ** 2 + (res.y - this.mouse.worldY) ** 2;
                         if (distSq < res.radius * res.radius) {
-                             if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
-                             else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
-                             else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
-                             else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
-                             else badgeIcon = 'assets/icons/gold.png';
+                            if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
+                            else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
+                            else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
+                            else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
+                            else badgeIcon = 'assets/icons/gold.png';
 
-                             showBadge = true;
-                             break;
+                            showBadge = true;
+                            break;
                         }
                     }
                 }
@@ -1879,14 +1879,12 @@ class Game {
         // Solo mostrar acciones si es del jugador
         if (entity.team !== 'player') return;
 
-        // Mapeo de hotkeys (posiciones en la cuadrícula 3x5)
+        // Mapeo de hotkeys (posiciones en la cuadrícula 2x5)
         // Fila 1: Q W E R T
         // Fila 2: A S D F G
-        // Fila 3: Z X C V B
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',  // Fila 1
-            'A', 'S', 'D', 'F', 'G',  // Fila 2
-            'Z', 'X', 'C', 'V', 'B'   // Fila 3
+            'A', 'S', 'D', 'F', 'G'   // Fila 2
         ];
 
         const buttons = [];
@@ -1895,7 +1893,7 @@ class Game {
 
         if (entity.type === 'villager') {
             buttons.push({
-                icon: '🏗️',
+                icon: 'assets/icons/build.png',
                 label: 'Construir',
                 hotkey: 'Q',
                 description: 'Construye edificios para expandir tu imperio',
@@ -1911,11 +1909,11 @@ class Game {
             else if (popFull) error = 'Límite de población alcanzado';
 
             buttons.push({
-                icon: '👨‍🌾',
+                icon: 'assets/icons/villager.png',
                 label: 'Aldeano',
                 hotkey: 'Q',
-                cost: `${cost.food}🌾`,
-                costObj: cost, // Palette: Added raw cost object
+                cost: `${cost.food}`,
+                costObj: cost,
                 description: 'Trabajador básico. Recolecta madera, comida, oro y piedra',
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
                 enabled: enabled,
@@ -1936,11 +1934,11 @@ class Game {
             else if (popFull) archerError = 'Límite de población alcanzado';
 
             buttons.push({
-                icon: '⚔️',
+                icon: 'assets/icons/warrior.png',
                 label: 'Guerrero',
                 hotkey: 'Q',
-                cost: `${warriorCost.food}🌾 ${warriorCost.gold}💰`,
-                costObj: warriorCost, // Palette: Added raw cost object
+                cost: `${warriorCost.food} + ${warriorCost.gold}`,
+                costObj: warriorCost,
                 description: 'Unidad de infantería básica. Fuerte en combate cuerpo a cuerpo',
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
                 enabled: canAffordWarrior && !popFull,
@@ -1948,11 +1946,11 @@ class Game {
             });
 
             buttons.push({
-                icon: '🏹',
+                icon: 'assets/icons/archer.png',
                 label: 'Arquero',
                 hotkey: 'W',
-                cost: `${archerCost.food}🌾 ${archerCost.gold}💰`,
-                costObj: archerCost, // Palette: Added raw cost object
+                cost: `${archerCost.food} + ${archerCost.gold}`,
+                costObj: archerCost,
                 description: 'Unidad de ataque a distancia. Fuerte contra infantería ligera',
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),
                 enabled: canAffordArcher && !popFull,
@@ -1965,7 +1963,7 @@ class Game {
             const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
             let techIndex = 0;
             for (let tech of availableTechs) {
-                if (techIndex >= 13) break; // Máximo 13 botones más (15 - 2 ya usados como máximo)
+                if (techIndex >= 8) break; // Máximo 8 botones más (10 - 2 ya usados como máximo)
 
                 const canAfford = this.techManager.canResearch(tech.id);
                 let costString = '';
@@ -1989,8 +1987,8 @@ class Game {
             }
         }
 
-        // Crear todos los 15 botones en el grid (3 filas x 5 columnas)
-        for (let i = 0; i < 15; i++) {
+        // Crear todos los 10 botones en el grid (2 filas x 5 columnas)
+        for (let i = 0; i < 10; i++) {
             const btn = document.createElement('button');
             btn.className = 'action-btn';
             const hotkey = hotkeys[i];
@@ -2042,14 +2040,14 @@ class Game {
                 iconDiv.className = 'btn-icon';
                 // Check if icon is an emoji or path/HTML, but treat as text or use createSafeIconElement if available
                 if (buttonData.icon && (buttonData.icon.includes('/') || buttonData.icon.includes('.'))) {
-                     const img = document.createElement('img');
-                     img.src = buttonData.icon;
-                     img.alt = buttonData.label;
-                     img.className = 'icon-small';
-                     img.onerror = function() { this.style.display = 'none'; }; // Hide if fails
-                     iconDiv.appendChild(img);
+                    const img = document.createElement('img');
+                    img.src = buttonData.icon;
+                    img.alt = buttonData.label;
+                    img.className = 'icon-small';
+                    img.onerror = function () { this.style.display = 'none'; }; // Hide if fails
+                    iconDiv.appendChild(img);
                 } else {
-                     iconDiv.textContent = buttonData.icon;
+                    iconDiv.textContent = buttonData.icon;
                 }
                 btn.appendChild(iconDiv);
 
@@ -3055,7 +3053,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             // Helper for icons (duplicate of global one for local scope)
             const createLocalIcon = (iconPath, alt, size = '64px') => {
-                 if (!iconPath) {
+                if (!iconPath) {
                     const placeholder = document.createElement('div');
                     placeholder.style.cssText = `font-size:30px;line-height:${size};text-align:center;width:${size};height:${size};`;
                     placeholder.textContent = alt.substring(0, 1);
@@ -3736,7 +3734,7 @@ function createSafeIconElement(iconPath, alt = '', size = '64px') {
         img.alt = alt; // Secure as attribute
         img.className = 'civ-icon-img';
         img.style.cssText = `width:${size};height:${size};object-fit:contain;`;
-        img.onerror = function() { this.style.display = 'none'; };
+        img.onerror = function () { this.style.display = 'none'; };
         return img;
     }
 

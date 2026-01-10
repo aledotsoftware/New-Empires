@@ -13,3 +13,7 @@
 ## 2024-05-25 - Status Visibility & Contextual Shortcuts
 **Learning:** Users often miss powerful features (like the "Tab" key for idle villagers) if they are invisible status indicators. Surfacing these features as visible UI elements (that appear only when relevant) provides both a reminder of the shortcut and a clickable alternative for mouse users.
 **Action:** When a game state is inefficient (e.g., idle workers), show a prominent, actionable indicator that solves the problem, and include the keyboard shortcut in its label.
+
+## 2024-05-25 - Resource Context & Focus
+**Learning:** Static HUD elements (like resource counters) often lack context for new players. While `aria-labelledby` connects labels, it doesn't make the element interactive. Adding `tabindex="0"` converts these into focusable "info cards" without changing visual layout.
+**Action:** Make critical HUD stats focusable and attach tooltips that explain *gameplay utility* (e.g., "Wood: Used for buildings") rather than just stating the name.

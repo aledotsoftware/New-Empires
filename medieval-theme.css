@@ -1959,3 +1959,38 @@ button:focus-visible,
 .unit-control-panel {
     display: none !important;
 }
+/* ==========================================
+   20. PALETTE UX ENHANCEMENTS
+   ========================================== */
+
+/* Resource Panel Tooltips (Overrides default .card-tooltip position) */
+.resource-item {
+    position: relative; /* Ensure absolute child is relative to this */
+}
+
+.resource-item .card-tooltip {
+    bottom: auto;
+    top: 100%; /* Position below */
+    margin-top: 10px;
+    width: 200px;
+    white-space: normal;
+    text-align: center;
+    z-index: 200;
+}
+
+/* Arrow pointing up */
+.resource-item .card-tooltip::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom: 6px solid var(--gold-dark);
+    border-bottom-color: var(--gold-dark);
+}
+
+/* Visibility triggers */
+.resource-item:hover .card-tooltip,
+.resource-item:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}

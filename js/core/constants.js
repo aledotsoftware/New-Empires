@@ -15,6 +15,18 @@ export const MAP_SIZES = {
     ludicrous: { name: 'Absurdo', tiles: 480, width: 15360, height: 15360 }
 };
 
+// Gameplay Tips for Loading/Empty States
+export const GAMEPLAY_TIPS = [
+    "Usa [Tab] para encontrar aldeanos inactivos rápidamente.",
+    "Construye casas para aumentar tu límite de población.",
+    "El Centro Urbano puede crear aldeanos y servir de refugio.",
+    "Mantén tus recursos bajos gastándolos en unidades y mejoras.",
+    "Explora el mapa para encontrar recursos adicionales.",
+    "Construye murallas para proteger tu economía de ataques.",
+    "Las mejoras económicas se pagan solas a largo plazo.",
+    "Usa [Shift] + Click para poner órdenes en cola."
+];
+
 // Tipos de terreno
 export const TERRAIN_TYPES = {
     grassland: {

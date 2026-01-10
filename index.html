@@ -185,11 +185,21 @@
                     <img src="assets/icons/villager.png" style="width:20px;height:20px;object-fit:contain;" alt="">
                     <span id="idleVillagerCount" style="font-weight:bold;">0</span>
                     <span class="kbd-inline" style="font-size:0.7rem; padding:1px 4px; margin-left:0;">Tab</span>
+
+                    <div class="btn-tooltip" role="tooltip">
+                        <div class="tooltip-header">Aldeanos Inactivos <span class="tooltip-hotkey">[Tab]</span></div>
+                        <div class="tooltip-desc">Cicla entre aldeanos sin tarea</div>
+                    </div>
                 </button>
 
                 <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
-                    aria-label="Configuración"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
-                        style="width:20px;height:20px;" alt=""></button>
+                    aria-label="Configuración">
+                    <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;" alt="">
+                    <div class="btn-tooltip" role="tooltip">
+                        <div class="tooltip-header">Configuración</div>
+                        <div class="tooltip-desc">Ajustar sonido y gráficos</div>
+                    </div>
+                </button>
             </div>
         </div>
 

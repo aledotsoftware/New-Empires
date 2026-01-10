@@ -139,3 +139,14 @@ export const CONFIG = {
         stone: 4
     }
 };
+
+export const GAMEPLAY_TIPS = [
+    "Tip: Usa [Tab] para encontrar aldeanos inactivos rápidamente.",
+    "Tip: Presiona [Espacio] para centrar la cámara en tu Centro Urbano.",
+    "Tip: Construye Casas para aumentar tu límite de población.",
+    "Tip: Mantén click y arrastra para seleccionar un grupo de unidades.",
+    "Tip: Usa [Q, W, E, R] con un aldeano seleccionado para construir.",
+    "Tip: Los depósitos cercanos a recursos aceleran la recolección.",
+    "Tip: Explora el mapa para encontrar recursos adicionales.",
+    "Tip: Doble click selecciona todas las unidades cercanas del mismo tipo."
+];

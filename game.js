@@ -3,6 +3,17 @@
 // ==========================================
 const TILE_SIZE = 32; // Tamaño de celda en píxeles
 
+const GAMEPLAY_TIPS = [
+    "Tip: Usa [Tab] para encontrar aldeanos inactivos rápidamente.",
+    "Tip: Presiona [Espacio] para centrar la cámara en tu Centro Urbano.",
+    "Tip: Construye Casas para aumentar tu límite de población.",
+    "Tip: Mantén click y arrastra para seleccionar un grupo de unidades.",
+    "Tip: Usa [Q, W, E, R] con un aldeano seleccionado para construir.",
+    "Tip: Los depósitos cercanos a recursos aceleran la recolección.",
+    "Tip: Explora el mapa para encontrar recursos adicionales.",
+    "Tip: Doble click selecciona todas las unidades cercanas del mismo tipo."
+];
+
 // ==========================================
 // VARIABLES GLOBALES
 // ==========================================
@@ -532,6 +543,9 @@ class Game {
         this.buildMode = null;
         this.buildGhost = null;
 
+        // Palette: Rotating Tips State
+        this.currentTipIndex = 0;
+
         this.setupEventListeners();
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
@@ -819,6 +833,11 @@ class Game {
                     this.selectedEntities.push(entity);
                 }
             }
+        }
+
+        // Palette: Cycle tip on deselect
+        if (this.selectedEntities.length === 0) {
+            this.currentTipIndex = (this.currentTipIndex + 1) % GAMEPLAY_TIPS.length;
         }
 
         this.updateSelectionPanel();
@@ -1799,12 +1818,14 @@ class Game {
             textDiv.textContent = 'Selecciona una unidad o edificio';
             emptyState.appendChild(textDiv);
 
-            const hintDiv = document.createElement('div');
-            hintDiv.style.fontSize = '0.75rem';
-            hintDiv.style.opacity = '0.6';
-            hintDiv.style.marginTop = '4px';
-            hintDiv.textContent = '(Arrastra para selección múltiple)';
-            emptyState.appendChild(hintDiv);
+            // Palette: Tip instead of generic hint
+            const tipDiv = document.createElement('div');
+            tipDiv.className = 'selection-tip';
+
+            const tipText = GAMEPLAY_TIPS[this.currentTipIndex % GAMEPLAY_TIPS.length];
+            tipDiv.textContent = tipText;
+
+            emptyState.appendChild(tipDiv);
 
             content.appendChild(emptyState);
             return;

@@ -1,0 +1,8 @@
+.selection-tip {
+    font-size: 0.8rem;
+    color: #d4af37; /* Gold */
+    margin-top: 8px;
+    font-style: italic;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 4px;
+}

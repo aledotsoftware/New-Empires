@@ -1,0 +1,35 @@
+<<<<<<< SEARCH
+            const textDiv = document.createElement('div');
+            textDiv.textContent = 'Selecciona una unidad o edificio';
+
+            const hintDiv = document.createElement('div');
+            hintDiv.style.fontSize = '0.75rem';
+            hintDiv.style.opacity = '0.6';
+            hintDiv.style.marginTop = '4px';
+            hintDiv.textContent = '(Arrastra para selección múltiple)';
+            emptyState.appendChild(hintDiv);
+
+            content.appendChild(emptyState);
+=======
+            const textDiv = document.createElement('div');
+            textDiv.textContent = 'Selecciona una unidad o edificio';
+
+            // Palette: Tip instead of generic hint
+            const tipDiv = document.createElement('div');
+            tipDiv.className = 'selection-tip';
+            tipDiv.style.fontSize = '0.8rem';
+            tipDiv.style.color = '#d4af37'; // Gold
+            tipDiv.style.marginTop = '8px';
+            tipDiv.style.fontStyle = 'italic';
+            tipDiv.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
+            tipDiv.style.paddingTop = '4px';
+
+            const tipText = GAMEPLAY_TIPS[this.currentTipIndex % GAMEPLAY_TIPS.length];
+            tipDiv.textContent = tipText;
+
+            emptyState.appendChild(iconDiv);
+            emptyState.appendChild(textDiv);
+            emptyState.appendChild(tipDiv);
+
+            content.appendChild(emptyState);
+>>>>>>> REPLACE

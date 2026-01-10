@@ -1,5 +1,5 @@
 // Imports de módulos creados
-import { CONFIG, TILE_SIZE, TERRAIN_TYPES } from './constants.js';
+import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS } from './constants.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
@@ -205,6 +205,9 @@ export class Game {
             player: 0,
             enemy: 0
         };
+
+        // Palette: Rotating Tips State
+        this.currentTipIndex = 0;
 
         this.initializeGame();
         this.updateUI();
@@ -541,6 +544,11 @@ export class Game {
                     this.selectedEntities.push(entity);
                 }
             }
+        }
+
+        // Palette: Cycle tip on deselect
+        if (this.selectedEntities.length === 0) {
+            this.currentTipIndex = (this.currentTipIndex + 1) % GAMEPLAY_TIPS.length;
         }
 
         this.updateSelectionPanel();
@@ -1856,16 +1864,20 @@ export class Game {
             const textDiv = document.createElement('div');
             textDiv.textContent = 'Selecciona una unidad o edificio';
 
-            // Hint (Palette touch)
-            const hintDiv = document.createElement('div');
-            hintDiv.style.fontSize = '0.75rem';
-            hintDiv.style.opacity = '0.6';
-            hintDiv.style.marginTop = '4px';
-            hintDiv.textContent = '(Arrastra para selección múltiple)';
+            // Palette: Tip instead of generic hint
+            const tipDiv = document.createElement('div');
+            tipDiv.className = 'selection-tip';
+
+            // Safe usage of GAMEPLAY_TIPS
+            const tipText = GAMEPLAY_TIPS && GAMEPLAY_TIPS.length > 0
+                ? GAMEPLAY_TIPS[this.currentTipIndex % GAMEPLAY_TIPS.length]
+                : '(Arrastra para selección múltiple)';
+
+            tipDiv.textContent = tipText;
 
             emptyState.appendChild(iconDiv);
             emptyState.appendChild(textDiv);
-            emptyState.appendChild(hintDiv);
+            emptyState.appendChild(tipDiv);
 
             content.appendChild(emptyState);
             return;

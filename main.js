@@ -886,14 +886,24 @@ const initApp = async () => {
             // Prevenir múltiples clics
             if (startButton.classList.contains('btn-loading')) return;
 
-            // Guardar contenido original
-            const originalContent = startButton.innerHTML;
+            // Guardar contenido original (nodos) para evitar XSS con innerHTML
+            const originalChildren = [];
+            while (startButton.firstChild) {
+                originalChildren.push(startButton.firstChild);
+                startButton.removeChild(startButton.firstChild);
+            }
 
             // Estado de carga
             startButton.classList.add('btn-loading');
             startButton.setAttribute('aria-busy', 'true');
             startButton.disabled = true;
-            startButton.innerHTML = '<span class="spinner"></span> Cargando...';
+
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            const loadingText = document.createTextNode(' Cargando...');
+
+            startButton.appendChild(spinner);
+            startButton.appendChild(loadingText);
 
             debugLogger.info('Mostrando selección de tamaño de mapa', 'ui');
 
@@ -907,7 +917,10 @@ const initApp = async () => {
                 startButton.classList.remove('btn-loading');
                 startButton.removeAttribute('aria-busy');
                 startButton.disabled = false;
-                startButton.innerHTML = originalContent;
+
+                // Limpiar estado de carga y restaurar nodos originales
+                startButton.textContent = '';
+                originalChildren.forEach(child => startButton.appendChild(child));
 
                 // Move focus with a small tick to ensure visibility
                 setTimeout(() => FocusManager.focusFirst(mapScreen), 0);

@@ -22,7 +22,10 @@
     <script>
         (function () {
             var v = Date.now();
-            document.write('<link rel="stylesheet" href="medieval-theme.css?v=' + v + '">');
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'medieval-theme.css?v=' + v;
+            document.head.appendChild(link);
         })();
     </script>
 </head>
@@ -448,11 +451,17 @@
                 'game.js',           // Motor principal del juego
                 'game.legacy.js'     // Shim de compatibilidad
             ];
+
+            // Cargar scripts secuencialmente para mantener el orden
+            var fragment = document.createDocumentFragment();
             scripts.forEach(function (src) {
-                // Si ya tiene parámetros, agregar &v, si no, agregar ?v
+                var script = document.createElement('script');
                 var separator = src.indexOf('?') > -1 ? '&' : '?';
-                document.write('<script src="' + src + separator + 'v=' + v + '"><\/script>');
+                script.src = src + separator + 'v=' + v;
+                script.async = false; // Importante para mantener orden de ejecución
+                fragment.appendChild(script);
             });
+            document.body.appendChild(fragment);
         })();
     </script>
 

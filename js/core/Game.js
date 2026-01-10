@@ -2276,6 +2276,7 @@ export class Game {
                     if (buttonData.cost) {
                         const costTooltip = document.createElement('div');
                         costTooltip.className = 'tooltip-cost';
+                        const missingResources = []; // Palette: Track missing resources
 
                         for (const [res, amount] of Object.entries(buttonData.cost)) {
                             const resSpan = document.createElement('span');
@@ -2309,6 +2310,7 @@ export class Game {
                             if (this.resources[res] < amount) {
                                 resSpan.style.color = 'var(--accent-red)';
                                 resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
+                                missingResources.push(`${res} (${amount - Math.floor(this.resources[res])})`);
                             } else {
                                 resSpan.setAttribute('aria-label', `${amount} ${res}`);
                             }
@@ -2316,6 +2318,9 @@ export class Game {
                             costTooltip.appendChild(resSpan);
                         }
                         tooltipDiv.appendChild(costTooltip);
+
+                        // Palette: Store missing info for error message
+                        buttonData._missingResources = missingResources;
                     }
 
                     // Palette: Add generic error label (Population or Resources)
@@ -2336,7 +2341,23 @@ export class Game {
                         errorDiv.style.marginTop = '4px';
                         errorDiv.style.fontSize = '0.75rem';
                         errorDiv.style.fontWeight = 'bold';
-                        errorDiv.textContent = '❌ Recursos insuficientes';
+
+                        // Palette: Show specific missing resources
+                        if (buttonData._missingResources && buttonData._missingResources.length > 0) {
+                            // Translate resource names for better UX
+                            const translatedMissing = buttonData._missingResources.map(mr => {
+                                let [name, amt] = mr.split(' (');
+                                amt = '(' + amt;
+                                if (name === 'food') name = 'comida';
+                                else if (name === 'wood') name = 'madera';
+                                else if (name === 'gold') name = 'oro';
+                                else if (name === 'stone') name = 'piedra';
+                                return `${name} ${amt}`;
+                            });
+                            errorDiv.textContent = `❌ Falta: ${translatedMissing.join(', ')}`;
+                        } else {
+                            errorDiv.textContent = '❌ Recursos insuficientes';
+                        }
                         tooltipDiv.appendChild(errorDiv);
                     }
 

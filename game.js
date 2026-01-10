@@ -2112,6 +2112,7 @@ class Game {
             const costDiv = document.createElement('div');
             costDiv.className = 'tooltip-cost';
             const icons = { food: '🌾', wood: '🪵', gold: '💰', stone: '🪨' };
+            const missingResources = []; // Palette: Track missing
 
             for (let [res, amt] of Object.entries(buttonData.costObj)) {
                 const span = document.createElement('span');
@@ -2121,6 +2122,7 @@ class Game {
                 if (this.resources[res] < amt) {
                     span.style.color = 'var(--accent-red)';
                     span.setAttribute('aria-label', `${amt} ${res} (Insuficiente)`);
+                    missingResources.push(`${res} (${amt - Math.floor(this.resources[res])})`);
                 }
                 costDiv.appendChild(span);
             }
@@ -2139,7 +2141,22 @@ class Game {
                 err.className = 'tooltip-error';
                 err.style.color = 'var(--accent-red)';
                 err.style.fontWeight = 'bold';
-                err.textContent = '❌ Recursos insuficientes';
+
+                // Palette: Specific missing resources
+                if (missingResources.length > 0) {
+                    const translated = missingResources.map(mr => {
+                        let [name, val] = mr.split(' (');
+                        val = '(' + val;
+                        if (name === 'food') name = 'comida';
+                        else if (name === 'wood') name = 'madera';
+                        else if (name === 'gold') name = 'oro';
+                        else if (name === 'stone') name = 'piedra';
+                        return `${name} ${val}`;
+                    });
+                    err.textContent = `❌ Falta: ${translated.join(', ')}`;
+                } else {
+                    err.textContent = '❌ Recursos insuficientes';
+                }
                 tooltip.appendChild(err);
             }
         }

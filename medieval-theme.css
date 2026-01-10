@@ -383,6 +383,7 @@ body,
 
 .btn-secondary {
     display: inline-flex;
+    position: relative;
     align-items: center;
     gap: 0.5rem;
     padding: 0.8rem 1.5rem;
@@ -1013,7 +1014,9 @@ body,
 }
 
 .action-btn:hover .btn-tooltip,
-.action-btn:focus-visible .btn-tooltip {
+.action-btn:focus-visible .btn-tooltip,
+.btn-secondary:hover .btn-tooltip,
+.btn-secondary:focus-visible .btn-tooltip {
     display: block;
     animation: tooltipFadeIn 0.2s ease-out;
 }

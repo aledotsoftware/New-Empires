@@ -208,9 +208,90 @@ window.loadMainMenu = function () {
 
     // Limpiar el juego si existe
     if (game) {
+        if (game.destroy) game.destroy();
         game = null;
     }
 };
+
+/**
+ * Guarda la partida actual
+ */
+window.saveGame = function () {
+    if (!game) {
+        updateSaveStatus('No hay partida activa para guardar', 'error');
+        return;
+    }
+
+    if (typeof saveManager !== 'undefined') {
+        const success = saveManager.save(game);
+        if (success) {
+            updateSaveStatus('✅ Partida guardada correctamente', 'success');
+        } else {
+            updateSaveStatus('❌ Error al guardar la partida', 'error');
+        }
+    } else {
+        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+    }
+};
+
+/**
+ * Carga la última partida guardada
+ */
+window.loadGame = function () {
+    if (typeof saveManager === 'undefined') {
+        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+        return;
+    }
+
+    const saveInfo = saveManager.getSaveInfo();
+    if (!saveInfo) {
+        updateSaveStatus('No hay partida guardada', 'info');
+        return;
+    }
+
+    // Por ahora solo mostramos info, la carga completa requiere más trabajo
+    const date = new Date(saveInfo.timestamp).toLocaleString();
+    updateSaveStatus(`📁 Última partida: ${saveInfo.civilizationId} - ${date}`, 'info');
+
+    // TODO: Implementar carga completa del estado del juego
+    debugLogger.info('Información de guardado:', 'save', saveInfo);
+};
+
+/**
+ * Exporta la partida a un archivo JSON
+ */
+window.exportGameToFile = function () {
+    if (!game) {
+        updateSaveStatus('No hay partida activa para exportar', 'error');
+        return;
+    }
+
+    if (typeof saveManager !== 'undefined') {
+        saveManager.exportToFile(game);
+        updateSaveStatus('📤 Archivo exportado', 'success');
+    } else {
+        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+    }
+};
+
+/**
+ * Actualiza el estado del guardado en la UI
+ */
+function updateSaveStatus(message, type) {
+    const statusEl = document.getElementById('saveStatus');
+    if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.style.color = type === 'success' ? '#48bb78' :
+            type === 'error' ? '#f56565' : '#a0aec0';
+
+        // Limpiar después de 5 segundos
+        setTimeout(() => {
+            if (statusEl.textContent === message) {
+                statusEl.textContent = '';
+            }
+        }, 5000);
+    }
+}
 
 /**
  * Helper para renderizar un item de tecnología
@@ -264,7 +345,7 @@ function createTechItemElement(tech, status, isInteractive) {
         img.alt = '';
         iconDiv.appendChild(img);
     } else {
-            const placeholder = document.createElement('div');
+        const placeholder = document.createElement('div');
         placeholder.className = 'tech-icon-placeholder';
         if (!tech.icon) placeholder.textContent = 'T';
         else if (tech.icon.length < 5) placeholder.textContent = tech.icon;
@@ -288,7 +369,7 @@ function createTechItemElement(tech, status, isInteractive) {
     // Cost
     const costDiv = document.createElement('div');
     costDiv.className = 'tech-cost';
-        if (tech.cost) {
+    if (tech.cost) {
         for (let [res, amount] of Object.entries(tech.cost)) {
             const costSpan = document.createElement('span');
             costSpan.style.cssText = 'display:inline-flex;align-items:center;margin-right:5px;';
@@ -302,16 +383,16 @@ function createTechItemElement(tech, status, isInteractive) {
                     img.alt = res;
                     costSpan.appendChild(img);
                 } else {
-                        const txt = document.createElement('span');
-                        txt.style.fontSize = '10px';
-                        txt.textContent = res.substring(0, 1).toUpperCase();
-                        costSpan.appendChild(txt);
-                }
-            } else {
                     const txt = document.createElement('span');
                     txt.style.fontSize = '10px';
                     txt.textContent = res.substring(0, 1).toUpperCase();
                     costSpan.appendChild(txt);
+                }
+            } else {
+                const txt = document.createElement('span');
+                txt.style.fontSize = '10px';
+                txt.textContent = res.substring(0, 1).toUpperCase();
+                costSpan.appendChild(txt);
             }
 
             const amountText = document.createTextNode(amount);
@@ -394,14 +475,14 @@ function renderTechTreeCommon(isInteractive) {
 
             if (isInteractive && status.available) {
                 const handleResearch = () => {
-                        if(game && game.techManager && game.techManager.canResearch(tech.id)) {
-                            // Save focus ID if possible?
-                            const id = `tech-${tech.id}`;
-                            techItem.id = id;
-                            game.techManager.startResearch(tech.id);
-                            renderTechTree();
-                            // Attempt to refocus after re-render (needs smarter re-render logic or ID persistence)
-                        }
+                    if (game && game.techManager && game.techManager.canResearch(tech.id)) {
+                        // Save focus ID if possible?
+                        const id = `tech-${tech.id}`;
+                        techItem.id = id;
+                        game.techManager.startResearch(tech.id);
+                        renderTechTree();
+                        // Attempt to refocus after re-render (needs smarter re-render logic or ID persistence)
+                    }
                 };
 
                 techItem.onclick = handleResearch;
@@ -559,7 +640,7 @@ function populateMapSizes() {
         `;
 
         const totalCells = gridDensity * gridDensity;
-        for(let i=0; i<totalCells; i++) {
+        for (let i = 0; i < totalCells; i++) {
             const cell = document.createElement('div');
             // Random opacity to simulate terrain/density
             const opacity = 0.3 + Math.random() * 0.5;

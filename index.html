@@ -433,6 +433,27 @@
                         </div>
                     </div>
 
+                    <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
+                        <h3 style="margin-bottom: 20px; color: #d4af37;">💾 Partida</h3>
+
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                            <button id="saveGameBtn" class="btn-secondary" onclick="saveGame()"
+                                style="padding: 10px 20px;">
+                                💾 Guardar Partida
+                            </button>
+                            <button id="loadGameBtn" class="btn-secondary" onclick="loadGame()"
+                                style="padding: 10px 20px;">
+                                📂 Cargar Partida
+                            </button>
+                            <button id="exportGameBtn" class="btn-secondary" onclick="exportGameToFile()"
+                                style="padding: 10px 20px;">
+                                📤 Exportar a Archivo
+                            </button>
+                        </div>
+                        <p id="saveStatus"
+                            style="text-align: center; margin-top: 10px; color: #a0aec0; font-size: 0.85rem;"></p>
+                    </div>
+
                     <div style="text-align: center; margin-top: 20px;">
                         <button class="btn-secondary" onclick="hideSettings()">Cerrar</button>
                     </div>
@@ -482,8 +503,9 @@
                 'civilizationManager.js', // Gestor de civilizaciones (depende de dataLoader)
                 'technologies.js',
                 'mapGenerator.js',
-                'soundManager.js'
-                // game.js eliminado: ahora usamos js/core/Game.js como módulo ES6
+                'soundManager.js',
+                'js/systems/FormationManager.js',  // Sistema de formaciones
+                'js/managers/SaveManager.js'       // Sistema de guardado
             ];
 
             // Cargar scripts secuencialmente para mantener el orden

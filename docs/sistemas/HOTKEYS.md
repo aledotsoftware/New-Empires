@@ -58,8 +58,21 @@
 | Tecla | Acción |
 |-------|--------|
 | **B** | Abrir menú de construcción |
+| **F** | Ciclar formación (con múltiples unidades) |
 | **ESC** | Cancelar acción actual / Cerrar menú |
 | **Delete** | Eliminar unidad seleccionada (debug) |
+
+### Formaciones Disponibles (tecla F)
+
+| Formación | Descripción |
+|-----------|-------------|
+| Line | Línea horizontal |
+| Column | Columna vertical |
+| Box | Cuadrado/caja |
+| Wedge | Cuña/flecha de ataque |
+| Vee | V invertida defensiva |
+| Circle | Círculo para defender punto |
+| Spread | Dispersa (evita ataques de área) |
 
 ---
 

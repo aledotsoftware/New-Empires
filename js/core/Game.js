@@ -765,6 +765,29 @@ export class Game {
             }
         }
 
+        // F - Ciclar formaciones (solo con unidades seleccionadas)
+        if (e.key === 'f' || e.key === 'F') {
+            const selectedUnits = this.selectedEntities.filter(e => e.isUnit);
+            if (selectedUnits.length > 1 && typeof formationManager !== 'undefined') {
+                const formation = formationManager.cycleFormation();
+
+                // Calcular centro del grupo
+                let centerX = 0, centerY = 0;
+                for (const unit of selectedUnits) {
+                    centerX += unit.x;
+                    centerY += unit.y;
+                }
+                centerX /= selectedUnits.length;
+                centerY /= selectedUnits.length;
+
+                // Aplicar formación
+                formationManager.applyFormation(formation, selectedUnits, { x: centerX, y: centerY });
+                this.showNotification(`Formación: ${formation}`, 'info');
+                e.preventDefault();
+                return;
+            }
+        }
+
         // WASD - Camera movement handled in updateCamera()
         // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
     }
@@ -1028,9 +1051,26 @@ export class Game {
         return true;
     }
 
+    /**
+     * Encola una unidad para entrenamiento
+     * @param {string} unitType - Tipo de unidad
+     * @param {Building} building - Edificio que entrena
+     */
     trainUnit(unitType, building) {
         if (building.isUnderConstruction) {
             this.showNotification('El edificio está en construcción', 'error');
+            return;
+        }
+
+        // Verificar si el edificio tiene cola de producción
+        if (!building.productionQueue) {
+            this._trainUnitInstant(unitType, building);
+            return;
+        }
+
+        // Verificar cola llena
+        if (building.productionQueue.isFull()) {
+            this.showNotification('Cola de producción llena (máx 5)', 'error');
             return;
         }
 
@@ -1041,20 +1081,74 @@ export class Game {
             return;
         }
 
-        if (this.population >= this.maxPopulation) {
+        if (this.population + building.productionQueue.length >= this.maxPopulation) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
             return;
         }
 
-        // Deducir recursos
+        // Deducir recursos inmediatamente
         for (let [resource, amount] of Object.entries(cost)) {
             this.resources[resource] -= amount;
         }
 
-        // Crear unidad cerca del edificio
-        const angle = Math.random() * Math.PI * 2;
-        const x = building.x + Math.cos(angle) * (building.size + 30);
-        const y = building.y + Math.sin(angle) * (building.size + 30);
+        // Tiempo de entrenamiento según tipo
+        const TRAINING_TIMES = {
+            villager: 25,
+            warrior: 30,
+            archer: 35
+        };
+        const trainingTime = TRAINING_TIMES[unitType] || 30;
+
+        // Encolar unidad
+        building.queueUnit(unitType, cost, trainingTime);
+
+        const queueLength = building.productionQueue.length;
+        this.showNotification(`${unitType} encolado (${queueLength}/5)`, 'info');
+        this.updateUI();
+    }
+
+    /**
+     * Entrena una unidad instantáneamente (fallback para edificios sin cola)
+     * @param {string} unitType 
+     * @param {Building} building 
+     */
+    _trainUnitInstant(unitType, building) {
+        const cost = CONFIG.UNIT_COSTS[unitType];
+
+        if (!this.canAfford(cost)) {
+            this.showNotification('Recursos insuficientes', 'error');
+            return;
+        }
+
+        if (this.population >= this.maxPopulation) {
+            this.showNotification('Límite de población alcanzado', 'error');
+            return;
+        }
+
+        for (let [resource, amount] of Object.entries(cost)) {
+            this.resources[resource] -= amount;
+        }
+
+        this._spawnUnit(unitType, building);
+    }
+
+    /**
+     * Crea una unidad cerca de un edificio
+     * @param {string} unitType - Tipo de unidad
+     * @param {Building} building - Edificio origen
+     * @returns {Unit} La unidad creada
+     */
+    _spawnUnit(unitType, building) {
+        // Posición: rally point o cerca del edificio
+        let x, y;
+        if (building.rallyPoint) {
+            x = building.rallyPoint.x;
+            y = building.rallyPoint.y;
+        } else {
+            const angle = Math.random() * Math.PI * 2;
+            x = building.x + Math.cos(angle) * (building.size + 30);
+            y = building.y + Math.sin(angle) * (building.size + 30);
+        }
 
         let unit;
         switch (unitType) {
@@ -1070,14 +1164,12 @@ export class Game {
         }
 
         if (unit) {
-            // Aplicar bonificaciones de civilización (variable global temporal)
             civilizationManager.applyUnitBonuses(unit, this.civilizationId);
 
             this.units.push(unit);
             this.entities.push(unit);
             this.population++;
 
-            // Reproducir sonido de creación (variable global temporal)
             if (typeof soundManager !== 'undefined') {
                 const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
                 soundManager.play(soundKey);
@@ -1085,7 +1177,15 @@ export class Game {
 
             this.showNotification(`${unit.name} entrenado`, 'success');
             this.updateUI();
+
+            // Si hay rally point, mover la unidad hacia allá
+            if (building.rallyPoint) {
+                unit.targetX = building.rallyPoint.x;
+                unit.targetY = building.rallyPoint.y;
+            }
         }
+
+        return unit;
     }
 
     updateCamera(deltaTime) {
@@ -1203,10 +1303,11 @@ export class Game {
             if (enemy.isDead) hasDeadEntities = true;
         }
 
-        // 3. Verificar Edificios (Solo check de muerte, sin update ni grid overhead)
+        // 3. Actualizar Edificios (colas de producción + death check)
         const buildingsLen = this.buildings.length;
         for (let i = 0; i < buildingsLen; i++) {
             const building = this.buildings[i];
+
             if (building.isDead) {
                 hasDeadEntities = true;
                 hasDeadBuildings = true;
@@ -1216,6 +1317,15 @@ export class Game {
                     if (this.townCenterCounts[building.team] !== undefined) {
                         this.townCenterCounts[building.team]--;
                     }
+                }
+                continue;
+            }
+
+            // Procesar cola de producción (solo para edificios del jugador)
+            if (building.team === 'player' && building.productionQueue && !building.isUnderConstruction) {
+                const completed = building.update(deltaTime, this);
+                if (completed) {
+                    this._spawnUnit(completed.unitType, building);
                 }
             }
         }

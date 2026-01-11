@@ -979,7 +979,29 @@ export class Game {
                 }
             }
 
-            const handleAction = () => {
+            const handleAction = (e) => {
+                // Palette: Prevent action if disabled
+                if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
+                    e.stopPropagation();
+
+                    // Visual feedback
+                    option.classList.remove('shake');
+                    void option.offsetWidth; // Force reflow
+                    option.classList.add('shake');
+
+                    // Auditory feedback (if soundManager exists)
+                    if (typeof soundManager !== 'undefined') {
+                        soundManager.play('error');
+                    }
+
+                    // Notification feedback
+                    const missing = option.getAttribute('aria-label').split(' - Insuficiente: ')[1];
+                    const msg = missing ? `Recursos insuficientes: ${missing}` : 'Recursos insuficientes';
+                    this.showNotification(msg, 'error');
+
+                    return;
+                }
+
                 const buildingType = option.dataset.building;
                 this.startBuildMode(buildingType);
                 this.closeBuildMenu();
@@ -991,7 +1013,7 @@ export class Game {
             option.onkeydown = (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault(); // Prevent scrolling for Space
-                    handleAction();
+                    handleAction(e);
                 }
             };
         });

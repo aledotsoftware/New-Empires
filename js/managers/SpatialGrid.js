@@ -29,18 +29,20 @@ export class SpatialGrid {
 
     clear() {
         // En lugar de iterar todo el grid, solo limpiamos los buckets usados
+        const buckets = this.buckets; // OPTIMIZATION: Hoisting
         const len = this.activeIndices.length;
         for (let i = 0; i < len; i++) {
             const index = this.activeIndices[i];
-            this.buckets[index].length = 0;
+            buckets[index].length = 0;
         }
         this.activeIndices.length = 0;
     }
 
     add(entity) {
         // Optimización: usar multiplicación es ligeramente más rápido que división
-        const col = Math.floor(entity.x * this.invCellSize);
-        const row = Math.floor(entity.y * this.invCellSize);
+        // OPTIMIZATION: Bitwise OR 0 is faster than Math.floor for positive numbers
+        const col = (entity.x * this.invCellSize) | 0;
+        const row = (entity.y * this.invCellSize) | 0;
 
         // Verificación de límites simple
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
@@ -74,11 +76,15 @@ export class SpatialGrid {
 
         // OPTIMIZATION: Manual indexing
         let count = result.length;
+        // OPTIMIZATION: Hoist properties
+        const buckets = this.buckets;
+        const cols = this.cols;
 
         // Optimización: usar multiplicación
         const cellRadius = Math.ceil(radius * this.invCellSize);
-        const centerCol = Math.floor(x * this.invCellSize);
-        const centerRow = Math.floor(y * this.invCellSize);
+        // OPTIMIZATION: Bitwise OR 0
+        const centerCol = (x * this.invCellSize) | 0;
+        const centerRow = (y * this.invCellSize) | 0;
 
         // Clamping para no salir de los bordes al iterar
         const startRow = Math.max(0, centerRow - cellRadius);
@@ -88,10 +94,10 @@ export class SpatialGrid {
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
-            const rowBase = r * this.cols;
+            const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
                 const index = rowBase + c;
-                const bucket = this.buckets[index];
+                const bucket = buckets[index];
 
                 // Iterar bucket y agregar a resultados
                 const bLen = bucket.length;
@@ -127,17 +133,21 @@ export class SpatialGrid {
 
         // OPTIMIZATION: Manual indexing
         let count = result.length;
+        // OPTIMIZATION: Hoist properties
+        const buckets = this.buckets;
+        const cols = this.cols;
 
-        const startCol = Math.max(0, Math.floor(minX * this.invCellSize));
-        const endCol = Math.min(this.cols - 1, Math.floor((minX + width) * this.invCellSize));
-        const startRow = Math.max(0, Math.floor(minY * this.invCellSize));
-        const endRow = Math.min(this.rows - 1, Math.floor((minY + height) * this.invCellSize));
+        // OPTIMIZATION: Bitwise OR 0
+        const startCol = Math.max(0, (minX * this.invCellSize) | 0);
+        const endCol = Math.min(cols - 1, ((minX + width) * this.invCellSize) | 0);
+        const startRow = Math.max(0, (minY * this.invCellSize) | 0);
+        const endRow = Math.min(this.rows - 1, ((minY + height) * this.invCellSize) | 0);
 
         for (let r = startRow; r <= endRow; r++) {
-            const rowBase = r * this.cols;
+            const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
                 const index = rowBase + c;
-                const bucket = this.buckets[index];
+                const bucket = buckets[index];
                 const bLen = bucket.length;
                 if (bLen > 0) {
                     for (let i = 0; i < bLen; i++) {

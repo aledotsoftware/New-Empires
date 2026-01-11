@@ -58,6 +58,16 @@ export class SaveManager {
                 console.warn('Versión de guardado diferente, puede haber incompatibilidades');
             }
 
+            // Sentinel: Validate state structure before returning
+            if (!this._validateState(state)) {
+                if (typeof debugLogger !== 'undefined') {
+                    debugLogger.error('Archivo de guardado corrupto o inválido', 'save');
+                } else {
+                    console.error('❌ Archivo de guardado corrupto o inválido');
+                }
+                return null;
+            }
+
             if (typeof debugLogger !== 'undefined') {
                 debugLogger.info('Partida cargada', 'save', {
                     civilizationId: state.civilizationId,
@@ -93,6 +103,10 @@ export class SaveManager {
             if (!data) return null;
 
             const state = JSON.parse(data);
+
+            // Basic validation for info retrieval
+            if (!state || typeof state !== 'object') return null;
+
             return {
                 version: state.version,
                 timestamp: state.timestamp,
@@ -104,6 +118,54 @@ export class SaveManager {
         } catch (error) {
             return null;
         }
+    }
+
+    /**
+     * Valida la estructura del estado del juego
+     * @param {Object} state - Estado deserializado
+     * @returns {boolean} true si es válido
+     */
+    _validateState(state) {
+        if (!state || typeof state !== 'object') return false;
+
+        // Required top-level fields
+        const requiredFields = [
+            'version', 'timestamp', 'civilizationId', 'gameTime',
+            'resources', 'units', 'buildings', 'enemies', 'resourceNodes'
+        ];
+
+        for (const field of requiredFields) {
+            if (!(field in state)) {
+                // console.warn(`Save validation failed: Missing field ${field}`);
+                return false;
+            }
+        }
+
+        // Validate types for critical fields
+        if (typeof state.civilizationId !== 'string') return false;
+        if (typeof state.resources !== 'object') return false;
+        if (!Array.isArray(state.units)) return false;
+        if (!Array.isArray(state.buildings)) return false;
+        if (!Array.isArray(state.enemies)) return false;
+        if (!Array.isArray(state.resourceNodes)) return false;
+
+        // Optional: Validate resource structure (prevent negative values or NaN)
+        const resourceKeys = ['wood', 'food', 'gold', 'stone'];
+        for (const key of resourceKeys) {
+            if (typeof state.resources[key] !== 'number' || isNaN(state.resources[key])) {
+                return false;
+            }
+        }
+
+        // Validate units structure (check first few to ensure array isn't full of garbage)
+        if (state.units.length > 0) {
+            const sample = state.units[0];
+            if (!sample || typeof sample.type !== 'string' || typeof sample.x !== 'number' || typeof sample.y !== 'number') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -221,7 +283,12 @@ export class SaveManager {
             reader.onload = (e) => {
                 try {
                     const state = JSON.parse(e.target.result);
-                    resolve(state);
+                    // Sentinel: Validate imported file structure
+                    if (this._validateState(state)) {
+                        resolve(state);
+                    } else {
+                        reject(new Error('Archivo de guardado inválido o corrupto'));
+                    }
                 } catch (error) {
                     reject(new Error('Archivo de guardado inválido'));
                 }

@@ -100,6 +100,9 @@ export class Game {
         this.enableIdleVillagerCycle = true; // Habilitar ciclo de aldeanos inactivos con TAB
         this.idleVillagerIndex = 0; // Índice para el ciclo de aldeanos inactivos
 
+        // Grupos de control (Ctrl+1-9 para guardar, 1-9 para seleccionar)
+        this.controlGroups = new Array(10).fill(null).map(() => []);
+
         // Pointer Lock para múltiples monitores
         this.isPointerLocked = false;
 
@@ -683,6 +686,80 @@ export class Game {
         }
     }
 
+    /**
+     * Guarda la selección actual en un grupo de control
+     * @param {number} groupNum - Número del grupo (1-9)
+     */
+    saveControlGroup(groupNum) {
+        if (this.selectedEntities.length === 0) {
+            this.showNotification('Nada seleccionado para guardar', 'error');
+            return;
+        }
+
+        // Guardar referencias a las entidades (no copias)
+        this.controlGroups[groupNum] = [...this.selectedEntities];
+
+        const count = this.selectedEntities.length;
+        const type = count === 1 ? this.selectedEntities[0].name : `${count} unidades`;
+        this.showNotification(`Grupo ${groupNum}: ${type}`, 'info');
+    }
+
+    /**
+     * Selecciona las entidades de un grupo de control
+     * @param {number} groupNum - Número del grupo (1-9)
+     * @param {boolean} addToSelection - Si true, añade al grupo actual
+     */
+    selectControlGroup(groupNum, addToSelection = false) {
+        const group = this.controlGroups[groupNum];
+
+        if (!group || group.length === 0) {
+            this.showNotification(`Grupo ${groupNum} vacío`, 'info');
+            return;
+        }
+
+        // Filtrar entidades muertas
+        const aliveEntities = group.filter(e => !e.isDead);
+
+        if (aliveEntities.length === 0) {
+            this.controlGroups[groupNum] = [];
+            this.showNotification(`Grupo ${groupNum} vacío (entidades muertas)`, 'info');
+            return;
+        }
+
+        // Actualizar grupo si algunas murieron
+        if (aliveEntities.length !== group.length) {
+            this.controlGroups[groupNum] = aliveEntities;
+        }
+
+        if (addToSelection) {
+            // Añadir al grupo actual
+            for (const entity of aliveEntities) {
+                if (!this.selectedEntities.includes(entity)) {
+                    this.selectedEntities.push(entity);
+                }
+            }
+        } else {
+            // Reemplazar selección
+            this.selectedEntities = [...aliveEntities];
+        }
+
+        // Centrar cámara en el grupo
+        if (aliveEntities.length > 0) {
+            let centerX = 0, centerY = 0;
+            for (const entity of aliveEntities) {
+                centerX += entity.x;
+                centerY += entity.y;
+            }
+            centerX /= aliveEntities.length;
+            centerY /= aliveEntities.length;
+
+            this.camera.x = centerX - this.viewWidth / 2;
+            this.camera.y = centerY - this.viewHeight / 2;
+        }
+
+        this.updateSelectionInfo();
+    }
+
     handleKeyPress(e) {
         // TAB - Seleccionar siguiente aldeano inactivo
         if (e.key === 'Tab') {
@@ -691,6 +768,21 @@ export class Game {
                 this.selectNextIdleVillager();
             }
             return;
+        }
+
+        // Grupos de control (1-9)
+        const numKey = parseInt(e.key);
+        if (numKey >= 1 && numKey <= 9) {
+            if (e.ctrlKey || e.metaKey) {
+                // Ctrl+1-9: Guardar grupo
+                e.preventDefault();
+                this.saveControlGroup(numKey);
+                return;
+            } else if (!e.altKey && !e.shiftKey) {
+                // 1-9 sin modificadores: Seleccionar grupo
+                this.selectControlGroup(numKey, e.shiftKey);
+                return;
+            }
         }
 
         // B - Build menu
@@ -1962,8 +2054,13 @@ export class Game {
             stateKey = 'empty';
         } else if (this.selectedEntities.length === 1) {
             const ent = this.selectedEntities[0];
-            // Incluir HP y otros estados cambiantes en la clave
-            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}`;
+            // Incluir HP, estado, y progreso de producción en la clave
+            let prodKey = '';
+            if (ent.productionQueue && !ent.productionQueue.isEmpty()) {
+                const prog = Math.floor(ent.productionQueue.getProgress() * 100);
+                prodKey = `:prod${ent.productionQueue.length}:${prog}`;
+            }
+            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}${prodKey}`;
         } else {
             stateKey = `multi:${this.selectedEntities.length}`;
         }
@@ -2092,6 +2189,86 @@ export class Game {
                 const attackDiv = document.createElement('div');
                 attackDiv.textContent = `Ataque: ${entity.attackDamage}`;
                 statsDiv.appendChild(attackDiv);
+            }
+
+            // Mostrar cola de producción si el edificio tiene una
+            if (entity.productionQueue && entity.productionQueue.length > 0) {
+                const prodContainer = document.createElement('div');
+                prodContainer.className = 'production-container';
+                prodContainer.style.marginTop = '8px';
+                prodContainer.style.borderTop = '1px solid rgba(212, 175, 55, 0.3)';
+                prodContainer.style.paddingTop = '8px';
+
+                const prodTitle = document.createElement('div');
+                prodTitle.style.fontSize = '0.75rem';
+                prodTitle.style.opacity = '0.7';
+                prodTitle.style.marginBottom = '4px';
+                prodTitle.textContent = '🔨 En producción:';
+                prodContainer.appendChild(prodTitle);
+
+                const current = entity.productionQueue.getCurrentItem();
+                if (current) {
+                    const currentDiv = document.createElement('div');
+                    currentDiv.style.display = 'flex';
+                    currentDiv.style.alignItems = 'center';
+                    currentDiv.style.gap = '8px';
+                    currentDiv.style.marginBottom = '4px';
+
+                    // Icono de la unidad
+                    const unitIcon = document.createElement('img');
+                    unitIcon.src = `assets/icons/${current.unitType}.png`;
+                    unitIcon.alt = current.unitType;
+                    unitIcon.style.width = '24px';
+                    unitIcon.style.height = '24px';
+                    unitIcon.onerror = () => { unitIcon.style.display = 'none'; };
+                    currentDiv.appendChild(unitIcon);
+
+                    // Nombre y tiempo
+                    const unitInfo = document.createElement('div');
+                    unitInfo.style.flex = '1';
+                    unitInfo.textContent = current.unitType.charAt(0).toUpperCase() + current.unitType.slice(1);
+                    currentDiv.appendChild(unitInfo);
+
+                    // Tiempo restante
+                    const timeLeft = document.createElement('div');
+                    timeLeft.style.fontSize = '0.8rem';
+                    timeLeft.style.color = '#48bb78';
+                    timeLeft.textContent = `${Math.ceil(current.remaining)}s`;
+                    currentDiv.appendChild(timeLeft);
+
+                    prodContainer.appendChild(currentDiv);
+
+                    // Barra de progreso
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'production-bar';
+                    progressBar.style.height = '4px';
+                    progressBar.style.background = 'rgba(255, 255, 255, 0.1)';
+                    progressBar.style.borderRadius = '2px';
+                    progressBar.style.overflow = 'hidden';
+
+                    const progressFill = document.createElement('div');
+                    progressFill.className = 'production-fill';
+                    const progress = entity.productionQueue.getProgress() * 100;
+                    progressFill.style.width = `${progress}%`;
+                    progressFill.style.height = '100%';
+                    progressFill.style.background = 'linear-gradient(90deg, #4299e1, #48bb78)';
+                    progressFill.style.transition = 'width 0.1s ease';
+
+                    progressBar.appendChild(progressFill);
+                    prodContainer.appendChild(progressBar);
+
+                    // Mostrar cola restante
+                    if (entity.productionQueue.length > 1) {
+                        const queueDiv = document.createElement('div');
+                        queueDiv.style.fontSize = '0.7rem';
+                        queueDiv.style.opacity = '0.6';
+                        queueDiv.style.marginTop = '4px';
+                        queueDiv.textContent = `+${entity.productionQueue.length - 1} en cola`;
+                        prodContainer.appendChild(queueDiv);
+                    }
+                }
+
+                statsDiv.appendChild(prodContainer);
             }
 
             detailsDiv.appendChild(nameHeader);

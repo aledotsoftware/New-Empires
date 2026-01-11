@@ -53,6 +53,16 @@
 | **Tab** | Siguiente aldeano inactivo |
 | **Shift + Tab** | Anterior aldeano inactivo |
 
+### Grupos de Control
+
+| Tecla | Acción |
+|-------|--------|
+| **Ctrl + 1-9** | Guardar selección actual en grupo |
+| **1-9** | Seleccionar grupo guardado |
+| **Shift + 1-9** | Añadir grupo a selección actual |
+
+> 💡 Los grupos de control recuerdan las unidades seleccionadas. Si una unidad muere, se remueve automáticamente del grupo.
+
 ### Acciones Generales
 
 | Tecla | Acción |

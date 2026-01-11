@@ -58,12 +58,8 @@ export class Unit extends Entity {
             }
         }
         else if (this.targetX !== null) {
-            this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game);
-            // OPTIMIZATION: Use squared distance check to avoid expensive Math.hypot (60x faster)
-            const dx = this.x - this.targetX;
-            const dy = this.y - this.targetY;
-            const distSq = dx * dx + dy * dy;
-            if (distSq < 100) { // 10 * 10 = 100
+            // OPTIMIZATION: moveTowardsTarget returns true if arrived, avoiding redundant dist calc
+            if (this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game)) {
                 this.targetX = null;
                 this.targetY = null;
             }
@@ -106,10 +102,14 @@ export class Unit extends Entity {
     moveTowardsTarget(targetX, targetY, deltaTime, game) {
         const dx = targetX - this.x;
         const dy = targetY - this.y;
-        // OPTIMIZATION: Math.sqrt is faster than Math.hypot for simple 2D distance
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
 
-        if (dist > 5) {
+        // OPTIMIZATION: Check squared distance first to avoid sqrt if already close
+        // threshold 5px -> 25 squared
+        if (distSq > 25) {
+            // OPTIMIZATION: Math.sqrt is faster than Math.hypot for simple 2D distance
+            const dist = Math.sqrt(distSq);
+
             // Obtener modificador de terreno
             let speedModifier = 1.0;
             if (game && game.terrainMap) {
@@ -156,18 +156,21 @@ export class Unit extends Entity {
 
                     if (content && content.isBuilding) {
                         // Colisión simple: Intentar deslizarse
+                        // OPTIMIZATION: Reuse calculated col/row indices to avoid 2 Math.floor calls
+                        // We need current position's grid coords for sliding logic
+                        const currCol = Math.floor(this.x * game.gridMap.invTileSize);
+                        const currRow = Math.floor(this.y * game.gridMap.invTileSize);
+
                         // Verificar movimiento solo en X
-                        const colX = Math.floor((this.x + moveX) * game.gridMap.invTileSize);
-                        const rowX = Math.floor(this.y * game.gridMap.invTileSize);
-                        const contentX = game.gridMap.grid[game.gridMap.getIndex(colX, rowX)];
+                        // nextX col is 'col', current y row is 'currRow'
+                        const contentX = game.gridMap.grid[game.gridMap.getIndex(col, currRow)];
                         if (contentX && contentX.isBuilding) {
                             moveX = 0;
                         }
 
                         // Verificar movimiento solo en Y
-                        const colY = Math.floor(this.x * game.gridMap.invTileSize);
-                        const rowY = Math.floor((this.y + moveY) * game.gridMap.invTileSize);
-                        const contentY = game.gridMap.grid[game.gridMap.getIndex(colY, rowY)];
+                        // current x col is 'currCol', nextY row is 'row'
+                        const contentY = game.gridMap.grid[game.gridMap.getIndex(currCol, row)];
                         if (contentY && contentY.isBuilding) {
                             moveY = 0;
                         }
@@ -183,7 +186,11 @@ export class Unit extends Entity {
                 this.x = Math.max(0, Math.min(CONFIG.CANVAS_WIDTH, this.x));
                 this.y = Math.max(0, Math.min(CONFIG.CANVAS_HEIGHT, this.y));
             }
+
+            return false; // Still moving
         }
+
+        return true; // Arrived
     }
 
     tryAttack(target, deltaTime, game) {

@@ -1,5 +1,5 @@
 // Imports de módulos creados
-import { CONFIG, TILE_SIZE, TERRAIN_TYPES } from './constants.js';
+import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS } from './constants.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
@@ -2099,18 +2099,25 @@ export class Game {
 
             // Text
             const textDiv = document.createElement('div');
-            textDiv.textContent = 'Selecciona una unidad o edificio';
+            textDiv.className = 'selection-empty-title';
+            textDiv.textContent = 'Listo para órdenes';
 
-            // Hint (Palette touch)
-            const hintDiv = document.createElement('div');
-            hintDiv.style.fontSize = '0.75rem';
-            hintDiv.style.opacity = '0.6';
-            hintDiv.style.marginTop = '4px';
-            hintDiv.textContent = '(Arrastra para selección múltiple)';
+            const subTextDiv = document.createElement('div');
+            subTextDiv.className = 'selection-empty-subtitle';
+            subTextDiv.textContent = 'Selecciona una unidad o edificio';
+
+            // Gameplay Tip (Palette enhancement)
+            const tipDiv = document.createElement('div');
+            tipDiv.className = 'selection-tip';
+
+            // Pick a random tip
+            const randomTip = GAMEPLAY_TIPS[Math.floor(Math.random() * GAMEPLAY_TIPS.length)];
+            tipDiv.textContent = `💡 Tip: ${randomTip}`;
 
             emptyState.appendChild(iconDiv);
             emptyState.appendChild(textDiv);
-            emptyState.appendChild(hintDiv);
+            emptyState.appendChild(subTextDiv);
+            emptyState.appendChild(tipDiv);
 
             content.appendChild(emptyState);
             return;

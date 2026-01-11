@@ -866,6 +866,28 @@ body,
     color: var(--text-dark);
     text-align: center;
     font-style: italic;
+    width: 100%;
+}
+
+.selection-empty-title {
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 4px;
+}
+
+.selection-empty-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-medium);
+}
+
+.selection-tip {
+    font-size: 0.7rem;
+    color: var(--text-medium);
+    margin-top: 8px;
+    font-style: italic;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 4px;
+    opacity: 0.8;
 }
 
 /* Panel de comandos (centro) - Grid 2x5 estilo Age of Empires */

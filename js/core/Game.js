@@ -795,9 +795,24 @@ export class Game {
 
         // ESC - Cancel y liberar pointer lock
         if (e.key === 'Escape') {
-            this.buildMode = null;
-            this.closeBuildMenu();
-            // Liberar pointer lock si está activo
+            // 1. Cancelar modo de construcción si está activo
+            if (this.buildMode) {
+                this.buildMode = null;
+                this.closeBuildMenu();
+                return;
+            }
+
+            this.closeBuildMenu(); // Asegurar que el menú se cierre
+
+            // 2. Palette: Deselect entities if nothing else is active
+            if (this.selectedEntities.length > 0) {
+                this.selectedEntities = [];
+                this.updateSelectionPanel();
+                this.updateActionsPanel();
+                return;
+            }
+
+            // 3. Liberar pointer lock si está activo
             if (this.isPointerLocked) {
                 document.exitPointerLock();
             }
@@ -979,7 +994,29 @@ export class Game {
                 }
             }
 
-            const handleAction = () => {
+            const handleAction = (e) => {
+                // Palette: Prevent action if disabled
+                if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
+                    e.stopPropagation();
+
+                    // Visual feedback
+                    option.classList.remove('shake');
+                    void option.offsetWidth; // Force reflow
+                    option.classList.add('shake');
+
+                    // Auditory feedback (if soundManager exists)
+                    if (typeof soundManager !== 'undefined') {
+                        soundManager.play('error');
+                    }
+
+                    // Notification feedback
+                    const missing = option.getAttribute('aria-label').split(' - Insuficiente: ')[1];
+                    const msg = missing ? `Recursos insuficientes: ${missing}` : 'Recursos insuficientes';
+                    this.showNotification(msg, 'error');
+
+                    return;
+                }
+
                 const buildingType = option.dataset.building;
                 this.startBuildMode(buildingType);
                 this.closeBuildMenu();
@@ -991,7 +1028,7 @@ export class Game {
             option.onkeydown = (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault(); // Prevent scrolling for Space
-                    handleAction();
+                    handleAction(e);
                 }
             };
         });
@@ -2074,6 +2111,21 @@ export class Game {
             content.removeChild(content.firstChild);
         }
 
+        // Helper para crear botón de deselección (Palette)
+        const createDeselectButton = () => {
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'btn-close'; // Reuse existing class
+            closeBtn.style.cssText = 'position: absolute; top: 0; right: 0; width: 20px; height: 20px; font-size: 10px; z-index: 20; padding: 0; line-height: 1;';
+            closeBtn.setAttribute('aria-label', 'Deseleccionar (Esc)');
+            closeBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.selectedEntities = [];
+                this.updateSelectionPanel();
+                this.updateActionsPanel();
+            };
+            return closeBtn;
+        };
+
         if (this.selectedEntities.length === 0) {
             const emptyState = document.createElement('div');
             emptyState.className = 'selection-empty-state';
@@ -2128,6 +2180,10 @@ export class Game {
 
             const infoDiv = document.createElement('div');
             infoDiv.className = 'selection-info';
+            infoDiv.style.position = 'relative'; // Palette: For close button positioning
+
+            // Palette: Add Deselect Button
+            infoDiv.appendChild(createDeselectButton());
 
             const iconDiv = document.createElement('div');
             iconDiv.className = 'selection-icon';
@@ -2287,6 +2343,10 @@ export class Game {
         } else {
             const infoDiv = document.createElement('div');
             infoDiv.className = 'selection-info';
+            infoDiv.style.position = 'relative'; // Palette: For close button positioning
+
+            // Palette: Add Deselect Button
+            infoDiv.appendChild(createDeselectButton());
 
             const iconDiv = document.createElement('div');
             iconDiv.className = 'selection-icon';

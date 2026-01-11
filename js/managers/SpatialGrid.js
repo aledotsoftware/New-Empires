@@ -30,14 +30,18 @@ export class SpatialGrid {
     clear() {
         // En lugar de iterar todo el grid, solo limpiamos los buckets usados
         const len = this.activeIndices.length;
+        const buckets = this.buckets;
         for (let i = 0; i < len; i++) {
             const index = this.activeIndices[i];
-            this.buckets[index].length = 0;
+            buckets[index].length = 0;
         }
         this.activeIndices.length = 0;
     }
 
     add(entity) {
+        // OPTIMIZATION: Hoist buckets to local variable
+        const buckets = this.buckets;
+
         // Optimización: usar multiplicación es ligeramente más rápido que división
         const col = Math.floor(entity.x * this.invCellSize);
         const row = Math.floor(entity.y * this.invCellSize);
@@ -45,11 +49,12 @@ export class SpatialGrid {
         // Verificación de límites simple
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {
             const index = row * this.cols + col;
-            const bucket = this.buckets[index];
+            const bucket = buckets[index];
 
             // Si el bucket estaba vacío, lo marcamos como activo
             if (bucket.length === 0) {
-                this.activeIndices.push(index);
+                // OPTIMIZATION: Manual indexing is faster than push()
+                this.activeIndices[this.activeIndices.length] = index;
             }
 
             // OPTIMIZATION: Manual indexing is faster than push() for hot loops (~30%)
@@ -72,6 +77,11 @@ export class SpatialGrid {
             result.length = 0;
         }
 
+        // OPTIMIZATION: Hoist class members
+        const buckets = this.buckets;
+        const cols = this.cols;
+        const rows = this.rows;
+
         // OPTIMIZATION: Manual indexing
         let count = result.length;
 
@@ -82,16 +92,16 @@ export class SpatialGrid {
 
         // Clamping para no salir de los bordes al iterar
         const startRow = Math.max(0, centerRow - cellRadius);
-        const endRow = Math.min(this.rows - 1, centerRow + cellRadius);
+        const endRow = Math.min(rows - 1, centerRow + cellRadius);
         const startCol = Math.max(0, centerCol - cellRadius);
-        const endCol = Math.min(this.cols - 1, centerCol + cellRadius);
+        const endCol = Math.min(cols - 1, centerCol + cellRadius);
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
-            const rowBase = r * this.cols;
+            const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
                 const index = rowBase + c;
-                const bucket = this.buckets[index];
+                const bucket = buckets[index];
 
                 // Iterar bucket y agregar a resultados
                 const bLen = bucket.length;
@@ -125,19 +135,24 @@ export class SpatialGrid {
             result.length = 0;
         }
 
+        // OPTIMIZATION: Hoist class members
+        const buckets = this.buckets;
+        const cols = this.cols;
+        const rows = this.rows;
+
         // OPTIMIZATION: Manual indexing
         let count = result.length;
 
         const startCol = Math.max(0, Math.floor(minX * this.invCellSize));
-        const endCol = Math.min(this.cols - 1, Math.floor((minX + width) * this.invCellSize));
+        const endCol = Math.min(cols - 1, Math.floor((minX + width) * this.invCellSize));
         const startRow = Math.max(0, Math.floor(minY * this.invCellSize));
-        const endRow = Math.min(this.rows - 1, Math.floor((minY + height) * this.invCellSize));
+        const endRow = Math.min(rows - 1, Math.floor((minY + height) * this.invCellSize));
 
         for (let r = startRow; r <= endRow; r++) {
-            const rowBase = r * this.cols;
+            const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
                 const index = rowBase + c;
-                const bucket = this.buckets[index];
+                const bucket = buckets[index];
                 const bLen = bucket.length;
                 if (bLen > 0) {
                     for (let i = 0; i < bLen; i++) {

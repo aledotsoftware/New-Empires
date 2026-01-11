@@ -22,7 +22,7 @@ const civilizationManager = {
     getCivilization: (id) => dataLoader.getCivilizationData(id),
     getStartingResources: (id) => {
         const civ = dataLoader.getCivilizationData(id);
-        return civ ? (civ.startingResources || {}) : {};
+        return civ?.bonuses?.startingResources || {};
     },
     getBuildSpeed: (id) => {
         const civ = dataLoader.getCivilizationData(id);

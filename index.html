@@ -86,7 +86,8 @@
     </div>
 
     <!-- Modal del Árbol de Tecnologías -->
-    <div id="techTreeScreen" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="techTreeTitle" tabindex="-1">
+    <div id="techTreeScreen" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="techTreeTitle" tabindex="-1">
         <div class="modal-content tech-tree-modal">
             <div class="modal-header">
                 <h2 id="techTreeTitle"><img src="assets/icons/tech.png" onerror="this.style.display='none'"
@@ -188,7 +189,8 @@
                     <span id="gameTime">00:00</span>
                 </div>
                 <!-- Palette: Idle Villager Indicator (Hidden by default) -->
-                <button id="idleVillagerBtn" class="btn-secondary hidden" style="padding:8px 12px; flex-direction:row; align-items:center; gap:8px; border-color:#f0ad4e; color:#f0ad4e;"
+                <button id="idleVillagerBtn" class="btn-secondary hidden"
+                    style="padding:8px 12px; flex-direction:row; align-items:center; gap:8px; border-color:#f0ad4e; color:#f0ad4e;"
                     aria-label="Seleccionar aldeano inactivo (Tab)">
                     <img src="assets/icons/villager.png" style="width:20px;height:20px;object-fit:contain;" alt="">
                     <span id="idleVillagerCount" style="font-weight:bold;">0</span>
@@ -202,7 +204,8 @@
 
                 <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
                     aria-label="Configuración">
-                    <img src="assets/icons/settings.png" onerror="this.style.display='none'" style="width:20px;height:20px;" alt="">
+                    <img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                        style="width:20px;height:20px;" alt="">
                     <div class="btn-tooltip" role="tooltip">
                         <div class="tooltip-header">Configuración</div>
                         <div class="tooltip-desc">Ajustar sonido y gráficos</div>
@@ -212,7 +215,8 @@
         </div>
 
         <!-- Menú de Construcción (Modal) -->
-        <div id="buildMenu" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="buildMenuTitle" tabindex="-1">
+        <div id="buildMenu" class="modal-overlay hidden" role="dialog" aria-modal="true"
+            aria-labelledby="buildMenuTitle" tabindex="-1">
             <div class="modal-content build-menu">
                 <div class="modal-header">
                     <h2 id="buildMenuTitle"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
@@ -220,7 +224,8 @@
                     <button class="btn-close" onclick="closeBuildMenu()" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="build-grid">
-                    <div class="build-option" data-building="house" role="button" tabindex="0" aria-keyshortcuts="Q" aria-label="Construir Casa (Costo: 30 Madera)">
+                    <div class="build-option" data-building="house" role="button" tabindex="0" aria-keyshortcuts="Q"
+                        aria-label="Construir Casa (Costo: 30 Madera)">
                         <div class="shortcut-badge" aria-hidden="true">Q</div>
                         <div class="build-icon"><img src="assets/icons/house.png" onerror="this.style.display='none'"
                                 style="width:100%;height:100%;object-fit:contain;" alt=""></div>
@@ -230,7 +235,8 @@
                         </div>
                         <div class="build-info">+5 población</div>
                     </div>
-                    <div class="build-option" data-building="barracks" role="button" tabindex="0" aria-keyshortcuts="W" aria-label="Construir Cuartel (Costo: 175 Madera)">
+                    <div class="build-option" data-building="barracks" role="button" tabindex="0" aria-keyshortcuts="W"
+                        aria-label="Construir Cuartel (Costo: 175 Madera)">
                         <div class="shortcut-badge" aria-hidden="true">W</div>
                         <div class="build-icon"><img src="assets/icons/barracks.png" onerror="this.style.display='none'"
                                 style="width:100%;height:100%;object-fit:contain;" alt=""></div>
@@ -240,10 +246,12 @@
                         </div>
                         <div class="build-info">Entrena unidades</div>
                     </div>
-                    <div class="build-option" data-building="townCenter" role="button" tabindex="0" aria-keyshortcuts="E" aria-label="Construir Centro Urbano (Costo: 275 Madera, 100 Piedra)">
+                    <div class="build-option" data-building="townCenter" role="button" tabindex="0"
+                        aria-keyshortcuts="E" aria-label="Construir Centro Urbano (Costo: 275 Madera, 100 Piedra)">
                         <div class="shortcut-badge" aria-hidden="true">E</div>
                         <div class="build-icon"><img src="assets/icons/townCenter.png"
-                                onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;" alt="">
+                                onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"
+                                alt="">
                         </div>
                         <div class="build-name">Centro Urbano</div>
                         <div class="build-cost">
@@ -252,7 +260,8 @@
                         </div>
                         <div class="build-info">Entrena aldeanos</div>
                     </div>
-                    <div class="build-option" data-building="storage" role="button" tabindex="0" aria-keyshortcuts="R" aria-label="Construir Depósito (Costo: 100 Madera)">
+                    <div class="build-option" data-building="storage" role="button" tabindex="0" aria-keyshortcuts="R"
+                        aria-label="Construir Depósito (Costo: 100 Madera)">
                         <div class="shortcut-badge" aria-hidden="true">R</div>
                         <div class="build-icon"><img src="assets/icons/storage.png" onerror="this.style.display='none'"
                                 style="width:100%;height:100%;object-fit:contain;" alt=""></div>
@@ -262,10 +271,12 @@
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
-                    <div class="build-option" data-building="storageWood" role="button" tabindex="0" aria-keyshortcuts="T" aria-label="Construir Depósito de Madera (Costo: 100 Madera)">
+                    <div class="build-option" data-building="storageWood" role="button" tabindex="0"
+                        aria-keyshortcuts="T" aria-label="Construir Depósito de Madera (Costo: 100 Madera)">
                         <div class="shortcut-badge" aria-hidden="true">T</div>
                         <div class="build-icon"><img src="assets/icons/storageWood.png"
-                                onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;" alt="">
+                                onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:contain;"
+                                alt="">
                         </div>
                         <div class="build-name">Depósito de Madera</div>
                         <div class="build-cost">
@@ -273,7 +284,8 @@
                         </div>
                         <div class="build-info">Almacena madera</div>
                     </div>
-                    <div class="build-option" data-building="market" role="button" tabindex="0" aria-keyshortcuts="Y" aria-label="Construir Mercado (Costo: 150 Madera, 50 Piedra)">
+                    <div class="build-option" data-building="market" role="button" tabindex="0" aria-keyshortcuts="Y"
+                        aria-label="Construir Mercado (Costo: 150 Madera, 50 Piedra)">
                         <div class="shortcut-badge" aria-hidden="true">Y</div>
                         <div class="build-icon"><img src="assets/icons/market.png" onerror="this.style.display='none'"
                                 style="width:100%;height:100%;object-fit:contain;" alt=""></div>
@@ -284,7 +296,8 @@
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
-                    <div class="build-option" data-building="temple" role="button" tabindex="0" aria-keyshortcuts="U" aria-label="Construir Templo (Costo: 200 Madera, 100 Oro)">
+                    <div class="build-option" data-building="temple" role="button" tabindex="0" aria-keyshortcuts="U"
+                        aria-label="Construir Templo (Costo: 200 Madera, 100 Oro)">
                         <div class="shortcut-badge" aria-hidden="true">U</div>
                         <div class="build-icon"><img src="assets/icons/temple.png" onerror="this.style.display='none'"
                                 style="width:100%;height:100%;object-fit:contain;" alt=""></div>
@@ -295,7 +308,8 @@
                         </div>
                         <div class="build-info">Almacena recursos</div>
                     </div>
-                    <div class="build-option" data-building="workshop" role="button" tabindex="0" aria-keyshortcuts="I" aria-label="Construir Taller (Costo: 200 Madera, 50 Oro)">
+                    <div class="build-option" data-building="workshop" role="button" tabindex="0" aria-keyshortcuts="I"
+                        aria-label="Construir Taller (Costo: 200 Madera, 50 Oro)">
                         <div class="shortcut-badge" aria-hidden="true">I</div>
                         <div class="build-icon"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
                                 style="width:100%;height:100%;object-fit:contain;" alt=""></div>
@@ -311,7 +325,8 @@
         </div>
 
         <!-- Pantalla de Game Over -->
-        <div id="gameOverScreen" class="game-over-screen hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle" tabindex="-1">
+        <div id="gameOverScreen" class="game-over-screen hidden" role="dialog" aria-modal="true"
+            aria-labelledby="gameOverTitle" tabindex="-1">
             <div class="game-over-content">
                 <h1 id="gameOverTitle" class="game-over-title">Victoria</h1>
                 <p id="gameOverMessage" class="game-over-message"></p>
@@ -321,10 +336,11 @@
         </div>
 
         <!-- Pantalla de Configuración -->
-    <div id="settingsScreen" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" tabindex="-1">
+        <div id="settingsScreen" class="modal-overlay hidden" role="dialog" aria-modal="true"
+            aria-labelledby="settingsTitle" tabindex="-1">
             <div class="modal-content settings-modal" style="max-width: 500px;">
                 <div class="modal-header">
-                <h2 id="settingsTitle"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
+                    <h2 id="settingsTitle"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
                     <button class="btn-close" onclick="hideSettings()" aria-label="Cerrar">✕</button>
                 </div>
@@ -337,8 +353,8 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Efectos de Sonido: <span id="soundToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
-                            <button id="soundToggleBtn" class="btn-secondary" onclick="toggleSound()" style="padding: 8px 16px;"
-                                aria-label="Alternar sonido" aria-pressed="true">
+                            <button id="soundToggleBtn" class="btn-secondary" onclick="toggleSound()"
+                                style="padding: 8px 16px;" aria-label="Alternar sonido" aria-pressed="true">
                                 Alternar
                             </button>
                         </div>
@@ -363,8 +379,8 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
                             </label>
-                            <button id="gridToggleBtn" class="btn-secondary" onclick="toggleGrid()" style="padding: 8px 16px;"
-                                aria-label="Alternar cuadrícula" aria-pressed="true">
+                            <button id="gridToggleBtn" class="btn-secondary" onclick="toggleGrid()"
+                                style="padding: 8px 16px;" aria-label="Alternar cuadrícula" aria-pressed="true">
                                 Alternar
                             </button>
                         </div>
@@ -372,10 +388,12 @@
                         <div
                             style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
                             <label style="font-weight: 600; color: #e2e8f0;">
-                                Ciclo Aldeanos Inactivos <span class="kbd-inline">Tab</span>: <span id="idleVillagerToggleValue" style="color: #48bb78;">Activado</span>
+                                Ciclo Aldeanos Inactivos <span class="kbd-inline">Tab</span>: <span
+                                    id="idleVillagerToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
                             <button id="idleVillagerToggleBtn" class="btn-secondary" onclick="toggleIdleVillagerCycle()"
-                                style="padding: 8px 16px;" aria-label="Alternar ciclo de aldeanos inactivos" aria-pressed="true">
+                                style="padding: 8px 16px;" aria-label="Alternar ciclo de aldeanos inactivos"
+                                aria-pressed="true">
                                 Alternar
                             </button>
                         </div>
@@ -443,7 +461,8 @@
             <!-- 3. Minimapa (Derecha) -->
             <div id="minimapPanel">
                 <div class="minimap-container">
-                    <canvas id="minimapCanvas" role="img" aria-label="Minimapa: Muestra la posición de unidades y edificios"></canvas>
+                    <canvas id="minimapCanvas" role="img"
+                        aria-label="Minimapa: Muestra la posición de unidades y edificios"></canvas>
                 </div>
             </div>
         </div>
@@ -452,7 +471,7 @@
         <div class="notifications" id="notifications" aria-live="polite" aria-atomic="false"></div>
     </div>
 
-    <!-- DEV MODE: Carga dinámica de scripts con timestamp para evitar caché -->
+    <!-- Scripts globales que aún no están modularizados -->
     <script>
         (function () {
             var v = Date.now();
@@ -460,11 +479,11 @@
                 'debugLogger.js',    // Sistema de debug (debe cargarse primero)
                 'effects.js',
                 'dataLoader.js',
+                'civilizationManager.js', // Gestor de civilizaciones (depende de dataLoader)
                 'technologies.js',
                 'mapGenerator.js',
-                'soundManager.js',
-                'game.js',           // Motor principal del juego
-                'game.legacy.js'     // Shim de compatibilidad
+                'soundManager.js'
+                // game.js eliminado: ahora usamos js/core/Game.js como módulo ES6
             ];
 
             // Cargar scripts secuencialmente para mantener el orden

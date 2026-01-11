@@ -45,7 +45,8 @@ export class Game {
 
         // Configurar dimensiones
         this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
+        this._resizeHandler = () => this.resizeCanvas();
+        window.addEventListener('resize', this._resizeHandler);
 
         // Estado del juego
         this.gameStartTime = Date.now();
@@ -208,6 +209,30 @@ export class Game {
 
         this.initializeGame();
         this.updateUI();
+    }
+
+    /**
+     * Limpieza de recursos del juego
+     * Debe llamarse antes de destruir la instancia para evitar memory leaks
+     */
+    destroy() {
+        // Remover event listeners
+        if (this._resizeHandler) {
+            window.removeEventListener('resize', this._resizeHandler);
+        }
+
+        // Remover cursor personalizado del DOM
+        if (this.cursorElement && this.cursorElement.parentNode) {
+            this.cursorElement.parentNode.removeChild(this.cursorElement);
+        }
+
+        // Limpiar referencias
+        this.entities = [];
+        this.units = [];
+        this.buildings = [];
+        this.enemies = [];
+        this.selectedEntities = [];
+        this.resourceNodes = [];
     }
 
     resizeCanvas() {
@@ -1128,6 +1153,21 @@ export class Game {
         }
     }
 
+    /**
+     * OPTIMIZACIÓN: Remueve entidades muertas in-place sin crear nuevo array
+     * Esto evita allocations innecesarias en el game loop
+     * @param {Array} array - Array de entidades a filtrar
+     */
+    _removeDeadInPlace(array) {
+        let writeIdx = 0;
+        for (let i = 0; i < array.length; i++) {
+            if (!array[i].isDead) {
+                array[writeIdx++] = array[i];
+            }
+        }
+        array.length = writeIdx;
+    }
+
     update(deltaTime) {
         if (this.isPaused || this.isGameOver) return;
 
@@ -1180,15 +1220,13 @@ export class Game {
             }
         }
 
-        // Remover entidades muertas (solo si es necesario para evitar GC)
+        // Remover entidades muertas (OPTIMIZADO: in-place para evitar allocations)
         if (hasDeadEntities) {
-            this.entities = this.entities.filter(e => !e.isDead);
-            this.units = this.units.filter(u => !u.isDead);
-            this.buildings = this.buildings.filter(b => !b.isDead);
-            this.enemies = this.enemies.filter(e => !e.isDead);
-
-            // Remover de selección las entidades muertas
-            this.selectedEntities = this.selectedEntities.filter(e => !e.isDead);
+            this._removeDeadInPlace(this.entities);
+            this._removeDeadInPlace(this.units);
+            this._removeDeadInPlace(this.buildings);
+            this._removeDeadInPlace(this.enemies);
+            this._removeDeadInPlace(this.selectedEntities);
 
             // Si murieron edificios, reconstruir el grid estático
             if (hasDeadBuildings) {

@@ -22,8 +22,11 @@ class DataLoader {
             CIVILIZATION: (id) => `assets/civilization/${id}.json`
         };
 
-        // Lista de civilizaciones (Idealmente debería venir de un manifiesto externo)
-        this.AVAILABLE_CIVS = ['mongols', 'sumeria', 'romans', 'vikings', 'argentinians'];
+        // Lista de civilizaciones (cargadas dinámicamente desde assets/civilization/)
+        this.AVAILABLE_CIVS = [
+            'mongols', 'sumeria', 'romans', 'vikings', 'argentinians',
+            'babylon', 'byzantium', 'caliphate', 'egypt', 'greece', 'persia', 'spain'
+        ];
     }
 
     /**

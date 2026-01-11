@@ -9,10 +9,10 @@
 
 | Fase | Nombre | Prioridad | Tiempo Estimado | Estado |
 |------|--------|-----------|-----------------|--------|
-| 1 | Limpieza y Corrección de Bugs | 🔴 Alta | 30 min | ⏳ Pendiente |
-| 2 | Eliminación de Código Duplicado | 🔴 Alta | 45 min | ⏳ Pendiente |
+| 1 | Limpieza y Corrección de Bugs | 🔴 Alta | 30 min | ✅ Completado |
+| 2 | Eliminación de Código Duplicado | 🔴 Alta | 45 min | ✅ Completado |
 | 3 | Modularización de Scripts Globales | 🟡 Media | 2-3 horas | ⏳ Pendiente |
-| 4 | Optimización de Rendimiento | 🟡 Media | 1-2 horas | ⏳ Pendiente |
+| 4 | Optimización de Rendimiento | 🟡 Media | 1-2 horas | ✅ Completado |
 | 5 | Nuevas Funcionalidades | 🟢 Baja | Variable | ⏳ Pendiente |
 
 ---

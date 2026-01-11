@@ -1,8 +1,148 @@
 # 📚 Índice de Código - New Empires
 
-**Versión**: 1.0.0  
-**Última actualización**: 2026-01-10  
+**Versión**: 1.1.0  
+**Última actualización**: 2026-01-11  
 **Propósito**: Mapa de ubicación de toda la funcionalidad del código para referencia rápida
+
+---
+
+## 📁 Estructura de Carpetas
+
+```
+New-Empires/
+├── main.js                     # Punto de entrada ES6
+├── js/                         # Código JavaScript modularizado
+│   ├── core/                   # Lógica central (Game, constants)
+│   ├── map/                    # Sistema de mapas y terrenos
+│   ├── entities/               # Clases de Unidades y Edificios
+│   ├── managers/               # Gestores (Save, Asset, Spatial)
+│   ├── systems/                # Sistemas lógicos (Formation, Queue)
+│   └── utils/                  # Utilidades (Debug)
+├── assets/                     # Recursos del juego
+│   ├── icons/                  # Iconos
+│   ├── sound/                  # Audio
+│   └── civilization/           # Datos JSON
+└── docs/                       # Documentación
+```
+
+---
+
+## 🎮 Core - Lógica Central
+
+### `js/core/constants.js`
+**Responsabilidad**: Configuración y constantes del juego  
+**Exporta**: `TILE_SIZE`, `MAP_SIZES`, `TERRAIN_TYPES`, `CONFIG`  
+
+### `js/core/Game.js`
+**Responsabilidad**: Clase principal del juego, orquesta todos los sistemas.  
+**Funcionalidad**:
+- Game loop (`update`, `render`)
+- Gestión de input (teclado, mouse)
+- Coordinación de managers
+- Gestión de estado de selección
+- Integración de UI (paneles, formaciones)
+
+---
+
+## 🗺️ Map - Sistema de Mapas
+
+### `js/map/GridMap.js`
+**Responsabilidad**: Gestión de cuadrícula para construcción y colisiones.  
+**Clase**: `GridMap`  
+**Métodos clave**: `isAreaFree()`, `occupyArea()`, `snapToGrid()`
+
+### `js/map/TerrainMap.js`
+**Responsabilidad**: Generación y gestión de tipos de terreno.  
+**Clase**: `TerrainMap`  
+**Métodos clave**: `generateTerrain()`, `getTerrainAt()`, `canBuildAt()`
+
+---
+
+## 👥 Entities - Entidades del Juego
+
+### Clases Base
+- **`js/entities/Entity.js`**: Clase base para todas las entidades (`hp`, `team`, `x`, `y`).
+- **`js/entities/Unit.js`**: Base para unidades móviles (movimiento, estados).
+- **`js/entities/Building.js`**: Base para edificios (construcción, cola).
+
+### Unidades (`js/entities/units/`)
+- **`Villager.js`**: Recolección, construcción.
+- **`Warrior.js`**: Combate melee básico.
+- **`Archer.js`**: Combate a distancia.
+
+### Edificios (`js/entities/buildings/`)
+- **`TownCenter.js`**: Principal, entrena aldeanos (usa `ProductionQueue`).
+- **`Barracks.js`**: Entrena militares (usa `ProductionQueue`).
+- **`House.js`**: Población.
+- **`Storage.js`, `StorageWood.js`**: Depósitos de recursos.
+- **`Market.js`, `Temple.js`, `Workshop.js`**: Economía y tech.
+
+---
+
+## 🎯 Systems - Sistemas Lógicos (NUEVO)
+
+### `js/systems/ProductionQueue.js`
+**Responsabilidad**: Maneja colas de entrenamiento en edificios.  
+**Funcionalidad**: 
+- Encolar unidades
+- Gestionar tiempos y progreso
+- Integrado en `TownCenter` y `Barracks`
+
+### `js/systems/FormationManager.js`
+**Responsabilidad**: Posicionamiento táctico de unidades.  
+**Funcionalidad**:
+- 7 tipos: line, column, box, wedge, vee, circle, spread
+- Cálculo de posiciones de destino
+
+---
+
+## 🎛️ Managers - Gestores
+
+### `js/managers/SaveManager.js` (NUEVO)
+**Responsabilidad**: Persistencia del juego.  
+**Funcionalidad**: `save()`, `load()`, `exportToFile()`.
+
+### `js/managers/AssetLoader.js`
+**Responsabilidad**: Carga asíncrona de imágenes.
+
+### `js/managers/SpatialGrid.js`
+**Responsabilidad**: Optimización de colisiones y búsquedas de rango.
+
+### `civilizationManager.js` (Global)
+**Responsabilidad**: Gestión de datos de civilizaciones (temporalmente global).
+
+---
+
+## 🛠️ Utils - Utilidades
+
+### `js/utils/DebugLogger.js`
+**Responsabilidad**: Logging centralizado y métricas de rendimiento.
+
+---
+
+## 📋 Estado de Modularización
+
+### ✅ Completado (100% Core & Entities)
+- Core: `Game.js`, `constants.js`
+- Map: `GridMap.js`, `TerrainMap.js`
+- Managers: `AssetLoader.js`, `SpatialGrid.js`, `SaveManager.js`
+- Systems: `ProductionQueue.js`, `FormationManager.js`
+- Entities: Todas las unidades y edificios modularizados.
+
+### 🔄 Scripts Globales Pendientes
+Aún cargados en `index.html` (no en `js/`):
+- `dataLoader.js`
+- `technologies.js`
+- `mapGenerator.js`
+- `soundManager.js`
+- `civilizationManager.js`
+
+---
+
+## 📞 Contacto y Contribución
+
+**Última revisión**: 2026-01-11  
+**Mantenedor**: Sistema de modularización automática
 
 ---
 

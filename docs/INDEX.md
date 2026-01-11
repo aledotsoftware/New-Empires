@@ -1,7 +1,7 @@
 # 📚 Índice de Documentación - New Empires
 
-**Última actualización**: 2026-01-10  
-**Versión del proyecto**: 1.0.0
+**Última actualización**: 2026-01-11  
+**Versión del proyecto**: 1.1.0
 
 ---
 
@@ -56,6 +56,12 @@ Historial de cambios y documentación archivada.
 |---------|-------------|
 | [CHANGELOG.md](historial/CHANGELOG.md) | Registro de cambios por versión |
 | `/fixes/` | Documentación de fixes específicos (referencia) |
+
+### 📋 Documentos Raíz
+
+| Archivo | Descripción |
+|---------|-------------|
+| [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md) | Plan de mejoras y estado de implementación |
 
 ---
 

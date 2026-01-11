@@ -261,7 +261,7 @@ Centro de investigación cultural.
 |-----------|-------|
 | HP | 1000 |
 | Tamaño | 50px (4x4 tiles) |
-| Costo | 200🪵 + 100🪨 |
+| Costo | 200🪵 + 100💰 |
 
 ### Funciones
 
@@ -300,7 +300,7 @@ Mejoras de unidades y equipamiento.
 | Cuartel | 1200 | 175 | - | Militar |
 | Depósito | 800 | 100 | - | Recursos |
 | Mercado | 800 | 150 | 50 | Comercio |
-| Templo | 1000 | 200 | 100 | Cultura |
+| Templo | 1000 | 200 | - | Cultura (100💰) |
 | Taller | 900 | 200 | 50 | Mejoras |
 
 ---

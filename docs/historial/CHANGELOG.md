@@ -10,10 +10,53 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.
 
 ### Por Hacer
 - Modularizar scripts legacy restantes (effects.js, dataLoader.js, etc.)
-- Sistema de guardado de partida
 - Mejoras de IA enemiga
 - Más civilizaciones
 - Tutorial interactivo
+
+---
+
+## [1.1.0] - 2026-01-11
+
+### ✨ Nuevas Funcionalidades
+
+#### Sistema de Cola de Producción
+- Cola de hasta 5 unidades por edificio
+- Tiempos de entrenamiento: Aldeano 25s, Guerrero 30s, Arquero 35s
+- Interfaz visual con barra de progreso y tiempo restante
+- Integrado en Centro Urbano y Cuartel
+
+#### Sistema de Formaciones
+- 7 formaciones: línea, columna, caja, cuña, V, círculo, dispersa
+- Hotkey **F** para ciclar formaciones
+- Funciona con 2+ unidades seleccionadas
+
+#### Sistema de Guardado
+- Guardar partida en localStorage
+- Cargar partida guardada
+- Exportar a archivo JSON
+- UI en menú de configuración
+
+#### Grupos de Control
+- **Ctrl+1-9** para guardar selección
+- **1-9** para seleccionar grupo guardado
+- Auto-centrar cámara en grupo seleccionado
+- Filtra automáticamente unidades muertas
+
+### 🔧 Correcciones
+- `AVAILABLE_CIVS` actualizado de 5 a 12 civilizaciones
+- `getStartingResources` corregido para usar `bonuses.startingResources`
+- Eliminados archivos obsoletos (backup_styles/, archivos temp)
+
+### ⚡ Optimizaciones
+- `_removeDeadInPlace()` - Remoción de entidades sin crear arrays
+- `destroy()` - Limpieza de event listeners para prevenir memory leaks
+- State key incluye progreso de producción para UI reactiva
+
+### 🗑️ Limpieza
+- Movido `game.js` a `_deprecated/`
+- Eliminado `backup_styles/` (7 archivos)
+- Eliminados archivos temporales
 
 ---
 

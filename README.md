@@ -85,6 +85,9 @@ Luego abrir: `http://localhost:8000`
 | **Tab** | Siguiente aldeano inactivo |
 | **ESC** | Cancelar acción |
 | **WASD / Flechas** | Mover cámara |
+| **F** | Ciclar formación (2+ unidades) |
+| **Ctrl+1-9** | Guardar grupo de control |
+| **1-9** | Seleccionar grupo guardado |
 | **Q-B** | Hotkeys de acciones |
 
 ---
@@ -126,8 +129,13 @@ Toda la documentación está organizada en la carpeta `docs/`:
 
 ## 🗺️ Roadmap
 
-### En Desarrollo (v1.1)
-- [ ] Persistencia de partida (guardado/carga)
+### Completado (v1.1) ✅
+- [x] Sistema de guardado/carga de partida
+- [x] Cola de producción para edificios
+- [x] Sistema de formaciones (7 tipos)
+- [x] Grupos de control (Ctrl+1-9)
+
+### En Desarrollo (v1.2)
 - [ ] Mejoras de IA enemiga
 - [ ] Más civilizaciones
 - [ ] Tutorial interactivo

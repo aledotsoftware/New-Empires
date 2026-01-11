@@ -1,40 +1,47 @@
 # 🔄 Estado de Modularización - New Empires
 
-**Última actualización**: 2026-01-10  
-**Estado**: ✅ 76% Completado - Arquitectura ES6 Funcional  
-**Progreso**: 18 módulos + main.js
+**Última actualización**: 2026-01-11  
+**Estado**: ✅ 82% Completado - Arquitectura ES6 Funcional  
+**Progreso**: 22 módulos + main.js
 
 ---
 
 ## 📊 Resumen Ejecutivo
 
-El proyecto New Empires ha sido modularizado exitosamente de un monolito de ~3000 líneas a una arquitectura modular de 19 archivos independientes usando ES6 modules.
+El proyecto New Empires ha sido modularizado exitosamente de un monolito de ~3000 líneas a una arquitectura modular de 23 archivos independientes usando ES6 modules.
 
 ### Estadísticas
-- **Módulos creados**: 19 (18 + main.js)
-- **Líneas modularizadas**: ~3,200+
+- **Módulos creados**: 23 (22 + main.js)
+- **Líneas modularizadas**: ~4,500+
 - **Funcionalidad preservada**: 100%
-- **Bugs introducidos**: 0
+- **Nuevos sistemas**: ProductionQueue, FormationManager, SaveManager
 
 ---
 
-## ✅ Módulos Completados (76%)
+## ✅ Módulos Completados (82%)
 
 ### 🎮 Core (3 módulos)
 | Módulo | Líneas | Descripción |
 |--------|--------|-------------|
 | `js/core/constants.js` | 101 | Configuración global del juego |
-| `js/core/Game.js` | 1,324 | Clase principal del juego ⭐ |
-| `main.js` | 410 | Punto de entrada ES6 |
+| `js/core/Game.js` | 2,700+ | Clase principal del juego ⭐ |
+| `main.js` | 500+ | Punto de entrada ES6 |
 
-### 🛠️ Utils & Managers (4 módulos)
+### 🛠️ Utils & Managers (6 módulos)
 | Módulo | Líneas | Descripción |
 |--------|--------|-------------|
 | `js/utils/DebugLogger.js` | 308 | Sistema de logging centralizado |
 | `js/managers/AssetLoader.js` | 67 | Carga de imágenes |
 | `js/managers/SpatialGrid.js` | 48 | Optimización de búsquedas espaciales |
+| `js/managers/SaveManager.js` | 180 | 🆕 Sistema de guardado/carga |
 | `js/map/GridMap.js` | 60 | Sistema de cuadrícula para construcción |
 | `js/map/TerrainMap.js` | 115 | Generación de terrenos |
+
+### 🎯 Systems (2 módulos) - 🆕
+| Módulo | Líneas | Descripción |
+|--------|--------|-------------|
+| `js/systems/ProductionQueue.js` | 170 | Cola de producción para edificios |
+| `js/systems/FormationManager.js` | 180 | Sistema de formaciones de unidades |
 
 ### 👥 Entities (11 módulos)
 | Módulo | Líneas | Descripción |
@@ -53,9 +60,9 @@ El proyecto New Empires ha sido modularizado exitosamente de un monolito de ~300
 #### Edificios
 | Módulo | Descripción |
 |--------|-------------|
-| `js/entities/buildings/TownCenter.js` | Centro Urbano |
+| `js/entities/buildings/TownCenter.js` | Centro Urbano + ProductionQueue |
 | `js/entities/buildings/House.js` | Casa (+5 población) |
-| `js/entities/buildings/Barracks.js` | Cuartel |
+| `js/entities/buildings/Barracks.js` | Cuartel + ProductionQueue |
 | `js/entities/buildings/Storage.js` | Depósito general |
 | `js/entities/buildings/StorageWood.js` | Depósito de madera |
 | `js/entities/buildings/Market.js` | Mercado |
@@ -64,7 +71,7 @@ El proyecto New Empires ha sido modularizado exitosamente de un monolito de ~300
 
 ---
 
-## ⏳ Scripts Legacy Pendientes (24%)
+## ⏳ Scripts Legacy Pendientes (18%)
 
 Estos scripts funcionan pero aún no están modularizados como ES6:
 

@@ -346,14 +346,56 @@ export const FORMATIONS = {
 
 ## 📊 Progreso General
 
-- [ ] Fase 1: Limpieza y Bugs
-- [ ] Fase 2: Código Duplicado
-- [ ] Fase 3: Modularización
-- [ ] Fase 4: Optimización
-- [ ] Fase 5: Nuevas Features
+- [x] Fase 1: Limpieza y Bugs ✅
+- [x] Fase 2: Código Duplicado ✅
+- [ ] Fase 3: Modularización (Fase futura)
+- [x] Fase 4: Optimización ✅
+- [x] Fase 5: Nuevas Features ✅
 
 ---
 
 ## 📝 Notas de Implementación
 
-_(Se actualizará durante la ejecución)_
+### Sesión 2026-01-11
+
+#### Commits realizados:
+1. `019ad74` - refactor: Phase 1-4 code improvements
+2. `7a6b897` - feat: Add Phase 5 new features
+3. `70051b1` - docs: Update improvement plan
+4. `803293d` - feat: Integrate production queue, formations and save system
+5. `5e68369` - feat: Add control groups and production progress UI
+
+#### Sistemas implementados:
+
+**ProductionQueue** (`js/systems/ProductionQueue.js`)
+- Cola de 5 unidades por edificio
+- Tiempos: Aldeano 25s, Guerrero 30s, Arquero 35s
+- Integrado en TownCenter y Barracks
+
+**FormationManager** (`js/systems/FormationManager.js`)
+- 7 formaciones: line, column, box, wedge, vee, circle, spread
+- Hotkey F para ciclar formaciones
+
+**SaveManager** (`js/managers/SaveManager.js`)
+- Guardar/cargar en localStorage
+- Exportar a archivo JSON
+- UI en menú de configuración
+
+**Control Groups**
+- Ctrl+1-9 para guardar selección
+- 1-9 para seleccionar grupo
+- Auto-centrar cámara en grupo
+
+**UI de Cola de Producción**
+- Barra de progreso visual
+- Icono y nombre de unidad
+- Tiempo restante en segundos
+- Cola restante "+X en cola"
+
+#### Archivos principales modificados:
+- `js/core/Game.js` - +300 líneas de nuevas funcionalidades
+- `js/entities/buildings/TownCenter.js` - ProductionQueue integrado
+- `js/entities/buildings/Barracks.js` - ProductionQueue integrado
+- `main.js` - Funciones de guardado
+- `index.html` - UI de guardado + scripts
+- `docs/sistemas/HOTKEYS.md` - Documentación actualizada

@@ -1,6 +1,4 @@
-# 📚 ARQUITECTURA DEL PROYECTO - REFERENCIA RÁPIDA
-
-## ⚠️ **IMPORTANTE: Archivos Activos vs Legacy**
+# 📚 ARQUITECTURA DEL PROYECTO - REFERENCIA RÁPIDA\n\n**Última actualización**: 2026-01-10
 
 ### ✅ **Archivos ACTIVOS (ES6 Modular) - USAR ESTOS**
 

@@ -278,6 +278,12 @@ export class SaveManager {
      * @returns {Promise<Object>} Estado del juego
      */
     async importFromFile(file) {
+        // Sentinel: Prevent DoS by limiting file size
+        const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit
+        if (file.size > MAX_SIZE) {
+            return Promise.reject(new Error('El archivo es demasiado grande (Máximo 5MB)'));
+        }
+
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => {

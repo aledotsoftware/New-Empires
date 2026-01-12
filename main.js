@@ -709,10 +709,34 @@ function populateMapSizes() {
         else if (mapData.width * mapData.height <= 200 * 200) sizeDesc = 'Tamaño estándar equilibrado.';
         else sizeDesc = 'Mapa extenso para partidas largas.';
 
-        // Palette: Custom Tooltip
+        // Palette: Rich Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
-        tooltip.textContent = `${mapData.name}: ${mapData.width}x${mapData.height} casillas.\n${sizeDesc}`;
+
+        const tipHeader = document.createElement('div');
+        tipHeader.style.fontWeight = 'bold';
+        tipHeader.style.marginBottom = '4px';
+        tipHeader.textContent = mapData.name;
+        tooltip.appendChild(tipHeader);
+
+        const tipDetails = document.createElement('div');
+        tipDetails.style.fontSize = '0.85rem';
+        tipDetails.textContent = `${mapData.width}x${mapData.height} casillas`;
+        tooltip.appendChild(tipDetails);
+
+        const tipDesc = document.createElement('div');
+        tipDesc.style.fontSize = '0.8rem';
+        tipDesc.style.fontStyle = 'italic';
+        tipDesc.style.margin = '6px 0';
+        tipDesc.textContent = sizeDesc;
+        tooltip.appendChild(tipDesc);
+
+        const tipRec = document.createElement('div');
+        tipRec.style.fontSize = '0.75rem';
+        tipRec.style.color = '#48bb78';
+        tipRec.textContent = `Recomendado: ${recommendedText}`;
+        tooltip.appendChild(tipRec);
+
         option.appendChild(tooltip);
 
         // Agregar event listener al crear el elemento
@@ -846,10 +870,44 @@ function populateCivilizations() {
         option.setAttribute('role', 'button');
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
-        // Palette: Custom Tooltip
+
+        // Palette: Rich HTML Tooltip (Compact)
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
-        tooltip.textContent = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
+        tooltip.style.width = '220px'; // Slightly wider
+
+        // Helper to add lines
+        const addLine = (html) => {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            tooltip.appendChild(div);
+        };
+
+        // Content
+        addLine(`<strong>${civ.name}</strong>`);
+        addLine(`<em style="font-size:0.85rem">${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}</em>`);
+
+        // Bonuses
+        if (civ.bonuses) {
+            let bonusHtml = '<ul style="padding-left:15px;margin:5px 0;font-size:0.8rem;text-align:left">';
+            const bonusMap = { buildSpeed: 'Construcción', buildingHp: 'Salud edificios', infantryAttack: 'Ataque infantería', unitSpeed: 'Velocidad', gatherBonus: 'Recolección' };
+
+            for (const [k, v] of Object.entries(civ.bonuses)) {
+                if (k === 'startingResources') {
+                    const r = Object.entries(v).filter(x => x[1] > 0).map(x => `+${x[1]} ${x[0]}`).join(', ');
+                    if (r) bonusHtml += `<li>Recursos: <span style="color:#48bb78">${r}</span></li>`;
+                } else if (bonusMap[k] && v !== 1) {
+                    const pct = Math.round(Math.abs(1 - v) * 100);
+                    bonusHtml += `<li>${bonusMap[k]}: <span style="color:#48bb78">${v > 1 ? '+' : '-'}${pct}%</span></li>`;
+                }
+            }
+            bonusHtml += '</ul>';
+            addLine(bonusHtml);
+        }
+
+        // Unique Unit
+        if (civ.uniqueUnit) addLine(`<div style="font-size:0.8rem;margin-top:4px">Unidad Única: <span style="color:#d4af37">${civ.uniqueUnit.name}</span></div>`);
+
         option.appendChild(tooltip);
 
         // Keyboard support

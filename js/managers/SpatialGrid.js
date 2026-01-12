@@ -122,6 +122,32 @@ export class SpatialGrid {
     }
 
     /**
+     * Appends entities from a specific row of buckets to the result array.
+     * Used for fine-grained control over querying order (e.g. interleaving multiple grids).
+     * Warning: Does not clear result array.
+     * @param {number} row - The row index to query
+     * @param {number} startCol - The starting column index
+     * @param {number} endCol - The ending column index
+     * @param {Array} result - Array to append results to
+     */
+    queryRowIndices(row, startCol, endCol, result) {
+        // OPTIMIZATION: Hoist buckets and members
+        const buckets = this.buckets;
+        const rowBase = row * this.cols;
+        let count = result.length;
+
+        for (let c = startCol; c <= endCol; c++) {
+            const bucket = buckets[rowBase + c];
+            const bLen = bucket.length;
+            if (bLen > 0) {
+                for (let i = 0; i < bLen; i++) {
+                    result[count++] = bucket[i];
+                }
+            }
+        }
+    }
+
+    /**
      * Devuelve entidades en un área rectangular (Optimizado para viewports)
      * @param {number} minX - Coordenada X mínima
      * @param {number} minY - Coordenada Y mínima

@@ -871,42 +871,85 @@ function populateCivilizations() {
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
 
-        // Palette: Rich HTML Tooltip (Compact)
+        // Palette: Rich HTML Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
-        tooltip.style.width = '220px'; // Slightly wider
+        tooltip.style.width = '240px'; // Slightly wider for bonuses
 
-        // Helper to add lines
-        const addLine = (html) => {
-            const div = document.createElement('div');
-            div.innerHTML = html;
-            tooltip.appendChild(div);
-        };
+        // Header
+        const tipHeader = document.createElement('div');
+        tipHeader.style.fontWeight = 'bold';
+        tipHeader.style.borderBottom = '1px solid rgba(255,255,255,0.2)';
+        tipHeader.style.paddingBottom = '4px';
+        tipHeader.style.marginBottom = '4px';
+        tipHeader.textContent = civ.name;
+        tooltip.appendChild(tipHeader);
 
-        // Content
-        addLine(`<strong>${civ.name}</strong>`);
-        addLine(`<em style="font-size:0.85rem">${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}</em>`);
+        // Description
+        const tipDesc = document.createElement('div');
+        tipDesc.style.fontSize = '0.85rem';
+        tipDesc.style.fontStyle = 'italic';
+        tipDesc.style.marginBottom = '8px';
+        tipDesc.textContent = civ.description.length > 100 ? civ.description.substring(0, 100) + '...' : civ.description;
+        tooltip.appendChild(tipDesc);
 
-        // Bonuses
+        // Bonuses Section
         if (civ.bonuses) {
-            let bonusHtml = '<ul style="padding-left:15px;margin:5px 0;font-size:0.8rem;text-align:left">';
-            const bonusMap = { buildSpeed: 'Construcción', buildingHp: 'Salud edificios', infantryAttack: 'Ataque infantería', unitSpeed: 'Velocidad', gatherBonus: 'Recolección' };
+            const bonusesDiv = document.createElement('div');
+            bonusesDiv.style.fontSize = '0.8rem';
 
-            for (const [k, v] of Object.entries(civ.bonuses)) {
-                if (k === 'startingResources') {
-                    const r = Object.entries(v).filter(x => x[1] > 0).map(x => `+${x[1]} ${x[0]}`).join(', ');
-                    if (r) bonusHtml += `<li>Recursos: <span style="color:#48bb78">${r}</span></li>`;
-                } else if (bonusMap[k] && v !== 1) {
-                    const pct = Math.round(Math.abs(1 - v) * 100);
-                    bonusHtml += `<li>${bonusMap[k]}: <span style="color:#48bb78">${v > 1 ? '+' : '-'}${pct}%</span></li>`;
+            const bonusTitle = document.createElement('div');
+            bonusTitle.textContent = 'Bonificaciones:';
+            bonusTitle.style.color = '#d4af37';
+            bonusesDiv.appendChild(bonusTitle);
+
+            const ul = document.createElement('ul');
+            ul.style.paddingLeft = '16px';
+            ul.style.margin = '2px 0';
+
+            const bonusMap = {
+                buildSpeed: 'Construcción',
+                buildingHp: 'Salud edificios',
+                infantryAttack: 'Ataque infantería',
+                unitSpeed: 'Velocidad unidades',
+                gatherBonus: 'Recolección',
+                startingResources: 'Recursos extra'
+            };
+
+            for (const [key, value] of Object.entries(civ.bonuses)) {
+                if (!bonusMap[key]) continue;
+
+                let textVal = '';
+                if (key === 'startingResources') {
+                    const res = Object.entries(value).filter(([_, v]) => v > 0).map(([k, v]) => `+${v} ${k}`).join(', ');
+                    if (!res) continue;
+                    textVal = res;
+                } else if (typeof value === 'number') {
+                    if (value === 1) continue;
+                    const percent = Math.round((Math.abs(1 - value)) * 100);
+                    textVal = (value > 1 ? '+' : '-') + percent + '%';
                 }
+
+                const li = document.createElement('li');
+                li.textContent = `${bonusMap[key]}: `;
+                const valSpan = document.createElement('span');
+                valSpan.style.color = '#48bb78';
+                valSpan.textContent = textVal;
+                li.appendChild(valSpan);
+                ul.appendChild(li);
             }
-            bonusHtml += '</ul>';
-            addLine(bonusHtml);
+            bonusesDiv.appendChild(ul);
+            tooltip.appendChild(bonusesDiv);
         }
 
         // Unique Unit
-        if (civ.uniqueUnit) addLine(`<div style="font-size:0.8rem;margin-top:4px">Unidad Única: <span style="color:#d4af37">${civ.uniqueUnit.name}</span></div>`);
+        if (civ.uniqueUnit) {
+            const uniqueDiv = document.createElement('div');
+            uniqueDiv.style.marginTop = '8px';
+            uniqueDiv.style.fontSize = '0.8rem';
+            uniqueDiv.innerHTML = `Unidad Única: <span style="color:#d4af37">${civ.uniqueUnit.name}</span>`;
+            tooltip.appendChild(uniqueDiv);
+        }
 
         option.appendChild(tooltip);
 

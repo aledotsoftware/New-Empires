@@ -86,8 +86,28 @@ window.showSettings = function () {
     const screen = document.getElementById('settingsScreen');
     screen.classList.remove('hidden');
 
+    // Palette: Show quit button only if game is active
+    const quitBtn = document.getElementById('quitGameBtn');
+    if (quitBtn) {
+        // Show only if game exists and is NOT game over (since Restart handles game over)
+        // Note: game variable is global in main.js
+        if (typeof game !== 'undefined' && game && !game.isGameOver) {
+            quitBtn.classList.remove('hidden');
+        } else {
+            quitBtn.classList.add('hidden');
+        }
+    }
+
     // Mover foco al modal (botón cerrar o primer input)
     setTimeout(() => FocusManager.focusFirst(screen), 50);
+};
+
+// Palette: Handle quit game action
+window.confirmQuitGame = function() {
+    if (confirm('¿Estás seguro de que quieres abandonar la partida? El progreso no guardado se perderá.')) {
+        hideSettings();
+        loadMainMenu();
+    }
 };
 
 /**
@@ -226,8 +246,11 @@ window.saveGame = function () {
         const success = saveManager.save(game);
         if (success) {
             updateSaveStatus('✅ Partida guardada correctamente', 'success');
+            // Palette: Toast notification
+            if (game && game.showNotification) game.showNotification('Partida guardada', 'success');
         } else {
             updateSaveStatus('❌ Error al guardar la partida', 'error');
+            if (game && game.showNotification) game.showNotification('Error al guardar', 'error');
         }
     } else {
         updateSaveStatus('❌ Sistema de guardado no disponible', 'error');

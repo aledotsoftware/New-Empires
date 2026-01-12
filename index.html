@@ -454,8 +454,13 @@
                             style="text-align: center; margin-top: 10px; color: #a0aec0; font-size: 0.85rem;"></p>
                     </div>
 
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button class="btn-secondary" onclick="hideSettings()">Cerrar</button>
+                    <div class="settings-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <button id="quitGameBtn" class="btn-secondary hidden" onclick="confirmQuitGame()"
+                            style="border-color: #c53030; color: #c53030;"
+                            aria-label="Abandonar la partida actual y volver al menú">
+                            🏳️ Abandonar
+                        </button>
+                        <button class="btn-secondary" onclick="hideSettings()" style="min-width: 100px;">Cerrar</button>
                     </div>
                 </div>
             </div>

@@ -709,10 +709,34 @@ function populateMapSizes() {
         else if (mapData.width * mapData.height <= 200 * 200) sizeDesc = 'Tamaño estándar equilibrado.';
         else sizeDesc = 'Mapa extenso para partidas largas.';
 
-        // Palette: Custom Tooltip
+        // Palette: Rich Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
-        tooltip.textContent = `${mapData.name}: ${mapData.width}x${mapData.height} casillas.\n${sizeDesc}`;
+
+        const tipHeader = document.createElement('div');
+        tipHeader.style.fontWeight = 'bold';
+        tipHeader.style.marginBottom = '4px';
+        tipHeader.textContent = mapData.name;
+        tooltip.appendChild(tipHeader);
+
+        const tipDetails = document.createElement('div');
+        tipDetails.style.fontSize = '0.85rem';
+        tipDetails.textContent = `${mapData.width}x${mapData.height} casillas`;
+        tooltip.appendChild(tipDetails);
+
+        const tipDesc = document.createElement('div');
+        tipDesc.style.fontSize = '0.8rem';
+        tipDesc.style.fontStyle = 'italic';
+        tipDesc.style.margin = '6px 0';
+        tipDesc.textContent = sizeDesc;
+        tooltip.appendChild(tipDesc);
+
+        const tipRec = document.createElement('div');
+        tipRec.style.fontSize = '0.75rem';
+        tipRec.style.color = '#48bb78';
+        tipRec.textContent = `Recomendado: ${recommendedText}`;
+        tooltip.appendChild(tipRec);
+
         option.appendChild(tooltip);
 
         // Agregar event listener al crear el elemento
@@ -846,10 +870,87 @@ function populateCivilizations() {
         option.setAttribute('role', 'button');
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
-        // Palette: Custom Tooltip
+
+        // Palette: Rich HTML Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
-        tooltip.textContent = `${civ.name}\n${civ.description.substring(0, 100)}${civ.description.length > 100 ? '...' : ''}`;
+        tooltip.style.width = '240px'; // Slightly wider for bonuses
+
+        // Header
+        const tipHeader = document.createElement('div');
+        tipHeader.style.fontWeight = 'bold';
+        tipHeader.style.borderBottom = '1px solid rgba(255,255,255,0.2)';
+        tipHeader.style.paddingBottom = '4px';
+        tipHeader.style.marginBottom = '4px';
+        tipHeader.textContent = civ.name;
+        tooltip.appendChild(tipHeader);
+
+        // Description
+        const tipDesc = document.createElement('div');
+        tipDesc.style.fontSize = '0.85rem';
+        tipDesc.style.fontStyle = 'italic';
+        tipDesc.style.marginBottom = '8px';
+        tipDesc.textContent = civ.description.length > 100 ? civ.description.substring(0, 100) + '...' : civ.description;
+        tooltip.appendChild(tipDesc);
+
+        // Bonuses Section
+        if (civ.bonuses) {
+            const bonusesDiv = document.createElement('div');
+            bonusesDiv.style.fontSize = '0.8rem';
+
+            const bonusTitle = document.createElement('div');
+            bonusTitle.textContent = 'Bonificaciones:';
+            bonusTitle.style.color = '#d4af37';
+            bonusesDiv.appendChild(bonusTitle);
+
+            const ul = document.createElement('ul');
+            ul.style.paddingLeft = '16px';
+            ul.style.margin = '2px 0';
+
+            const bonusMap = {
+                buildSpeed: 'Construcción',
+                buildingHp: 'Salud edificios',
+                infantryAttack: 'Ataque infantería',
+                unitSpeed: 'Velocidad unidades',
+                gatherBonus: 'Recolección',
+                startingResources: 'Recursos extra'
+            };
+
+            for (const [key, value] of Object.entries(civ.bonuses)) {
+                if (!bonusMap[key]) continue;
+
+                let textVal = '';
+                if (key === 'startingResources') {
+                    const res = Object.entries(value).filter(([_, v]) => v > 0).map(([k, v]) => `+${v} ${k}`).join(', ');
+                    if (!res) continue;
+                    textVal = res;
+                } else if (typeof value === 'number') {
+                    if (value === 1) continue;
+                    const percent = Math.round((Math.abs(1 - value)) * 100);
+                    textVal = (value > 1 ? '+' : '-') + percent + '%';
+                }
+
+                const li = document.createElement('li');
+                li.textContent = `${bonusMap[key]}: `;
+                const valSpan = document.createElement('span');
+                valSpan.style.color = '#48bb78';
+                valSpan.textContent = textVal;
+                li.appendChild(valSpan);
+                ul.appendChild(li);
+            }
+            bonusesDiv.appendChild(ul);
+            tooltip.appendChild(bonusesDiv);
+        }
+
+        // Unique Unit
+        if (civ.uniqueUnit) {
+            const uniqueDiv = document.createElement('div');
+            uniqueDiv.style.marginTop = '8px';
+            uniqueDiv.style.fontSize = '0.8rem';
+            uniqueDiv.innerHTML = `Unidad Única: <span style="color:#d4af37">${civ.uniqueUnit.name}</span>`;
+            tooltip.appendChild(uniqueDiv);
+        }
+
         option.appendChild(tooltip);
 
         // Keyboard support

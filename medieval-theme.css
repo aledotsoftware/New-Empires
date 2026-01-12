@@ -2031,3 +2031,21 @@ button:focus-visible,
 .shake {
     animation: shake 0.4s ease-in-out;
 }
+
+/* Spinner for Start Button (fix for main.js) */
+.spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+.btn-loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

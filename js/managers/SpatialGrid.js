@@ -43,8 +43,10 @@ export class SpatialGrid {
         const buckets = this.buckets;
 
         // Optimización: usar multiplicación es ligeramente más rápido que división
-        const col = Math.floor(entity.x * this.invCellSize);
-        const row = Math.floor(entity.y * this.invCellSize);
+        // OPTIMIZATION: Bitwise truncation is safe here because entities are clamped to positive coordinates
+        // in Unit.update() before being added to the grid.
+        const col = (entity.x * this.invCellSize) | 0;
+        const row = (entity.y * this.invCellSize) | 0;
 
         // Verificación de límites simple
         if (col >= 0 && col < this.cols && row >= 0 && row < this.rows) {

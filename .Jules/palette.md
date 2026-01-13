@@ -1,5 +1,5 @@
-# Palette's Journal
+# Palette's Journal - UX & Accessibility
 
-## 2024-05-22 - Reactive Disabled States
-**Learning:** Users frustrated by "dead clicks" on disabled buttons often think the UI is broken. Providing specific feedback (shake animation + "Missing: Wood (50)") turns a negative experience into a helpful guidance moment.
-**Action:** Always attach click handlers to disabled elements that explain *why* they are disabled, rather than removing the handler entirely.
+## 2024-05-23 - Selection Empty State & Tips
+**Learning:** Empty states are prime real estate for onboarding and guidance. The selection panel's "Nothing selected" state was a missed opportunity to educate the user.
+**Action:** Implemented a "Tip of the Moment" feature that cycles through helpful gameplay tips when nothing is selected. This transforms a dead space into a passive learning channel, improving the onboarding experience for new RTS players. Used `aria-live="polite"` to ensure screen readers are aware of these updates without being overwhelmed.

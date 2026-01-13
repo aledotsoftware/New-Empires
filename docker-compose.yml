@@ -49,7 +49,6 @@ services:
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
-        - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
         - "traefik.http.routers.newempire-pss-txn-01.priority=100"
         - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=80"
 

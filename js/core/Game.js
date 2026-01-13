@@ -2671,6 +2671,36 @@ export class Game {
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');
                         btn.setAttribute('aria-disabled', 'true');
+                        // Palette: Reactive Disabled Feedback
+                        btn.onclick = (e) => {
+                            e.stopPropagation();
+                            btn.classList.remove('shake');
+                            void btn.offsetWidth; // Force reflow
+                            btn.classList.add('shake');
+
+                            if (typeof soundManager !== 'undefined') {
+                                soundManager.play('error');
+                            }
+
+                            // Show why it's disabled
+                            let msg = buttonData.error || 'Acción no disponible';
+                            // If missing resources were calculated in the loop below (from previous render or just now if we could access them early)
+                            // Since we populate _missingResources in the tooltip generation below, we might miss it on FIRST render if we click instantly?
+                            // No, closures capture the object reference. If _missingResources is added to buttonData later in this same function execution,
+                            // the click handler (executed later) will see it.
+                            if (buttonData._missingResources && buttonData._missingResources.length > 0) {
+                                // Translate for display if raw strings
+                                const translated = buttonData._missingResources.map(mr => {
+                                    if (mr.includes('food')) return mr.replace('food', 'Comida');
+                                    if (mr.includes('wood')) return mr.replace('wood', 'Madera');
+                                    if (mr.includes('gold')) return mr.replace('gold', 'Oro');
+                                    if (mr.includes('stone')) return mr.replace('stone', 'Piedra');
+                                    return mr;
+                                });
+                                msg = `Falta: ${translated.join(', ')}`;
+                            }
+                            this.showNotification(msg, 'error');
+                        };
                     } else {
                         btn.onclick = buttonData.action;
                         btn.removeAttribute('aria-disabled');

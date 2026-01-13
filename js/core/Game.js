@@ -206,6 +206,7 @@ export class Game {
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
         this._resourceRenderCache = [];
+        this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
 
         // OPTIMIZACIÓN: Rastreo de Centros Urbanos (O(1) CheckGameOver)
         // Evita iterar todos los edificios para verificar condiciones de victoria
@@ -1508,8 +1509,9 @@ export class Game {
             if (entity.team === 'player' && entity.isUnit) {
                 // Attack Cursor Logic
                 if (entity.canAttack) {
-                    this._cursorQueryCache.length = 0;
-                    const nearby = this.spatialGrid.query(this.mouse.worldX, this.mouse.worldY, 30);
+                    // BOLT OPTIMIZATION: Pass cache array to query to avoid per-frame allocation
+                    // query() clears the array automatically by default
+                    const nearby = this.spatialGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
                     for (let i = 0; i < nearby.length; i++) {
                         const other = nearby[i];
                         if (other.team === 'enemy' && !other.isDead) {
@@ -1525,9 +1527,8 @@ export class Game {
 
                 // Gather Cursor Logic (Villager only) - Lower priority than attack
                 if (!showBadge && entity.canGather && entity.type === 'villager' && this.resourceGrid) {
-                    // Reuse cache array for resources
-                    this._cursorQueryCache.length = 0;
-                    const resources = this.resourceGrid.query(this.mouse.worldX, this.mouse.worldY, 30);
+                    // Reuse cache array for resources (BOLT OPTIMIZATION: Pass cache array)
+                    const resources = this.resourceGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
                     for (let i = 0; i < resources.length; i++) {
                         const res = resources[i];
                         if (res.amount > 0) {
@@ -1623,8 +1624,13 @@ export class Game {
 
         // OPTIMIZATION: Batch draw calls by terrain type using Array instead of Object
         // Using integer-indexed array avoids hash lookups in the hot loop
-        const paths = new Array(idToName.length);
+        // BOLT OPTIMIZATION: Reuse Array container to avoid allocation per frame
+        const paths = this._terrainPaths;
+        if (paths.length < idToName.length) paths.length = idToName.length;
+
         for (let i = 0; i < idToName.length; i++) {
+            // Note: Path2D cannot be cleared, so we must instantiate new ones.
+            // But we save the Array allocation overhead.
             paths[i] = new Path2D();
         }
         // Fallback path just in case

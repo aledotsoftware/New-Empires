@@ -148,6 +148,9 @@ export class Unit extends Entity {
 
             // Colisiones con edificios (GridMap)
             if (hasGridMap) {
+                // OPTIMIZATION: Hoist cols for inlined getIndex
+                const mapCols = game.gridMap.cols;
+
                 // Verificar nueva posición propuesta
                 const nextX = this.x + moveX;
                 const nextY = this.y + moveY;
@@ -158,7 +161,9 @@ export class Unit extends Entity {
                 const nextCol = (nextX * game.gridMap.invTileSize) | 0;
                 const nextRow = (nextY * game.gridMap.invTileSize) | 0;
 
-                const cellIndex = game.gridMap.getIndex(nextCol, nextRow);
+                // OPTIMIZATION: Inlined from GridMap.getIndex for performance
+                // Replaces: const cellIndex = game.gridMap.getIndex(nextCol, nextRow);
+                const cellIndex = nextRow * mapCols + nextCol;
 
                 // Si el índice es válido y hay algo en la celda
                 if (cellIndex >= 0 && cellIndex < game.gridMap.grid.length) {
@@ -171,14 +176,16 @@ export class Unit extends Entity {
 
                         // Verificar movimiento solo en X
                         // nextX col is 'nextCol', current y row is 'currRow'
-                        const contentX = game.gridMap.grid[game.gridMap.getIndex(nextCol, currRow)];
+                        // OPTIMIZATION: Inlined getIndex
+                        const contentX = game.gridMap.grid[currRow * mapCols + nextCol];
                         if (contentX && contentX.isBuilding) {
                             moveX = 0;
                         }
 
                         // Verificar movimiento solo en Y
                         // current x col is 'currCol', nextY row is 'nextRow'
-                        const contentY = game.gridMap.grid[game.gridMap.getIndex(currCol, nextRow)];
+                        // OPTIMIZATION: Inlined getIndex
+                        const contentY = game.gridMap.grid[nextRow * mapCols + currCol];
                         if (contentY && contentY.isBuilding) {
                             moveY = 0;
                         }

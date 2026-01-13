@@ -1,4 +1,11 @@
 {
+  "name": "flexyapp1-pss-txn-01",
+  "version": "1.0.0",
+  "description": "Strategy Game - Static Site served via Node.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
   "devDependencies": {
     "jsdom": "^27.4.0"
   }

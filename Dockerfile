@@ -1,17 +1,25 @@
-FROM public.ecr.aws/docker/library/nginx:alpine
+# Dockerfile para flexyapp1-pss-txn-01
+FROM node:20-alpine
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+# Crear directorio de trabajo
+WORKDIR /app
 
-# This project is a static site (Vanilla JS).
-# package.json is used only for dev dependencies (jsdom) and does not contain build scripts.
-# Therefore, we directly serve the source files via Nginx.
-# The content is filtered by .dockerignore to exclude sensitive files and dev config.
+# Copiar archivos de dependencias
+COPY package*.json ./
 
-COPY . /usr/share/nginx/html/
+# Instalar dependencias de producción
+RUN npm install --production
 
-# Copy custom Nginx configuration for security headers
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copiar código fuente
+COPY . .
 
-# Expose port 80
-EXPOSE 80
+# Exponer puerto
+EXPOSE 3000
+
+# Variables de entorno por defecto
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV MONGODB_URI=mongodb://mongo:27017/flexyapp1-pss-txn-01
+
+# Comando de inicio
+CMD ["node", "server.js"]

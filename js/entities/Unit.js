@@ -148,6 +148,11 @@ export class Unit extends Entity {
 
             // Colisiones con edificios (GridMap)
             if (hasGridMap) {
+                // OPTIMIZATION: Hoist properties for faster access
+                const gridMap = game.gridMap;
+                const grid = gridMap.grid;
+                const cols = gridMap.cols;
+
                 // Verificar nueva posición propuesta
                 const nextX = this.x + moveX;
                 const nextY = this.y + moveY;
@@ -155,14 +160,16 @@ export class Unit extends Entity {
                 // OPTIMIZATION: Inlined snapToGrid to avoid object allocation (10x faster)
                 // Usar multiplicación por invTileSize en lugar de división (más rápido)
                 // Using bitwise OR for truncation
-                const nextCol = (nextX * game.gridMap.invTileSize) | 0;
-                const nextRow = (nextY * game.gridMap.invTileSize) | 0;
+                const nextCol = (nextX * gridMap.invTileSize) | 0;
+                const nextRow = (nextY * gridMap.invTileSize) | 0;
 
-                const cellIndex = game.gridMap.getIndex(nextCol, nextRow);
+                // OPTIMIZATION: Inline getIndex to avoid method call overhead
+                // const cellIndex = gridMap.getIndex(nextCol, nextRow);
+                const cellIndex = nextRow * cols + nextCol;
 
                 // Si el índice es válido y hay algo en la celda
-                if (cellIndex >= 0 && cellIndex < game.gridMap.grid.length) {
-                    const content = game.gridMap.grid[cellIndex];
+                if (cellIndex >= 0 && cellIndex < grid.length) {
+                    const content = grid[cellIndex];
 
                     if (content && content.isBuilding) {
                         // Colisión simple: Intentar deslizarse
@@ -171,14 +178,20 @@ export class Unit extends Entity {
 
                         // Verificar movimiento solo en X
                         // nextX col is 'nextCol', current y row is 'currRow'
-                        const contentX = game.gridMap.grid[game.gridMap.getIndex(nextCol, currRow)];
+                        // const contentX = gridMap.grid[gridMap.getIndex(nextCol, currRow)];
+                        const indexX = currRow * cols + nextCol;
+                        const contentX = grid[indexX];
+
                         if (contentX && contentX.isBuilding) {
                             moveX = 0;
                         }
 
                         // Verificar movimiento solo en Y
                         // current x col is 'currCol', nextY row is 'nextRow'
-                        const contentY = game.gridMap.grid[game.gridMap.getIndex(currCol, nextRow)];
+                        // const contentY = gridMap.grid[gridMap.getIndex(currCol, nextRow)];
+                        const indexY = nextRow * cols + currCol;
+                        const contentY = grid[indexY];
+
                         if (contentY && contentY.isBuilding) {
                             moveY = 0;
                         }

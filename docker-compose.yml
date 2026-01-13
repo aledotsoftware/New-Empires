@@ -11,10 +11,6 @@ services:
     container_name: newempire-pss-txn-01
     restart: unless-stopped
 
-    # Exposed port
-    ports:
-      - "${PORT:-3000}:80"
-
     # Environment variables
     environment:
       - HOST=0.0.0.0

@@ -102,12 +102,52 @@ window.showSettings = function () {
     setTimeout(() => FocusManager.focusFirst(screen), 50);
 };
 
-// Palette: Handle quit game action
+// Palette: Generic confirmation modal helper
+window.showConfirmation = function (message, onConfirm, onCancel) {
+    const modal = document.getElementById('confirmationModal');
+    const msgEl = document.getElementById('confirmMessage');
+    const yesBtn = document.getElementById('confirmYesBtn');
+    const noBtn = document.getElementById('confirmNoBtn');
+
+    if (!modal || !msgEl || !yesBtn || !noBtn) return;
+
+    msgEl.textContent = message;
+    modal.classList.remove('hidden');
+
+    // Save previous focus
+    FocusManager.saveFocus();
+
+    const close = () => {
+        modal.classList.add('hidden');
+        FocusManager.restoreFocus();
+    };
+
+    // Clean up old listeners
+    const newYes = yesBtn.cloneNode(true);
+    const newNo = noBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYes, yesBtn);
+    noBtn.parentNode.replaceChild(newNo, noBtn);
+
+    newYes.onclick = () => { close(); onConfirm(); };
+    newNo.onclick = () => { close(); if (onCancel) onCancel(); };
+
+    // Add escape key support specifically for this modal
+    newYes.onkeydown = (e) => { if (e.key === 'Escape') newNo.click(); };
+    newNo.onkeydown = (e) => { if (e.key === 'Escape') newNo.click(); };
+
+    // Focus "No" by default to prevent accidental clicks
+    setTimeout(() => newNo.focus(), 50);
+};
+
+// Palette: Handle quit game action with custom modal
 window.confirmQuitGame = function() {
-    if (confirm('¿Estás seguro de que quieres abandonar la partida? El progreso no guardado se perderá.')) {
-        hideSettings();
-        loadMainMenu();
-    }
+    showConfirmation(
+        '¿Estás seguro de que quieres abandonar? El progreso no guardado se perderá.',
+        () => {
+            hideSettings();
+            loadMainMenu();
+        }
+    );
 };
 
 /**

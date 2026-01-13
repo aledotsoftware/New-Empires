@@ -335,6 +335,24 @@
             </div>
         </div>
 
+    <!-- Modal de Confirmación Genérico (Palette) -->
+    <div id="confirmationModal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="confirmTitle" tabindex="-1">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header">
+                <h2 id="confirmTitle" style="font-size: 1.2rem; margin: 0 auto;">Confirmación</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p id="confirmMessage" style="margin-bottom: 20px; color: #e2e8f0;">¿Estás seguro?</p>
+                <div style="display: flex; justify-content: center; gap: 15px;">
+                    <button id="confirmYesBtn" class="btn-secondary"
+                        style="border-color: #c53030; color: #c53030;">Sí, confirmar</button>
+                    <button id="confirmNoBtn" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
         <!-- Pantalla de Configuración -->
         <div id="settingsScreen" class="modal-overlay hidden" role="dialog" aria-modal="true"
             aria-labelledby="settingsTitle" tabindex="-1">

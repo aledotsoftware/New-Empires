@@ -2146,7 +2146,16 @@ export class Game {
             // Actualizar cada 8 segundos
             if (tipEl && Date.now() - this.lastTipTime > 8000) {
                 this.currentTipIndex = (this.currentTipIndex + 1) % GAMEPLAY_TIPS.length;
-                tipEl.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
+
+                // Palette: Smooth fade out/in transition
+                tipEl.style.transition = 'opacity 0.2s ease-out';
+                tipEl.style.opacity = '0';
+
+                setTimeout(() => {
+                    tipEl.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
+                    tipEl.style.opacity = '0.8'; // Match default opacity
+                }, 200);
+
                 this.lastTipTime = Date.now();
             }
             return;
@@ -2218,6 +2227,8 @@ export class Game {
                 this.currentTipIndex = Math.floor(Math.random() * GAMEPLAY_TIPS.length);
                 this.lastTipTime = Date.now();
             }
+            // Palette: Tip of the Moment
+            // Ensure aria-live updates are announced gracefully
             tipDiv.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
 
             emptyState.appendChild(iconDiv);

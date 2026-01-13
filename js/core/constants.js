@@ -24,7 +24,9 @@ export const GAMEPLAY_TIPS = [
     "Explora el mapa para encontrar recursos adicionales.",
     "Construye murallas para proteger tu economía de ataques.",
     "Las mejoras económicas se pagan solas a largo plazo.",
-    "Usa [Shift] + Click para poner órdenes en cola."
+    "Usa [Shift] + Click para poner órdenes en cola.",
+    "Usa [Ctrl] + [1-9] para crear grupos de unidades.",
+    "Presiona [H] o [Espacio] para volver a tu Centro Urbano."
 ];
 
 // Tipos de terreno

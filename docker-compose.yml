@@ -1,6 +1,6 @@
 # ===========================================
 # New Empires - Docker Compose for Dockploy
-# Strategy Game - Static Site Deployment
+# Strategy Game - Node.js Static Server
 # ===========================================
 
 services:
@@ -13,18 +13,18 @@ services:
 
     # Environment variables
     environment:
-      - HOST=0.0.0.0
       - NODE_ENV=production
+      - PORT=3000
 
     # Healthcheck
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
 
-    # Resources (Optimized for static site)
+    # Resources
     deploy:
       resources:
         limits:
@@ -45,16 +45,13 @@ services:
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
+        - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
         - "traefik.http.routers.newempire-pss-txn-01.priority=100"
-        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=80"
+        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=3000"
 
     networks:
       - dokploy-network
-    
 
 networks:
   dokploy-network:
     external: true
-  default:
-    name: tudex-network
-    driver: bridge

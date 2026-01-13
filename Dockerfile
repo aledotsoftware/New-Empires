@@ -1,17 +1,22 @@
-FROM nginx:alpine
+FROM node:20-alpine
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+WORKDIR /app
 
-# This project is a static site (Vanilla JS).
-# package.json is used only for dev dependencies (jsdom) and does not contain build scripts.
-# Therefore, we directly serve the source files via Nginx.
-# The content is filtered by .dockerignore to exclude sensitive files and dev config.
+# Copy package files
+COPY package*.json ./
 
-COPY . /usr/share/nginx/html/
+# Install production dependencies (if any)
+RUN npm install --production
 
-# Copy custom Nginx configuration for security headers
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy all source files
+COPY . .
 
-# Expose port 80
-EXPOSE 80
+# Environment setup
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Expose port (documentary)
+EXPOSE 3000
+
+# Start server
+CMD ["node", "server.js"]

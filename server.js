@@ -1,0 +1,71 @@
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = process.env.PORT || 3000;
+
+const MIME_TYPES = {
+    '.html': 'text/html',
+    '.js': 'text/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.wav': 'audio/wav',
+    '.mp3': 'audio/mpeg',
+    '.ico': 'image/x-icon',
+    '.webmanifest': 'application/manifest+json',
+    '.txt': 'text/plain'
+};
+
+const server = http.createServer((req, res) => {
+    // Normalize path
+    let safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+
+    // Remove query string
+    safePath = safePath.split('?')[0];
+
+    // Default to index.html
+    if (safePath === '/' || safePath === '') {
+        safePath = '/index.html';
+    }
+
+    // Construct full path
+    const filePath = path.join(__dirname, safePath);
+
+    // Prevent directory traversal
+    if (!filePath.startsWith(__dirname)) {
+        res.writeHead(403);
+        res.end('Forbidden');
+        return;
+    }
+
+    // Check if file exists
+    fs.stat(filePath, (err, stats) => {
+        if (err || !stats.isFile()) {
+            res.writeHead(404);
+            res.end('Not Found');
+            return;
+        }
+
+        const ext = path.extname(filePath).toLowerCase();
+        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+        res.writeHead(200, {
+            'Content-Type': contentType,
+            // Security headers
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY',
+            'X-XSS-Protection': '1; mode=block'
+        });
+
+        const readStream = fs.createReadStream(filePath);
+        readStream.pipe(res);
+    });
+});
+
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

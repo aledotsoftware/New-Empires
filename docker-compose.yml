@@ -11,11 +11,11 @@ services:
     depends_on:
       - database
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.flexyapp1-pss-txn-01.rule=Host(`flexyapp1-pss-txn-01.tudexnetworks.com`)"
-      - "traefik.http.routers.flexyapp1-pss-txn-01.entrypoints=web"
-      - "traefik.http.routers.flexyapp1-pss-txn-01.priority=100"
-      - "traefik.http.services.flexyapp1-pss-txn-01.loadbalancer.server.port=3000"
+        - "traefik.enable=true"
+        - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
+        - "traefik.http.routers.newempire-pss-txn-01.priority=100"
+        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=80"
+
     networks:
       - app-tier
       - dokploy-network

@@ -1,5 +1,4 @@
-# Dockerfile para flexyapp1-pss-txn-01
-FROM node:20-alpine
+FROM nginx:alpine
 
 # Crear directorio de trabajo
 WORKDIR /app

@@ -947,7 +947,15 @@ function populateCivilizations() {
             const uniqueDiv = document.createElement('div');
             uniqueDiv.style.marginTop = '8px';
             uniqueDiv.style.fontSize = '0.8rem';
-            uniqueDiv.innerHTML = `Unidad Única: <span style="color:#d4af37">${civ.uniqueUnit.name}</span>`;
+
+            // Sentinel: Secure rendering to prevent XSS
+            const prefix = document.createTextNode('Unidad Única: ');
+            const span = document.createElement('span');
+            span.style.color = '#d4af37';
+            span.textContent = civ.uniqueUnit.name;
+
+            uniqueDiv.appendChild(prefix);
+            uniqueDiv.appendChild(span);
             tooltip.appendChild(uniqueDiv);
         }
 

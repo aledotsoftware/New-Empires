@@ -171,6 +171,10 @@ export class Game {
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
 
+        // Variables para el ciclo de tips (Palette)
+        this.currentTipIndex = 0;
+        this.lastTipTime = 0;
+
         // Cache para queries de cursor
         this._cursorQueryCache = [];
 
@@ -2136,6 +2140,18 @@ export class Game {
             stateKey = `multi:${this.selectedEntities.length}`;
         }
 
+        // Palette: Si ya estamos en estado vacío, comprobar si debemos actualizar el tip
+        if (this.lastSelectionStateKey === 'empty' && stateKey === 'empty') {
+            const tipEl = content.querySelector('.selection-tip');
+            // Actualizar cada 8 segundos
+            if (tipEl && Date.now() - this.lastTipTime > 8000) {
+                this.currentTipIndex = (this.currentTipIndex + 1) % GAMEPLAY_TIPS.length;
+                tipEl.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
+                this.lastTipTime = Date.now();
+            }
+            return;
+        }
+
         // Si el estado no ha cambiado, no tocar el DOM
         if (this.lastSelectionStateKey === stateKey) return;
         this.lastSelectionStateKey = stateKey;
@@ -2195,10 +2211,14 @@ export class Game {
             // Gameplay Tip (Palette enhancement)
             const tipDiv = document.createElement('div');
             tipDiv.className = 'selection-tip';
+            tipDiv.setAttribute('aria-live', 'polite'); // Ensure screen readers announce updates
 
-            // Pick a random tip
-            const randomTip = GAMEPLAY_TIPS[Math.floor(Math.random() * GAMEPLAY_TIPS.length)];
-            tipDiv.textContent = `💡 Tip: ${randomTip}`;
+            // Pick a random tip initiallly
+            if (this.lastSelectionStateKey !== 'empty') {
+                this.currentTipIndex = Math.floor(Math.random() * GAMEPLAY_TIPS.length);
+                this.lastTipTime = Date.now();
+            }
+            tipDiv.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
 
             emptyState.appendChild(iconDiv);
             emptyState.appendChild(textDiv);

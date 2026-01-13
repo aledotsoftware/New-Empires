@@ -750,6 +750,7 @@ body,
 
 /* Tiempo de juego */
 .game-time {
+    position: relative; /* Palette: For tooltip positioning */
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -762,6 +763,41 @@ body,
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-gold);
+    cursor: help; /* Palette: Indicate interactivity */
+    transition: all 0.2s ease;
+}
+
+.game-time:hover,
+.game-time:focus-visible {
+    border-color: var(--gold);
+    background: rgba(0, 0, 0, 0.5);
+    outline: none; /* Focus handled by border/glow */
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.3);
+}
+
+/* Palette: Tooltip behavior for game time */
+.game-time .card-tooltip {
+    bottom: auto;
+    top: 100%;
+    margin-top: 10px;
+    white-space: normal; /* Allow text wrapping */
+    width: 160px;
+    text-align: center;
+    z-index: 200;
+}
+
+.game-time .card-tooltip::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom: 6px solid var(--gold-dark);
+}
+
+.game-time:hover .card-tooltip,
+.game-time:focus-visible .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
 }
 
 .time-icon {

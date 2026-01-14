@@ -380,8 +380,10 @@
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label for="volumeSlider" style="font-weight: 600; color: #e2e8f0;">Volumen
-                                    Maestro</label>
+                                <label for="volumeSlider" style="font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px;">
+                                    <span id="volumeIcon" aria-hidden="true" style="font-size: 1.2rem;">🔊</span>
+                                    Volumen Maestro
+                                </label>
                                 <span id="volumeValue" style="color: #48bb78;">50%</span>
                             </div>
                             <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"

@@ -220,6 +220,83 @@ window.toggleIdleVillagerCycle = function () {
 };
 
 /**
+ * Toggle sound enabled/disabled
+ * Palette: Enhanced UX with visual feedback
+ */
+window.toggleSound = function () {
+    let newState = false;
+    if (typeof soundManager !== 'undefined') {
+        soundManager.setEnabled(!soundManager.enabled);
+        newState = soundManager.enabled;
+
+        // If sound was re-enabled, play a feedback sound if possible, but might be annoying
+        // if (newState) soundManager.play('selectUnit');
+    } else {
+        const toggleElement = document.getElementById('soundToggleValue');
+        if (toggleElement) {
+            newState = toggleElement.textContent !== 'Activado';
+        }
+    }
+
+    // Update UI
+    const toggleElement = document.getElementById('soundToggleValue');
+    if (toggleElement) {
+        toggleElement.textContent = newState ? 'Activado' : 'Desactivado';
+        toggleElement.style.color = newState ? '#48bb78' : '#f56565';
+    }
+
+    const btn = document.getElementById('soundToggleBtn');
+    if (btn) {
+        btn.setAttribute('aria-pressed', newState);
+    }
+
+    // Also update the volume icon to reflect state (muted if disabled)
+    const volSlider = document.getElementById('volumeSlider');
+    if (volSlider) {
+        // Force update of volume icon
+        window.updateSoundVolume(volSlider.value);
+    }
+};
+
+/**
+ * Update sound volume
+ * Palette: Added dynamic icon feedback
+ */
+window.updateSoundVolume = function (value) {
+    const volume = parseInt(value);
+
+    // 1. Update backend
+    if (typeof soundManager !== 'undefined') {
+        soundManager.setVolume(volume / 100);
+    }
+
+    // 2. Update Label
+    const label = document.getElementById('volumeValue');
+    if (label) label.textContent = volume + '%';
+
+    // 3. Update Dynamic Icon (UX Enhancement)
+    const icon = document.getElementById('volumeIcon');
+    if (icon) {
+        // Check if sound is globally disabled first
+        const isEnabled = typeof soundManager !== 'undefined' ? soundManager.enabled : true;
+
+        if (!isEnabled || volume === 0) {
+            icon.textContent = '🔇';
+            icon.setAttribute('aria-label', 'Silenciado');
+        } else if (volume < 30) {
+            icon.textContent = '🔈';
+            icon.setAttribute('aria-label', 'Volumen bajo');
+        } else if (volume < 70) {
+            icon.textContent = '🔉';
+            icon.setAttribute('aria-label', 'Volumen medio');
+        } else {
+            icon.textContent = '🔊';
+            icon.setAttribute('aria-label', 'Volumen alto');
+        }
+    }
+};
+
+/**
  * Actualiza el tamaño del cursor
  */
 window.updateCursorSize = function (value) {
@@ -247,6 +324,18 @@ window.updateCameraMargin = function (value) {
     }
     const label = document.getElementById('cameraMarginValue');
     if (label) label.textContent = value + 'px';
+};
+
+/**
+ * Actualiza la velocidad de la cámara
+ */
+window.updateCameraSpeed = function (value) {
+    debugLogger.debug(`Velocidad de cámara: ${value}px/s`, 'ui');
+    if (game && game.cameraConfig) {
+        game.cameraConfig.baseSpeed = parseInt(value);
+    }
+    const label = document.getElementById('cameraSpeedValue');
+    if (label) label.textContent = value + ' px/s';
 };
 
 /**

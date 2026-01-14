@@ -58,7 +58,15 @@ const server = http.createServer((req, res) => {
             // Security headers
             'X-Content-Type-Options': 'nosniff',
             'X-Frame-Options': 'DENY',
-            'X-XSS-Protection': '1; mode=block'
+            'X-XSS-Protection': '1; mode=block',
+            // CSP: Allow self, Google Fonts, and inline scripts/styles (required for current app structure)
+            'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+            // HSTS: Enforce HTTPS for 2 years (ignored on HTTP, beneficial if behind SSL proxy)
+            'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+            // Referrer: Only send origin when cross-origin
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+            // Permissions: Disable sensitive features
+            'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()'
         });
 
         const readStream = fs.createReadStream(filePath);

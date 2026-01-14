@@ -282,18 +282,29 @@ window.saveGame = function () {
         return;
     }
 
-    if (typeof saveManager !== 'undefined') {
-        const success = saveManager.save(game);
-        if (success) {
-            updateSaveStatus('✅ Partida guardada correctamente', 'success');
-            // Palette: Toast notification
-            if (game && game.showNotification) game.showNotification('Partida guardada', 'success');
+    const performSave = () => {
+        if (typeof saveManager !== 'undefined') {
+            const success = saveManager.save(game);
+            if (success) {
+                updateSaveStatus('✅ Partida guardada correctamente', 'success');
+                // Palette: Toast notification
+                if (game && game.showNotification) game.showNotification('Partida guardada', 'success');
+            } else {
+                updateSaveStatus('❌ Error al guardar la partida', 'error');
+                if (game && game.showNotification) game.showNotification('Error al guardar', 'error');
+            }
         } else {
-            updateSaveStatus('❌ Error al guardar la partida', 'error');
-            if (game && game.showNotification) game.showNotification('Error al guardar', 'error');
+            updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
         }
+    };
+
+    if (typeof saveManager !== 'undefined' && saveManager.hasSave()) {
+        showConfirmation(
+            'Existe una partida guardada. ¿Deseas sobrescribirla?',
+            performSave
+        );
     } else {
-        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+        performSave();
     }
 };
 

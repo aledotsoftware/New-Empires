@@ -39,6 +39,9 @@ export class TerrainMap {
             'desert': 5
         };
 
+        // Optimización: Cache inverso para usar multiplicación en lugar de división
+        this.invTileSize = 1 / tileSize;
+
         this.generateTerrain();
     }
 
@@ -117,14 +120,33 @@ export class TerrainMap {
      * @returns {Object} Datos del terreno (velocidad, bonos, etc.)
      */
     getTerrainDataAt(x, y) {
-        const col = Math.floor(x / this.tileSize);
-        const row = Math.floor(y / this.tileSize);
+        // Optimización: Bitwise OR es más rápido que Math.floor
+        const col = (x * this.invTileSize) | 0;
+        const row = (y * this.invTileSize) | 0;
 
         if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) {
             return this._dataCache[0]; // Default grassland
         }
 
-        const index = this.getIndex(col, row);
+        // Optimización: Inline getIndex
+        const index = row * this.cols + col;
+        const id = this.grid[index];
+        return this._dataCache[id] || this._dataCache[0];
+    }
+
+    /**
+     * Obtiene datos del terreno usando coordenadas de grid ya calculadas.
+     * Evita recalcular col/row si ya se conocen.
+     * @param {number} col - Columna del grid
+     * @param {number} row - Fila del grid
+     * @returns {Object} Datos del terreno
+     */
+    getTerrainDataByGrid(col, row) {
+        if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) {
+            return this._dataCache[0];
+        }
+
+        const index = row * this.cols + col;
         const id = this.grid[index];
         return this._dataCache[id] || this._dataCache[0];
     }

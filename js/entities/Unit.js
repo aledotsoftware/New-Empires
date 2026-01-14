@@ -131,7 +131,8 @@ export class Unit extends Entity {
                     this._lastGridRow = currRow;
 
                     if (game.terrainMap) {
-                        const terrainData = game.terrainMap.getTerrainDataAt(this.x, this.y);
+                        // OPTIMIZATION: Use direct grid access to avoid redundant coordinate calculation
+                        const terrainData = game.terrainMap.getTerrainDataByGrid(currCol, currRow);
                         this._cachedTerrainSpeed = terrainData.movementSpeed;
                     }
                 }

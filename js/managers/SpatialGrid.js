@@ -65,6 +65,56 @@ export class SpatialGrid {
     }
 
     /**
+     * Busca la primera entidad que cumpla con el predicado en el radio dado
+     * @param {number} x - Coordenada X central
+     * @param {number} y - Coordenada Y central
+     * @param {number} radius - Radio de búsqueda
+     * @param {Function} predicate - Función que retorna true si es la entidad buscada (entity) => boolean
+     * @returns {Object|null} La entidad encontrada o null
+     */
+    find(x, y, radius, predicate) {
+        // OPTIMIZATION: Hoist class members
+        const buckets = this.buckets;
+        const cols = this.cols;
+        const rows = this.rows;
+
+        // Optimización: usar multiplicación
+        const cellRadius = Math.ceil(radius * this.invCellSize);
+
+        // OPTIMIZATION: Bitwise truncation is faster than Math.floor (~15% speedup)
+        // Safe here because coordinates are clamped to positive values in Unit.update()
+        const centerCol = (x * this.invCellSize) | 0;
+        const centerRow = (y * this.invCellSize) | 0;
+
+        // Clamping para no salir de los bordes al iterar
+        const startRow = Math.max(0, centerRow - cellRadius);
+        const endRow = Math.min(rows - 1, centerRow + cellRadius);
+        const startCol = Math.max(0, centerCol - cellRadius);
+        const endCol = Math.min(cols - 1, centerCol + cellRadius);
+
+        for (let r = startRow; r <= endRow; r++) {
+            // Optimización: calcular índice base de la fila
+            const rowBase = r * cols;
+            for (let c = startCol; c <= endCol; c++) {
+                const index = rowBase + c;
+                const bucket = buckets[index];
+
+                // Iterar bucket y buscar
+                const bLen = bucket.length;
+                if (bLen > 0) {
+                    for (let i = 0; i < bLen; i++) {
+                        if (predicate(bucket[i])) {
+                            return bucket[i];
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Devuelve entidades en las celdas cercanas
      * @param {number} x - Coordenada X central
      * @param {number} y - Coordenada Y central

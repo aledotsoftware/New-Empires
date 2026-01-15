@@ -24,9 +24,6 @@ export class Unit extends Entity {
         this.aiTimer = Math.random() * 0.5;
         this.aiCheckInterval = 0.5;
 
-        // Optimización: Cache para consultas espaciales
-        this._nearbyCache = [];
-
         // Optimización: Cache para consultas de terreno (Unit.js)
         this._lastGridCol = -1;
         this._lastGridRow = -1;
@@ -75,17 +72,22 @@ export class Unit extends Entity {
         const searchRadius = 200;
         const searchRadiusSq = searchRadius * searchRadius;
 
-        // OPTIMIZACIÓN: Usar find() para early exit
-        // Evita llenar el array cache y termina en cuanto encuentra un enemigo válido
-        this.attackTarget = game.spatialGrid.find(this.x, this.y, searchRadius, (entity) => {
+        // OPTIMIZACIÓN: Usar find() para salir temprano si se encuentra un objetivo
+        // Evita poblar un array intermedio y lo recorre solo hasta encontrar coincidencia.
+        const target = game.spatialGrid.find(this.x, this.y, searchRadius, (entity) => {
             if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
                 const dx = this.x - entity.x;
                 const dy = this.y - entity.y;
                 const distSq = dx * dx + dy * dy;
+
                 return distSq < searchRadiusSq;
             }
             return false;
         });
+
+        if (target) {
+            this.attackTarget = target;
+        }
     }
 
     moveTowardsTarget(targetX, targetY, deltaTime, game) {

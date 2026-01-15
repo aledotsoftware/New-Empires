@@ -1575,6 +1575,7 @@ export class Game {
         const screen = document.getElementById('gameOverScreen');
         const title = document.getElementById('gameOverTitle');
         const message = document.getElementById('gameOverMessage');
+        const statsContainer = document.getElementById('gameOverStats');
 
         if (victory) {
             title.textContent = '🏆 Victoria';
@@ -1588,6 +1589,50 @@ export class Game {
             title.style.webkitBackgroundClip = 'text';
             title.style.webkitTextFillColor = 'transparent';
             message.textContent = 'Tu Centro Urbano ha sido destruido.';
+        }
+
+        // Palette: Populate Game Over Stats
+        if (statsContainer) {
+            const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+            const timeString = `${minutes}:${seconds}`;
+
+            const villagers = this.units.filter(u => u.type === 'villager').length;
+            const military = this.units.filter(u => u.type !== 'villager').length;
+
+            statsContainer.innerHTML = `
+                <div class="controls-grid" style="margin-bottom: 0;">
+                    <div class="resource-item">
+                        <div class="resource-icon"><img src="assets/icons/time.png" style="width:100%;height:100%;object-fit:contain;" alt=""></div>
+                        <div class="resource-info">
+                            <div class="resource-label">Tiempo</div>
+                            <div class="resource-value">${timeString}</div>
+                        </div>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon"><img src="assets/icons/population.png" style="width:100%;height:100%;object-fit:contain;" alt=""></div>
+                        <div class="resource-info">
+                            <div class="resource-label">Población</div>
+                            <div class="resource-value">${this.population}/${this.maxPopulation}</div>
+                        </div>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon"><img src="assets/icons/villager.png" style="width:100%;height:100%;object-fit:contain;" alt=""></div>
+                        <div class="resource-info">
+                            <div class="resource-label">Aldeanos</div>
+                            <div class="resource-value">${villagers}</div>
+                        </div>
+                    </div>
+                    <div class="resource-item">
+                        <div class="resource-icon"><img src="assets/icons/swords.png" style="width:100%;height:100%;object-fit:contain;" alt=""></div>
+                        <div class="resource-info">
+                            <div class="resource-label">Militar</div>
+                            <div class="resource-value">${military}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         screen.classList.remove('hidden');

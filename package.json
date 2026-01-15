@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "jsdom": "^27.4.0"
+  },
+  "dependencies": {
+    "playwright": "^1.57.0"
   }
 }

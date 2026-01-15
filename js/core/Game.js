@@ -1590,6 +1590,54 @@ export class Game {
             message.textContent = 'Tu Centro Urbano ha sido destruido.';
         }
 
+        // Palette: Populate Game Over Stats
+        const stats = document.getElementById('gameOverStats');
+        if (stats) {
+            const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+
+            stats.innerHTML = '';
+
+            // Time Stat
+            const timeStat = document.createElement('div');
+            timeStat.className = 'control-item'; // Reuse existing class for styling
+            timeStat.style.justifyContent = 'space-between'; // Override slightly to separate label and value
+            timeStat.style.marginBottom = '8px';
+
+            const timeLabel = document.createElement('span');
+            timeLabel.textContent = '⏱️ Tiempo: ';
+            timeLabel.className = 'text-medium'; // Use existing theme class
+
+            const timeValue = document.createElement('span');
+            timeValue.textContent = `${minutes}:${seconds}`;
+            timeValue.className = 'text-light'; // Use existing theme class
+            timeValue.style.fontWeight = 'bold';
+
+            timeStat.appendChild(timeLabel);
+            timeStat.appendChild(timeValue);
+
+            // Population Stat
+            const popStat = document.createElement('div');
+            popStat.className = 'control-item'; // Reuse existing class for styling
+            popStat.style.justifyContent = 'space-between';
+
+            const popLabel = document.createElement('span');
+            popLabel.textContent = '👥 Población Alcanzada: ';
+            popLabel.className = 'text-medium'; // Use existing theme class
+
+            const popValue = document.createElement('span');
+            popValue.textContent = `${Math.floor(this.population)}`;
+            popValue.className = 'text-light'; // Use existing theme class
+            popValue.style.fontWeight = 'bold';
+
+            popStat.appendChild(popLabel);
+            popStat.appendChild(popValue);
+
+            stats.appendChild(timeStat);
+            stats.appendChild(popStat);
+        }
+
         screen.classList.remove('hidden');
 
         // Manage Focus for Accessibility

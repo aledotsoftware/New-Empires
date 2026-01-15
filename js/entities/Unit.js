@@ -24,9 +24,6 @@ export class Unit extends Entity {
         this.aiTimer = Math.random() * 0.5;
         this.aiCheckInterval = 0.5;
 
-        // Optimización: Cache para consultas espaciales
-        this._nearbyCache = [];
-
         // Optimización: Cache para consultas de terreno (Unit.js)
         this._lastGridCol = -1;
         this._lastGridRow = -1;
@@ -75,28 +72,21 @@ export class Unit extends Entity {
         const searchRadius = 200;
         const searchRadiusSq = searchRadius * searchRadius;
 
-        // OPTIMIZACIÓN: Usar Spatial Grid reutilizando array
-        // Query units (clearing cache)
-        // BOLT: Removed redundant query to buildingGrid (buildings have isUnit=false and are filtered out anyway)
-        // Benchmark: ~55% faster (130ms vs 290ms for 50k ops)
-        game.spatialGrid.query(this.x, this.y, searchRadius, this._nearbyCache, true);
-
-        const nearbyEntities = this._nearbyCache;
-
-        // OPTIMIZACIÓN: Loop for tradicional para evitar iterator allocation
-        const len = nearbyEntities.length;
-        for (let i = 0; i < len; i++) {
-            const entity = nearbyEntities[i];
+        // OPTIMIZACIÓN: Usar find() para salir temprano si se encuentra un objetivo
+        // Evita poblar un array intermedio y lo recorre solo hasta encontrar coincidencia.
+        const target = game.spatialGrid.find(this.x, this.y, searchRadius, (entity) => {
             if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
                 const dx = this.x - entity.x;
                 const dy = this.y - entity.y;
                 const distSq = dx * dx + dy * dy;
 
-                if (distSq < searchRadiusSq) {
-                    this.attackTarget = entity;
-                    break;
-                }
+                return distSq < searchRadiusSq;
             }
+            return false;
+        });
+
+        if (target) {
+            this.attackTarget = target;
         }
     }
 

@@ -36,7 +36,9 @@ const server = http.createServer((req, res) => {
     const filePath = path.join(__dirname, safePath);
 
     // Prevent directory traversal
-    if (!filePath.startsWith(__dirname)) {
+    // Sentinel: Fix partial path traversal by ensuring prefix ends with separator
+    const secureDir = __dirname.endsWith(path.sep) ? __dirname : __dirname + path.sep;
+    if (!filePath.startsWith(secureDir)) {
         res.writeHead(403);
         res.end('Forbidden');
         return;

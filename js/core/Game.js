@@ -50,6 +50,7 @@ export class Game {
 
         // Estado del juego
         this.gameStartTime = Date.now();
+        this.gameTime = 0; // Palette: Track game time independently of wall clock
         this.isPaused = false;
         this.isGameOver = false;
 
@@ -1405,6 +1406,8 @@ export class Game {
     update(deltaTime) {
         if (this.isPaused || this.isGameOver) return;
 
+        this.gameTime += deltaTime;
+
         // Actualizar cámara (Sistema RTS optimizado)
         this.updateCamera(deltaTime);
 
@@ -2084,7 +2087,8 @@ export class Game {
         if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.maxPopulation;
 
         // Actualizar tiempo de juego
-        const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+        // Palette: Use accumulated gameTime instead of wall-clock time
+        const elapsedSeconds = Math.floor(this.gameTime);
         const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
         const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
         if (this.uiElements.gameTime) this.uiElements.gameTime.textContent = `${minutes}:${seconds}`;

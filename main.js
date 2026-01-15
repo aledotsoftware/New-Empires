@@ -39,6 +39,12 @@ let lastFocusedElement = null;
  */
 window.showTechTree = function () {
     debugLogger.info('Abriendo árbol de tecnologías', 'ui');
+
+    // Palette: Auto-pause game
+    if (typeof game !== 'undefined' && game && !game.isGameOver) {
+        game.isPaused = true;
+    }
+
     FocusManager.saveFocus();
 
     const screen = document.getElementById('techTreeScreen');
@@ -73,6 +79,12 @@ window.showTechTree = function () {
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
     document.getElementById('techTreeScreen').classList.add('hidden');
+
+    // Palette: Resume game
+    if (typeof game !== 'undefined' && game && !game.isGameOver) {
+        game.isPaused = false;
+    }
+
     FocusManager.restoreFocus();
 };
 
@@ -81,6 +93,12 @@ window.hideTechTree = function () {
  */
 window.showSettings = function () {
     debugLogger.info('Abriendo configuración', 'ui');
+
+    // Palette: Auto-pause game
+    if (typeof game !== 'undefined' && game && !game.isGameOver) {
+        game.isPaused = true;
+    }
+
     FocusManager.saveFocus();
 
     const screen = document.getElementById('settingsScreen');
@@ -156,6 +174,12 @@ window.confirmQuitGame = function() {
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
     document.getElementById('settingsScreen').classList.add('hidden');
+
+    // Palette: Resume game
+    if (typeof game !== 'undefined' && game && !game.isGameOver) {
+        game.isPaused = false;
+    }
+
     FocusManager.restoreFocus();
 };
 

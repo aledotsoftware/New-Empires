@@ -31,6 +31,7 @@ export class Unit extends Entity {
         this._lastGridCol = -1;
         this._lastGridRow = -1;
         this._cachedTerrainSpeed = 1.0;
+        this._cachedTerrainData = null;
     }
 
     update(deltaTime, game) {
@@ -134,6 +135,7 @@ export class Unit extends Entity {
                         // OPTIMIZATION: Use direct grid access to avoid redundant coordinate calculation
                         const terrainData = game.terrainMap.getTerrainDataByGrid(currCol, currRow);
                         this._cachedTerrainSpeed = terrainData.movementSpeed;
+                        this._cachedTerrainData = terrainData;
                     }
                 }
                 speedModifier = this._cachedTerrainSpeed;
@@ -227,15 +229,22 @@ export class Unit extends Entity {
             // Aplicar bonificaciones de terreno si el juego está disponible
             if (game && game.terrainMap) {
                 // Bonificación del atacante
-                // OPTIMIZACIÓN: Usar acceso directo a datos
-                const myTerrainData = game.terrainMap.getTerrainDataAt(this.x, this.y);
+                // OPTIMIZACIÓN: Usar cache si está disponible (evita recálculo de grid coords)
+                let myTerrainData = this._cachedTerrainData;
+                if (!myTerrainData || this._lastGridCol === -1) {
+                    myTerrainData = game.terrainMap.getTerrainDataAt(this.x, this.y);
+                }
 
                 if (myTerrainData.combatBonus[this.type]) {
                     damage *= myTerrainData.combatBonus[this.type];
                 }
 
                 // Bonificación defensiva del objetivo
-                const targetTerrainData = game.terrainMap.getTerrainDataAt(target.x, target.y);
+                // OPTIMIZACIÓN: Usar cache del objetivo si es una unidad
+                let targetTerrainData = target._cachedTerrainData;
+                if (!targetTerrainData) {
+                    targetTerrainData = game.terrainMap.getTerrainDataAt(target.x, target.y);
+                }
 
                 if (targetTerrainData.combatBonus.defense) {
                     damage /= targetTerrainData.combatBonus.defense;

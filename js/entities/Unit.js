@@ -136,8 +136,13 @@ export class Unit extends Entity {
             }
 
             const effectiveSpeed = this.speed * speedModifier;
-            let moveX = (dx / dist) * effectiveSpeed * deltaTime;
-            let moveY = (dy / dist) * effectiveSpeed * deltaTime;
+
+            // OPTIMIZATION: Replace division with multiplication (faster)
+            // invDist avoids 2 divisions per frame
+            const invDist = 1 / dist;
+            const moveStep = effectiveSpeed * deltaTime * invDist;
+            let moveX = dx * moveStep;
+            let moveY = dy * moveStep;
 
             // Colisiones con edificios (GridMap)
             if (hasGridMap) {

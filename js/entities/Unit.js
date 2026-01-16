@@ -69,25 +69,27 @@ export class Unit extends Entity {
     }
 
     findNearbyEnemy(game) {
-        const searchRadius = 200;
-        const searchRadiusSq = searchRadius * searchRadius;
-
         // OPTIMIZACIÓN: Usar find() para salir temprano si se encuentra un objetivo
         // Evita poblar un array intermedio y lo recorre solo hasta encontrar coincidencia.
-        const target = game.spatialGrid.find(this.x, this.y, searchRadius, (entity) => {
-            if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
-                const dx = this.x - entity.x;
-                const dy = this.y - entity.y;
-                const distSq = dx * dx + dy * dy;
-
-                return distSq < searchRadiusSq;
-            }
-            return false;
-        });
+        // OPTIMIZACIÓN: Pasar función estática y contexto para evitar alocación de clausuras
+        const target = game.spatialGrid.find(this.x, this.y, 200, Unit._isTargetableEnemy, this);
 
         if (target) {
             this.attackTarget = target;
         }
+    }
+
+    // Predicado estático para buscar enemigos
+    static _isTargetableEnemy(entity, self) {
+        // 200 * 200 = 40000 (searchRadiusSq)
+        if (entity.team !== self.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
+            const dx = self.x - entity.x;
+            const dy = self.y - entity.y;
+            const distSq = dx * dx + dy * dy;
+
+            return distSq < 40000;
+        }
+        return false;
     }
 
     moveTowardsTarget(targetX, targetY, deltaTime, game) {
@@ -136,8 +138,11 @@ export class Unit extends Entity {
             }
 
             const effectiveSpeed = this.speed * speedModifier;
-            let moveX = (dx / dist) * effectiveSpeed * deltaTime;
-            let moveY = (dy / dist) * effectiveSpeed * deltaTime;
+            // OPTIMIZATION: Use inverse distance multiplication (1 div, 2 mults) instead of 2 divisions
+            const invDist = 1 / dist;
+            const step = effectiveSpeed * deltaTime * invDist;
+            let moveX = dx * step;
+            let moveY = dy * step;
 
             // Colisiones con edificios (GridMap)
             if (hasGridMap) {

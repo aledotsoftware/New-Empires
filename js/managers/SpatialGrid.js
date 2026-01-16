@@ -72,7 +72,7 @@ export class SpatialGrid {
      * @param {Function} predicate - Función que retorna true si es la entidad buscada (entity) => boolean
      * @returns {Object|null} La entidad encontrada o null
      */
-    find(x, y, radius, predicate) {
+    find(x, y, radius, predicate, context) {
         // OPTIMIZATION: Hoist class members
         const buckets = this.buckets;
         const cols = this.cols;
@@ -103,7 +103,8 @@ export class SpatialGrid {
                 const bLen = bucket.length;
                 if (bLen > 0) {
                     for (let i = 0; i < bLen; i++) {
-                        if (predicate(bucket[i])) {
+                        // OPTIMIZATION: Pass context to avoid closure allocation
+                        if (predicate(bucket[i], context)) {
                             return bucket[i];
                         }
                     }

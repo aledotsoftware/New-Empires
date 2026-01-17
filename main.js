@@ -484,15 +484,16 @@ function createTechItemElement(tech, status, isInteractive) {
     let statusClass = 'locked';
     if (status.researched) statusClass = 'researched';
     else if (status.researching) statusClass = 'researching';
-    else if (status.available) statusClass = 'available'; // Simplified status mapping
+    else if (status.available) statusClass = 'available';
+    else if (status.unaffordable) statusClass = 'unaffordable'; // Palette: New status
 
     const techItem = document.createElement('div');
     techItem.className = `tech-item ${statusClass}`;
 
     // Interaction attributes
-    techItem.setAttribute('role', isInteractive && statusClass === 'available' ? 'button' : 'article');
-    techItem.setAttribute('tabindex', isInteractive && statusClass === 'available' ? '0' : '0'); // Always focusable for tooltip reading
-    if (!isInteractive) techItem.setAttribute('tabindex', '0'); // Even static items should be focusable to read description if we treat them as tooltips
+    const isClickable = isInteractive && (status.available || status.unaffordable);
+    techItem.setAttribute('role', isClickable ? 'button' : 'article');
+    techItem.setAttribute('tabindex', '0'); // Always focusable for tooltip reading
 
     let ariaLabel = `${tech.name}`;
     // Accessibility: Include description and cost in the label
@@ -501,12 +502,18 @@ function createTechItemElement(tech, status, isInteractive) {
     if (status.researched) ariaLabel += ' (Investigado)';
     else if (status.researching) ariaLabel += ' (Investigando)';
     else if (status.available) ariaLabel += ' (Disponible para investigar)';
+    else if (status.unaffordable) ariaLabel += ' (Recursos insuficientes)';
     else ariaLabel += ' (Bloqueado)';
 
     if (tech.cost) {
         const costParts = [];
         for (const [res, amount] of Object.entries(tech.cost)) {
-            costParts.push(`${amount} ${res}`);
+            let part = `${amount} ${res}`;
+            // Palette: Check affordability for ARIA label
+            if (isInteractive && game && game.resources && game.resources[res] < amount) {
+                part += ' (Falta)';
+            }
+            costParts.push(part);
         }
         if (costParts.length > 0) {
             ariaLabel += `. Costo: ${costParts.join(', ')}`;
@@ -515,7 +522,7 @@ function createTechItemElement(tech, status, isInteractive) {
 
     techItem.setAttribute('aria-label', ariaLabel);
 
-    if (statusClass === 'locked') {
+    if (statusClass === 'locked' || statusClass === 'unaffordable') {
         techItem.setAttribute('aria-disabled', 'true');
     }
 
@@ -557,6 +564,12 @@ function createTechItemElement(tech, status, isInteractive) {
         for (let [res, amount] of Object.entries(tech.cost)) {
             const costSpan = document.createElement('span');
             costSpan.style.cssText = 'display:inline-flex;align-items:center;margin-right:5px;';
+
+            // Palette: Visual feedback for missing resources
+            if (isInteractive && game && game.resources && game.resources[res] < amount) {
+                costSpan.style.color = '#e53e3e'; // Red
+                costSpan.style.fontWeight = 'bold';
+            }
 
             if (assetLoader && assetLoader.getSrc) {
                 const src = assetLoader.getSrc(res);
@@ -641,41 +654,104 @@ function renderTechTreeCommon(isInteractive) {
         gridDiv.className = 'tech-grid';
 
         for (let tech of techs) {
-            let status = { researched: false, researching: false, available: false };
+            // Palette: Enhanced status tracking
+            let status = {
+                researched: false,
+                researching: false,
+                available: false,
+                unaffordable: false,
+                locked: true
+            };
 
             if (isInteractive && game && game.techManager) {
                 if (game.techManager.getResearchStatus) {
                     status = game.techManager.getResearchStatus(tech.id);
                 } else {
+                    const isResearched = game.techManager.isResearched(tech.id);
+                    const isResearching = game.techManager.isResearching(tech.id);
+                    const isLocked = game.techManager.isLocked ? game.techManager.isLocked(tech.id) : false; // Fallback check
+
+                    // Note: canResearch includes affordable check, so we manually check afford
+                    const canAfford = game.canAfford ? game.canAfford(tech.cost) : true;
+
                     status = {
-                        researched: game.techManager.isResearched(tech.id),
-                        researching: game.techManager.isResearching(tech.id),
-                        available: game.techManager.canResearch(tech.id)
+                        researched: isResearched,
+                        researching: isResearching,
+                        available: !isResearched && !isResearching && !isLocked && canAfford,
+                        unaffordable: !isResearched && !isResearching && !isLocked && !canAfford,
+                        locked: isLocked
                     };
                 }
             }
 
             const techItem = createTechItemElement(tech, status, isInteractive);
 
-            if (isInteractive && status.available) {
-                const handleResearch = () => {
-                    if (game && game.techManager && game.techManager.canResearch(tech.id)) {
-                        // Save focus ID if possible?
-                        const id = `tech-${tech.id}`;
-                        techItem.id = id;
-                        game.techManager.startResearch(tech.id);
-                        renderTechTree();
-                        // Attempt to refocus after re-render (needs smarter re-render logic or ID persistence)
-                    }
-                };
+            if (isInteractive) {
+                if (status.available) {
+                    const handleResearch = () => {
+                        if (game && game.techManager && game.techManager.canResearch(tech.id)) {
+                            const id = `tech-${tech.id}`;
+                            techItem.id = id;
+                            game.techManager.startResearch(tech.id);
+                            renderTechTree();
+                        }
+                    };
 
-                techItem.onclick = handleResearch;
-                techItem.onkeydown = (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleResearch();
-                    }
-                };
+                    techItem.onclick = handleResearch;
+                    techItem.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleResearch();
+                        }
+                    };
+                } else if (status.unaffordable) {
+                    // Palette: Feedback for unaffordable items
+                    const handleUnaffordable = (e) => {
+                        // Animation feedback
+                        techItem.classList.remove('shake');
+                        void techItem.offsetWidth; // Force reflow
+                        techItem.classList.add('shake');
+
+                        // Sound feedback
+                        if (typeof soundManager !== 'undefined') {
+                            soundManager.play('error');
+                        }
+
+                        // Identify missing resources
+                        const missing = [];
+                        if (game && game.resources && tech.cost) {
+                            for (const [res, amount] of Object.entries(tech.cost)) {
+                                if (game.resources[res] < amount) {
+                                    // Translate
+                                    let name = res;
+                                    if (name === 'food') name = 'Comida';
+                                    else if (name === 'wood') name = 'Madera';
+                                    else if (name === 'gold') name = 'Oro';
+                                    else if (name === 'stone') name = 'Piedra';
+
+                                    const diff = Math.ceil(amount - game.resources[res]);
+                                    missing.push(`${name} (${diff})`);
+                                }
+                            }
+                        }
+
+                        const msg = missing.length > 0
+                            ? `Falta: ${missing.join(', ')}`
+                            : 'Recursos insuficientes';
+
+                        if (game && game.showNotification) {
+                            game.showNotification(msg, 'error');
+                        }
+                    };
+
+                    techItem.onclick = handleUnaffordable;
+                    techItem.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleUnaffordable();
+                        }
+                    };
+                }
             }
 
             gridDiv.appendChild(techItem);

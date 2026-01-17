@@ -4,6 +4,9 @@ import { Entity } from './Entity.js';
  * Unit - Clase base para unidades móviles
  * Maneja movimiento, combate, recolección y IA básica
  */
+// OPTIMIZATION: Constant for aggro radius squared to avoid recalculation
+const AGGRO_RADIUS_SQ = 200 * 200;
+
 export class Unit extends Entity {
     constructor(x, y, team) {
         super(x, y, team);
@@ -68,22 +71,25 @@ export class Unit extends Entity {
         }
     }
 
+    // OPTIMIZATION: Static predicate to avoid closure allocation in hot path
+    static _enemyPredicate(entity, unit) {
+        if (entity.team !== unit.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
+            const dx = unit.x - entity.x;
+            const dy = unit.y - entity.y;
+            const distSq = dx * dx + dy * dy;
+
+            return distSq < AGGRO_RADIUS_SQ;
+        }
+        return false;
+    }
+
     findNearbyEnemy(game) {
         const searchRadius = 200;
-        const searchRadiusSq = searchRadius * searchRadius;
 
         // OPTIMIZACIÓN: Usar find() para salir temprano si se encuentra un objetivo
         // Evita poblar un array intermedio y lo recorre solo hasta encontrar coincidencia.
-        const target = game.spatialGrid.find(this.x, this.y, searchRadius, (entity) => {
-            if (entity.team !== this.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
-                const dx = this.x - entity.x;
-                const dy = this.y - entity.y;
-                const distSq = dx * dx + dy * dy;
-
-                return distSq < searchRadiusSq;
-            }
-            return false;
-        });
+        // OPTIMIZATION: Use static predicate and context to avoid closure allocation
+        const target = game.spatialGrid.find(this.x, this.y, searchRadius, Unit._enemyPredicate, this);
 
         if (target) {
             this.attackTarget = target;
@@ -136,8 +142,13 @@ export class Unit extends Entity {
             }
 
             const effectiveSpeed = this.speed * speedModifier;
-            let moveX = (dx / dist) * effectiveSpeed * deltaTime;
-            let moveY = (dy / dist) * effectiveSpeed * deltaTime;
+
+            // OPTIMIZATION: Replace division with multiplication (faster)
+            // invDist avoids 2 divisions per frame
+            const invDist = 1 / dist;
+            const moveStep = effectiveSpeed * deltaTime * invDist;
+            let moveX = dx * moveStep;
+            let moveY = dy * moveStep;
 
             // Colisiones con edificios (GridMap)
             if (hasGridMap) {

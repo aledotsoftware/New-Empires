@@ -177,52 +177,6 @@ export class SpatialGrid {
     }
 
     /**
-     * Busca la primera entidad que cumpla con el predicado en el área (Early Exit)
-     * @param {number} x - Coordenada X central
-     * @param {number} y - Coordenada Y central
-     * @param {number} radius - Radio de búsqueda
-     * @param {function} predicate - Función que retorna true si es la entidad buscada
-     * @returns {Object|null} La entidad encontrada o null
-     */
-    find(x, y, radius, predicate) {
-        // OPTIMIZATION: Hoist class members
-        const buckets = this.buckets;
-        const cols = this.cols;
-        const rows = this.rows;
-
-        // Optimización: usar multiplicación
-        const cellRadius = Math.ceil(radius * this.invCellSize);
-        // OPTIMIZATION: Bitwise truncation
-        const centerCol = (x * this.invCellSize) | 0;
-        const centerRow = (y * this.invCellSize) | 0;
-
-        // Clamping
-        const startRow = Math.max(0, centerRow - cellRadius);
-        const endRow = Math.min(rows - 1, centerRow + cellRadius);
-        const startCol = Math.max(0, centerCol - cellRadius);
-        const endCol = Math.min(cols - 1, centerCol + cellRadius);
-
-        for (let r = startRow; r <= endRow; r++) {
-            const rowBase = r * cols;
-            for (let c = startCol; c <= endCol; c++) {
-                const index = rowBase + c;
-                const bucket = buckets[index];
-                const bLen = bucket.length;
-
-                if (bLen > 0) {
-                    for (let i = 0; i < bLen; i++) {
-                        if (predicate(bucket[i])) {
-                            return bucket[i];
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Appends entities from a specific row of buckets to the result array.
      * Used for fine-grained control over querying order (e.g. interleaving multiple grids).
      * Warning: Does not clear result array.

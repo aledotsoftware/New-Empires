@@ -4,6 +4,7 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
+// Whitelist of allowed extensions
 const MIME_TYPES = {
     '.html': 'text/html',
     '.js': 'text/javascript',
@@ -32,17 +33,38 @@ const server = http.createServer((req, res) => {
         safePath = '/index.html';
     }
 
-    // Security: Block sensitive files and directories
+    // Security: Block sensitive files (Root level protection)
+    // These files might have allowed extensions (like .js or .json) but must never be served
     const filename = path.basename(safePath);
     const isSensitive = [
-        'server.js', 'package.json', 'package-lock.json', 'pnpm-lock.yaml',
-        'Dockerfile', 'docker-compose.yml', 'server.log', '.env'
+        'server.js',
+        'package.json',
+        'package-lock.json',
+        'pnpm-lock.yaml',
+        'Dockerfile',
+        'docker-compose.yml',
+        '.env'
     ].includes(filename);
 
-    // Check for dotfiles in any part of the path
+    // Security: Block sensitive directories
+    // Explicitly deny access to internal folders
+    const normalizedPath = safePath.startsWith(path.sep) ? safePath.slice(1) : safePath;
+    const firstDir = normalizedPath.split(path.sep)[0];
+    const BLOCKED_DIRS = [
+        'docs',
+        '_deprecated',
+        '.Jules',
+        '.git',
+        '.jules',
+        'node_modules',
+        '.vscode',
+        '.idea'
+    ];
+
+    // Check for dotfiles in any part of the path (hidden files)
     const isHidden = safePath.split(path.sep).some(part => part.startsWith('.') && part !== '.' && part !== '..');
 
-    if (isSensitive || isHidden) {
+    if (isSensitive || isHidden || BLOCKED_DIRS.includes(firstDir)) {
         res.writeHead(403);
         res.end('Forbidden');
         return;
@@ -67,7 +89,17 @@ const server = http.createServer((req, res) => {
         }
 
         const ext = path.extname(filePath).toLowerCase();
-        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+        // Security: Strict Extension Whitelist
+        // Only serve files with explicitly allowed extensions
+        // This blocks .log, .md, .backup, .sh, etc. automatically
+        if (!MIME_TYPES[ext]) {
+            res.writeHead(403);
+            res.end('Forbidden');
+            return;
+        }
+
+        const contentType = MIME_TYPES[ext];
 
         res.writeHead(200, {
             'Content-Type': contentType,

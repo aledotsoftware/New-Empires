@@ -10,3 +10,11 @@
 ## 2024-05-24 - Build Ghost Accessibility
 **Learning:** Relying solely on color (Red vs Green) to indicate state (Invalid vs Valid placement) is a critical accessibility failure for colorblind users and can be ambiguous on complex terrain backgrounds.
 **Action:** Enhanced the building placement preview ("ghost") to include a high-contrast symbol ('🚫') and a clear text label ("Occupied" or "Invalid Terrain") when placement is forbidden. This ensures the feedback is communicated through multiple channels (Color + Shape + Text), making the core mechanic of building accessible to everyone.
+
+## 2025-05-25 - Canvas Keyboard Accessibility
+**Learning:** Canvas elements are not keyboard accessible by default. Adding `tabindex="0"` and an `aria-label` allows keyboard users to focus the canvas, enabling keyboard-based camera controls (arrow keys) and screen reader identification.
+**Action:** Always ensure interactive canvases have `tabindex="0"` and appropriate ARIA labels.
+
+## 2025-05-25 - Modal Auto-Pause
+**Learning:** Full-screen overlays (Settings, Tech Tree) in a real-time game must explicitly pause the game loop to prevent user anxiety and unintended state changes while navigating menus.
+**Action:** Implemented centralized `togglePause` and hooked it into modal open/close events to ensure the simulation halts when the user's attention is diverted.

@@ -766,6 +766,11 @@ export class Game {
     }
 
     handleKeyPress(e) {
+        // P - Pausa
+        if (e.key === 'p' || e.key === 'P') {
+            this.togglePause();
+        }
+
         // TAB - Seleccionar siguiente aldeano inactivo
         if (e.key === 'Tab') {
             e.preventDefault();
@@ -902,6 +907,13 @@ export class Game {
 
         // WASD - Camera movement handled in updateCamera()
         // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
+    }
+
+    togglePause() {
+        if (this.isGameOver) return;
+        this.isPaused = !this.isPaused;
+        // Force immediate render to show/hide pause overlay
+        this.render();
     }
 
     openBuildMenu() {
@@ -1858,6 +1870,26 @@ export class Game {
 
         // Renderizar minimapa
         this.renderMinimap();
+
+        // Palette: Pause Overlay
+        if (this.isPaused && !this.isGameOver) {
+            this.ctx.save();
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            this.ctx.font = 'bold 48px "Cinzel", serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillStyle = '#d4af37'; // Gold
+            this.ctx.shadowColor = 'black';
+            this.ctx.shadowBlur = 10;
+            this.ctx.fillText('JUEGO PAUSADO', this.canvas.width / 2, this.canvas.height / 2);
+
+            this.ctx.font = '24px "Inter", sans-serif';
+            this.ctx.fillStyle = '#e2e8f0';
+            this.ctx.fillText('Presiona P para continuar', this.canvas.width / 2, this.canvas.height / 2 + 50);
+            this.ctx.restore();
+        }
     }
 
     drawGrid() {

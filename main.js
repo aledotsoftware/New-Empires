@@ -39,6 +39,7 @@ let lastFocusedElement = null;
  */
 window.showTechTree = function () {
     debugLogger.info('Abriendo árbol de tecnologías', 'ui');
+    if (game) game.isPaused = true;
     FocusManager.saveFocus();
 
     const screen = document.getElementById('techTreeScreen');
@@ -72,6 +73,7 @@ window.showTechTree = function () {
  */
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
+    if (game) game.isPaused = false;
     document.getElementById('techTreeScreen').classList.add('hidden');
     FocusManager.restoreFocus();
 };
@@ -81,6 +83,7 @@ window.hideTechTree = function () {
  */
 window.showSettings = function () {
     debugLogger.info('Abriendo configuración', 'ui');
+    if (game) game.isPaused = true;
     FocusManager.saveFocus();
 
     const screen = document.getElementById('settingsScreen');
@@ -155,6 +158,7 @@ window.confirmQuitGame = function() {
  */
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
+    if (game) game.isPaused = false;
     document.getElementById('settingsScreen').classList.add('hidden');
     FocusManager.restoreFocus();
 };

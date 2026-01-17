@@ -1575,6 +1575,7 @@ export class Game {
         const screen = document.getElementById('gameOverScreen');
         const title = document.getElementById('gameOverTitle');
         const message = document.getElementById('gameOverMessage');
+        const statsContainer = document.getElementById('gameOverStats');
 
         if (victory) {
             title.textContent = '🏆 Victoria';

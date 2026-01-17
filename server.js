@@ -32,11 +32,27 @@ const server = http.createServer((req, res) => {
         safePath = '/index.html';
     }
 
+    // Security: Block sensitive files and directories
+    const filename = path.basename(safePath);
+    const isSensitive = [
+        'server.js', 'package.json', 'package-lock.json', 'pnpm-lock.yaml',
+        'Dockerfile', 'docker-compose.yml', 'server.log', '.env'
+    ].includes(filename);
+
+    // Check for dotfiles in any part of the path
+    const isHidden = safePath.split(path.sep).some(part => part.startsWith('.') && part !== '.' && part !== '..');
+
+    if (isSensitive || isHidden) {
+        res.writeHead(403);
+        res.end('Forbidden');
+        return;
+    }
+
     // Construct full path
     const filePath = path.join(__dirname, safePath);
 
-    // Prevent directory traversal
-    if (!filePath.startsWith(__dirname)) {
+    // Prevent directory traversal (ensure strict prefix match)
+    if (!filePath.startsWith(path.join(__dirname, path.sep))) {
         res.writeHead(403);
         res.end('Forbidden');
         return;

@@ -2325,6 +2325,36 @@ export class Game {
             emptyState.appendChild(subTextDiv);
             emptyState.appendChild(tipDiv);
 
+            // Palette: Quick Actions Section
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.cssText = 'margin-top:15px; display:flex; flex-direction:column; gap:8px; width:100%; padding:0 10px;';
+
+            const createActionBtn = (icon, text, kbd, onClick, style = '') => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-secondary';
+                btn.style.cssText = `font-size:0.8rem; padding:6px 10px; display:flex; align-items:center; justify-content:center; gap:6px; ${style}`;
+                btn.innerHTML = `<img src="assets/icons/${icon}.png" class="icon-tiny" alt=""> ${text} <span class="kbd-inline" style="font-size:0.65rem;">${kbd}</span>`;
+                btn.onclick = (e) => { e.stopPropagation(); onClick(); if (typeof soundManager !== 'undefined') soundManager.play('click'); };
+                return btn;
+            };
+
+            // Action 1: Focus Town Center
+            actionsDiv.appendChild(createActionBtn('townCenter', 'Ir al Centro Urbano', 'Espacio', () => {
+                const tc = this.buildings.find(b => b.type === 'townCenter' && b.team === 'player');
+                if (tc) { this.camera.x = tc.x - this.viewWidth / 2; this.camera.y = tc.y - this.viewHeight / 2; }
+                else this.showNotification('No tienes Centro Urbano', 'error');
+            }));
+
+            // Action 2: Idle Villager (Conditional)
+            let idleCount = 0;
+            for (let i = 0; i < this.units.length; i++) { if (this.units[i].type === 'villager' && this.units[i].state === 'IDLE') idleCount++; }
+
+            if (idleCount > 0) {
+                actionsDiv.appendChild(createActionBtn('villager', `Aldeano Inactivo (${idleCount})`, 'Tab',
+                    () => this.selectNextIdleVillager(), 'border-color:#f0ad4e; color:#f0ad4e;'));
+            }
+            emptyState.appendChild(actionsDiv);
+
             content.appendChild(emptyState);
             return;
         }

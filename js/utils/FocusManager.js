@@ -2,23 +2,25 @@
  * FocusManager - Helper for managing keyboard focus for accessibility
  */
 export const FocusManager = {
-    previousActiveElement: null,
+    focusStack: [],
 
     /**
      * Stores the currently focused element to restore it later
      */
     saveFocus() {
-        this.previousActiveElement = document.activeElement;
+        if (document.activeElement) {
+            this.focusStack.push(document.activeElement);
+        }
     },
 
     /**
      * Restores focus to the previously saved element
      */
     restoreFocus() {
-        if (this.previousActiveElement && document.body.contains(this.previousActiveElement)) {
-            this.previousActiveElement.focus();
+        const element = this.focusStack.pop();
+        if (element && document.body.contains(element)) {
+            element.focus();
         }
-        this.previousActiveElement = null;
     },
 
     /**

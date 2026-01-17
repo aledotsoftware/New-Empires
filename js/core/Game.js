@@ -1403,10 +1403,13 @@ export class Game {
     }
 
     update(deltaTime) {
-        if (this.isPaused || this.isGameOver) return;
+        if (this.isPaused) return;
 
         // Actualizar cámara (Sistema RTS optimizado)
+        // Palette: Allow camera movement even in Game Over state
         this.updateCamera(deltaTime);
+
+        if (this.isGameOver) return;
 
         // Actualizar tecnologías
         if (this.techManager) this.techManager.update(deltaTime);
@@ -1572,7 +1575,7 @@ export class Game {
 
     gameOver(victory) {
         this.isGameOver = true;
-        const screen = document.getElementById('gameOverScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
         const title = document.getElementById('gameOverTitle');
         const message = document.getElementById('gameOverMessage');
         const statsContainer = document.getElementById('gameOverStats');
@@ -1639,7 +1642,7 @@ export class Game {
             stats.appendChild(popStat);
         }
 
-        screen.classList.remove('hidden');
+        gameOverScreen.classList.remove('hidden');
 
         // Manage Focus for Accessibility
         const restartBtn = document.getElementById('restartButton');
@@ -1653,6 +1656,29 @@ export class Game {
                 }
             };
             setTimeout(() => restartBtn.focus(), 50);
+        }
+
+        // Palette: View Map Functionality
+        const viewMapBtn = document.getElementById('viewMapButton');
+        const returnBtn = document.getElementById('returnToStatsBtn');
+
+        if (viewMapBtn && returnBtn) {
+            viewMapBtn.onclick = () => {
+                gameOverScreen.classList.add('hidden');
+                returnBtn.classList.remove('hidden');
+                // Focus return button for accessibility
+                returnBtn.focus();
+
+                // Show notification to guide user
+                this.showNotification('Modo Espectador: Puedes moverte por el mapa', 'info');
+            };
+
+            returnBtn.onclick = () => {
+                gameOverScreen.classList.remove('hidden');
+                returnBtn.classList.add('hidden');
+                // Focus view map button
+                viewMapBtn.focus();
+            };
         }
     }
 

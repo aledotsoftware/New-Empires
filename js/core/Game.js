@@ -1994,11 +1994,14 @@ export class Game {
         const width = size.width * TILE_SIZE;
         const height = size.height * TILE_SIZE;
 
-        const isFree = this.gridMap.isAreaFree(snap.col, snap.row, size.width, size.height);
+        // Palette: Enhanced validation (Grid + Terrain)
+        const isGridFree = this.gridMap.isAreaFree(snap.col, snap.row, size.width, size.height);
+        const isTerrainValid = this.terrainMap.canBuildAt(snap.x, snap.y, size.width, size.height);
+        const isPlaceable = isGridFree && isTerrainValid;
 
         // Color basado en si es construible
-        this.ctx.fillStyle = isFree ? 'rgba(72, 187, 120, 0.4)' : 'rgba(197, 48, 48, 0.4)';
-        this.ctx.strokeStyle = isFree ? '#48bb78' : '#c53030';
+        this.ctx.fillStyle = isPlaceable ? 'rgba(72, 187, 120, 0.4)' : 'rgba(197, 48, 48, 0.4)';
+        this.ctx.strokeStyle = isPlaceable ? '#48bb78' : '#c53030';
         this.ctx.lineWidth = 2;
 
         // Dibujar rectángulo del edificio
@@ -2039,19 +2042,51 @@ export class Game {
             this.ctx.fillText(icon, screenX + width / 2, screenY + height / 2);
         }
 
-        // Dibujar grid local para referencia visual
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        this.ctx.lineWidth = 1;
-        this.ctx.beginPath();
-        for (let i = 1; i < size.width; i++) {
-            this.ctx.moveTo(screenX + i * TILE_SIZE, screenY);
-            this.ctx.lineTo(screenX + i * TILE_SIZE, screenY + height);
+        // Palette: Accessible Invalid Feedback (High Contrast)
+        if (!isPlaceable) {
+            const symbolSize = Math.min(width, height) * 0.8;
+            this.ctx.font = `bold ${symbolSize}px Arial`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+
+            // Shadow/Stroke for visibility
+            this.ctx.lineWidth = 4;
+            this.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+            this.ctx.strokeText('🚫', screenX + width / 2, screenY + height / 2);
+
+            this.ctx.fillStyle = '#c53030';
+            this.ctx.fillText('🚫', screenX + width / 2, screenY + height / 2);
+
+            // Reason Text
+            const reason = !isGridFree ? 'Ocupado' : 'Terreno Inválido';
+            this.ctx.font = 'bold 14px "Segoe UI", sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillStyle = '#fc8181';
+            this.ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            this.ctx.lineWidth = 3;
+
+            const labelX = screenX + width / 2;
+            const labelY = screenY + height + 20;
+
+            this.ctx.strokeText(reason, labelX, labelY);
+            this.ctx.fillText(reason, labelX, labelY);
         }
-        for (let i = 1; i < size.height; i++) {
-            this.ctx.moveTo(screenX, screenY + i * TILE_SIZE);
-            this.ctx.lineTo(screenX + width, screenY + i * TILE_SIZE);
+
+        // Dibujar grid local para referencia visual (solo si es válido para evitar ruido)
+        if (isPlaceable) {
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            for (let i = 1; i < size.width; i++) {
+                this.ctx.moveTo(screenX + i * TILE_SIZE, screenY);
+                this.ctx.lineTo(screenX + i * TILE_SIZE, screenY + height);
+            }
+            for (let i = 1; i < size.height; i++) {
+                this.ctx.moveTo(screenX, screenY + i * TILE_SIZE);
+                this.ctx.lineTo(screenX + width, screenY + i * TILE_SIZE);
+            }
+            this.ctx.stroke();
         }
-        this.ctx.stroke();
     }
 
     renderMinimap() {

@@ -1,8 +1,8 @@
-# Palette's Journal - UX & Accessibility
+# Palette's Journal - UX & Accessibility Learnings
 
-## 2024-05-23 - Selection Empty State & Tips
-**Learning:** Empty states are prime real estate for onboarding and guidance. The selection panel's "Nothing selected" state was a missed opportunity to educate the user.
-**Action:** Implemented a "Tip of the Moment" feature that cycles through helpful gameplay tips when nothing is selected. This transforms a dead space into a passive learning channel, improving the onboarding experience for new RTS players. Used `aria-live="polite"` to ensure screen readers are aware of these updates without being overwhelmed.
+## 2024-05-22 - Post-Game Map Viewing
+**Learning:** Players in RTS games expect to be able to review the map after the game ends to analyze strategies and enemy layouts. Locking the camera immediately upon "Game Over" frustrates this desire.
+**Action:** Decoupled the camera update logic (`updateCamera`) from the main game state update loop. This allows the camera to remain interactive (pan/scroll) even when the game state (`isGameOver`) is frozen, enabling a "Spectator Mode" post-game without complex architectural changes.
 
 ## 2025-05-24 - Nested Modal Focus Management
 **Learning:** The existing `FocusManager` used a single `previousActiveElement` variable, which failed to restore focus correctly when modals were nested (e.g., Confirmation dialog over Settings).

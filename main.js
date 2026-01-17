@@ -375,6 +375,10 @@ window.loadMainMenu = function () {
     // Ocultar todas las pantallas
     document.getElementById('gameScreen').classList.add('hidden');
     document.getElementById('gameOverScreen').classList.add('hidden');
+    // Ensure stats return button is hidden
+    const returnBtn = document.getElementById('returnToStatsBtn');
+    if (returnBtn) returnBtn.classList.add('hidden');
+
     document.getElementById('settingsScreen').classList.add('hidden');
     document.getElementById('techTreeScreen').classList.add('hidden');
     document.getElementById('mapSizeScreen').classList.add('hidden');

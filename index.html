@@ -193,6 +193,13 @@
                         <div style="font-size:0.75rem;color:#48bb78;margin-top:4px;font-style:italic">Velocidad: Normal</div>
                     </div>
                 </div>
+                <!-- Palette: Return to Results Button (Hidden by default) -->
+                <button id="returnToStatsBtn" class="btn-secondary hidden"
+                    style="padding:8px 12px; border-color: var(--gold); background: var(--stone-dark); color: var(--gold);"
+                    aria-label="Volver a los resultados">
+                    🏆 Resultados
+                </button>
+
                 <!-- Palette: Idle Villager Indicator (Hidden by default) -->
                 <button id="idleVillagerBtn" class="btn-secondary hidden"
                     style="padding:8px 12px; flex-direction:row; align-items:center; gap:8px; border-color:#f0ad4e; color:#f0ad4e;"
@@ -336,7 +343,12 @@
                 <h1 id="gameOverTitle" class="game-over-title">Victoria</h1>
                 <p id="gameOverMessage" class="game-over-message"></p>
                 <div class="game-over-stats" id="gameOverStats"></div>
-                <button id="restartButton" class="btn-restart">Volver al Menú</button>
+                <div class="game-over-actions" style="display:flex; gap:15px; justify-content:center;">
+                    <button id="viewMapButton" class="btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
+                        👁️ Ver Mapa
+                    </button>
+                    <button id="restartButton" class="btn-restart">Volver al Menú</button>
+                </div>
             </div>
         </div>
 

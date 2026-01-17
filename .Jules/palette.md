@@ -10,3 +10,7 @@
 ## 2024-05-24 - Build Ghost Accessibility
 **Learning:** Relying solely on color (Red vs Green) to indicate state (Invalid vs Valid placement) is a critical accessibility failure for colorblind users and can be ambiguous on complex terrain backgrounds.
 **Action:** Enhanced the building placement preview ("ghost") to include a high-contrast symbol ('🚫') and a clear text label ("Occupied" or "Invalid Terrain") when placement is forbidden. This ensures the feedback is communicated through multiple channels (Color + Shape + Text), making the core mechanic of building accessible to everyone.
+
+## 2025-05-25 - Auto-Pause on Fullscreen Modals
+**Learning:** In single-player RTS games, allowing the game loop to run while full-screen modals (Settings, Tech Tree) are open creates unnecessary cognitive load and anxiety, as players fear missing events while reading static content.
+**Action:** Implemented automatic toggling of `game.isPaused` when opening/closing these modals. This aligns the system state with the user's mental model that "Menu = Pause", providing a safe space for configuration and learning without gameplay penalty.

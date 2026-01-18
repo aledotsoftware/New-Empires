@@ -597,6 +597,12 @@ export class Game {
             return;
         }
 
+        // Palette: Visual feedback on the button if visible
+        if (this.uiElements.idleVillagerBtn && !this.uiElements.idleVillagerBtn.classList.contains('hidden')) {
+            this.uiElements.idleVillagerBtn.classList.add('active-key');
+            setTimeout(() => this.uiElements.idleVillagerBtn.classList.remove('active-key'), 150);
+        }
+
         // Ciclar al siguiente aldeano inactivo
         this.idleVillagerIndex = this.idleVillagerIndex % idleVillagers.length;
         const villager = idleVillagers[this.idleVillagerIndex];
@@ -834,6 +840,20 @@ export class Game {
             if (tc) {
                 this.camera.x = tc.x - this.viewWidth / 2;
                 this.camera.y = tc.y - this.viewHeight / 2;
+
+                // Palette: Visual feedback for Town Center button if visible (in quick actions)
+                const content = document.getElementById('selectionContent');
+                if (content) {
+                    const btns = content.querySelectorAll('button');
+                    for (let btn of btns) {
+                        // Check if it's the TC button (by icon or text)
+                        if (btn.innerHTML.includes('townCenter') || btn.textContent.includes('Centro Urbano')) {
+                            btn.classList.add('active-key');
+                            setTimeout(() => btn.classList.remove('active-key'), 150);
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -873,6 +893,10 @@ export class Game {
                 if (actionsGrid) {
                     const buttons = actionsGrid.querySelectorAll('.action-btn');
                     if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
+                        // Palette: Visual feedback for hotkey
+                        buttons[btnIndex].classList.add('active-key');
+                        setTimeout(() => buttons[btnIndex].classList.remove('active-key'), 150);
+
                         buttons[btnIndex].click();
                         e.preventDefault();
                         return;

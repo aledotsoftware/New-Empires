@@ -16,6 +16,6 @@
 **Learning:** For "find any target" queries (like `findNearbyEnemy`), populating a full array of neighbors is wasteful if we only need the first valid one. Adding a `find` method with a predicate allowed stopping the search immediately upon finding a match, yielding ~84% improvement in benchmarks. Furthermore, even in "no match" cases, `find` was ~77% faster because it avoided the memory traffic of writing references to the result array.
 **Action:** Prefer iterator/predicate patterns over array-filling patterns for "exists" or "find first" queries in hot loops.
 
-## 2025-01-18 - Canvas Path2D Caching
-**Learning:** Creating `new Path2D()` objects every frame in HTML5 Canvas, even if empty or simple, generates significant garbage collection pressure at 60fps (360+ allocations/sec). For static viewports (common in RTS base management), caching these path objects resulted in a 9x performance improvement (10.8ms -> 1.2ms per 500 frames) by skipping both the allocation and the coordinate calculation loops.
-**Action:** Always look for opportunities to cache `Path2D` or pre-rendered canvases for static rendering layers.
+## 2025-01-26 - Global Lookups & Math Calls
+**Learning:** In the `moveTowardsTarget` hot path, removing a repeated `typeof CONFIG` global check and replacing `Math.max/min` clamping with explicit `if/else` checks yielded a massive ~6.8x speedup (329ms -> 48ms for 1M iterations). Property access hoisting and import usage were key factors.
+**Action:** For critical per-entity methods, hoist repeated property accesses and prefer local constants/imports over global variable checks.

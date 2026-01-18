@@ -157,10 +157,38 @@ export class SaveManager {
             }
         }
 
-        // Validate units structure (check first few to ensure array isn't full of garbage)
-        if (state.units.length > 0) {
-            const sample = state.units[0];
-            if (!sample || typeof sample.type !== 'string' || typeof sample.x !== 'number' || typeof sample.y !== 'number') {
+        // Sentinel: Prevent DoS by limiting array lengths
+        const MAX_ENTITIES = 50000;
+        if (state.units.length > MAX_ENTITIES || state.buildings.length > MAX_ENTITIES || state.enemies.length > MAX_ENTITIES) {
+            // console.warn('Save validation failed: Too many entities');
+            return false;
+        }
+
+        // Sentinel: Generic entity validator
+        const validateEntities = (entities) => {
+            for (let i = 0; i < entities.length; i++) {
+                const e = entities[i];
+                if (!e || typeof e !== 'object' ||
+                    typeof e.type !== 'string' ||
+                    typeof e.x !== 'number' ||
+                    typeof e.y !== 'number') {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        if (!validateEntities(state.units)) return false;
+        if (!validateEntities(state.buildings)) return false;
+        if (!validateEntities(state.enemies)) return false;
+
+        // Sentinel: Validate resource nodes structure
+        if (!Array.isArray(state.resourceNodes)) return false;
+        for (let i = 0; i < state.resourceNodes.length; i++) {
+            const node = state.resourceNodes[i];
+            if (!node || typeof node !== 'object' ||
+                typeof node.type !== 'string' ||
+                typeof node.amount !== 'number') {
                 return false;
             }
         }

@@ -207,6 +207,10 @@ export class Game {
         this._renderCache = [];
         this._resourceRenderCache = [];
         this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
+        this.lastCameraX = -1; // BOLT OPTIMIZATION: Track camera for static terrain rendering
+        this.lastCameraY = -1;
+        this.lastViewWidth = -1;
+        this.lastViewHeight = -1;
 
         // OPTIMIZACIÓN: Rastreo de Centros Urbanos (O(1) CheckGameOver)
         // Evita iterar todos los edificios para verificar condiciones de victoria
@@ -621,6 +625,12 @@ export class Game {
             return;
         }
 
+        // Palette: Visual feedback on the button if visible
+        if (this.uiElements.idleVillagerBtn && !this.uiElements.idleVillagerBtn.classList.contains('hidden')) {
+            this.uiElements.idleVillagerBtn.classList.add('active-key');
+            setTimeout(() => this.uiElements.idleVillagerBtn.classList.remove('active-key'), 150);
+        }
+
         // Ciclar al siguiente aldeano inactivo
         this.idleVillagerIndex = this.idleVillagerIndex % idleVillagers.length;
         const villager = idleVillagers[this.idleVillagerIndex];
@@ -865,6 +875,20 @@ export class Game {
             if (tc) {
                 this.camera.x = tc.x - this.viewWidth / 2;
                 this.camera.y = tc.y - this.viewHeight / 2;
+
+                // Palette: Visual feedback for Town Center button if visible (in quick actions)
+                const content = document.getElementById('selectionContent');
+                if (content) {
+                    const btns = content.querySelectorAll('button');
+                    for (let btn of btns) {
+                        // Check if it's the TC button (by icon or text)
+                        if (btn.innerHTML.includes('townCenter') || btn.textContent.includes('Centro Urbano')) {
+                            btn.classList.add('active-key');
+                            setTimeout(() => btn.classList.remove('active-key'), 150);
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -904,6 +928,10 @@ export class Game {
                 if (actionsGrid) {
                     const buttons = actionsGrid.querySelectorAll('.action-btn');
                     if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
+                        // Palette: Visual feedback for hotkey
+                        buttons[btnIndex].classList.add('active-key');
+                        setTimeout(() => buttons[btnIndex].classList.remove('active-key'), 150);
+
                         buttons[btnIndex].click();
                         e.preventDefault();
                         return;
@@ -1720,87 +1748,87 @@ export class Game {
     drawTerrain() {
         if (!this.terrainMap) return;
 
-        // OPTIMIZATION: Clamp bounds and hoist variables
-        // Avoids boundary checks inside the loop and repetitive function calls
-        const startCol = Math.max(0, Math.floor(this.camera.x / TILE_SIZE));
-        const startRow = Math.max(0, Math.floor(this.camera.y / TILE_SIZE));
-        const endCol = Math.min(this.terrainMap.cols, Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE));
-        const endRow = Math.min(this.terrainMap.rows, Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE));
-
-        // Hoist properties for faster access inside loop
-        const mapCols = this.terrainMap.cols;
-        const grid = this.terrainMap.grid;
         const idToName = this.terrainMap._idToName;
-
-        // OPTIMIZATION: Batch draw calls by terrain type using Array instead of Object
-        // Using integer-indexed array avoids hash lookups in the hot loop
-        // BOLT OPTIMIZATION: Reuse Array container to avoid allocation per frame
         const paths = this._terrainPaths;
-        if (paths.length < idToName.length) paths.length = idToName.length;
 
-        for (let i = 0; i < idToName.length; i++) {
-            // Note: Path2D cannot be cleared, so we must instantiate new ones.
-            // But we save the Array allocation overhead.
-            paths[i] = new Path2D();
-        }
-        // Fallback path just in case
-        const fallbackPath = new Path2D();
+        // BOLT OPTIMIZATION: If camera hasn't moved, reuse existing Path2D objects
+        // This avoids creating ~600 Path2D objects/sec (GC pressure) and recalculating tiles
+        const cameraChanged = Math.abs(this.camera.x - this.lastCameraX) > 0.1 ||
+            Math.abs(this.camera.y - this.lastCameraY) > 0.1 ||
+            this.viewWidth !== this.lastViewWidth ||
+            this.viewHeight !== this.lastViewHeight;
 
-        for (let row = startRow; row < endRow; row++) {
-            // Calculate row base index
-            let index = row * mapCols + startCol;
-            // Pre-calculate base Y for the row
-            const y = Math.floor(row * TILE_SIZE - this.camera.y);
+        if (cameraChanged || paths.length === 0) {
+            this.lastCameraX = this.camera.x;
+            this.lastCameraY = this.camera.y;
+            this.lastViewWidth = this.viewWidth;
+            this.lastViewHeight = this.viewHeight;
 
-            // OPTIMIZATION: Pre-calculate X and update incrementally
-            // Reduces multiplications and Math.floor calls by one per tile
-            let x = Math.floor(startCol * TILE_SIZE - this.camera.x);
+            // OPTIMIZATION: Clamp bounds and hoist variables
+            const startCol = Math.max(0, Math.floor(this.camera.x / TILE_SIZE));
+            const startRow = Math.max(0, Math.floor(this.camera.y / TILE_SIZE));
+            const endCol = Math.min(this.terrainMap.cols, Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE));
+            const endRow = Math.min(this.terrainMap.rows, Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE));
 
-            // OPTIMIZATION: Horizontal Run-Length Encoding (RLE)
-            // Batch adjacent tiles of same terrain into one rect call
-            // Reduces path construction overhead by 3-10x depending on map
-            let runStartX = x;
-            let runLength = 0;
-            let currentTerrainId = -1; // -1 indicates no active run
+            const mapCols = this.terrainMap.cols;
+            const grid = this.terrainMap.grid;
 
-            for (let col = startCol; col < endCol; col++) {
-                const terrainId = grid[index];
+            // Reset paths array
+            if (paths.length < idToName.length) paths.length = idToName.length;
 
-                if (terrainId !== currentTerrainId) {
-                    // Finish previous run
-                    if (currentTerrainId !== -1) {
-                        if (currentTerrainId < paths.length) {
-                            paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
-                        } else {
-                            fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+            for (let i = 0; i < idToName.length; i++) {
+                // Note: Path2D cannot be cleared, so we must instantiate new ones only when camera moves
+                paths[i] = new Path2D();
+            }
+            const fallbackPath = new Path2D();
+
+            for (let row = startRow; row < endRow; row++) {
+                let index = row * mapCols + startCol;
+                const y = Math.floor(row * TILE_SIZE - this.camera.y);
+
+                // OPTIMIZATION: Pre-calculate X and update incrementally
+                let x = Math.floor(startCol * TILE_SIZE - this.camera.x);
+
+                // OPTIMIZATION: Horizontal Run-Length Encoding (RLE)
+                let runStartX = x;
+                let runLength = 0;
+                let currentTerrainId = -1;
+
+                for (let col = startCol; col < endCol; col++) {
+                    const terrainId = grid[index];
+
+                    if (terrainId !== currentTerrainId) {
+                        if (currentTerrainId !== -1) {
+                            if (currentTerrainId < paths.length) {
+                                paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                            } else {
+                                fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                            }
                         }
+                        currentTerrainId = terrainId;
+                        runStartX = x;
+                        runLength = 1;
+                    } else {
+                        runLength++;
                     }
 
-                    // Start new run
-                    currentTerrainId = terrainId;
-                    runStartX = x;
-                    runLength = 1;
-                } else {
-                    // Continue current run
-                    runLength++;
+                    x += TILE_SIZE;
+                    index++;
                 }
 
-                x += TILE_SIZE; // Incremental X calculation
-                index++;
-            }
-
-            // Finish the last run of the row
-            if (currentTerrainId !== -1) {
-                if (currentTerrainId < paths.length) {
-                    paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
-                } else {
-                    fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                if (currentTerrainId !== -1) {
+                    if (currentTerrainId < paths.length) {
+                        paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                    } else {
+                        fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                    }
                 }
             }
         }
 
-        // Draw batched paths
+        // Draw batched paths (reused if static)
         for (let i = 0; i < paths.length; i++) {
+            if (!paths[i]) continue; // Safety check
             const type = idToName[i];
             const terrainData = TERRAIN_TYPES[type];
             if (terrainData) {
@@ -1808,11 +1836,6 @@ export class Game {
                 this.ctx.fill(paths[i]);
             }
         }
-        // Draw fallback if not empty (rare)
-        // Since we can't check isEmpty easily on Path2D, we just ignore fallback usually unless debugging
-        // but to be safe we can fill it with default color
-        // Note: standard Path2D doesn't have isEmpty(), so we skip it to avoid overdraw
-        // as valid IDs should cover everything.
     }
 
     render() {

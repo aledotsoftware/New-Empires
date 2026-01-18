@@ -7,3 +7,8 @@
 **Vulnerability:** Reliance on a blacklist for sensitive files left unexpected file types (e.g., `.backup`, `.log`, `.md` in subfolders) exposed.
 **Learning:** Blacklisting is fragile because it requires anticipating every possible sensitive filename. A "default deny" strategy using an extension whitelist is superior for static file servers.
 **Prevention:** Updated `server.js` to enforce a strict allowed-extension whitelist (e.g., only `.html`, `.js`, `.css`, `.png`, etc.) and explicitly blocked internal directories (`docs`, `_deprecated`, `node_modules`).
+
+## 2026-01-18 - [MEDIUM] Incomplete Array Validation in Save Loader
+**Vulnerability:** The save file validator checked only the first element of entity arrays (`units[0]`), allowing malicious or malformed data in subsequent indices to bypass checks.
+**Learning:** Sampling-based validation (checking index 0) provides a false sense of security. Attackers can easily craft payloads where the first item is valid but subsequent items contain malicious data or exploits.
+**Prevention:** Implemented O(N) validation that iterates through every element in input arrays. Added explicit length limits to prevent Denial of Service via memory exhaustion.

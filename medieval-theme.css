@@ -2098,3 +2098,13 @@ button:focus-visible,
     background: rgba(139, 26, 26, 0.15);
     transform: translateY(-1px);
 }
+
+/* Palette: Keyboard Feedback State */
+.action-btn.active-key,
+.btn-secondary.active-key {
+    transform: translateY(1px) !important;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3) !important;
+    border-color: var(--gold) !important;
+    background: linear-gradient(180deg, var(--stone-light) 0%, var(--stone-medium) 100%) !important;
+    transition: none !important; /* Instant feedback */
+}

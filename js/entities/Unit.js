@@ -1,4 +1,5 @@
 import { Entity } from './Entity.js';
+import { CONFIG } from '../core/constants.js';
 
 /**
  * Unit - Clase base para unidades móviles
@@ -73,7 +74,9 @@ export class Unit extends Entity {
 
     // OPTIMIZATION: Static predicate to avoid closure allocation in hot path
     static _enemyPredicate(entity, unit) {
-        if (entity.team !== unit.team && entity.team !== 'neutral' && !entity.isDead && entity.isUnit) {
+        // OPTIMIZATION: Removed redundant isUnit check (SpatialGrid only holds units).
+        // Kept !isDead because units can die during the current frame update loop.
+        if (entity.team !== unit.team && entity.team !== 'neutral' && !entity.isDead) {
             const dx = unit.x - entity.x;
             const dy = unit.y - entity.y;
             const distSq = dx * dx + dy * dy;
@@ -115,13 +118,18 @@ export class Unit extends Entity {
             let currCol = -1;
             let currRow = -1;
             let hasGridMap = false;
+            let gridMap = null;
+            let invTileSize = 0;
 
             if (game && game.gridMap) {
                 hasGridMap = true;
+                gridMap = game.gridMap;
+                invTileSize = gridMap.invTileSize;
+
                 // OPTIMIZATION: Bitwise OR is faster than Math.floor for positive coordinates
                 // Entities are clamped to positive coordinates in update()
-                currCol = (this.x * game.gridMap.invTileSize) | 0;
-                currRow = (this.y * game.gridMap.invTileSize) | 0;
+                currCol = (this.x * invTileSize) | 0;
+                currRow = (this.y * invTileSize) | 0;
 
                 if (currCol !== this._lastGridCol || currRow !== this._lastGridRow) {
                     this._lastGridCol = currCol;
@@ -152,9 +160,6 @@ export class Unit extends Entity {
 
             // Colisiones con edificios (GridMap)
             if (hasGridMap) {
-                // OPTIMIZATION: Hoist properties for faster access
-                const gridMap = game.gridMap;
-
                 // Verificar nueva posición propuesta
                 const nextX = this.x + moveX;
                 const nextY = this.y + moveY;
@@ -162,8 +167,8 @@ export class Unit extends Entity {
                 // OPTIMIZATION: Inlined snapToGrid to avoid object allocation (10x faster)
                 // Usar multiplicación por invTileSize en lugar de división (más rápido)
                 // Using bitwise OR for truncation
-                const nextCol = (nextX * gridMap.invTileSize) | 0;
-                const nextRow = (nextY * gridMap.invTileSize) | 0;
+                const nextCol = (nextX * invTileSize) | 0;
+                const nextRow = (nextY * invTileSize) | 0;
 
                 // OPTIMIZATION: Skip collision check if moving within the same tile (~97% of frames)
                 // If we are currently in a valid (non-building) tile, staying in it is safe.
@@ -211,11 +216,12 @@ export class Unit extends Entity {
             this.x += moveX;
             this.y += moveY;
 
-            // CONFIG es una variable global
-            if (typeof CONFIG !== 'undefined') {
-                this.x = Math.max(0, Math.min(CONFIG.CANVAS_WIDTH, this.x));
-                this.y = Math.max(0, Math.min(CONFIG.CANVAS_HEIGHT, this.y));
-            }
+            // BOLT OPTIMIZATION: Use local CONFIG (imported) and explicit checks instead of Math.min/max
+            if (this.x < 0) this.x = 0;
+            else if (this.x > CONFIG.CANVAS_WIDTH) this.x = CONFIG.CANVAS_WIDTH;
+
+            if (this.y < 0) this.y = 0;
+            else if (this.y > CONFIG.CANVAS_HEIGHT) this.y = CONFIG.CANVAS_HEIGHT;
 
             return false; // Still moving
         }

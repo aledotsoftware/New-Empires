@@ -846,6 +846,44 @@ function startGame(civId, mapConfig) {
 // ===== FUNCIONES DE INICIALIZACIÓN =====
 
 /**
+ * Inicializa las partículas de fondo (embers)
+ * Palette UX Enhancement
+ */
+function initStartScreenParticles() {
+    const container = document.getElementById('particlesBg');
+    if (!container) return;
+
+    // Clear any existing (just in case)
+    container.innerHTML = '';
+
+    // Create ~30 embers
+    for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'ember';
+
+        // Random horizontal position
+        p.style.left = Math.random() * 100 + '%';
+
+        // Random animation duration (5-10s)
+        p.style.animationDuration = (Math.random() * 5 + 5) + 's';
+
+        // Random delay (0-10s) so they don't all start at once
+        p.style.animationDelay = (Math.random() * 10) + 's';
+
+        // Random size variation
+        const scale = Math.random() * 0.5 + 0.8;
+        // Note: transform is controlled by animation, so we set size instead
+        const size = 3 * scale;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+
+        container.appendChild(p);
+    }
+
+    debugLogger.info('Partículas de fondo inicializadas', 'ui');
+}
+
+/**
  * Genera dinámicamente las opciones de tamaño de mapa
  */
 function populateMapSizes() {
@@ -1243,6 +1281,9 @@ function populateCivilizations() {
 
 const initApp = async () => {
     debugLogger.info('DOM cargado, inicializando juego...', 'game');
+
+    // Palette: Initialize background particles
+    initStartScreenParticles();
 
     // Generar opciones de tamaño de mapa dinámicamente
     populateMapSizes();

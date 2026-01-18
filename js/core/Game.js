@@ -527,6 +527,34 @@ export class Game {
         });
     }
 
+    /**
+     * Helper para obtener unidades militares del jugador
+     */
+    getMilitaryUnits() {
+        return this.units.filter(u => u.type !== 'villager' && u.team === 'player' && !u.isDead);
+    }
+
+    /**
+     * Selecciona todas las unidades militares del jugador
+     */
+    selectAllArmy() {
+        const army = this.getMilitaryUnits();
+
+        if (army.length === 0) {
+            this.showNotification('No tienes unidades militares', 'info');
+            return;
+        }
+
+        this.selectedEntities = [...army];
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
+        this.showNotification(`${army.length} unidades militares seleccionadas`, 'info');
+
+        if (typeof soundManager !== 'undefined') {
+            soundManager.play('click');
+        }
+    }
+
     selectEntities() {
         const minX = Math.min(this.dragStart.x, this.mouse.worldX);
         const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
@@ -772,6 +800,13 @@ export class Game {
             if (this.enableIdleVillagerCycle) {
                 this.selectNextIdleVillager();
             }
+            return;
+        }
+
+        // Palette: Comma (,) - Seleccionar todo el ejército
+        if (e.key === ',') {
+            e.preventDefault();
+            this.selectAllArmy();
             return;
         }
 
@@ -2242,7 +2277,9 @@ export class Game {
         // Generar clave de estado para evitar actualizaciones innecesarias del DOM
         let stateKey = '';
         if (this.selectedEntities.length === 0) {
-            stateKey = 'empty';
+            // Palette: Include army count in state key to update "Select Army" button
+            const armyCount = this.getMilitaryUnits().length;
+            stateKey = `empty:${armyCount}`;
         } else if (this.selectedEntities.length === 1) {
             const ent = this.selectedEntities[0];
             // Incluir HP, estado, y progreso de producción en la clave
@@ -2257,7 +2294,8 @@ export class Game {
         }
 
         // Palette: Si ya estamos en estado vacío, comprobar si debemos actualizar el tip
-        if (this.lastSelectionStateKey === 'empty' && stateKey === 'empty') {
+        // We use startsWith because key now contains count (e.g. empty:5)
+        if (this.lastSelectionStateKey.startsWith('empty') && stateKey.startsWith('empty') && this.lastSelectionStateKey === stateKey) {
             const tipEl = content.querySelector('.selection-tip');
             // Actualizar cada 8 segundos
             if (tipEl && Date.now() - this.lastTipTime > 8000) {
@@ -2339,7 +2377,7 @@ export class Game {
             tipDiv.setAttribute('aria-live', 'polite'); // Ensure screen readers announce updates
 
             // Pick a random tip initiallly
-            if (this.lastSelectionStateKey !== 'empty') {
+            if (!this.lastSelectionStateKey.startsWith('empty')) {
                 this.currentTipIndex = Math.floor(Math.random() * GAMEPLAY_TIPS.length);
                 this.lastTipTime = Date.now();
             }
@@ -2359,6 +2397,11 @@ export class Game {
             const createActionBtn = (icon, text, kbd, onClick, style = '') => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-secondary';
+                // Palette: Added aria-keyshortcuts for accessibility
+                if (kbd) btn.setAttribute('aria-keyshortcuts', kbd);
+                // Palette: Added aria-label for accessibility (text content)
+                btn.setAttribute('aria-label', `${text} (${kbd})`);
+
                 btn.style.cssText = `font-size:0.8rem; padding:6px 10px; display:flex; align-items:center; justify-content:center; gap:6px; ${style}`;
                 btn.innerHTML = `<img src="assets/icons/${icon}.png" class="icon-tiny" alt=""> ${text} <span class="kbd-inline" style="font-size:0.65rem;">${kbd}</span>`;
                 btn.onclick = (e) => { e.stopPropagation(); onClick(); if (typeof soundManager !== 'undefined') soundManager.play('click'); };
@@ -2372,7 +2415,16 @@ export class Game {
                 else this.showNotification('No tienes Centro Urbano', 'error');
             }));
 
-            // Action 2: Idle Villager (Conditional)
+            // Action 2: Select All Army (Palette)
+            // Count military units (not villagers, alive, player team)
+            const armyCount = this.getMilitaryUnits().length;
+
+            if (armyCount > 0) {
+                actionsDiv.appendChild(createActionBtn('swords', `Seleccionar Ejército (${armyCount})`, ',',
+                    () => this.selectAllArmy(), 'border-color:#e53e3e; color:#e53e3e;'));
+            }
+
+            // Action 3: Idle Villager (Conditional)
             let idleCount = 0;
             for (let i = 0; i < this.units.length; i++) { if (this.units[i].type === 'villager' && this.units[i].state === 'IDLE') idleCount++; }
 

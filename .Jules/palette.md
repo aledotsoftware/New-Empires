@@ -18,3 +18,7 @@
 ## 2025-05-26 - Reactive Tech Tree Feedback
 **Learning:** In the Tech Tree, technologies that were unlocked but unaffordable (insufficient resources) were non-interactive. This lack of feedback led to "click rage" or confusion about why an action wasn't working.
 **Action:** Implemented a specific "unaffordable" state that keeps the element interactive (clickable) but visually distinct. Clicking now triggers a toast notification explicitly listing the missing resources, guiding the player on what to do next instead of silently failing.
+
+## 2025-05-27 - Contextual Empty States
+**Learning:** An "Empty State" (e.g., nothing selected) is often treated as a dead end. However, in complex interfaces like RTS games, users at a dead end often have a specific next intent (e.g., "Where is my army?").
+**Action:** Transformed the "Nothing Selected" panel from a passive message into an active "Quick Actions" hub. By contextually offering high-utility actions like "Select Army" or "Idle Villager" directly in the empty state, we reduce friction and teach keyboard shortcuts naturally.

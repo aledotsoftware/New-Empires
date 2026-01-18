@@ -18,3 +18,7 @@
 ## 2025-05-26 - Reactive Tech Tree Feedback
 **Learning:** In the Tech Tree, technologies that were unlocked but unaffordable (insufficient resources) were non-interactive. This lack of feedback led to "click rage" or confusion about why an action wasn't working.
 **Action:** Implemented a specific "unaffordable" state that keeps the element interactive (clickable) but visually distinct. Clicking now triggers a toast notification explicitly listing the missing resources, guiding the player on what to do next instead of silently failing.
+
+## 2025-05-27 - Hotkey Visual Feedback
+**Learning:** Hotkeys are efficient but invisible. Users, especially those learning the game, lack confirmation that their keypress triggered the desired action (e.g., "Did I press 'Q' or not?").
+**Action:** Implemented a momentary ".active-key" visual state (simulating a click press) on UI buttons when their corresponding hotkey is pressed. This bridges the gap between physical input and digital response, making the interface feel more tangible and responsive.

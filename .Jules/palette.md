@@ -14,3 +14,7 @@
 ## 2025-05-25 - Auto-Pause on Fullscreen Modals
 **Learning:** In single-player RTS games, allowing the game loop to run while full-screen modals (Settings, Tech Tree) are open creates unnecessary cognitive load and anxiety, as players fear missing events while reading static content.
 **Action:** Implemented automatic toggling of `game.isPaused` when opening/closing these modals. This aligns the system state with the user's mental model that "Menu = Pause", providing a safe space for configuration and learning without gameplay penalty.
+
+## 2025-05-26 - Reactive Tech Tree Feedback
+**Learning:** In the Tech Tree, technologies that were unlocked but unaffordable (insufficient resources) were non-interactive. This lack of feedback led to "click rage" or confusion about why an action wasn't working.
+**Action:** Implemented a specific "unaffordable" state that keeps the element interactive (clickable) but visually distinct. Clicking now triggers a toast notification explicitly listing the missing resources, guiding the player on what to do next instead of silently failing.

@@ -2085,3 +2085,16 @@ button:focus-visible,
     cursor: wait;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Palette: Unaffordable Style */
+.tech-item.unaffordable {
+    border-color: var(--blood-red);
+    opacity: 0.9;
+    cursor: pointer; /* Interactive for feedback */
+    background: rgba(139, 26, 26, 0.05);
+}
+
+.tech-item.unaffordable:hover {
+    background: rgba(139, 26, 26, 0.15);
+    transform: translateY(-1px);
+}

@@ -285,14 +285,12 @@ export class Unit extends Entity {
 
         // 30 * 30 = 900
         if (distSq <= 900) {
-            // CONFIG es una variable global
-            if (typeof CONFIG !== 'undefined') {
-                const gatherAmount = CONFIG.GATHER_RATES[node.type] * deltaTime;
-                const actualGather = Math.min(gatherAmount, node.amount);
+            // BOLT OPTIMIZATION: Removed redundant typeof CONFIG check (imported module)
+            const gatherAmount = CONFIG.GATHER_RATES[node.type] * deltaTime;
+            const actualGather = Math.min(gatherAmount, node.amount);
 
-                node.amount -= actualGather;
-                game.resources[node.type] += actualGather;
-            }
+            node.amount -= actualGather;
+            game.resources[node.type] += actualGather;
         }
     }
 }

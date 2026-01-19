@@ -1,4 +1,5 @@
 import { Unit } from '../Unit.js';
+import { CONFIG } from '../../core/constants.js';
 
 /**
  * Villager - Aldeano
@@ -73,15 +74,13 @@ export class Villager extends Unit {
                     this.gatherTimer += deltaTime;
                     if (this.gatherTimer >= 1.0) {
                         this.gatherTimer = 0;
-                        // CONFIG es una variable global
-                        if (typeof CONFIG !== 'undefined') {
-                            const rate = CONFIG.GATHER_RATES[this.currentResourceNode.type];
-                            const amount = Math.min(rate, this.currentResourceNode.amount, this.maxCarry - this.carryAmount);
-                            this.currentResourceNode.amount -= amount;
-                            this.carryAmount += amount;
-                            this.carryType = this.currentResourceNode.type;
-                            if (this.carryAmount >= this.maxCarry) this.findDropOffAndGo(game);
-                        }
+                        // BOLT OPTIMIZATION: Removed redundant typeof CONFIG check (imported module)
+                        const rate = CONFIG.GATHER_RATES[this.currentResourceNode.type];
+                        const amount = Math.min(rate, this.currentResourceNode.amount, this.maxCarry - this.carryAmount);
+                        this.currentResourceNode.amount -= amount;
+                        this.carryAmount += amount;
+                        this.carryType = this.currentResourceNode.type;
+                        if (this.carryAmount >= this.maxCarry) this.findDropOffAndGo(game);
                     }
                 }
                 break;

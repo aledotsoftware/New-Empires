@@ -2108,3 +2108,30 @@ button:focus-visible,
     background: linear-gradient(180deg, var(--stone-light) 0%, var(--stone-medium) 100%) !important;
     transition: none !important; /* Instant feedback */
 }
+
+/* Palette: Start Screen Embers */
+.ember {
+    position: absolute;
+    bottom: -20px;
+    width: 3px;
+    height: 3px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 6px var(--gold-bright);
+    animation: rise linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rise {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.8; }
+    100% { transform: translateY(-105vh) scale(0); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ember {
+        animation: none;
+        display: none;
+    }
+}

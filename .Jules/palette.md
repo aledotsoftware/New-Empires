@@ -22,3 +22,7 @@
 ## 2025-05-27 - Hotkey Visual Feedback
 **Learning:** Hotkeys are efficient but invisible. Users, especially those learning the game, lack confirmation that their keypress triggered the desired action (e.g., "Did I press 'Q' or not?").
 **Action:** Implemented a momentary ".active-key" visual state (simulating a click press) on UI buttons when their corresponding hotkey is pressed. This bridges the gap between physical input and digital response, making the interface feel more tangible and responsive.
+
+## 2025-05-28 - Atmospheric Particle Effects
+**Learning:** Static start screens in immersive games can feel "dead". Adding subtle, procedural animations (like rising embers) creates a sense of life and polish without heavy video assets.
+**Action:** Implemented a lightweight particle system using DOM elements and CSS animations. Crucially, the system respects `prefers-reduced-motion` to ensure accessibility, disabling the effect for users sensitive to motion.

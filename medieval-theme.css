@@ -2135,3 +2135,13 @@ button:focus-visible,
         display: none;
     }
 }
+
+/* Palette: Resource Error Flash */
+@keyframes border-flash-red {
+    0%, 100% { border-color: var(--stone-light); box-shadow: none; }
+    50% { border-color: var(--blood-red); box-shadow: 0 0 10px rgba(229, 62, 62, 0.5); }
+}
+
+.resource-flash-error {
+    animation: border-flash-red 0.5s ease-in-out;
+}

@@ -731,6 +731,11 @@ function renderTechTreeCommon(isInteractive) {
 
                                     const diff = Math.ceil(amount - game.resources[res]);
                                     missing.push(`${name} (${diff})`);
+
+                                    // Palette: Flash resource
+                                    if (game && game.flashResource) {
+                                        game.flashResource(res);
+                                    }
                                 }
                             }
                         }

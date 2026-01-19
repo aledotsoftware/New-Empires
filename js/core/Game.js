@@ -1080,6 +1080,16 @@ export class Game {
                     // Notification feedback
                     const missing = option.getAttribute('aria-label').split(' - Insuficiente: ')[1];
                     const msg = missing ? `Recursos insuficientes: ${missing}` : 'Recursos insuficientes';
+
+                    // Palette: Flash missing resources
+                    if (cost) {
+                        for (const [res, amount] of Object.entries(cost)) {
+                            if (this.resources[res] < amount) {
+                                this.flashResource(res);
+                            }
+                        }
+                    }
+
                     this.showNotification(msg, 'error');
 
                     return;
@@ -2931,6 +2941,16 @@ export class Game {
                                 });
                                 msg = `Falta: ${translated.join(', ')}`;
                             }
+
+                            // Palette: Flash missing resources
+                            if (buttonData.cost) {
+                                for (const [res, amount] of Object.entries(buttonData.cost)) {
+                                    if (this.resources[res] < amount) {
+                                        this.flashResource(res);
+                                    }
+                                }
+                            }
+
                             this.showNotification(msg, 'error');
                         };
                     } else {
@@ -3260,5 +3280,30 @@ export class Game {
 
         // Start initial timer
         startTimer();
+    }
+
+    /**
+     * Palette: Visual feedback for missing resources
+     * Flashes the specific resource container in the top bar
+     */
+    flashResource(resourceType) {
+        // Map resource type to UI element ID
+        // Note: uiElements keys are like 'woodCount', 'foodCount'
+        // But we want to target the parent .resource-item if possible for the border effect
+        const countEl = this.uiElements[`${resourceType}Count`];
+        if (countEl) {
+            const container = countEl.closest('.resource-item');
+            if (container) {
+                container.classList.remove('resource-flash-error');
+                void container.offsetWidth; // Trigger reflow
+                container.classList.add('resource-flash-error');
+
+                // Remove class after animation ends to allow re-triggering cleanly
+                // although removing it at start handles rapid clicks
+                setTimeout(() => {
+                   container.classList.remove('resource-flash-error');
+                }, 500);
+            }
+        }
     }
 }

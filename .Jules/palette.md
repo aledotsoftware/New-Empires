@@ -26,3 +26,7 @@
 ## 2025-05-28 - Atmospheric Particle Effects
 **Learning:** Static start screens in immersive games can feel "dead". Adding subtle, procedural animations (like rising embers) creates a sense of life and polish without heavy video assets.
 **Action:** Implemented a lightweight particle system using DOM elements and CSS animations. Crucially, the system respects `prefers-reduced-motion` to ensure accessibility, disabling the effect for users sensitive to motion.
+
+## 2025-05-29 - Connected Visual Feedback for Errors
+**Learning:** When an action fails due to insufficient resources, a text notification is often disconnected from the HUD where the resource counts actually live. Users have to read the text, then look up to the resource bar to verify.
+**Action:** Implemented a visual "flash" animation on the specific resource container in the HUD when a related action fails. This creates a direct visual link between the cause (click on unit) and effect (flash on wood count), reducing cognitive load and reinforcing the resource economy model.

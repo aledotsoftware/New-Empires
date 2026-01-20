@@ -26,3 +26,7 @@
 ## 2025-05-28 - Atmospheric Particle Effects
 **Learning:** Static start screens in immersive games can feel "dead". Adding subtle, procedural animations (like rising embers) creates a sense of life and polish without heavy video assets.
 **Action:** Implemented a lightweight particle system using DOM elements and CSS animations. Crucially, the system respects `prefers-reduced-motion` to ensure accessibility, disabling the effect for users sensitive to motion.
+
+## 2025-05-29 - System State Visibility
+**Learning:** In immersive games, changes to system state (like Pausing) via hotkeys must have immediate, high-contrast visual confirmation. Relying on the absence of movement is insufficient feedback.
+**Action:** Implemented a full-screen "PAUSA" overlay with a clear subtitle "Press P to resume" when the game is manually paused. This removes ambiguity about whether the game is frozen or just inactive.

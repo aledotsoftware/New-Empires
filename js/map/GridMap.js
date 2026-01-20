@@ -10,6 +10,10 @@ export class GridMap {
         this.cols = Math.ceil(width / tileSize);
         this.rows = Math.ceil(height / tileSize);
         this.grid = new Array(this.cols * this.rows).fill(null);
+
+        // BOLT OPTIMIZATION: Uint8Array for faster collision checks (avoids object lookup)
+        this.collisionGrid = new Uint8Array(this.cols * this.rows);
+
         // Optimización: Cache inverso para usar multiplicación en lugar de división
         this.invTileSize = 1 / tileSize;
     }
@@ -22,7 +26,8 @@ export class GridMap {
         for (let r = startRow; r < startRow + heightTiles; r++) {
             for (let c = startCol; c < startCol + widthTiles; c++) {
                 if (c < 0 || c >= this.cols || r < 0 || r >= this.rows) return false;
-                if (this.grid[this.getIndex(c, r)] !== null) return false;
+                // OPTIMIZATION: Check collisionGrid first (faster than object lookup)
+                if (this.collisionGrid[this.getIndex(c, r)] !== 0) return false;
             }
         }
         return true;
@@ -32,7 +37,10 @@ export class GridMap {
         for (let r = startRow; r < startRow + heightTiles; r++) {
             for (let c = startCol; c < startCol + widthTiles; c++) {
                 if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
-                    this.grid[this.getIndex(c, r)] = entity;
+                    const index = this.getIndex(c, r);
+                    this.grid[index] = entity;
+                    // BOLT OPTIMIZATION: Mark collision grid
+                    this.collisionGrid[index] = 1;
                 }
             }
         }
@@ -42,7 +50,10 @@ export class GridMap {
         for (let r = startRow; r < startRow + heightTiles; r++) {
             for (let c = startCol; c < startCol + widthTiles; c++) {
                 if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
-                    this.grid[this.getIndex(c, r)] = null;
+                    const index = this.getIndex(c, r);
+                    this.grid[index] = null;
+                    // BOLT OPTIMIZATION: Clear collision grid
+                    this.collisionGrid[index] = 0;
                 }
             }
         }

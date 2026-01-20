@@ -722,6 +722,9 @@ function renderTechTreeCommon(isInteractive) {
                         if (game && game.resources && tech.cost) {
                             for (const [res, amount] of Object.entries(tech.cost)) {
                                 if (game.resources[res] < amount) {
+                                    // Palette: Flash missing resource
+                                    if (game.flashResource) game.flashResource(res);
+
                                     // Translate
                                     let name = res;
                                     if (name === 'food') name = 'Comida';

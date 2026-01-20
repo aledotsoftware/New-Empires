@@ -170,6 +170,7 @@ export class Game {
         this.lastUITime = 0;
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
+        this.lastResources = { ...this.resources }; // Palette: Track for animations
 
         // Variables para el ciclo de tips (Palette)
         this.currentTipIndex = 0;
@@ -2240,12 +2241,32 @@ export class Game {
     }
 
     updateUI() {
-        // Actualizar recursos
-        // OPTIMIZACIÓN: Usar elementos cacheados
-        if (this.uiElements.woodCount) this.uiElements.woodCount.textContent = Math.floor(this.resources.wood);
-        if (this.uiElements.foodCount) this.uiElements.foodCount.textContent = Math.floor(this.resources.food);
-        if (this.uiElements.goldCount) this.uiElements.goldCount.textContent = Math.floor(this.resources.gold);
-        if (this.uiElements.stoneCount) this.uiElements.stoneCount.textContent = Math.floor(this.resources.stone);
+        // Actualizar recursos con animación (Palette)
+        const resourceKeys = ['wood', 'food', 'gold', 'stone'];
+
+        for (const key of resourceKeys) {
+            const el = this.uiElements[`${key}Count`];
+            if (!el) continue;
+
+            const currentVal = Math.floor(this.resources[key]);
+            const lastVal = Math.floor(this.lastResources[key] || 0);
+
+            // Always update text
+            el.textContent = currentVal;
+
+            // Trigger animation if value changed
+            if (currentVal !== lastVal) {
+                const isGain = currentVal > lastVal;
+                const animClass = isGain ? 'resource-pop-up' : 'resource-pop-down';
+
+                el.classList.remove('resource-pop-up', 'resource-pop-down');
+                void el.offsetWidth; // Force reflow
+                el.classList.add(animClass);
+            }
+        }
+
+        // Update history for next frame
+        this.lastResources = { ...this.resources };
 
         // Actualizar población
         if (this.uiElements.currentPopulation) this.uiElements.currentPopulation.textContent = Math.floor(this.population);

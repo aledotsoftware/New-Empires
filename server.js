@@ -21,7 +21,45 @@ const MIME_TYPES = {
     '.txt': 'text/plain'
 };
 
+// Security: Rate Limiting
+// Protect against DoS attacks by limiting requests per IP
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 500; // Requests per minute
+const requestCounts = new Map();
+
+// Cleanup expired entries periodically to prevent memory leaks
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, data] of requestCounts.entries()) {
+        if (now - data.startTime > RATE_LIMIT_WINDOW) {
+            requestCounts.delete(ip);
+        }
+    }
+}, 5 * 60 * 1000); // Run every 5 minutes
+
 const server = http.createServer((req, res) => {
+    // Security: Rate Limiting Check
+    const ip = req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+
+    if (!requestCounts.has(ip)) {
+        requestCounts.set(ip, { count: 1, startTime: now });
+    } else {
+        const data = requestCounts.get(ip);
+        if (now - data.startTime > RATE_LIMIT_WINDOW) {
+            // Reset window
+            data.count = 1;
+            data.startTime = now;
+        } else {
+            data.count++;
+            if (data.count > RATE_LIMIT_MAX) {
+                res.writeHead(429, { 'Content-Type': 'text/plain' });
+                res.end('Too Many Requests');
+                return;
+            }
+        }
+    }
+
     // Normalize path
     let safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
 

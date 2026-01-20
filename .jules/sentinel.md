@@ -12,3 +12,8 @@
 **Vulnerability:** The save file validator checked only the first element of entity arrays (`units[0]`), allowing malicious or malformed data in subsequent indices to bypass checks.
 **Learning:** Sampling-based validation (checking index 0) provides a false sense of security. Attackers can easily craft payloads where the first item is valid but subsequent items contain malicious data or exploits.
 **Prevention:** Implemented O(N) validation that iterates through every element in input arrays. Added explicit length limits to prevent Denial of Service via memory exhaustion.
+
+## 2026-01-20 - [HIGH] Missing Rate Limiting in Custom Server
+**Vulnerability:** The custom `server.js` implementation lacked any request throttling, allowing a single IP to flood the server with unlimited requests (DoS) and potentially exhaust system resources.
+**Learning:** Node.js `http` server by default accepts connections as fast as the OS allows. Without application-level rate limiting, even a simple script can degrade service availability.
+**Prevention:** Implemented an in-memory `Map`-based sliding window rate limiter in `server.js` to enforce a maximum request quota per IP, with periodic cleanup to prevent memory leaks.

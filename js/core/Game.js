@@ -50,7 +50,7 @@ export class Game {
 
         // Estado del juego
         this.gameStartTime = Date.now();
-        this.isPaused = false;
+        this._isPaused = false;
         this.isGameOver = false;
 
         // Recursos
@@ -1633,14 +1633,50 @@ export class Game {
         }
     }
 
+    get isPaused() {
+        return this._isPaused;
+    }
+
+    set isPaused(value) {
+        if (this._isPaused === value) return;
+
+        this._isPaused = value;
+        this._updatePauseState();
+    }
+
+    _updatePauseState() {
+        // Update UI Button
+        const btn = document.getElementById('pauseButton');
+        const icon = document.getElementById('pauseIcon');
+
+        if (btn && icon) {
+            if (this._isPaused) {
+                icon.textContent = '▶';
+                btn.setAttribute('aria-label', 'Reanudar juego (P)');
+                btn.classList.add('active-key');
+            } else {
+                icon.textContent = '⏸';
+                btn.setAttribute('aria-label', 'Pausar juego (P)');
+                btn.classList.remove('active-key');
+            }
+        }
+
+        // Timer Logic: Adjust start time to ignore pause duration
+        if (this._isPaused) {
+            this.pauseStartTime = Date.now();
+        } else {
+            if (this.pauseStartTime) {
+                const pauseDuration = Date.now() - this.pauseStartTime;
+                this.gameStartTime += pauseDuration;
+                this.pauseStartTime = null;
+            }
+        }
+    }
+
     // Palette: Toggle Pause
     togglePause() {
         if (this.isGameOver) return;
         this.isPaused = !this.isPaused;
-
-        if (this.isPaused) {
-            // Optional: Pause music or ambient sound logic here
-        }
     }
 
     checkGameOver() {

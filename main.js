@@ -251,6 +251,16 @@ window.toggleIdleVillagerCycle = function () {
  * Toggle sound enabled/disabled
  * Palette: Enhanced UX with visual feedback
  */
+/**
+ * Toggle pause state via UI button
+ * Palette: Pause/Resume functionality
+ */
+window.togglePauseGame = function () {
+    if (window.game) {
+        window.game.togglePause();
+    }
+};
+
 window.toggleSound = function () {
     let newState = false;
     if (typeof soundManager !== 'undefined') {

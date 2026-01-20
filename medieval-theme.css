@@ -2135,3 +2135,16 @@ button:focus-visible,
         display: none;
     }
 }
+
+/* Palette: Resource Flash Error Animation */
+@keyframes flash-error {
+    50% {
+        border-color: var(--blood-red);
+        background: rgba(139, 26, 26, 0.4);
+        box-shadow: 0 0 15px rgba(139, 26, 26, 0.5);
+    }
+}
+
+.resource-flash-error {
+    animation: flash-error 0.5s ease-in-out;
+}

@@ -1143,6 +1143,7 @@ export class Game {
         const cost = CONFIG.COSTS[this.buildMode];
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
+            this.flashMissingResources(cost);
             return;
         }
 
@@ -1275,11 +1276,13 @@ export class Game {
 
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
+            this.flashMissingResources(cost);
             return;
         }
 
         if (this.population + building.productionQueue.length >= this.maxPopulation) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
+            this.flashResource('population');
             return;
         }
 
@@ -1314,11 +1317,13 @@ export class Game {
 
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
+            this.flashMissingResources(cost);
             return;
         }
 
         if (this.population >= this.maxPopulation) {
             this.showNotification('Límite de población alcanzado', 'error');
+            this.flashResource('population');
             return;
         }
 
@@ -2923,6 +2928,10 @@ export class Game {
                             if (buttonData._missingResources && buttonData._missingResources.length > 0) {
                                 // Translate for display if raw strings
                                 const translated = buttonData._missingResources.map(mr => {
+                                    // Extract resource name to flash it
+                                    const resName = mr.split(' ')[0].trim();
+                                    this.flashResource(resName); // Palette: Flash resource
+
                                     if (mr.includes('food')) return mr.replace('food', 'Comida');
                                     if (mr.includes('wood')) return mr.replace('wood', 'Madera');
                                     if (mr.includes('gold')) return mr.replace('gold', 'Oro');
@@ -2931,6 +2940,12 @@ export class Game {
                                 });
                                 msg = `Falta: ${translated.join(', ')}`;
                             }
+
+                            // Palette: Flash population if that's the error
+                            if (msg.includes('población') || msg.includes('Población')) {
+                                this.flashResource('population');
+                            }
+
                             this.showNotification(msg, 'error');
                         };
                     } else {
@@ -3260,5 +3275,52 @@ export class Game {
 
         // Start initial timer
         startTimer();
+    }
+
+    /**
+     * Palette: Helper to flash all missing resources for a given cost
+     */
+    flashMissingResources(cost) {
+        for (let [resource, amount] of Object.entries(cost)) {
+            if (this.resources[resource] < amount) {
+                this.flashResource(resource);
+            }
+        }
+    }
+
+    /**
+     * Palette: Visual Feedback for Insufficient Resources
+     * Flashes the corresponding resource counter in the top bar.
+     * @param {string} resourceName - 'wood', 'food', 'gold', 'stone', or 'population'
+     */
+    flashResource(resourceName) {
+        // Map resource names to UI element keys or IDs
+        let element = null;
+
+        // Handle population special case
+        if (resourceName === 'population') {
+            element = document.querySelector('.resource-population');
+        } else {
+            // Find the resource item container for the given resource
+            // We look up the counter element first, then get its parent container
+            const counterKey = `${resourceName}Count`;
+            if (this.uiElements[counterKey]) {
+                // The structure is .resource-item > .resource-info > .resource-value (id=...)
+                // So we need to go up 2 levels
+                element = this.uiElements[counterKey].closest('.resource-item');
+            }
+        }
+
+        if (element) {
+            // Reset animation
+            element.classList.remove('resource-flash-error');
+            void element.offsetWidth; // Force reflow
+            element.classList.add('resource-flash-error');
+
+            // Remove class after animation ends to allow re-triggering
+            setTimeout(() => {
+                element.classList.remove('resource-flash-error');
+            }, 500);
+        }
     }
 }

@@ -85,7 +85,7 @@
     /* === Z-INDEX === */
     --z-base: 1;
     --z-hud: 100;
-    --z-modal: 500;
+    --z-modal: 1050; /* Palette: Increased to be visible over Start Screen (1000) */
     --z-overlay: 1000;
     --z-notification: 1100;
 }

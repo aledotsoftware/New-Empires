@@ -884,6 +884,40 @@ function initStartScreenParticles() {
 }
 
 /**
+ * Inicializa los manejadores para cerrar modales al hacer click en el fondo
+ * Palette: "Click outside to close" pattern
+ */
+function initModalBackdropHandlers() {
+    const modalMap = {
+        'techTreeScreen': window.hideTechTree,
+        'settingsScreen': window.hideSettings,
+        'buildMenu': window.closeBuildMenu,
+        'confirmationModal': () => {
+            // Para confirmación, click en fondo actúa como "Cancelar"
+            const noBtn = document.getElementById('confirmNoBtn');
+            if (noBtn) noBtn.click();
+            else document.getElementById('confirmationModal').classList.add('hidden');
+        }
+    };
+
+    for (const [id, closeAction] of Object.entries(modalMap)) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                // Solo cerrar si se clickea el fondo (overlay), no el contenido
+                if (e.target === modal) {
+                    debugLogger.info(`Cerrando modal ${id} por click en fondo`, 'ui');
+                    if (typeof closeAction === 'function') {
+                        closeAction();
+                    }
+                }
+            });
+        }
+    }
+    debugLogger.info('Manejadores de fondo de modales inicializados', 'ui');
+}
+
+/**
  * Genera dinámicamente las opciones de tamaño de mapa
  */
 function populateMapSizes() {
@@ -1284,6 +1318,9 @@ const initApp = async () => {
 
     // Palette: Initialize background particles
     initStartScreenParticles();
+
+    // Palette: Initialize modal backdrop handlers
+    initModalBackdropHandlers();
 
     // Generar opciones de tamaño de mapa dinámicamente
     populateMapSizes();

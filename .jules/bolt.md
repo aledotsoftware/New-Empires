@@ -23,3 +23,7 @@
 ## 2025-01-28 - Micro-optimization vs Readability
 **Learning:** While replacing `Math.min` might yield nanosecond gains in tight loops, applying it broadly (e.g. in 1Hz timers) is counter-productive. Code reviews favor readability unless the bottleneck is proven. However, removing `typeof CONFIG` and global lookups remains a solid win (verified ~7.9x speedup in isolated benchmark for `Villager.update`).
 **Action:** Distinguish between "Hot Path" (per frame per entity) and "Warm Path" (timers). Keep math readable unless profiling demands otherwise.
+
+## 2025-02-05 - DOM Updates & Layout Thrashing
+**Learning:** Optimizing high-frequency DOM updates (like game clocks or resource counters at 10-60 FPS) by caching rendered state significantly reduces 'Layout Thrashing' and Style Recalculation costs. Simple strict equality checks on strings/numbers in JS are much cheaper than touching DOM properties like `textContent`, even if the value hasn't changed.
+**Action:** Implement "dirty checking" or "last rendered value" tracking for any UI element updated in the main loop.

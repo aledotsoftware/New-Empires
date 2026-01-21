@@ -1,5 +1,6 @@
 import { Unit } from '../Unit.js';
 import { CONFIG } from '../../core/constants.js';
+import { assetLoader } from '../../managers/AssetLoader.js';
 
 /**
  * Villager - Aldeano
@@ -177,6 +178,47 @@ export class Villager extends Unit {
                     this.state = 'IDLE';
                 }
                 break;
+        }
+    }
+
+    render(ctx, camera, viewWidth, viewHeight, drawHp) {
+        super.render(ctx, camera, viewWidth, viewHeight, drawHp);
+
+        // Palette: Draw carried resource icon
+        if (this.carryAmount > 0 && this.carryType) {
+            const screenX = this.x - camera.x;
+            const screenY = this.y - camera.y;
+
+            // Simple visibility check
+            if (screenX < -20 || screenX > viewWidth + 20 || screenY < -20 || screenY > viewHeight + 20) return;
+
+            const iconSize = 14;
+            // Position above head. Entity.js size=20 default, rect is 40x40 centered at xy?
+            // Entity.js: ctx.fillRect(screenX - this.size, screenY - this.size, ...)
+            // So top is screenY - size.
+            // HP bar is at screenY - size - 10.
+            // We want it above HP bar. HP bar height is 4.
+            // Let's put it at screenY - size - 25.
+            const iconY = screenY - this.size - 25;
+
+            // Background for readability
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.beginPath();
+            ctx.arc(screenX, iconY + iconSize / 2, iconSize / 2 + 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Icon
+            const img = assetLoader.getImage(this.carryType);
+            if (img && img.complete) {
+                ctx.drawImage(img, screenX - iconSize / 2, iconY, iconSize, iconSize);
+            } else {
+                // Fallback colors
+                const colors = { wood: '#8b5a2b', food: '#7cb342', gold: '#ffc107', stone: '#78909c' };
+                ctx.fillStyle = colors[this.carryType] || '#fff';
+                ctx.beginPath();
+                ctx.arc(screenX, iconY + iconSize / 2, iconSize / 2 - 1, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 

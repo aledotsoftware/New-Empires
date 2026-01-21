@@ -136,6 +136,11 @@ export class Game {
         // SISTEMA DE TECNOLOGÍAS (variable global temporal)
         this.techManager = new TechManager(this);
 
+        // Palette: Initialize Particle System (Global from effects.js)
+        if (typeof ParticleSystem !== 'undefined') {
+            this.particleSystem = new ParticleSystem();
+        }
+
         // Cargar imagen del cursor personalizado
         this.cursorImage = new Image();
         this.cursorImage.src = 'assets/icons/cursor.png';
@@ -367,6 +372,7 @@ export class Game {
                 }
             }
         }
+
     }
 
     applyProceduralResources(generatedMap) {
@@ -696,6 +702,7 @@ export class Game {
         }
 
         // Comandar unidades
+        let moveCommandIssued = false;
         for (let entity of this.selectedEntities) {
             if (entity.isUnit) {
                 if (targetEnemy && entity.canAttack) {
@@ -725,8 +732,14 @@ export class Game {
                     entity.attackTarget = null;
                     entity.gatherTarget = null;
                     if (entity.type === 'villager') entity.state = 'MOVING';
+                    moveCommandIssued = true;
                 }
             }
+        }
+
+        // Palette: Trigger Ripple Effect for Move Commands
+        if (moveCommandIssued && this.particleSystem) {
+            this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
         }
     }
 
@@ -1484,6 +1497,9 @@ export class Game {
         // Actualizar tecnologías
         if (this.techManager) this.techManager.update(deltaTime);
 
+        // Palette: Update Particle System
+        if (this.particleSystem) this.particleSystem.update(deltaTime);
+
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
         // Separamos el bucle para iterar solo sobre unidades dinámicas (Jugador + Enemigos)
         // Los edificios son estáticos y no necesitan update() ni reinserción en spatialGrid cada frame.
@@ -1991,6 +2007,11 @@ export class Game {
         // Dibujar fantasma de construcción
         if (this.buildMode) {
             this.drawBuildGhost();
+        }
+
+        // Palette: Render Particle System
+        if (this.particleSystem) {
+            this.particleSystem.render(this.ctx, this.camera);
         }
 
         // Renderizar minimapa

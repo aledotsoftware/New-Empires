@@ -69,6 +69,43 @@ class Particle {
     }
 }
 
+class Ripple {
+    constructor(x, y, color = '#48bb78') {
+        this.x = x;
+        this.y = y;
+        this.life = 0.6;
+        this.maxLife = 0.6;
+        this.size = 2;
+        this.maxSize = 20;
+        this.color = color;
+        this.lineWidth = 3;
+    }
+
+    update(deltaTime) {
+        this.life -= deltaTime;
+        const progress = 1 - (this.life / this.maxLife);
+        // Cubic ease out for expansion
+        this.size = 2 + (this.maxSize - 2) * (1 - Math.pow(1 - progress, 3));
+        this.alpha = Math.max(0, this.life / this.maxLife);
+        return this.life > 0;
+    }
+
+    render(ctx, camera) {
+        const screenX = this.x - camera.x;
+        const screenY = this.y - camera.y;
+
+        ctx.save();
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.lineWidth;
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        // Flatten y to give 3D perspective effect (ellipse)
+        ctx.ellipse(screenX, screenY, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
 class ParticleSystem {
     constructor() {
         this.particles = [];
@@ -180,6 +217,11 @@ class ParticleSystem {
                 friction: 0.9
             }));
         }
+    }
+
+    // Efecto de movimiento (Ripple)
+    createMoveRipple(x, y) {
+        this.particles.push(new Ripple(x, y));
     }
 
     update(deltaTime) {

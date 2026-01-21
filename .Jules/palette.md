@@ -30,3 +30,7 @@
 ## 2025-05-29 - System State Visibility
 **Learning:** In immersive games, changes to system state (like Pausing) via hotkeys must have immediate, high-contrast visual confirmation. Relying on the absence of movement is insufficient feedback.
 **Action:** Implemented a full-screen "PAUSA" overlay with a clear subtitle "Press P to resume" when the game is manually paused. This removes ambiguity about whether the game is frozen or just inactive.
+
+## 2025-05-30 - Immediate Feedback for Move Commands
+**Learning:** In RTS games, the "right-click to move" interaction is frequent and critical. Without immediate visual confirmation on the terrain, players may doubt if the command was registered, leading to redundant clicks or uncertainty.
+**Action:** Implemented a lightweight "Ripple" particle effect at the exact location of the click. This provides positive reinforcement that the system received the input, improving the feeling of responsiveness and control.

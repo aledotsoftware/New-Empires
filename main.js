@@ -1290,20 +1290,54 @@ function populateCivilizations() {
 
         // Agregar event listener al crear el elemento
         const selectCiv = () => {
+            // Palette: Immediate visual feedback
+            if (option.classList.contains('loading')) return;
+
+            // Visual State
+            option.classList.add('loading');
+            option.setAttribute('aria-busy', 'true');
+            option.style.cursor = 'wait';
+
+            // Add spinner to name
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            spinner.style.width = '0.8em';
+            spinner.style.height = '0.8em';
+            spinner.style.marginLeft = '8px';
+            spinner.style.borderWidth = '2px';
+            spinner.style.borderTopColor = 'var(--gold)'; // Ensure visibility
+
+            // Find name div to append spinner
+            const nameEl = option.querySelector('.civ-name');
+            if (nameEl) nameEl.appendChild(spinner);
+
+            // Disable other interactions in the grid
+            const grid = document.getElementById('civGrid');
+            if (grid) grid.style.pointerEvents = 'none';
+
             selectedCivilization = civ.civilizationId;
             debugLogger.info(`Civilizacion seleccionada: ${civ.civilizationId}`, 'ui');
 
-            // Obtener configuracion del mapa
-            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
+            // Defer execution to allow UI update paint
+            setTimeout(() => {
+                // Obtener configuracion del mapa
+                const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
 
-            // Iniciar juego
-            startGame(civ.civilizationId, {
-                ...mapConfig,
-                seed: Date.now(),
-                numPlayers: 2,
-                biome: 'grassland',
-                style: 'continental'
-            });
+                // Iniciar juego
+                startGame(civ.civilizationId, {
+                    ...mapConfig,
+                    seed: Date.now(),
+                    numPlayers: 2,
+                    biome: 'grassland',
+                    style: 'continental'
+                });
+
+                // Cleanup if needed (though screen changes)
+                if (grid) grid.style.pointerEvents = '';
+                option.classList.remove('loading');
+                option.removeAttribute('aria-busy');
+                if (nameEl && nameEl.contains(spinner)) nameEl.removeChild(spinner);
+            }, 50);
         };
 
         option.addEventListener('click', selectCiv);

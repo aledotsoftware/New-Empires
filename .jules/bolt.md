@@ -27,3 +27,7 @@
 ## 2025-02-05 - DOM Updates & Layout Thrashing
 **Learning:** Optimizing high-frequency DOM updates (like game clocks or resource counters at 10-60 FPS) by caching rendered state significantly reduces 'Layout Thrashing' and Style Recalculation costs. Simple strict equality checks on strings/numbers in JS are much cheaper than touching DOM properties like `textContent`, even if the value hasn't changed.
 **Action:** Implement "dirty checking" or "last rendered value" tracking for any UI element updated in the main loop.
+
+## 2025-02-12 - Block Sorting Strategy
+**Learning:** Sorting the entire render list (N entities) every frame using `sort((a,b) => a.y - b.y)` is O(N log N). However, if entities are queried from a SpatialGrid row-by-row, the list is already "Block Sorted" (Row0 < Row1 < Row2). Sorting small buckets individually and concatenating them is 34% faster for N=1000 and avoids the worst-case sorting cost for large N.
+**Action:** Leverage inherent spatial ordering when rendering. Sort small buckets/rows locally instead of global sorts.

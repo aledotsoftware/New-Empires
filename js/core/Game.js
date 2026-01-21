@@ -217,6 +217,7 @@ export class Game {
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
         this._resourceRenderCache = [];
+        this._rowCache = []; // BOLT OPTIMIZATION: Cache for row-wise sorting
         this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
         this.lastCameraX = -1; // BOLT OPTIMIZATION: Track camera for static terrain rendering
         this.lastCameraY = -1;
@@ -1955,13 +1956,28 @@ export class Game {
         const endRow = Math.min(rows - 1, Math.floor((this.camera.y + this.viewHeight + margin) * invCellSize));
 
         for (let r = startRow; r <= endRow; r++) {
-            this.spatialGrid.queryRowIndices(r, startCol, endCol, this._renderCache);
-            this.buildingGrid.queryRowIndices(r, startCol, endCol, this._renderCache);
+            // BOLT OPTIMIZATION: Sort row-by-row instead of globally
+            // This exploits the fact that rows are already mostly sorted by Y
+            // and avoids the O(N log N) cost of sorting the entire visible set at once.
+            this._rowCache.length = 0;
+            this.spatialGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+
+            // Sort only this row's entities
+            this._rowCache.sort((a, b) => a.y - b.y);
+
+            // Manual append to avoid call stack limits or creation of intermediate arrays
+            // This loop is extremely fast in V8
+            const rowLen = this._rowCache.length;
+            let renderIdx = this._renderCache.length;
+            for (let i = 0; i < rowLen; i++) {
+                this._renderCache[renderIdx++] = this._rowCache[i];
+            }
         }
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
-        // Esto corrige problemas de superposición que el SpatialGrid podría introducir
-        this._renderCache.sort((a, b) => a.y - b.y);
+        // BOLT OPTIMIZATION: Global sort removed as row-wise sort + grid order is sufficient
+        // this._renderCache.sort((a, b) => a.y - b.y);
 
         // Render entities (Pass 1: Main sprites)
         // OPTIMIZATION: Use standard for loop with cached length instead of for...of

@@ -31,3 +31,7 @@
 ## 2025-02-12 - Block Sorting Strategy
 **Learning:** Sorting the entire render list (N entities) every frame using `sort((a,b) => a.y - b.y)` is O(N log N). However, if entities are queried from a SpatialGrid row-by-row, the list is already "Block Sorted" (Row0 < Row1 < Row2). Sorting small buckets individually and concatenating them is 34% faster for N=1000 and avoids the worst-case sorting cost for large N.
 **Action:** Leverage inherent spatial ordering when rendering. Sort small buckets/rows locally instead of global sorts.
+
+## 2025-02-26 - Array.filter vs In-Place Removal
+**Learning:** `Array.filter` creates a shallow copy of the array every frame. For high-frequency loops (like particle systems), replacing `filter` with a manual in-place "read/write index" loop (swap-and-pop or just overwrite) eliminated GC pressure and yielded a ~13x speedup in synthetic benchmarks.
+**Action:** Avoid `filter` in `update()` loops. Use manual in-place modification.

@@ -225,16 +225,32 @@ class ParticleSystem {
     }
 
     update(deltaTime) {
-        this.particles = this.particles.filter(p => p.update(deltaTime));
-        this.projectiles = this.projectiles.filter(p => p.update(deltaTime));
+        // BOLT OPTIMIZATION: In-place removal to avoid Array allocation (GC pressure)
+        // Reduces garbage collection by reusing the existing array
+        let writeIdx = 0;
+        for (let i = 0; i < this.particles.length; i++) {
+            if (this.particles[i].update(deltaTime)) {
+                this.particles[writeIdx++] = this.particles[i];
+            }
+        }
+        this.particles.length = writeIdx;
+
+        writeIdx = 0;
+        for (let i = 0; i < this.projectiles.length; i++) {
+            if (this.projectiles[i].update(deltaTime)) {
+                this.projectiles[writeIdx++] = this.projectiles[i];
+            }
+        }
+        this.projectiles.length = writeIdx;
     }
 
     render(ctx, camera) {
-        for (let particle of this.particles) {
-            particle.render(ctx, camera);
+        // BOLT OPTIMIZATION: Standard loop avoids iterator allocation
+        for (let i = 0; i < this.particles.length; i++) {
+            this.particles[i].render(ctx, camera);
         }
-        for (let projectile of this.projectiles) {
-            projectile.render(ctx, camera);
+        for (let i = 0; i < this.projectiles.length; i++) {
+            this.projectiles[i].render(ctx, camera);
         }
     }
 }

@@ -135,59 +135,59 @@
         <!-- Top HUD: recursos, población, tiempo y settings -->
         <div class="top-panel">
             <div class="resources-panel" role="region" aria-label="Recursos">
-                <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount" aria-describedby="woodTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div id="woodLabel" class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
                     </div>
-                    <div class="card-tooltip">Recurso básico para construcción y unidades a distancia.</div>
+                    <div id="woodTooltip" class="card-tooltip">Recurso básico para construcción y unidades a distancia.</div>
                 </div>
-                <div class="resource-item" role="group" aria-labelledby="foodLabel foodCount" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="foodLabel foodCount" aria-describedby="foodTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div id="foodLabel" class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
                     </div>
-                    <div class="card-tooltip">Vital para entrenar aldeanos y unidades militares.</div>
+                    <div id="foodTooltip" class="card-tooltip">Vital para entrenar aldeanos y unidades militares.</div>
                 </div>
-                <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount" aria-describedby="goldTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div id="goldLabel" class="resource-label">Oro</div>
                         <div id="goldCount" class="resource-value">0</div>
                     </div>
-                    <div class="card-tooltip">Moneda para tecnologías avanzadas y comercio.</div>
+                    <div id="goldTooltip" class="card-tooltip">Moneda para tecnologías avanzadas y comercio.</div>
                 </div>
-                <div class="resource-item" role="group" aria-labelledby="stoneLabel stoneCount" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="stoneLabel stoneCount" aria-describedby="stoneTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div id="stoneLabel" class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
                     </div>
-                    <div class="card-tooltip">Material defensivo para murallas y centros urbanos.</div>
+                    <div id="stoneTooltip" class="card-tooltip">Material defensivo para murallas y centros urbanos.</div>
                 </div>
-                <div class="resource-item resource-population" role="group" aria-label="Población" tabindex="0">
+                <div class="resource-item resource-population" role="group" aria-label="Población" aria-describedby="popTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/population.png"
                             onerror="this.style.display='none'" style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div class="resource-label">Población</div>
                         <div><span id="currentPopulation">0</span>/<span id="maxPopulation">0</span></div>
                     </div>
-                    <div class="card-tooltip">Capacidad actual. Construye casas para aumentar.</div>
+                    <div id="popTooltip" class="card-tooltip">Capacidad actual. Construye casas para aumentar.</div>
                 </div>
             </div>
 
             <div style="display:flex; align-items:center; gap:12px;">
-                <div class="game-time" role="timer" aria-label="Tiempo de partida" tabindex="0">
+                <div class="game-time" role="timer" aria-label="Tiempo de partida" aria-describedby="timeTooltip" tabindex="0">
                     <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'"
                             style="width:20px;height:20px;" alt=""></span>
                     <span id="gameTime">00:00</span>
-                    <div class="card-tooltip">
+                    <div id="timeTooltip" class="card-tooltip">
                         <div style="font-weight:bold;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:4px">Tiempo de Partida</div>
                         <div style="font-size:0.8rem">Duración de la sesión actual.</div>
                         <div style="font-size:0.75rem;color:#48bb78;margin-top:4px;font-style:italic">Velocidad: Normal</div>

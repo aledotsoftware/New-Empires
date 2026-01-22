@@ -30,3 +30,7 @@
 ## 2025-05-29 - System State Visibility
 **Learning:** In immersive games, changes to system state (like Pausing) via hotkeys must have immediate, high-contrast visual confirmation. Relying on the absence of movement is insufficient feedback.
 **Action:** Implemented a full-screen "PAUSA" overlay with a clear subtitle "Press P to resume" when the game is manually paused. This removes ambiguity about whether the game is frozen or just inactive.
+
+## 2025-05-30 - Unit State Visualization
+**Learning:** Players need to understand their economy's flow at a glance. Knowing which villagers are carrying resources (and what type) without selecting them reduces cognitive load and helps diagnose bottlenecks instantly.
+**Action:** Added a visual indicator (resource icon) above villagers when they are carrying resources. This provides immediate, non-intrusive feedback about the unit's current task and state directly in the game world.

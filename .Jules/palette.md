@@ -30,3 +30,7 @@
 ## 2025-05-29 - System State Visibility
 **Learning:** In immersive games, changes to system state (like Pausing) via hotkeys must have immediate, high-contrast visual confirmation. Relying on the absence of movement is insufficient feedback.
 **Action:** Implemented a full-screen "PAUSA" overlay with a clear subtitle "Press P to resume" when the game is manually paused. This removes ambiguity about whether the game is frozen or just inactive.
+
+## 2025-05-30 - Resource Cost Clarity
+**Learning:** When a build action is disabled due to cost, generic "insufficient resources" feedback forces users to mentally compare multiple numbers. Highlighting *specifically* which resource is missing reduces cognitive load significantly.
+**Action:** Added `data-resource` attributes to semantic HTML in the build menu and updated logic to apply a specific warning color (`--accent-red`) only to the cost components that the player lacks. This creates an immediate "fix-it" list for the user.

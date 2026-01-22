@@ -31,6 +31,7 @@
     --wood-light: #5c4d3d;
 
     /* === COLORES DE ACENTO === */
+    --accent-red: #e53e3e; /* Palette: Added for missing resource feedback */
     --blood-red: #8b1a1a;
     --blood-red-light: #b32d2d;
     --royal-blue: #1a3a5c;

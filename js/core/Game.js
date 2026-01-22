@@ -1023,18 +1023,25 @@ export class Game {
                 const costSpans = option.querySelectorAll('.build-cost span');
                 costSpans.forEach(span => {
                     span.style.color = ''; // Reset
-                    const img = span.querySelector('img');
-                    if (img) {
-                        const src = img.src.toLowerCase();
-                        let resource = null;
-                        if (src.includes('wood')) resource = 'wood';
-                        else if (src.includes('food')) resource = 'food';
-                        else if (src.includes('gold')) resource = 'gold';
-                        else if (src.includes('stone')) resource = 'stone';
 
-                        if (resource && cost[resource] && this.resources[resource] < cost[resource]) {
-                            span.style.color = 'var(--accent-red)';
+                    // Palette: Prefer data-resource attribute for robustness
+                    let resource = span.dataset.resource;
+
+                    // Fallback to image parsing if attribute missing (legacy support)
+                    if (!resource) {
+                        const img = span.querySelector('img');
+                        if (img) {
+                            const src = img.src.toLowerCase();
+                            if (src.includes('wood')) resource = 'wood';
+                            else if (src.includes('food')) resource = 'food';
+                            else if (src.includes('gold')) resource = 'gold';
+                            else if (src.includes('stone')) resource = 'stone';
                         }
+                    }
+
+                    if (resource && cost[resource] && this.resources[resource] < cost[resource]) {
+                        span.style.color = 'var(--accent-red)';
+                        span.style.fontWeight = 'bold'; // Palette: Added emphasis
                     }
                 });
 

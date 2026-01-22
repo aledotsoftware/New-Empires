@@ -2156,3 +2156,14 @@ button:focus-visible,
 .resource-pop-down {
     animation: resourcePopDown 0.3s ease-out;
 }
+
+/* Palette: Resource Flash Error */
+@keyframes flashError {
+    0% { border-color: var(--stone-light); box-shadow: none; background: rgba(0, 0, 0, 0.3); }
+    25% { border-color: var(--blood-red); box-shadow: 0 0 10px var(--blood-red); background: rgba(139, 26, 26, 0.2); }
+    100% { border-color: var(--stone-light); box-shadow: none; background: rgba(0, 0, 0, 0.3); }
+}
+
+.resource-flash-error {
+    animation: flashError 0.6s ease-in-out;
+}

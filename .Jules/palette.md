@@ -30,3 +30,6 @@
 ## 2025-05-29 - System State Visibility
 **Learning:** In immersive games, changes to system state (like Pausing) via hotkeys must have immediate, high-contrast visual confirmation. Relying on the absence of movement is insufficient feedback.
 **Action:** Implemented a full-screen "PAUSA" overlay with a clear subtitle "Press P to resume" when the game is manually paused. This removes ambiguity about whether the game is frozen or just inactive.
+## 2024-05-22 - Testing Disabled States
+**Learning:** Playwright's `click()` strictly respects accessibility semantics. It refuses to click elements with `aria-disabled="true"` (even custom `div` buttons) because it considers them non-interactive, mirroring screen reader behavior.
+**Action:** When testing "disabled" feedback handlers (UX patterns where clicking a disabled item explains *why* it's disabled), always use `page.click(selector, force=True)` to bypass this check.

@@ -1108,6 +1108,9 @@ export class Game {
                     const msg = missing ? `Recursos insuficientes: ${missing}` : 'Recursos insuficientes';
                     this.showNotification(msg, 'error');
 
+                    // Palette: Flash missing resources
+                    this.flashMissingResources(cost);
+
                     return;
                 }
 
@@ -1169,6 +1172,7 @@ export class Game {
         const cost = CONFIG.COSTS[this.buildMode];
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
+            this.flashMissingResources(cost);
             return;
         }
 
@@ -1301,11 +1305,13 @@ export class Game {
 
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
+            this.flashMissingResources(cost);
             return;
         }
 
         if (this.population + building.productionQueue.length >= this.maxPopulation) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
+            this.flashResource('population');
             return;
         }
 
@@ -1340,11 +1346,13 @@ export class Game {
 
         if (!this.canAfford(cost)) {
             this.showNotification('Recursos insuficientes', 'error');
+            this.flashMissingResources(cost);
             return;
         }
 
         if (this.population >= this.maxPopulation) {
             this.showNotification('Límite de población alcanzado', 'error');
+            this.flashResource('population');
             return;
         }
 
@@ -2359,6 +2367,39 @@ export class Game {
         }
     }
 
+    /**
+     * Flash a resource indicator to alert the user (e.g. when missing cost)
+     * @param {string} resourceName - 'wood', 'food', 'gold', 'stone', 'population'
+     */
+    flashResource(resourceName) {
+        let el;
+        if (resourceName === 'population') {
+            if (this.uiElements.currentPopulation) {
+                el = this.uiElements.currentPopulation.closest('.resource-item');
+            }
+        } else {
+            const countEl = this.uiElements[`${resourceName}Count`];
+            if (countEl) {
+                el = countEl.closest('.resource-item');
+            }
+        }
+
+        if (el) {
+            el.classList.remove('resource-flash-error');
+            void el.offsetWidth; // Force reflow
+            el.classList.add('resource-flash-error');
+        }
+    }
+
+    flashMissingResources(cost) {
+        if (!cost) return;
+        for (let [res, amount] of Object.entries(cost)) {
+            if (this.resources[res] < amount) {
+                this.flashResource(res);
+            }
+        }
+    }
+
     updateUI() {
         // Actualizar recursos con animación (Palette)
         const resourceKeys = ['wood', 'food', 'gold', 'stone'];
@@ -3090,6 +3131,20 @@ export class Game {
                                 msg = `Falta: ${translated.join(', ')}`;
                             }
                             this.showNotification(msg, 'error');
+
+                            // Palette: Flash missing resources
+                            if (buttonData.cost) {
+                                for (let [res, amount] of Object.entries(buttonData.cost)) {
+                                    if (this.resources[res] < amount) {
+                                        this.flashResource(res);
+                                    }
+                                }
+                            }
+
+                            // Also flash population if error is population related
+                            if (buttonData.error && (buttonData.error.toLowerCase().includes('población') || buttonData.error.toLowerCase().includes('population'))) {
+                                this.flashResource('population');
+                            }
                         };
                     } else {
                         btn.onclick = buttonData.action;

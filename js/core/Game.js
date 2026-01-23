@@ -2891,9 +2891,55 @@ export class Game {
             const statsDiv = document.createElement('div');
             statsDiv.className = 'selection-stats';
 
-            const selectionTextDiv = document.createElement('div');
-            selectionTextDiv.textContent = 'Selección múltiple';
-            statsDiv.appendChild(selectionTextDiv);
+            // Group entities by type
+            const groups = {};
+            this.selectedEntities.forEach(e => {
+                if (!groups[e.type]) groups[e.type] = 0;
+                groups[e.type]++;
+            });
+
+            const groupContainer = document.createElement('div');
+            groupContainer.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;';
+
+            for (const [type, count] of Object.entries(groups)) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-secondary';
+                btn.style.cssText = 'padding:4px 8px; font-size:0.75rem; display:flex; align-items:center; gap:6px; border-color:var(--stone-light);';
+                btn.setAttribute('aria-label', `Seleccionar solo ${count} ${type}`);
+
+                // Icon
+                if (typeof assetLoader !== 'undefined') {
+                    const iconSrc = assetLoader.getSrc(type);
+                    if (iconSrc) {
+                        const img = document.createElement('img');
+                        img.src = iconSrc;
+                        img.className = 'icon-tiny';
+                        img.alt = '';
+                        btn.appendChild(img);
+                    }
+                }
+
+                // Count
+                const countSpan = document.createElement('span');
+                countSpan.textContent = count;
+                countSpan.style.fontWeight = 'bold';
+                btn.appendChild(countSpan);
+
+                // Click to filter
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    // Filter selection
+                    this.selectedEntities = this.selectedEntities.filter(ent => ent.type === type);
+                    // Refresh
+                    this.updateSelectionPanel();
+                    this.updateActionsPanel();
+                    // Feedback
+                    if (typeof soundManager !== 'undefined') soundManager.play('click');
+                };
+
+                groupContainer.appendChild(btn);
+            }
+            statsDiv.appendChild(groupContainer);
 
             detailsDiv.appendChild(nameHeader);
             detailsDiv.appendChild(statsDiv);

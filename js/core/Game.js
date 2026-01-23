@@ -2640,7 +2640,22 @@ export class Game {
                 btn.setAttribute('aria-label', `${text} (${kbd})`);
 
                 btn.style.cssText = `font-size:0.8rem; padding:6px 10px; display:flex; align-items:center; justify-content:center; gap:6px; ${style}`;
-                btn.innerHTML = `<img src="assets/icons/${icon}.png" class="icon-tiny" alt=""> ${text} <span class="kbd-inline" style="font-size:0.65rem;">${kbd}</span>`;
+
+                // Securely create content without innerHTML
+                const img = document.createElement('img');
+                img.src = `assets/icons/${icon}.png`;
+                img.className = 'icon-tiny';
+                img.alt = '';
+                btn.appendChild(img);
+
+                btn.appendChild(document.createTextNode(` ${text} `));
+
+                const span = document.createElement('span');
+                span.className = 'kbd-inline';
+                span.style.fontSize = '0.65rem';
+                span.textContent = kbd;
+                btn.appendChild(span);
+
                 btn.onclick = (e) => { e.stopPropagation(); onClick(); if (typeof soundManager !== 'undefined') soundManager.play('click'); };
                 return btn;
             };

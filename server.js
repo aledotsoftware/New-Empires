@@ -59,9 +59,13 @@ const server = http.createServer((req, res) => {
         'package.json',
         'package-lock.json',
         'pnpm-lock.yaml',
+        'yarn.lock',
+        '.npmrc',
+        '.nvmrc',
         'Dockerfile',
         'docker-compose.yml',
-        '.env'
+        '.env',
+        'AGENTS.md'
     ].includes(filename);
 
     // Security: Block sensitive directories
@@ -76,7 +80,9 @@ const server = http.createServer((req, res) => {
         '.jules',
         'node_modules',
         '.vscode',
-        '.idea'
+        '.idea',
+        'test-results',
+        'tests'
     ];
 
     // Check for dotfiles in any part of the path (hidden files)

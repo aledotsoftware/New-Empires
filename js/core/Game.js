@@ -1,5 +1,6 @@
 // Imports de módulos creados
 import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS } from './constants.js';
+import { FocusManager } from '../utils/FocusManager.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
@@ -1136,11 +1137,8 @@ export class Game {
 
         menu.classList.remove('hidden');
 
-        // Mover foco al botón de cerrar
-        const closeBtn = menu.querySelector('.btn-close');
-        if (closeBtn) {
-            closeBtn.focus();
-        }
+        // Activamos el trap focus para accesibilidad (Palette)
+        FocusManager.trapFocus(menu);
 
         // Update state immediately
         this.updateBuildMenuState();
@@ -1189,6 +1187,7 @@ export class Game {
     }
 
     closeBuildMenu() {
+        FocusManager.releaseTrap();
         document.getElementById('buildMenu').classList.add('hidden');
 
         // Restaurar foco al canvas para continuar jugando

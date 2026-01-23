@@ -109,6 +109,7 @@ export class Game {
         // Mouse
         this.mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
         this.isDragging = false;
+        this.isMinimapDragging = false; // Palette: Enable minimap dragging
         this.dragStart = { x: 0, y: 0 };
 
         // Modo de construcción
@@ -271,6 +272,16 @@ export class Game {
         const halfWidth = this.viewWidth / 2;
         const halfHeight = this.viewHeight / 2;
         this.cullingRadius = Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight) + 100;
+
+        // Fix Minimap Resolution (Palette: 1:1 Pixel Mapping)
+        if (this.minimap) {
+            const minimapRect = this.minimap.getBoundingClientRect();
+            // Ensure non-zero dimensions to prevent errors
+            if (minimapRect.width > 0 && minimapRect.height > 0) {
+                this.minimap.width = minimapRect.width;
+                this.minimap.height = minimapRect.height;
+            }
+        }
     }
 
     initializeGame() {
@@ -471,10 +482,57 @@ export class Game {
         this.townCenterCounts.enemy++;
     }
 
+    /**
+     * Helper to keep camera within map bounds
+     * Palette: UX Improvement
+     */
+    clampCamera() {
+        const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
+        const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
+
+        if (this.camera.x < 0) this.camera.x = 0;
+        else if (this.camera.x > maxCamX) this.camera.x = maxCamX;
+
+        if (this.camera.y < 0) this.camera.y = 0;
+        else if (this.camera.y > maxCamY) this.camera.y = maxCamY;
+    }
+
+    /**
+     * Calculates camera position from minimap interaction
+     * Palette: UX Improvement (Drag Navigation)
+     */
+    handleMinimapInput(clientX, clientY) {
+        if (!this.minimap) return;
+
+        const rect = this.minimap.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        // Clamp to minimap bounds to prevent wild jumps if dragging outside
+        const clampedX = Math.max(0, Math.min(x, rect.width));
+        const clampedY = Math.max(0, Math.min(y, rect.height));
+
+        // Use current width/height (should match rect due to our fix, but rect is safe source of truth for input)
+        // Note: We map from rect space (CSS pixels) to World Space
+        const worldX = (clampedX / rect.width) * CONFIG.CANVAS_WIDTH;
+        const worldY = (clampedY / rect.height) * CONFIG.CANVAS_HEIGHT;
+
+        // Center camera
+        this.camera.x = worldX - this.viewWidth / 2;
+        this.camera.y = worldY - this.viewHeight / 2;
+
+        this.clampCamera();
+    }
+
     setupEventListeners() {
         // Mouse move - Actualizar cursor DOM y posición lógica
         window.addEventListener('mousemove', (e) => {
             this.hasMouseMoved = true;
+
+            // Palette: Handle Minimap Dragging
+            if (this.isMinimapDragging) {
+                this.handleMinimapInput(e.clientX, e.clientY);
+            }
 
             // Actualizar posición del cursor visual (DOM)
             if (this.cursorElement) {
@@ -489,6 +547,11 @@ export class Game {
 
             this.mouse.worldX = this.mouse.x + this.camera.x;
             this.mouse.worldY = this.mouse.y + this.camera.y;
+        });
+
+        // Global Mouse Up (Palette: Stop Minimap Dragging)
+        window.addEventListener('mouseup', () => {
+            this.isMinimapDragging = false;
         });
 
         // Click izquierdo
@@ -529,17 +592,11 @@ export class Game {
             this.keysPressed[e.key.toLowerCase()] = false;
         });
 
-        // Minimapa click
-        this.minimap.addEventListener('click', (e) => {
-            const rect = this.minimap.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const worldX = (x / this.minimap.width) * CONFIG.CANVAS_WIDTH;
-            const worldY = (y / this.minimap.height) * CONFIG.CANVAS_HEIGHT;
-
-            this.camera.x = worldX - this.viewWidth / 2;
-            this.camera.y = worldY - this.viewHeight / 2;
+        // Minimapa Interaction (Palette: Click & Drag Navigation)
+        this.minimap.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevent text selection etc.
+            this.isMinimapDragging = true;
+            this.handleMinimapInput(e.clientX, e.clientY);
         });
     }
 

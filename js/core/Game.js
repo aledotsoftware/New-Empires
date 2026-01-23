@@ -111,6 +111,7 @@ export class Game {
         this.mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
         this.isDragging = false;
         this.dragStart = { x: 0, y: 0 };
+        this.isMinimapDragging = false; // Palette: Minimap drag state
 
         // Modo de construcción
         this.buildMode = null;
@@ -266,6 +267,17 @@ export class Game {
         this.canvas.height = container.clientHeight;
         this.viewWidth = this.canvas.width;
         this.viewHeight = this.canvas.height;
+
+        // Palette: Fix Minimap Resolution (Match CSS display size)
+        // This prevents image distortion (squashing 2:1 canvas into 1:1 container)
+        // and ensures accurate coordinate mapping.
+        if (this.minimap) {
+            const rect = this.minimap.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                this.minimap.width = rect.width;
+                this.minimap.height = rect.height;
+            }
+        }
 
         // OPTIMIZATION: Pre-calculate culling radius to avoid Math.hypot in render loop
         // Diagonal / 2 + margin (100px)
@@ -492,6 +504,18 @@ export class Game {
             this.mouse.worldY = this.mouse.y + this.camera.y;
         });
 
+        // Palette: Dedicated Minimap Drag Handler
+        window.addEventListener('mousemove', (e) => {
+            if (this.isMinimapDragging) {
+                this.handleMinimapInput(e.clientX, e.clientY);
+            }
+        });
+
+        // Global mouseup to stop dragging anywhere
+        window.addEventListener('mouseup', () => {
+            this.isMinimapDragging = false;
+        });
+
         // Click izquierdo
         this.canvas.addEventListener('mousedown', (e) => {
             if (e.button === 0) { // Left click
@@ -530,18 +554,46 @@ export class Game {
             this.keysPressed[e.key.toLowerCase()] = false;
         });
 
-        // Minimapa click
-        this.minimap.addEventListener('click', (e) => {
-            const rect = this.minimap.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const worldX = (x / this.minimap.width) * CONFIG.CANVAS_WIDTH;
-            const worldY = (y / this.minimap.height) * CONFIG.CANVAS_HEIGHT;
-
-            this.camera.x = worldX - this.viewWidth / 2;
-            this.camera.y = worldY - this.viewHeight / 2;
+        // Minimapa interaction (Click + Drag)
+        this.minimap.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevent text selection etc
+            this.isMinimapDragging = true;
+            this.handleMinimapInput(e.clientX, e.clientY);
         });
+    }
+
+    // Palette: Helper for Minimap Navigation
+    handleMinimapInput(clientX, clientY) {
+        const rect = this.minimap.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        // Determine click position relative to map
+        // Note: this.minimap.width is now synced with rect.width in resizeCanvas
+        // but we use rect.width for safety in case resize hasn't fired yet
+        const width = rect.width || this.minimap.width;
+        const height = rect.height || this.minimap.height;
+
+        const worldX = (x / width) * CONFIG.CANVAS_WIDTH;
+        const worldY = (y / height) * CONFIG.CANVAS_HEIGHT;
+
+        // Center camera on click
+        this.camera.x = worldX - this.viewWidth / 2;
+        this.camera.y = worldY - this.viewHeight / 2;
+
+        this.clampCamera();
+    }
+
+    // Palette: Helper to keep camera in bounds
+    clampCamera() {
+        const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
+        const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
+
+        if (this.camera.x < 0) this.camera.x = 0;
+        else if (this.camera.x > maxCamX) this.camera.x = maxCamX;
+
+        if (this.camera.y < 0) this.camera.y = 0;
+        else if (this.camera.y > maxCamY) this.camera.y = maxCamY;
     }
 
     /**
@@ -1470,16 +1522,7 @@ export class Game {
             this.camera.y += dy * dt;
 
             // 4. Clamping (Límites del mapa)
-            // Precalcular límites para evitar accesos repetidos
-            const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
-            const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
-
-            // Clamp eficiente
-            if (this.camera.x < 0) this.camera.x = 0;
-            else if (this.camera.x > maxCamX) this.camera.x = maxCamX;
-
-            if (this.camera.y < 0) this.camera.y = 0;
-            else if (this.camera.y > maxCamY) this.camera.y = maxCamY;
+            this.clampCamera();
         }
     }
 

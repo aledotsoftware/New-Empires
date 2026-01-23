@@ -34,7 +34,6 @@
 ## 2025-05-30 - Unit State Visualization
 **Learning:** Players need to understand their economy's flow at a glance. Knowing which villagers are carrying resources (and what type) without selecting them reduces cognitive load and helps diagnose bottlenecks instantly.
 **Action:** Added a visual indicator (resource icon) above villagers when they are carrying resources. This provides immediate, non-intrusive feedback about the unit's current task and state directly in the game world.
-
-## 2025-05-31 - Focus Trapping in SPA Modals
-**Learning:** In Single Page Applications, "modals" are often just divs layered on top of other content. Without explicit focus trapping, keyboard users can Tab right out of the modal into the invisible background interface, breaking the modal illusion and causing disorientation.
-**Action:** Implemented a robust `FocusManager.trapFocus()` system that uses a stack to handle nested modals (e.g., Confirmation over Settings) and a global `keydown` interceptor to cyclically constrain focus within the active container.
+## 2026-01-23 - [Minimap Navigation & Resolution]
+**Learning:** HTML5 Canvas defaults to 300x150, which causes severe coordinate mapping errors when resized via CSS (e.g., 110x110) without updating internal width/height attributes.
+**Action:** Always synchronize internal canvas resolution (`width/height`) with CSS display size (`getBoundingClientRect`) in `resize` handlers to ensure 1:1 pixel mapping and accurate pointer events.

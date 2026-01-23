@@ -993,19 +993,7 @@ export class Game {
         // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
     }
 
-    openBuildMenu() {
-        const menu = document.getElementById('buildMenu');
-        this.lastFocusedElement = document.activeElement;
-
-        menu.classList.remove('hidden');
-
-        // Mover foco al botón de cerrar
-        const closeBtn = menu.querySelector('.btn-close');
-        if (closeBtn) {
-            closeBtn.focus();
-        }
-
-        // Setup build options
+    updateBuildMenuState() {
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
             const type = option.dataset.building;
@@ -1056,7 +1044,7 @@ export class Game {
 
                     // Update aria-label with specific reason
                     let originalLabel = option.getAttribute('aria-label');
-                    if (originalLabel.includes(' - Insuficiente:')) {
+                    if (originalLabel && originalLabel.includes(' - Insuficiente:')) {
                         originalLabel = originalLabel.split(' - Insuficiente:')[0];
                     }
 
@@ -1087,7 +1075,27 @@ export class Game {
                     }
                 }
             }
+        });
+    }
 
+    openBuildMenu() {
+        const menu = document.getElementById('buildMenu');
+        this.lastFocusedElement = document.activeElement;
+
+        menu.classList.remove('hidden');
+
+        // Mover foco al botón de cerrar
+        const closeBtn = menu.querySelector('.btn-close');
+        if (closeBtn) {
+            closeBtn.focus();
+        }
+
+        // Update state immediately
+        this.updateBuildMenuState();
+
+        // Setup build options handlers
+        const buildOptions = document.querySelectorAll('.build-option');
+        buildOptions.forEach(option => {
             const handleAction = (e) => {
                 // Palette: Prevent action if disabled
                 if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
@@ -2414,6 +2422,12 @@ export class Game {
         }
 
         this._forceUIUpdate = false;
+
+        // Palette: Real-time update for build menu
+        const buildMenu = document.getElementById('buildMenu');
+        if (buildMenu && !buildMenu.classList.contains('hidden')) {
+            this.updateBuildMenuState();
+        }
 
         // Palette: Update Idle Villager Indicator
         if (this.uiElements.idleVillagerBtn && this.enableIdleVillagerCycle) {

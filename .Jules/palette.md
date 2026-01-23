@@ -33,3 +33,7 @@
 ## 2024-05-22 - Testing Disabled States
 **Learning:** Playwright's `click()` strictly respects accessibility semantics. It refuses to click elements with `aria-disabled="true"` (even custom `div` buttons) because it considers them non-interactive, mirroring screen reader behavior.
 **Action:** When testing "disabled" feedback handlers (UX patterns where clicking a disabled item explains *why* it's disabled), always use `page.click(selector, force=True)` to bypass this check.
+
+## 2025-05-30 - Unit State Visualization
+**Learning:** Players need to understand their economy's flow at a glance. Knowing which villagers are carrying resources (and what type) without selecting them reduces cognitive load and helps diagnose bottlenecks instantly.
+**Action:** Added a visual indicator (resource icon) above villagers when they are carrying resources. This provides immediate, non-intrusive feedback about the unit's current task and state directly in the game world.

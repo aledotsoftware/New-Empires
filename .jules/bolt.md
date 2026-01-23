@@ -35,3 +35,7 @@
 ## 2025-02-26 - Array.filter vs In-Place Removal
 **Learning:** `Array.filter` creates a shallow copy of the array every frame. For high-frequency loops (like particle systems), replacing `filter` with a manual in-place "read/write index" loop (swap-and-pop or just overwrite) eliminated GC pressure and yielded a ~13x speedup in synthetic benchmarks.
 **Action:** Avoid `filter` in `update()` loops. Use manual in-place modification.
+
+## 2025-02-27 - Context State Batching
+**Learning:** Canvas `ctx.save()` and `ctx.restore()` are relatively expensive operations (managing the state stack). For particle systems with hundreds of entities, calling them per-particle adds significant overhead. By wrapping the entire system render loop in a single `save/restore` and manually managing state changes (alpha, color) inside the loop, we eliminate N*2 state stack operations per frame.
+**Action:** Batch context state saves at the system level for high-count entities like particles.

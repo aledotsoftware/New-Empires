@@ -186,8 +186,9 @@ export class Villager extends Unit {
 
         // Palette: Draw carried resource icon
         if (this.carryAmount > 0 && this.carryType) {
-            const screenX = this.x - camera.x;
-            const screenY = this.y - camera.y;
+            // OPTIMIZATION: Integer coordinates
+            const screenX = (this.x - camera.x) | 0;
+            const screenY = (this.y - camera.y) | 0;
 
             // Simple visibility check
             if (screenX < -20 || screenX > viewWidth + 20 || screenY < -20 || screenY > viewHeight + 20) return;

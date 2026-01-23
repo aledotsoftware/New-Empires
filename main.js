@@ -70,8 +70,8 @@ window.showTechTree = function () {
         renderStaticTechTree();
     }
 
-    // Mover foco al modal
-    setTimeout(() => FocusManager.focusFirst(screen), 50);
+    // Mover foco al modal y activar trap
+    setTimeout(() => FocusManager.trapFocus(screen), 50);
 };
 
 /**
@@ -79,6 +79,8 @@ window.showTechTree = function () {
  */
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
+
+    FocusManager.releaseTrap();
     document.getElementById('techTreeScreen').classList.add('hidden');
 
     // Palette: Resume game
@@ -119,8 +121,8 @@ window.showSettings = function () {
         }
     }
 
-    // Mover foco al modal (botón cerrar o primer input)
-    setTimeout(() => FocusManager.focusFirst(screen), 50);
+    // Mover foco al modal y activar trap
+    setTimeout(() => FocusManager.trapFocus(screen), 50);
 };
 
 // Palette: Generic confirmation modal helper
@@ -139,6 +141,7 @@ window.showConfirmation = function (message, onConfirm, onCancel) {
     FocusManager.saveFocus();
 
     const close = () => {
+        FocusManager.releaseTrap();
         modal.classList.add('hidden');
         FocusManager.restoreFocus();
     };
@@ -157,7 +160,8 @@ window.showConfirmation = function (message, onConfirm, onCancel) {
     newNo.onkeydown = (e) => { if (e.key === 'Escape') newNo.click(); };
 
     // Focus "No" by default to prevent accidental clicks
-    setTimeout(() => newNo.focus(), 50);
+    // Use trapFocus to keep focus inside the confirmation
+    setTimeout(() => FocusManager.trapFocus(modal), 50);
 };
 
 // Palette: Handle quit game action with custom modal
@@ -176,6 +180,8 @@ window.confirmQuitGame = function() {
  */
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
+
+    FocusManager.releaseTrap();
     document.getElementById('settingsScreen').classList.add('hidden');
 
     // Palette: Resume game

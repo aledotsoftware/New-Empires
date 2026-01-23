@@ -34,3 +34,6 @@
 ## 2025-05-30 - Unit State Visualization
 **Learning:** Players need to understand their economy's flow at a glance. Knowing which villagers are carrying resources (and what type) without selecting them reduces cognitive load and helps diagnose bottlenecks instantly.
 **Action:** Added a visual indicator (resource icon) above villagers when they are carrying resources. This provides immediate, non-intrusive feedback about the unit's current task and state directly in the game world.
+## 2026-01-23 - [Minimap Navigation & Resolution]
+**Learning:** HTML5 Canvas defaults to 300x150, which causes severe coordinate mapping errors when resized via CSS (e.g., 110x110) without updating internal width/height attributes.
+**Action:** Always synchronize internal canvas resolution (`width/height`) with CSS display size (`getBoundingClientRect`) in `resize` handlers to ensure 1:1 pixel mapping and accurate pointer events.

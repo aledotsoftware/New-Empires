@@ -38,7 +38,8 @@ class Particle {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
 
-        ctx.save();
+        // BOLT OPTIMIZATION: Removed ctx.save() to avoid allocation.
+        // Context state is managed globally in ParticleSystem.render
         ctx.globalAlpha = this.alpha;
 
         if (this.emoji) {
@@ -65,7 +66,7 @@ class Particle {
             }
         }
 
-        ctx.restore();
+        // BOLT OPTIMIZATION: Removed ctx.restore()
     }
 }
 
@@ -94,7 +95,8 @@ class Ripple {
         const screenX = this.x - camera.x;
         const screenY = this.y - camera.y;
 
-        ctx.save();
+        // BOLT OPTIMIZATION: Removed ctx.save()
+        // Context state is managed globally in ParticleSystem.render
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lineWidth;
         ctx.globalAlpha = this.alpha;
@@ -102,7 +104,7 @@ class Ripple {
         // Flatten y to give 3D perspective effect (ellipse)
         ctx.ellipse(screenX, screenY, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.restore();
+        // BOLT OPTIMIZATION: Removed ctx.restore()
     }
 }
 
@@ -245,13 +247,21 @@ class ParticleSystem {
     }
 
     render(ctx, camera) {
+        // BOLT OPTIMIZATION: Wrap particles loop in save/restore to isolate state changes
+        // This replaces N * 2 save/restore calls with 1 * 2 calls per loop.
+        ctx.save();
         // BOLT OPTIMIZATION: Standard loop avoids iterator allocation
         for (let i = 0; i < this.particles.length; i++) {
             this.particles[i].render(ctx, camera);
         }
+        ctx.restore();
+
+        // Prevent state leakage between particles and projectiles
+        ctx.save();
         for (let i = 0; i < this.projectiles.length; i++) {
             this.projectiles[i].render(ctx, camera);
         }
+        ctx.restore();
     }
 }
 

@@ -543,6 +543,12 @@ export class Game {
             this.handleRightClick();
         });
 
+        // Doble click (Palette: Select Similar Units)
+        this.canvas.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            this.handleDoubleClick(e);
+        });
+
         // Teclado (keydown)
         document.addEventListener('keydown', (e) => {
             this.keysPressed[e.key.toLowerCase()] = true;
@@ -624,6 +630,33 @@ export class Game {
         }
     }
 
+    /**
+     * Helper para encontrar la entidad más cercana a una posición
+     * @param {number} worldX - Posición X en el mundo
+     * @param {number} worldY - Posición Y en el mundo
+     * @param {string|null} teamFilter - Filtrar por equipo (opcional)
+     * @returns {Entity|null}
+     */
+    _getClosestEntity(worldX, worldY, teamFilter = 'player') {
+        let closest = null;
+        let closestDistSq = Infinity;
+
+        for (let entity of this.entities) {
+            if (teamFilter && entity.team !== teamFilter) continue;
+
+            const dx = entity.x - worldX;
+            const dy = entity.y - worldY;
+            const distSq = dx * dx + dy * dy;
+            const sizeSq = entity.size * entity.size;
+
+            if (distSq < sizeSq && distSq < closestDistSq) {
+                closest = entity;
+                closestDistSq = distSq;
+            }
+        }
+        return closest;
+    }
+
     selectEntities() {
         const minX = Math.min(this.dragStart.x, this.mouse.worldX);
         const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
@@ -636,22 +669,7 @@ export class Game {
         if (Math.abs(this.dragStart.x - this.mouse.worldX) < 10 &&
             Math.abs(this.dragStart.y - this.mouse.worldY) < 10) {
 
-            let closest = null;
-            let closestDistSq = Infinity;
-
-            for (let entity of this.entities) {
-                if (entity.team !== 'player') continue;
-
-                const dx = entity.x - this.mouse.worldX;
-                const dy = entity.y - this.mouse.worldY;
-                const distSq = dx * dx + dy * dy;
-                const sizeSq = entity.size * entity.size;
-
-                if (distSq < sizeSq && distSq < closestDistSq) {
-                    closest = entity;
-                    closestDistSq = distSq;
-                }
-            }
+            const closest = this._getClosestEntity(this.mouse.worldX, this.mouse.worldY, 'player');
 
             if (closest) {
                 this.selectedEntities = [closest];
@@ -799,6 +817,42 @@ export class Game {
         // Palette: Visual feedback for move command
         if (moveCommandTriggered && this.particleSystem) {
             this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
+        }
+    }
+
+    handleDoubleClick(e) {
+        // Find entity under cursor
+        const closest = this._getClosestEntity(this.mouse.worldX, this.mouse.worldY, 'player');
+
+        if (closest && closest.isUnit) {
+            // Select all visible units of the same type
+            const visibleSimilarUnits = this.units.filter(u => {
+                // Must match type and team
+                if (u.type !== closest.type || u.team !== 'player') return false;
+
+                // Must be visible (Frustum Culling)
+                // Using margin - same as render loop
+                const margin = 50;
+                return u.x >= this.camera.x - margin &&
+                       u.x <= this.camera.x + this.viewWidth + margin &&
+                       u.y >= this.camera.y - margin &&
+                       u.y <= this.camera.y + this.viewHeight + margin;
+            });
+
+            if (visibleSimilarUnits.length > 0) {
+                this.selectedEntities = visibleSimilarUnits;
+                this.updateSelectionPanel();
+                this.updateActionsPanel();
+
+                // Pluralize name roughly
+                const name = closest.name + (closest.name.endsWith('s') ? '' : 's');
+                this.showNotification(`Seleccionados: ${visibleSimilarUnits.length} ${name}`, 'info');
+
+                if (typeof soundManager !== 'undefined') {
+                    // Reuse unit selection sound
+                    soundManager.playEntitySelection(closest.type);
+                }
+            }
         }
     }
 

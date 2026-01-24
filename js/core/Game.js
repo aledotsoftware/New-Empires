@@ -2525,7 +2525,8 @@ export class Game {
                 const prog = Math.floor(ent.productionQueue.getProgress() * 100);
                 prodKey = `:prod${ent.productionQueue.length}:${prog}`;
             }
-            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}${prodKey}`;
+            // BOLT OPTIMIZATION: Floor HP to avoid DOM thrashing on fractional damage/regen
+            stateKey = `single:${ent.id}:${Math.floor(ent.hp)}:${ent.state}${prodKey}`;
         } else {
             stateKey = `multi:${this.selectedEntities.length}`;
         }

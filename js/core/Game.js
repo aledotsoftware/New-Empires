@@ -1,5 +1,6 @@
 // Imports de módulos creados
 import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS } from './constants.js';
+import { FocusManager } from '../utils/FocusManager.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
@@ -50,7 +51,7 @@ export class Game {
 
         // Estado del juego
         this.gameStartTime = Date.now();
-        this.isPaused = false;
+        this._isPaused = false;
         this.isGameOver = false;
 
         // Recursos
@@ -110,6 +111,7 @@ export class Game {
         this.mouse = { x: 0, y: 0, worldX: 0, worldY: 0 };
         this.isDragging = false;
         this.dragStart = { x: 0, y: 0 };
+        this.isMinimapDragging = false; // Palette: Minimap drag state
 
         // Modo de construcción
         this.buildMode = null;
@@ -135,6 +137,11 @@ export class Game {
 
         // SISTEMA DE TECNOLOGÍAS (variable global temporal)
         this.techManager = new TechManager(this);
+
+        // SISTEMA DE PARTÍCULAS (Palette: Visual Feedback)
+        if (typeof ParticleSystem !== 'undefined') {
+            this.particleSystem = new ParticleSystem();
+        }
 
         // Cargar imagen del cursor personalizado
         this.cursorImage = new Image();
@@ -170,6 +177,12 @@ export class Game {
         this.lastUITime = 0;
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
+        this.lastResources = { ...this.resources }; // Palette: Track for animations
+
+        // BOLT OPTIMIZATION: Track rendered values to avoid redundant DOM writes
+        this._lastRenderedPopulation = -1;
+        this._lastRenderedTimeStr = '';
+        this._forceUIUpdate = true; // Force first render
 
         // Variables para el ciclo de tips (Palette)
         this.currentTipIndex = 0;
@@ -206,6 +219,7 @@ export class Game {
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
         this._resourceRenderCache = [];
+        this._rowCache = []; // BOLT OPTIMIZATION: Cache for row-wise sorting
         this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
         this.lastCameraX = -1; // BOLT OPTIMIZATION: Track camera for static terrain rendering
         this.lastCameraY = -1;
@@ -253,6 +267,17 @@ export class Game {
         this.canvas.height = container.clientHeight;
         this.viewWidth = this.canvas.width;
         this.viewHeight = this.canvas.height;
+
+        // Palette: Fix Minimap Resolution (Match CSS display size)
+        // This prevents image distortion (squashing 2:1 canvas into 1:1 container)
+        // and ensures accurate coordinate mapping.
+        if (this.minimap) {
+            const rect = this.minimap.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                this.minimap.width = rect.width;
+                this.minimap.height = rect.height;
+            }
+        }
 
         // OPTIMIZATION: Pre-calculate culling radius to avoid Math.hypot in render loop
         // Diagonal / 2 + margin (100px)
@@ -479,6 +504,18 @@ export class Game {
             this.mouse.worldY = this.mouse.y + this.camera.y;
         });
 
+        // Palette: Dedicated Minimap Drag Handler
+        window.addEventListener('mousemove', (e) => {
+            if (this.isMinimapDragging) {
+                this.handleMinimapInput(e.clientX, e.clientY);
+            }
+        });
+
+        // Global mouseup to stop dragging anywhere
+        window.addEventListener('mouseup', () => {
+            this.isMinimapDragging = false;
+        });
+
         // Click izquierdo
         this.canvas.addEventListener('mousedown', (e) => {
             if (e.button === 0) { // Left click
@@ -517,18 +554,46 @@ export class Game {
             this.keysPressed[e.key.toLowerCase()] = false;
         });
 
-        // Minimapa click
-        this.minimap.addEventListener('click', (e) => {
-            const rect = this.minimap.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const worldX = (x / this.minimap.width) * CONFIG.CANVAS_WIDTH;
-            const worldY = (y / this.minimap.height) * CONFIG.CANVAS_HEIGHT;
-
-            this.camera.x = worldX - this.viewWidth / 2;
-            this.camera.y = worldY - this.viewHeight / 2;
+        // Minimapa interaction (Click + Drag)
+        this.minimap.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevent text selection etc
+            this.isMinimapDragging = true;
+            this.handleMinimapInput(e.clientX, e.clientY);
         });
+    }
+
+    // Palette: Helper for Minimap Navigation
+    handleMinimapInput(clientX, clientY) {
+        const rect = this.minimap.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        // Determine click position relative to map
+        // Note: this.minimap.width is now synced with rect.width in resizeCanvas
+        // but we use rect.width for safety in case resize hasn't fired yet
+        const width = rect.width || this.minimap.width;
+        const height = rect.height || this.minimap.height;
+
+        const worldX = (x / width) * CONFIG.CANVAS_WIDTH;
+        const worldY = (y / height) * CONFIG.CANVAS_HEIGHT;
+
+        // Center camera on click
+        this.camera.x = worldX - this.viewWidth / 2;
+        this.camera.y = worldY - this.viewHeight / 2;
+
+        this.clampCamera();
+    }
+
+    // Palette: Helper to keep camera in bounds
+    clampCamera() {
+        const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
+        const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
+
+        if (this.camera.x < 0) this.camera.x = 0;
+        else if (this.camera.x > maxCamX) this.camera.x = maxCamX;
+
+        if (this.camera.y < 0) this.camera.y = 0;
+        else if (this.camera.y > maxCamY) this.camera.y = maxCamY;
     }
 
     /**
@@ -695,6 +760,8 @@ export class Game {
         }
 
         // Comandar unidades
+        let moveCommandTriggered = false;
+
         for (let entity of this.selectedEntities) {
             if (entity.isUnit) {
                 if (targetEnemy && entity.canAttack) {
@@ -724,8 +791,14 @@ export class Game {
                     entity.attackTarget = null;
                     entity.gatherTarget = null;
                     if (entity.type === 'villager') entity.state = 'MOVING';
+                    moveCommandTriggered = true;
                 }
             }
+        }
+
+        // Palette: Visual feedback for move command
+        if (moveCommandTriggered && this.particleSystem) {
+            this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
         }
     }
 
@@ -804,6 +877,12 @@ export class Game {
     }
 
     handleKeyPress(e) {
+        // P - Toggle Pause (Palette)
+        if (e.key === 'p' || e.key === 'P') {
+            this.togglePause();
+            return;
+        }
+
         // TAB - Seleccionar siguiente aldeano inactivo
         if (e.key === 'Tab') {
             e.preventDefault();
@@ -967,19 +1046,7 @@ export class Game {
         // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
     }
 
-    openBuildMenu() {
-        const menu = document.getElementById('buildMenu');
-        this.lastFocusedElement = document.activeElement;
-
-        menu.classList.remove('hidden');
-
-        // Mover foco al botón de cerrar
-        const closeBtn = menu.querySelector('.btn-close');
-        if (closeBtn) {
-            closeBtn.focus();
-        }
-
-        // Setup build options
+    updateBuildMenuState() {
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
             const type = option.dataset.building;
@@ -1030,7 +1097,7 @@ export class Game {
 
                     // Update aria-label with specific reason
                     let originalLabel = option.getAttribute('aria-label');
-                    if (originalLabel.includes(' - Insuficiente:')) {
+                    if (originalLabel && originalLabel.includes(' - Insuficiente:')) {
                         originalLabel = originalLabel.split(' - Insuficiente:')[0];
                     }
 
@@ -1061,7 +1128,24 @@ export class Game {
                     }
                 }
             }
+        });
+    }
 
+    openBuildMenu() {
+        const menu = document.getElementById('buildMenu');
+        this.lastFocusedElement = document.activeElement;
+
+        menu.classList.remove('hidden');
+
+        // Activamos el trap focus para accesibilidad (Palette)
+        FocusManager.trapFocus(menu);
+
+        // Update state immediately
+        this.updateBuildMenuState();
+
+        // Setup build options handlers
+        const buildOptions = document.querySelectorAll('.build-option');
+        buildOptions.forEach(option => {
             const handleAction = (e) => {
                 // Palette: Prevent action if disabled
                 if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
@@ -1103,6 +1187,7 @@ export class Game {
     }
 
     closeBuildMenu() {
+        FocusManager.releaseTrap();
         document.getElementById('buildMenu').classList.add('hidden');
 
         // Restaurar foco al canvas para continuar jugando
@@ -1442,16 +1527,7 @@ export class Game {
             this.camera.y += dy * dt;
 
             // 4. Clamping (Límites del mapa)
-            // Precalcular límites para evitar accesos repetidos
-            const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
-            const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
-
-            // Clamp eficiente
-            if (this.camera.x < 0) this.camera.x = 0;
-            else if (this.camera.x > maxCamX) this.camera.x = maxCamX;
-
-            if (this.camera.y < 0) this.camera.y = 0;
-            else if (this.camera.y > maxCamY) this.camera.y = maxCamY;
+            this.clampCamera();
         }
     }
 
@@ -1481,6 +1557,9 @@ export class Game {
 
         // Actualizar tecnologías
         if (this.techManager) this.techManager.update(deltaTime);
+
+        // Actualizar partículas (Palette)
+        if (this.particleSystem) this.particleSystem.update(deltaTime);
 
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
         // Separamos el bucle para iterar solo sobre unidades dinámicas (Jugador + Enemigos)
@@ -1629,6 +1708,52 @@ export class Game {
         } else {
             this.cursorBadge.style.display = 'none';
         }
+    }
+
+    get isPaused() {
+        return this._isPaused;
+    }
+
+    set isPaused(value) {
+        if (this._isPaused === value) return;
+
+        this._isPaused = value;
+        this._updatePauseState();
+    }
+
+    _updatePauseState() {
+        // Update UI Button
+        const btn = document.getElementById('pauseButton');
+        const icon = document.getElementById('pauseIcon');
+
+        if (btn && icon) {
+            if (this._isPaused) {
+                icon.textContent = '▶';
+                btn.setAttribute('aria-label', 'Reanudar juego (P)');
+                btn.classList.add('active-key');
+            } else {
+                icon.textContent = '⏸';
+                btn.setAttribute('aria-label', 'Pausar juego (P)');
+                btn.classList.remove('active-key');
+            }
+        }
+
+        // Timer Logic: Adjust start time to ignore pause duration
+        if (this._isPaused) {
+            this.pauseStartTime = Date.now();
+        } else {
+            if (this.pauseStartTime) {
+                const pauseDuration = Date.now() - this.pauseStartTime;
+                this.gameStartTime += pauseDuration;
+                this.pauseStartTime = null;
+            }
+        }
+    }
+
+    // Palette: Toggle Pause
+    togglePause() {
+        if (this.isGameOver) return;
+        this.isPaused = !this.isPaused;
     }
 
     checkGameOver() {
@@ -1886,13 +2011,28 @@ export class Game {
         const endRow = Math.min(rows - 1, Math.floor((this.camera.y + this.viewHeight + margin) * invCellSize));
 
         for (let r = startRow; r <= endRow; r++) {
-            this.spatialGrid.queryRowIndices(r, startCol, endCol, this._renderCache);
-            this.buildingGrid.queryRowIndices(r, startCol, endCol, this._renderCache);
+            // BOLT OPTIMIZATION: Sort row-by-row instead of globally
+            // This exploits the fact that rows are already mostly sorted by Y
+            // and avoids the O(N log N) cost of sorting the entire visible set at once.
+            this._rowCache.length = 0;
+            this.spatialGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+
+            // Sort only this row's entities
+            this._rowCache.sort((a, b) => a.y - b.y);
+
+            // Manual append to avoid call stack limits or creation of intermediate arrays
+            // This loop is extremely fast in V8
+            const rowLen = this._rowCache.length;
+            let renderIdx = this._renderCache.length;
+            for (let i = 0; i < rowLen; i++) {
+                this._renderCache[renderIdx++] = this._rowCache[i];
+            }
         }
 
         // Ordenar por Y para correcto "Painter's Algorithm" (los de arriba se dibujan antes)
-        // Esto corrige problemas de superposición que el SpatialGrid podría introducir
-        this._renderCache.sort((a, b) => a.y - b.y);
+        // BOLT OPTIMIZATION: Global sort removed as row-wise sort + grid order is sufficient
+        // this._renderCache.sort((a, b) => a.y - b.y);
 
         // Render entities (Pass 1: Main sprites)
         // OPTIMIZATION: Use standard for loop with cached length instead of for...of
@@ -1945,8 +2085,38 @@ export class Game {
             this.drawBuildGhost();
         }
 
+        // Renderizar partículas (Palette)
+        if (this.particleSystem) {
+            this.particleSystem.render(this.ctx, this.camera);
+        }
+
         // Renderizar minimapa
         this.renderMinimap();
+
+        // Palette: Draw Pause Overlay
+        if (this.isPaused && !this.isGameOver) {
+            this.ctx.save();
+            // Overlay oscuro
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            this.ctx.fillRect(0, 0, this.viewWidth, this.viewHeight);
+
+            // Título
+            this.ctx.font = 'bold 48px "Cinzel", serif';
+            this.ctx.fillStyle = '#c9a227'; // var(--gold)
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            this.ctx.shadowBlur = 10;
+            this.ctx.fillText('PAUSA', this.viewWidth / 2, this.viewHeight / 2 - 20);
+
+            // Subtítulo
+            this.ctx.font = '20px "Inter", sans-serif';
+            this.ctx.fillStyle = '#e8d48b'; // var(--text-gold)
+            this.ctx.shadowBlur = 4;
+            this.ctx.fillText('Presiona P para reanudar', this.viewWidth / 2, this.viewHeight / 2 + 30);
+
+            this.ctx.restore();
+        }
     }
 
     drawGrid() {
@@ -2024,16 +2194,20 @@ export class Game {
             }
 
             // Icon
-            if (typeof assetLoader !== 'undefined') {
-                const img = assetLoader.getImage(node.type);
-                if (img && img.complete) {
-                    const size = node.radius * 1.5;
-                    this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
-                } else {
-                    // Fallback to square if image not ready
-                    this.ctx.fillStyle = '#FFD700';
-                    this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
-                }
+            // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop
+            let img = node._cachedImage;
+            if (!img && typeof assetLoader !== 'undefined') {
+                img = assetLoader.getImage(node.type);
+                if (img) node._cachedImage = img;
+            }
+
+            if (img && img.complete) {
+                const size = node.radius * 1.5;
+                this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
+            } else if (typeof assetLoader !== 'undefined') {
+                // Fallback to square if image not ready
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
             }
         }
     }
@@ -2245,22 +2419,66 @@ export class Game {
     }
 
     updateUI() {
-        // Actualizar recursos
-        // OPTIMIZACIÓN: Usar elementos cacheados
-        if (this.uiElements.woodCount) this.uiElements.woodCount.textContent = Math.floor(this.resources.wood);
-        if (this.uiElements.foodCount) this.uiElements.foodCount.textContent = Math.floor(this.resources.food);
-        if (this.uiElements.goldCount) this.uiElements.goldCount.textContent = Math.floor(this.resources.gold);
-        if (this.uiElements.stoneCount) this.uiElements.stoneCount.textContent = Math.floor(this.resources.stone);
+        // Actualizar recursos con animación (Palette)
+        const resourceKeys = ['wood', 'food', 'gold', 'stone'];
+        const forceUpdate = this._forceUIUpdate;
+
+        for (const key of resourceKeys) {
+            const el = this.uiElements[`${key}Count`];
+            if (!el) continue;
+
+            const currentVal = Math.floor(this.resources[key]);
+            const lastVal = Math.floor(this.lastResources[key] || 0);
+
+            // BOLT OPTIMIZATION: Only update DOM text if value changed or forced
+            // Reduces Layout thrashing and DOM calls by ~90% for these elements
+            if (forceUpdate || currentVal !== lastVal) {
+                el.textContent = currentVal;
+            }
+
+            // Trigger animation if value changed (and not first render)
+            if (!forceUpdate && currentVal !== lastVal) {
+                const isGain = currentVal > lastVal;
+                const animClass = isGain ? 'resource-pop-up' : 'resource-pop-down';
+
+                el.classList.remove('resource-pop-up', 'resource-pop-down');
+                void el.offsetWidth; // Force reflow
+                el.classList.add(animClass);
+            }
+        }
+
+        // Update history for next frame
+        this.lastResources = { ...this.resources };
 
         // Actualizar población
-        if (this.uiElements.currentPopulation) this.uiElements.currentPopulation.textContent = Math.floor(this.population);
+        // BOLT OPTIMIZATION: Only write if changed
+        const currentPop = Math.floor(this.population);
+        if (forceUpdate || this._lastRenderedPopulation !== currentPop) {
+            if (this.uiElements.currentPopulation) this.uiElements.currentPopulation.textContent = currentPop;
+            this._lastRenderedPopulation = currentPop;
+        }
+
         if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.maxPopulation;
 
         // Actualizar tiempo de juego
         const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
         const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
         const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-        if (this.uiElements.gameTime) this.uiElements.gameTime.textContent = `${minutes}:${seconds}`;
+        const timeStr = `${minutes}:${seconds}`;
+
+        // BOLT OPTIMIZATION: Only write if changed (updates once per sec instead of 10x/sec)
+        if (forceUpdate || this._lastRenderedTimeStr !== timeStr) {
+            if (this.uiElements.gameTime) this.uiElements.gameTime.textContent = timeStr;
+            this._lastRenderedTimeStr = timeStr;
+        }
+
+        this._forceUIUpdate = false;
+
+        // Palette: Real-time update for build menu
+        const buildMenu = document.getElementById('buildMenu');
+        if (buildMenu && !buildMenu.classList.contains('hidden')) {
+            this.updateBuildMenuState();
+        }
 
         // Palette: Update Idle Villager Indicator
         if (this.uiElements.idleVillagerBtn && this.enableIdleVillagerCycle) {
@@ -2316,7 +2534,8 @@ export class Game {
                 const prog = Math.floor(ent.productionQueue.getProgress() * 100);
                 prodKey = `:prod${ent.productionQueue.length}:${prog}`;
             }
-            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}${prodKey}`;
+            // BOLT OPTIMIZATION: Floor HP to avoid DOM thrashing on fractional damage/regen
+            stateKey = `single:${ent.id}:${Math.floor(ent.hp)}:${ent.state}${prodKey}`;
         } else {
             stateKey = `multi:${this.selectedEntities.length}`;
         }
@@ -2431,7 +2650,22 @@ export class Game {
                 btn.setAttribute('aria-label', `${text} (${kbd})`);
 
                 btn.style.cssText = `font-size:0.8rem; padding:6px 10px; display:flex; align-items:center; justify-content:center; gap:6px; ${style}`;
-                btn.innerHTML = `<img src="assets/icons/${icon}.png" class="icon-tiny" alt=""> ${text} <span class="kbd-inline" style="font-size:0.65rem;">${kbd}</span>`;
+
+                // Securely create content without innerHTML
+                const img = document.createElement('img');
+                img.src = `assets/icons/${icon}.png`;
+                img.className = 'icon-tiny';
+                img.alt = '';
+                btn.appendChild(img);
+
+                btn.appendChild(document.createTextNode(` ${text} `));
+
+                const span = document.createElement('span');
+                span.className = 'kbd-inline';
+                span.style.fontSize = '0.65rem';
+                span.textContent = kbd;
+                btn.appendChild(span);
+
                 btn.onclick = (e) => { e.stopPropagation(); onClick(); if (typeof soundManager !== 'undefined') soundManager.play('click'); };
                 return btn;
             };
@@ -2667,9 +2901,55 @@ export class Game {
             const statsDiv = document.createElement('div');
             statsDiv.className = 'selection-stats';
 
-            const selectionTextDiv = document.createElement('div');
-            selectionTextDiv.textContent = 'Selección múltiple';
-            statsDiv.appendChild(selectionTextDiv);
+            // Group entities by type
+            const groups = {};
+            this.selectedEntities.forEach(e => {
+                if (!groups[e.type]) groups[e.type] = 0;
+                groups[e.type]++;
+            });
+
+            const groupContainer = document.createElement('div');
+            groupContainer.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;';
+
+            for (const [type, count] of Object.entries(groups)) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-secondary';
+                btn.style.cssText = 'padding:4px 8px; font-size:0.75rem; display:flex; align-items:center; gap:6px; border-color:var(--stone-light);';
+                btn.setAttribute('aria-label', `Seleccionar solo ${count} ${type}`);
+
+                // Icon
+                if (typeof assetLoader !== 'undefined') {
+                    const iconSrc = assetLoader.getSrc(type);
+                    if (iconSrc) {
+                        const img = document.createElement('img');
+                        img.src = iconSrc;
+                        img.className = 'icon-tiny';
+                        img.alt = '';
+                        btn.appendChild(img);
+                    }
+                }
+
+                // Count
+                const countSpan = document.createElement('span');
+                countSpan.textContent = count;
+                countSpan.style.fontWeight = 'bold';
+                btn.appendChild(countSpan);
+
+                // Click to filter
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    // Filter selection
+                    this.selectedEntities = this.selectedEntities.filter(ent => ent.type === type);
+                    // Refresh
+                    this.updateSelectionPanel();
+                    this.updateActionsPanel();
+                    // Feedback
+                    if (typeof soundManager !== 'undefined') soundManager.play('click');
+                };
+
+                groupContainer.appendChild(btn);
+            }
+            statsDiv.appendChild(groupContainer);
 
             detailsDiv.appendChild(nameHeader);
             detailsDiv.appendChild(statsDiv);

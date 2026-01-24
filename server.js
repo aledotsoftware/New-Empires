@@ -22,8 +22,26 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+    // Security: Decode URL to handle spaces and special characters
+    // This fixes accessibility for assets with special names
+    let decodedUrl;
+    try {
+        decodedUrl = decodeURIComponent(req.url);
+    } catch (e) {
+        res.writeHead(400);
+        res.end('Bad Request');
+        return;
+    }
+
+    // Security: Prevent Null Byte Injection
+    if (decodedUrl.indexOf('\0') !== -1) {
+        res.writeHead(400);
+        res.end('Bad Request');
+        return;
+    }
+
     // Normalize path
-    let safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+    let safePath = path.normalize(decodedUrl).replace(/^(\.\.[\/\\])+/, '');
 
     // Remove query string
     safePath = safePath.split('?')[0];
@@ -41,9 +59,13 @@ const server = http.createServer((req, res) => {
         'package.json',
         'package-lock.json',
         'pnpm-lock.yaml',
+        'yarn.lock',
+        '.npmrc',
+        '.nvmrc',
         'Dockerfile',
         'docker-compose.yml',
-        '.env'
+        '.env',
+        'AGENTS.md'
     ].includes(filename);
 
     // Security: Block sensitive directories
@@ -58,7 +80,9 @@ const server = http.createServer((req, res) => {
         '.jules',
         'node_modules',
         '.vscode',
-        '.idea'
+        '.idea',
+        'test-results',
+        'tests'
     ];
 
     // Check for dotfiles in any part of the path (hidden files)

@@ -26,3 +26,18 @@
 ## 2025-05-28 - Atmospheric Particle Effects
 **Learning:** Static start screens in immersive games can feel "dead". Adding subtle, procedural animations (like rising embers) creates a sense of life and polish without heavy video assets.
 **Action:** Implemented a lightweight particle system using DOM elements and CSS animations. Crucially, the system respects `prefers-reduced-motion` to ensure accessibility, disabling the effect for users sensitive to motion.
+
+## 2025-05-29 - System State Visibility
+**Learning:** In immersive games, changes to system state (like Pausing) via hotkeys must have immediate, high-contrast visual confirmation. Relying on the absence of movement is insufficient feedback.
+**Action:** Implemented a full-screen "PAUSA" overlay with a clear subtitle "Press P to resume" when the game is manually paused. This removes ambiguity about whether the game is frozen or just inactive.
+
+## 2025-05-30 - Unit State Visualization
+**Learning:** Players need to understand their economy's flow at a glance. Knowing which villagers are carrying resources (and what type) without selecting them reduces cognitive load and helps diagnose bottlenecks instantly.
+**Action:** Added a visual indicator (resource icon) above villagers when they are carrying resources. This provides immediate, non-intrusive feedback about the unit's current task and state directly in the game world.
+## 2026-01-23 - [Minimap Navigation & Resolution]
+**Learning:** HTML5 Canvas defaults to 300x150, which causes severe coordinate mapping errors when resized via CSS (e.g., 110x110) without updating internal width/height attributes.
+**Action:** Always synchronize internal canvas resolution (`width/height`) with CSS display size (`getBoundingClientRect`) in `resize` handlers to ensure 1:1 pixel mapping and accurate pointer events.
+
+## 2026-01-24 - [Sub-Selection Filtering]
+**Learning:** In RTS games, precise control over unit subgroups is essential. Players often drag-select a mixed group but need to command only specific units (e.g., "Archers only"). A static "Multiple Selection" text provides no utility.
+**Action:** Replaced the generic multi-selection label with interactive buttons for each unit type selected. Clicking a button filters the selection to that specific type, enabling rapid "Select All Army -> Filter to Archers" workflows without needing complex hotkeys.

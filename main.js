@@ -70,8 +70,8 @@ window.showTechTree = function () {
         renderStaticTechTree();
     }
 
-    // Mover foco al modal
-    setTimeout(() => FocusManager.focusFirst(screen), 50);
+    // Mover foco al modal y activar trap
+    setTimeout(() => FocusManager.trapFocus(screen), 50);
 };
 
 /**
@@ -79,6 +79,8 @@ window.showTechTree = function () {
  */
 window.hideTechTree = function () {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
+
+    FocusManager.releaseTrap();
     document.getElementById('techTreeScreen').classList.add('hidden');
 
     // Palette: Resume game
@@ -119,8 +121,8 @@ window.showSettings = function () {
         }
     }
 
-    // Mover foco al modal (botón cerrar o primer input)
-    setTimeout(() => FocusManager.focusFirst(screen), 50);
+    // Mover foco al modal y activar trap
+    setTimeout(() => FocusManager.trapFocus(screen), 50);
 };
 
 // Palette: Generic confirmation modal helper
@@ -139,6 +141,7 @@ window.showConfirmation = function (message, onConfirm, onCancel) {
     FocusManager.saveFocus();
 
     const close = () => {
+        FocusManager.releaseTrap();
         modal.classList.add('hidden');
         FocusManager.restoreFocus();
     };
@@ -157,7 +160,8 @@ window.showConfirmation = function (message, onConfirm, onCancel) {
     newNo.onkeydown = (e) => { if (e.key === 'Escape') newNo.click(); };
 
     // Focus "No" by default to prevent accidental clicks
-    setTimeout(() => newNo.focus(), 50);
+    // Use trapFocus to keep focus inside the confirmation
+    setTimeout(() => FocusManager.trapFocus(modal), 50);
 };
 
 // Palette: Handle quit game action with custom modal
@@ -176,6 +180,8 @@ window.confirmQuitGame = function() {
  */
 window.hideSettings = function () {
     debugLogger.info('Cerrando configuración', 'ui');
+
+    FocusManager.releaseTrap();
     document.getElementById('settingsScreen').classList.add('hidden');
 
     // Palette: Resume game
@@ -251,6 +257,16 @@ window.toggleIdleVillagerCycle = function () {
  * Toggle sound enabled/disabled
  * Palette: Enhanced UX with visual feedback
  */
+/**
+ * Toggle pause state via UI button
+ * Palette: Pause/Resume functionality
+ */
+window.togglePauseGame = function () {
+    if (window.game) {
+        window.game.togglePause();
+    }
+};
+
 window.toggleSound = function () {
     let newState = false;
     if (typeof soundManager !== 'undefined') {
@@ -895,6 +911,40 @@ function initStartScreenParticles() {
 }
 
 /**
+ * Inicializa los manejadores para cerrar modales al hacer click en el fondo
+ * Palette: "Click outside to close" pattern
+ */
+function initModalBackdropHandlers() {
+    const modalMap = {
+        'techTreeScreen': window.hideTechTree,
+        'settingsScreen': window.hideSettings,
+        'buildMenu': window.closeBuildMenu,
+        'confirmationModal': () => {
+            // Para confirmación, click en fondo actúa como "Cancelar"
+            const noBtn = document.getElementById('confirmNoBtn');
+            if (noBtn) noBtn.click();
+            else document.getElementById('confirmationModal').classList.add('hidden');
+        }
+    };
+
+    for (const [id, closeAction] of Object.entries(modalMap)) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                // Solo cerrar si se clickea el fondo (overlay), no el contenido
+                if (e.target === modal) {
+                    debugLogger.info(`Cerrando modal ${id} por click en fondo`, 'ui');
+                    if (typeof closeAction === 'function') {
+                        closeAction();
+                    }
+                }
+            });
+        }
+    }
+    debugLogger.info('Manejadores de fondo de modales inicializados', 'ui');
+}
+
+/**
  * Genera dinámicamente las opciones de tamaño de mapa
  */
 function populateMapSizes() {
@@ -1257,20 +1307,54 @@ function populateCivilizations() {
 
         // Agregar event listener al crear el elemento
         const selectCiv = () => {
+            // Palette: Immediate visual feedback
+            if (option.classList.contains('loading')) return;
+
+            // Visual State
+            option.classList.add('loading');
+            option.setAttribute('aria-busy', 'true');
+            option.style.cursor = 'wait';
+
+            // Add spinner to name
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            spinner.style.width = '0.8em';
+            spinner.style.height = '0.8em';
+            spinner.style.marginLeft = '8px';
+            spinner.style.borderWidth = '2px';
+            spinner.style.borderTopColor = 'var(--gold)'; // Ensure visibility
+
+            // Find name div to append spinner
+            const nameEl = option.querySelector('.civ-name');
+            if (nameEl) nameEl.appendChild(spinner);
+
+            // Disable other interactions in the grid
+            const grid = document.getElementById('civGrid');
+            if (grid) grid.style.pointerEvents = 'none';
+
             selectedCivilization = civ.civilizationId;
             debugLogger.info(`Civilizacion seleccionada: ${civ.civilizationId}`, 'ui');
 
-            // Obtener configuracion del mapa
-            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
+            // Defer execution to allow UI update paint
+            setTimeout(() => {
+                // Obtener configuracion del mapa
+                const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
 
-            // Iniciar juego
-            startGame(civ.civilizationId, {
-                ...mapConfig,
-                seed: Date.now(),
-                numPlayers: 2,
-                biome: 'grassland',
-                style: 'continental'
-            });
+                // Iniciar juego
+                startGame(civ.civilizationId, {
+                    ...mapConfig,
+                    seed: Date.now(),
+                    numPlayers: 2,
+                    biome: 'grassland',
+                    style: 'continental'
+                });
+
+                // Cleanup if needed (though screen changes)
+                if (grid) grid.style.pointerEvents = '';
+                option.classList.remove('loading');
+                option.removeAttribute('aria-busy');
+                if (nameEl && nameEl.contains(spinner)) nameEl.removeChild(spinner);
+            }, 50);
         };
 
         option.addEventListener('click', selectCiv);
@@ -1295,6 +1379,9 @@ const initApp = async () => {
 
     // Palette: Initialize background particles
     initStartScreenParticles();
+
+    // Palette: Initialize modal backdrop handlers
+    initModalBackdropHandlers();
 
     // Generar opciones de tamaño de mapa dinámicamente
     populateMapSizes();

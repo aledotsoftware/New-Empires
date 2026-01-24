@@ -39,3 +39,11 @@
 ## 2025-02-27 - Context State Batching
 **Learning:** Canvas `ctx.save()` and `ctx.restore()` are relatively expensive operations (managing the state stack). For particle systems with hundreds of entities, calling them per-particle adds significant overhead. By wrapping the entire system render loop in a single `save/restore` and manually managing state changes (alpha, color) inside the loop, we eliminate N*2 state stack operations per frame.
 **Action:** Batch context state saves at the system level for high-count entities like particles.
+
+## 2025-05-23 - Render Loop Lookups & Caching
+**Learning:** In hot render loops like `drawResourceNodes` (N=hundreds), repeated global lookups (`assetLoader.getImage`) and property access (`typeof`) add measurable overhead (~0.1ms per frame for 10k nodes).
+**Action:** Cache static assets directly on the entity instance (`node._cachedImage`) during the first render pass to convert subsequent lookups into O(1) property access.
+
+## 2025-05-23 - Spatial Grid Correctness vs Performance
+**Learning:** Merging `SpatialGrid.add()` and `Unit.update()` into a single loop for "optimization" introduces asymmetric behavior (early units don't see late units). While fixing this requires splitting the loop (2x iteration overhead), correctness is a prerequisite for any valid optimization.
+**Action:** Be wary of single-pass optimizations that depend on neighbor state. Verify symmetric visibility.

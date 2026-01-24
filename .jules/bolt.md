@@ -39,3 +39,7 @@
 ## 2025-02-27 - Context State Batching
 **Learning:** Canvas `ctx.save()` and `ctx.restore()` are relatively expensive operations (managing the state stack). For particle systems with hundreds of entities, calling them per-particle adds significant overhead. By wrapping the entire system render loop in a single `save/restore` and manually managing state changes (alpha, color) inside the loop, we eliminate N*2 state stack operations per frame.
 **Action:** Batch context state saves at the system level for high-count entities like particles.
+
+## 2025-03-02 - Floating Point Keys in DOM Caching
+**Learning:** Using floating-point values (like entity HP) in cache keys for DOM updates causes "thrashing" (rebuilding the DOM every frame) when values change by fractional amounts (e.g. 99.9 -> 99.1).
+**Action:** Always round floating-point values (using `Math.ceil` or `Math.floor`) when generating cache keys or comparing state for UI updates, especially if the UI only displays integer values.

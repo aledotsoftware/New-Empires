@@ -2525,7 +2525,8 @@ export class Game {
                 const prog = Math.floor(ent.productionQueue.getProgress() * 100);
                 prodKey = `:prod${ent.productionQueue.length}:${prog}`;
             }
-            stateKey = `single:${ent.id}:${ent.hp}:${ent.state}${prodKey}`;
+            // BOLT OPTIMIZATION: Use ceil(hp) to prevent DOM thrashing on fractional damage
+            stateKey = `single:${ent.id}:${Math.ceil(ent.hp)}:${ent.state}${prodKey}`;
         } else {
             stateKey = `multi:${this.selectedEntities.length}`;
         }
@@ -2734,7 +2735,7 @@ export class Game {
             hpContainer.style.marginBottom = '6px';
 
             const hpText = document.createElement('div');
-            hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+            hpText.textContent = `HP: ${Math.ceil(entity.hp)}/${entity.maxHp}`;
             hpText.style.marginBottom = '2px';
             hpText.style.fontSize = '0.8rem';
 
@@ -2743,7 +2744,7 @@ export class Game {
             hpBar.style.height = '6px';
             hpBar.style.background = 'rgba(255, 255, 255, 0.2)';
             hpBar.setAttribute('role', 'progressbar');
-            hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
+            hpBar.setAttribute('aria-valuenow', Math.ceil(entity.hp));
             hpBar.setAttribute('aria-valuemin', '0');
             hpBar.setAttribute('aria-valuemax', entity.maxHp);
             hpBar.setAttribute('aria-label', `Salud de ${entity.name}`);

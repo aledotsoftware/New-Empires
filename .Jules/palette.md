@@ -37,3 +37,7 @@
 ## 2026-01-23 - [Minimap Navigation & Resolution]
 **Learning:** HTML5 Canvas defaults to 300x150, which causes severe coordinate mapping errors when resized via CSS (e.g., 110x110) without updating internal width/height attributes.
 **Action:** Always synchronize internal canvas resolution (`width/height`) with CSS display size (`getBoundingClientRect`) in `resize` handlers to ensure 1:1 pixel mapping and accurate pointer events.
+
+## 2026-05-31 - Tech Tree Grid Layout
+**Learning:** Dynamic content generated via JS needs robust default CSS to handle layout states (like grid vs list). Missing base styles can render an entire feature (like the Tech Tree) unusable and visually broken, even if the logic is correct.
+**Action:** Implemented a comprehensive CSS grid system for the Tech Tree, ensuring responsive layout and distinct visual states (Locked, Available, Researched) to guide user progression clearly.

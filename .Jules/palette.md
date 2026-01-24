@@ -37,3 +37,7 @@
 ## 2026-01-23 - [Minimap Navigation & Resolution]
 **Learning:** HTML5 Canvas defaults to 300x150, which causes severe coordinate mapping errors when resized via CSS (e.g., 110x110) without updating internal width/height attributes.
 **Action:** Always synchronize internal canvas resolution (`width/height`) with CSS display size (`getBoundingClientRect`) in `resize` handlers to ensure 1:1 pixel mapping and accurate pointer events.
+
+## 2026-01-24 - [Sub-Selection Filtering]
+**Learning:** In RTS games, precise control over unit subgroups is essential. Players often drag-select a mixed group but need to command only specific units (e.g., "Archers only"). A static "Multiple Selection" text provides no utility.
+**Action:** Replaced the generic multi-selection label with interactive buttons for each unit type selected. Clicking a button filters the selection to that specific type, enabling rapid "Select All Army -> Filter to Archers" workflows without needing complex hotkeys.

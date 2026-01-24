@@ -2164,8 +2164,9 @@ export class Game {
             const node = this._resourceRenderCache[i];
             if (node.amount <= 0) continue;
 
-            const screenX = node.x - this.camera.x;
-            const screenY = node.y - this.camera.y;
+            // BOLT OPTIMIZATION: Truncate to integer
+            const screenX = (node.x - this.camera.x) | 0;
+            const screenY = (node.y - this.camera.y) | 0;
 
             // Frustum culling
             if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
@@ -2184,8 +2185,9 @@ export class Game {
             const node = this._resourceRenderCache[i];
             if (node.amount <= 0) continue;
 
-            const screenX = node.x - this.camera.x;
-            const screenY = node.y - this.camera.y;
+            // BOLT OPTIMIZATION: Truncate to integer
+            const screenX = (node.x - this.camera.x) | 0;
+            const screenY = (node.y - this.camera.y) | 0;
 
             // Frustum culling (same check, cost is negligible compared to draw calls)
             if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
@@ -2223,8 +2225,8 @@ export class Game {
         this.ctx.beginPath();
 
         for (let entity of this.selectedEntities) {
-            const screenX = entity.x - this.camera.x;
-            const screenY = entity.y - this.camera.y;
+            const screenX = (entity.x - this.camera.x) | 0;
+            const screenY = (entity.y - this.camera.y) | 0;
             const radius = entity.size + 5;
 
             // Move to start of arc to prevent connecting lines
@@ -2236,10 +2238,10 @@ export class Game {
     }
 
     drawDragSelection() {
-        const startX = this.dragStart.x - this.camera.x;
-        const startY = this.dragStart.y - this.camera.y;
-        const width = this.mouse.x - startX;
-        const height = this.mouse.y - startY;
+        const startX = (this.dragStart.x - this.camera.x) | 0;
+        const startY = (this.dragStart.y - this.camera.y) | 0;
+        const width = (this.mouse.x - startX) | 0;
+        const height = (this.mouse.y - startY) | 0;
 
         this.ctx.strokeStyle = '#48bb78';
         this.ctx.fillStyle = 'rgba(72, 187, 120, 0.1)';
@@ -2253,8 +2255,9 @@ export class Game {
         const snap = this.gridMap.snapToGrid(this.mouse.worldX, this.mouse.worldY);
         const size = CONFIG.BUILDING_SIZES[this.buildMode];
 
-        const screenX = snap.x - this.camera.x;
-        const screenY = snap.y - this.camera.y;
+        // BOLT OPTIMIZATION: Truncate to integer
+        const screenX = (snap.x - this.camera.x) | 0;
+        const screenY = (snap.y - this.camera.y) | 0;
         const width = size.width * TILE_SIZE;
         const height = size.height * TILE_SIZE;
 

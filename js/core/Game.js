@@ -2189,16 +2189,20 @@ export class Game {
             }
 
             // Icon
-            if (typeof assetLoader !== 'undefined') {
-                const img = assetLoader.getImage(node.type);
-                if (img && img.complete) {
-                    const size = node.radius * 1.5;
-                    this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
-                } else {
-                    // Fallback to square if image not ready
-                    this.ctx.fillStyle = '#FFD700';
-                    this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
-                }
+            // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop
+            let img = node._cachedImage;
+            if (!img && typeof assetLoader !== 'undefined') {
+                img = assetLoader.getImage(node.type);
+                if (img) node._cachedImage = img;
+            }
+
+            if (img && img.complete) {
+                const size = node.radius * 1.5;
+                this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
+            } else if (typeof assetLoader !== 'undefined') {
+                // Fallback to square if image not ready
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
             }
         }
     }

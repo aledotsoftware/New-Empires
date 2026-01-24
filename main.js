@@ -755,8 +755,19 @@ function renderTechTreeCommon(isInteractive) {
                             ? `Falta: ${missing.join(', ')}`
                             : 'Recursos insuficientes';
 
-                        if (game && game.showNotification) {
-                            game.showNotification(msg, 'error');
+                        if (game) {
+                            if (game.showNotification) {
+                                game.showNotification(msg, 'error');
+                            }
+
+                            // Palette: Visual feedback for missing resources
+                            if (game.flashResource) {
+                                for (const [res, amount] of Object.entries(tech.cost)) {
+                                    if (game.resources && game.resources[res] < amount) {
+                                        game.flashResource(res);
+                                    }
+                                }
+                            }
                         }
                     };
 

@@ -51,7 +51,8 @@ export class SaveManager {
                 return null;
             }
 
-            const state = JSON.parse(data);
+            // Sentinel: Use safe reviver to prevent prototype pollution
+            const state = JSON.parse(data, (k, v) => this._safeReviver(k, v));
 
             // Verificar versión
             if (state.version !== this.VERSION) {
@@ -102,7 +103,8 @@ export class SaveManager {
             const data = localStorage.getItem(this.SAVE_KEY);
             if (!data) return null;
 
-            const state = JSON.parse(data);
+            // Sentinel: Safe parse
+            const state = JSON.parse(data, (k, v) => this._safeReviver(k, v));
 
             // Basic validation for info retrieval
             if (!state || typeof state !== 'object') return null;
@@ -118,6 +120,16 @@ export class SaveManager {
         } catch (error) {
             return null;
         }
+    }
+
+    /**
+     * Sentinel: JSON Reviver para prevenir prototype pollution
+     */
+    _safeReviver(key, value) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            return undefined;
+        }
+        return value;
     }
 
     /**
@@ -143,6 +155,9 @@ export class SaveManager {
 
         // Validate types for critical fields
         if (typeof state.civilizationId !== 'string') return false;
+        // Sentinel: Prevent path traversal/injection in civilizationId
+        if (!/^[a-zA-Z0-9]+$/.test(state.civilizationId)) return false;
+
         if (typeof state.resources !== 'object') return false;
         if (!Array.isArray(state.units)) return false;
         if (!Array.isArray(state.buildings)) return false;
@@ -316,7 +331,8 @@ export class SaveManager {
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const state = JSON.parse(e.target.result);
+                    // Sentinel: Use safe reviver to prevent prototype pollution
+                    const state = JSON.parse(e.target.result, (k, v) => this._safeReviver(k, v));
                     // Sentinel: Validate imported file structure
                     if (this._validateState(state)) {
                         resolve(state);

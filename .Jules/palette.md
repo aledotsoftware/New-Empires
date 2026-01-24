@@ -37,3 +37,7 @@
 ## 2026-01-23 - [Minimap Navigation & Resolution]
 **Learning:** HTML5 Canvas defaults to 300x150, which causes severe coordinate mapping errors when resized via CSS (e.g., 110x110) without updating internal width/height attributes.
 **Action:** Always synchronize internal canvas resolution (`width/height`) with CSS display size (`getBoundingClientRect`) in `resize` handlers to ensure 1:1 pixel mapping and accurate pointer events.
+
+## 2026-01-24 - Actionable Hotkey Feedback
+**Learning:** Players using hotkeys (like 'B' for Build or 'F' for Formation) often face silent failures when the game state doesn't allow the action (e.g., no unit selected). This lack of feedback is confusing and frustrating.
+**Action:** Implemented immediate feedback via `showNotification` when a hotkey action is blocked. The notification explicitly states *why* the action failed (e.g., "Select a villager to build" vs "Only villagers can build"), turning a "broken" interaction into a teachable moment.

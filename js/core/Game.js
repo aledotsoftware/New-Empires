@@ -919,6 +919,16 @@ export class Game {
             if (this.selectedEntities.length === 1 &&
                 this.selectedEntities[0].type === 'villager') {
                 this.openBuildMenu();
+            } else {
+                // Palette: Actionable Feedback for silent failure
+                if (this.selectedEntities.length === 0) {
+                    this.showNotification('Selecciona un aldeano para construir', 'info');
+                } else if (this.selectedEntities.some(e => e.type !== 'villager')) {
+                    this.showNotification('Solo los aldeanos pueden construir', 'error');
+                } else {
+                    this.showNotification('Selecciona un solo aldeano para construir', 'info');
+                }
+                if (typeof soundManager !== 'undefined') soundManager.play('error');
             }
         }
 
@@ -968,6 +978,10 @@ export class Game {
                         }
                     }
                 }
+            } else {
+                // Palette: Actionable Feedback
+                this.showNotification('No tienes Centro Urbano', 'error');
+                if (typeof soundManager !== 'undefined') soundManager.play('error');
             }
         }
 
@@ -1039,6 +1053,14 @@ export class Game {
                 this.showNotification(`Formación: ${formation}`, 'info');
                 e.preventDefault();
                 return;
+            } else {
+                // Palette: Actionable Feedback
+                if (selectedUnits.length === 0) {
+                    this.showNotification('Selecciona unidades militares para formación', 'info');
+                } else {
+                    this.showNotification('Se necesitan al menos 2 unidades para formación', 'info');
+                }
+                if (typeof soundManager !== 'undefined') soundManager.play('error');
             }
         }
 

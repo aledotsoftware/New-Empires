@@ -50,8 +50,9 @@ export class Entity {
     }
 
     render(ctx, camera, viewWidth, viewHeight, drawHp = true) {
-        const screenX = this.x - camera.x;
-        const screenY = this.y - camera.y;
+        // BOLT OPTIMIZATION: Truncate to integer to avoid sub-pixel rendering cost
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
 
         // OPTIMIZATION: Removed redundant global CONFIG check and loose culling.
         // Game.js handles frustum culling via SpatialGrid before calling this.
@@ -85,8 +86,8 @@ export class Entity {
     }
 
     drawHpBar(ctx, camera) {
-        const screenX = this.x - camera.x;
-        const screenY = this.y - camera.y;
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
         const barWidth = this.size * 2;
         const barHeight = 4;
         const barX = screenX - barWidth / 2;
@@ -101,8 +102,8 @@ export class Entity {
 
     // OPTIMIZATION: Batching support methods for HP bars
     addHpBarBackgroundToPath(ctx, camera) {
-        const screenX = this.x - camera.x;
-        const screenY = this.y - camera.y;
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
         const barWidth = this.size * 2;
         const barHeight = 4;
         const barX = screenX - barWidth / 2;
@@ -111,8 +112,8 @@ export class Entity {
     }
 
     addHpBarForegroundToPath(ctx, camera) {
-        const screenX = this.x - camera.x;
-        const screenY = this.y - camera.y;
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
         const barWidth = this.size * 2;
         const barHeight = 4;
         const barX = screenX - barWidth / 2;

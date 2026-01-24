@@ -35,8 +35,9 @@ class Particle {
     }
 
     render(ctx, camera) {
-        const screenX = this.x - camera.x;
-        const screenY = this.y - camera.y;
+        // BOLT OPTIMIZATION: Truncate to integer
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
 
         // BOLT OPTIMIZATION: Removed per-particle save/restore (handled by system)
         ctx.globalAlpha = this.alpha;
@@ -89,8 +90,9 @@ class Ripple {
     }
 
     render(ctx, camera) {
-        const screenX = this.x - camera.x;
-        const screenY = this.y - camera.y;
+        // BOLT OPTIMIZATION: Truncate to integer
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
 
         // BOLT OPTIMIZATION: Removed per-particle save/restore (handled by system)
         ctx.strokeStyle = this.color;

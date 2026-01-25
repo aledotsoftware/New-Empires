@@ -2463,6 +2463,45 @@ export class Game {
 
         if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.maxPopulation;
 
+        // Palette: Detailed Population Tooltip
+        const popTooltip = document.getElementById('popTooltip');
+        if (popTooltip) {
+            let villagers = 0;
+            let totalUnits = 0;
+            for (let i = 0; i < this.units.length; i++) {
+                if (this.units[i].team === 'player') {
+                    totalUnits++;
+                    if (this.units[i].type === 'villager') villagers++;
+                }
+            }
+            const military = totalUnits - villagers;
+
+            let houses = 0;
+            for (let i = 0; i < this.buildings.length; i++) {
+                const b = this.buildings[i];
+                if (b.team === 'player' && b.type === 'house' && !b.isDead) houses++;
+            }
+
+            // Optimize: Only update DOM if content changed
+            const tooltipHtml = `
+                <div style="text-align:left; min-width:140px">
+                    <div style="margin-bottom:4px" class="text-gold"><strong>Población:</strong></div>
+                    <div style="display:flex;justify-content:space-between"><span>👨‍🌾 Aldeanos:</span> <span class="text-light">${villagers}</span></div>
+                    <div style="display:flex;justify-content:space-between"><span>⚔️ Militares:</span> <span class="text-light">${military}</span></div>
+                    <div style="margin-top:6px; border-top:1px solid rgba(255,255,255,0.2); padding-top:4px">
+                        <div style="margin-bottom:2px" class="text-gold"><strong>Capacidad:</strong></div>
+                        <div style="display:flex;justify-content:space-between; font-size:0.8rem" class="text-medium"><span>🏠 Casas:</span> <span>${houses}</span></div>
+                        <div style="display:flex;justify-content:space-between; font-size:0.8rem" class="text-medium"><span>🏰 Centros:</span> <span>${this.townCenterCounts.player}</span></div>
+                    </div>
+                </div>
+            `;
+
+            if (this._lastPopTooltipHtml !== tooltipHtml) {
+                popTooltip.innerHTML = tooltipHtml;
+                this._lastPopTooltipHtml = tooltipHtml;
+            }
+        }
+
         // Actualizar tiempo de juego
         const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
         const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');

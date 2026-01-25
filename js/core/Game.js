@@ -284,6 +284,21 @@ export class Game {
         const halfWidth = this.viewWidth / 2;
         const halfHeight = this.viewHeight / 2;
         this.cullingRadius = Math.sqrt(halfWidth * halfWidth + halfHeight * halfHeight) + 100;
+
+        // BOLT OPTIMIZATION: Create static grid path for rendering
+        // Covers the viewport + 1 tile buffer for scrolling
+        this._gridPath = new Path2D();
+        const gridW = this.viewWidth + TILE_SIZE;
+        const gridH = this.viewHeight + TILE_SIZE;
+
+        for (let x = 0; x <= gridW; x += TILE_SIZE) {
+            this._gridPath.moveTo(x, 0);
+            this._gridPath.lineTo(x, gridH);
+        }
+        for (let y = 0; y <= gridH; y += TILE_SIZE) {
+            this._gridPath.moveTo(0, y);
+            this._gridPath.lineTo(gridW, y);
+        }
     }
 
     initializeGame() {
@@ -2123,25 +2138,18 @@ export class Game {
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         this.ctx.lineWidth = 1;
 
-        const gridSize = TILE_SIZE;
-        const startX = Math.floor(this.camera.x / gridSize) * gridSize;
-        const startY = Math.floor(this.camera.y / gridSize) * gridSize;
+        // BOLT OPTIMIZATION: Use cached Path2D with translation
+        // Reduces JS overhead and draw calls
+        if (this._gridPath) {
+            this.ctx.save();
+            // Calculate offset based on camera position modulo tile size
+            const dx = -(this.camera.x % TILE_SIZE);
+            const dy = -(this.camera.y % TILE_SIZE);
 
-        // OPTIMIZATION: Batch all grid lines into a single path to reduce draw calls
-        // from ~45/frame to 1/frame.
-        this.ctx.beginPath();
-
-        for (let x = startX; x < this.camera.x + this.viewWidth; x += gridSize) {
-            this.ctx.moveTo(x - this.camera.x, 0);
-            this.ctx.lineTo(x - this.camera.x, this.viewHeight);
+            this.ctx.translate(dx, dy);
+            this.ctx.stroke(this._gridPath);
+            this.ctx.restore();
         }
-
-        for (let y = startY; y < this.camera.y + this.viewHeight; y += gridSize) {
-            this.ctx.moveTo(0, y - this.camera.y);
-            this.ctx.lineTo(this.viewWidth, y - this.camera.y);
-        }
-
-        this.ctx.stroke();
     }
 
     drawResourceNodes() {

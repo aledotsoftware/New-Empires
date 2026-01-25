@@ -47,3 +47,7 @@
 ## 2025-05-23 - Spatial Grid Correctness vs Performance
 **Learning:** Merging `SpatialGrid.add()` and `Unit.update()` into a single loop for "optimization" introduces asymmetric behavior (early units don't see late units). While fixing this requires splitting the loop (2x iteration overhead), correctness is a prerequisite for any valid optimization.
 **Action:** Be wary of single-pass optimizations that depend on neighbor state. Verify symmetric visibility.
+
+## 2025-06-03 - Path2D Caching for Static Patterns
+**Learning:** For infinite repeating patterns like a grid, creating a static `Path2D` covering the viewport size (plus one tile buffer) and translating it via `ctx.translate(offset)` is significantly faster than recalculating lines every frame. This reduces JS calls from ~200 (moveTo/lineTo loop) to ~4 (save/translate/stroke/restore) per frame.
+**Action:** Use cached Path2D with translation for any large, repeating static background elements.

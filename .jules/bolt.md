@@ -47,3 +47,7 @@
 ## 2025-05-23 - Spatial Grid Correctness vs Performance
 **Learning:** Merging `SpatialGrid.add()` and `Unit.update()` into a single loop for "optimization" introduces asymmetric behavior (early units don't see late units). While fixing this requires splitting the loop (2x iteration overhead), correctness is a prerequisite for any valid optimization.
 **Action:** Be wary of single-pass optimizations that depend on neighbor state. Verify symmetric visibility.
+
+## 2025-05-24 - Drop-Off Point Caching
+**Learning:** Villager pathfinding to drop-off resources was an O(N) operation over all buildings (N=hundreds), causing spikes in late game. By maintaining a cached array of just 'TownCenter' and 'Storage' buildings (O(M), M < 10), we reduced the search space significantly.
+**Action:** Identify and cache subsets of entities (like drop-off points) that are queried frequently but change infrequently.

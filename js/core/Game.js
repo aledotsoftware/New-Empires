@@ -233,6 +233,10 @@ export class Game {
             enemy: 0
         };
 
+        // BOLT OPTIMIZATION: Cache drop-off points (TownCenter, Storage)
+        // Avoids O(N) search through all buildings by Villagers
+        this.dropOffPoints = [];
+
         this.initializeGame();
         this.updateUI();
     }
@@ -298,6 +302,7 @@ export class Game {
         const townCenter = new TownCenter(400, 400, 'player');
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
+        this.dropOffPoints.push(townCenter);
         this.townCenterCounts.player++;
 
         // Actualizar grid de edificios
@@ -481,6 +486,7 @@ export class Game {
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
         this.buildingGrid.add(enemyTC);
+        this.dropOffPoints.push(enemyTC);
         this.townCenterCounts.enemy++;
     }
 
@@ -1300,6 +1306,11 @@ export class Game {
                 }
             }
 
+            // BOLT OPTIMIZATION: Add to drop-off cache
+            if (building.type === 'townCenter' || building.type === 'storage') {
+                this.dropOffPoints.push(building);
+            }
+
             // Reproducir sonido de inicio de construcción (variable global temporal)
             if (typeof soundManager !== 'undefined') {
                 soundManager.play('buildStart');
@@ -1621,6 +1632,7 @@ export class Game {
             this._removeDeadInPlace(this.buildings);
             this._removeDeadInPlace(this.enemies);
             this._removeDeadInPlace(this.selectedEntities);
+            this._removeDeadInPlace(this.dropOffPoints);
 
             // Si murieron edificios, reconstruir el grid estático
             if (hasDeadBuildings) {

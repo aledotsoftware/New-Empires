@@ -4,6 +4,21 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
+// Security: Rate Limiting Configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 300; // 300 requests per minute per IP
+const ipCounts = new Map();
+
+// Periodic cleanup of rate limit data (every 5 minutes)
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, data] of ipCounts.entries()) {
+        if (now - data.startTime > RATE_LIMIT_WINDOW_MS) {
+            ipCounts.delete(ip);
+        }
+    }
+}, 5 * 60 * 1000);
+
 // Whitelist of allowed extensions
 const MIME_TYPES = {
     '.html': 'text/html',
@@ -22,6 +37,24 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+    // Security: Rate Limiting (Fixed Window Counter)
+    const ip = req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+
+    let clientData = ipCounts.get(ip);
+    if (!clientData || now - clientData.startTime > RATE_LIMIT_WINDOW_MS) {
+        clientData = { count: 0, startTime: now };
+    }
+
+    if (clientData.count >= RATE_LIMIT_MAX_REQUESTS) {
+        res.writeHead(429, { 'Content-Type': 'text/plain' });
+        res.end('Too Many Requests');
+        return;
+    }
+
+    clientData.count++;
+    ipCounts.set(ip, clientData);
+
     // Security: Decode URL to handle spaces and special characters
     // This fixes accessibility for assets with special names
     let decodedUrl;

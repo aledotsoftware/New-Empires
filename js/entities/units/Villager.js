@@ -237,11 +237,12 @@ export class Villager extends Unit {
 
         // OPTIMIZATION: Avoid Array.filter allocation and use manual loop with squared distance
         // Reduces garbage collection pressure and cpu cycles by avoiding array creation and sqrt
-        const buildings = game.buildings;
-        const len = buildings.length;
+        // BOLT OPTIMIZATION: Use cached dropOffPoints (M << N)
+        const candidates = game.dropOffPoints || game.buildings;
+        const len = candidates.length;
 
         for (let i = 0; i < len; i++) {
-            const b = buildings[i];
+            const b = candidates[i];
             // Filter inline
             if ((b.type === 'townCenter' || b.type === 'storage') && b.team === this.team) {
                 const dx = this.x - b.x;

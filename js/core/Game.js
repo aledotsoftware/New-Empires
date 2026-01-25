@@ -79,6 +79,8 @@ export class Game {
         this.units = [];
         this.enemies = [];
         this.resourceNodes = [];
+        // BOLT OPTIMIZATION: Cache drop-off points (TC, Storage) to avoid O(N) search in Villager AI
+        this.dropOffPoints = [];
 
         // Control de cámara
         this.camera = { x: 0, y: 0 };
@@ -256,6 +258,7 @@ export class Game {
         this.entities = [];
         this.units = [];
         this.buildings = [];
+        this.dropOffPoints = [];
         this.enemies = [];
         this.selectedEntities = [];
         this.resourceNodes = [];
@@ -298,6 +301,7 @@ export class Game {
         const townCenter = new TownCenter(400, 400, 'player');
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
+        this.dropOffPoints.push(townCenter);
         this.townCenterCounts.player++;
 
         // Actualizar grid de edificios
@@ -480,6 +484,7 @@ export class Game {
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
+        this.dropOffPoints.push(enemyTC);
         this.buildingGrid.add(enemyTC);
         this.townCenterCounts.enemy++;
     }
@@ -1293,6 +1298,11 @@ export class Game {
             this.entities.push(building);
             this.buildingGrid.add(building);
 
+            // BOLT OPTIMIZATION: Add to drop-off cache if valid type
+            if (building.type === 'townCenter' || building.type === 'storage' || building.type === 'storageWood') {
+                this.dropOffPoints.push(building);
+            }
+
             // Actualizar contadores si es un Centro Urbano
             if (building.type === 'townCenter') {
                 if (this.townCenterCounts[building.team] !== undefined) {
@@ -1619,6 +1629,7 @@ export class Game {
             this._removeDeadInPlace(this.entities);
             this._removeDeadInPlace(this.units);
             this._removeDeadInPlace(this.buildings);
+            this._removeDeadInPlace(this.dropOffPoints);
             this._removeDeadInPlace(this.enemies);
             this._removeDeadInPlace(this.selectedEntities);
 

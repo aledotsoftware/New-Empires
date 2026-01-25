@@ -1047,10 +1047,49 @@ export class Game {
     }
 
     updateBuildMenuState() {
+        // Palette: Calculate building counts once per frame to avoid N*M iterations
+        // Map<type, count>
+        const buildingCounts = new Map();
+        for (const b of this.buildings) {
+            if (b.team === 'player' && !b.isDead) {
+                buildingCounts.set(b.type, (buildingCounts.get(b.type) || 0) + 1);
+            }
+        }
+
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
             const type = option.dataset.building;
             const cost = CONFIG.COSTS[type];
+            const currentCount = buildingCounts.get(type) || 0;
+
+            // Palette: Update/Create Owned Badge
+            let badge = option.querySelector('.owned-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'owned-badge';
+                badge.setAttribute('aria-hidden', 'true');
+                option.appendChild(badge);
+            }
+
+            // Update text content only if changed
+            const badgeText = `${currentCount}`;
+            if (badge.textContent !== badgeText) {
+                badge.textContent = badgeText;
+            }
+
+            // Hide if 0 to reduce clutter
+            badge.style.display = currentCount > 0 ? 'flex' : 'none';
+
+            // Palette: Robust ARIA Label Handling
+            // Store original label once to avoid accumulation
+            if (!option.dataset.originalLabel) {
+                option.dataset.originalLabel = option.getAttribute('aria-label');
+            }
+
+            let newLabel = option.dataset.originalLabel;
+            if (currentCount > 0) {
+                newLabel += ` - Tienes: ${currentCount}`;
+            }
 
             // Palette: Visual affordability check
             if (cost) {
@@ -1095,14 +1134,8 @@ export class Game {
                         }
                     }
 
-                    // Update aria-label with specific reason
-                    let originalLabel = option.getAttribute('aria-label');
-                    if (originalLabel && originalLabel.includes(' - Insuficiente:')) {
-                        originalLabel = originalLabel.split(' - Insuficiente:')[0];
-                    }
-
                     if (missing.length > 0) {
-                        option.setAttribute('aria-label', `${originalLabel} - Insuficiente: ${missing.join(', ')}`);
+                        newLabel += ` - Insuficiente: ${missing.join(', ')}`;
 
                         // Add visual warning (if not already present)
                         if (!option.querySelector('.build-warning')) {
@@ -1120,12 +1153,11 @@ export class Game {
                     // Remove warning if present
                     const warning = option.querySelector('.build-warning');
                     if (warning) warning.remove();
+                }
 
-                    // Restore original label (clean up "Insuficiente" suffix)
-                    const currentLabel = option.getAttribute('aria-label');
-                    if (currentLabel && currentLabel.includes(' - Insuficiente:')) {
-                        option.setAttribute('aria-label', currentLabel.split(' - Insuficiente:')[0]);
-                    }
+                // Apply accumulated label
+                if (option.getAttribute('aria-label') !== newLabel) {
+                    option.setAttribute('aria-label', newLabel);
                 }
             }
         });

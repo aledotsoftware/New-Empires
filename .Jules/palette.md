@@ -41,3 +41,7 @@
 ## 2026-01-24 - [Sub-Selection Filtering]
 **Learning:** In RTS games, precise control over unit subgroups is essential. Players often drag-select a mixed group but need to command only specific units (e.g., "Archers only"). A static "Multiple Selection" text provides no utility.
 **Action:** Replaced the generic multi-selection label with interactive buttons for each unit type selected. Clicking a button filters the selection to that specific type, enabling rapid "Select All Army -> Filter to Archers" workflows without needing complex hotkeys.
+
+## 2026-01-25 - [Build Menu Owned Count]
+**Learning:** Players benefit from immediate inventory context ("How many do I have?") when making purchase decisions in strategy games. This prevents accidental duplicate purchases and aids strategic planning.
+**Action:** Implemented dynamic counting in the build menu with non-intrusive badges. Crucially, used `dataset.originalLabel` to manage ARIA label state, preventing text accumulation during frequent UI updates.

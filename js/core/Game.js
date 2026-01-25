@@ -1047,10 +1047,34 @@ export class Game {
     }
 
     updateBuildMenuState() {
+        // Palette: Calculate building counts
+        const buildingCounts = new Map();
+        for (const b of this.buildings) {
+            if (b.team === 'player' && !b.isDead) {
+                buildingCounts.set(b.type, (buildingCounts.get(b.type) || 0) + 1);
+            }
+        }
+
         const buildOptions = document.querySelectorAll('.build-option');
         buildOptions.forEach(option => {
             const type = option.dataset.building;
             const cost = CONFIG.COSTS[type];
+            const currentCount = buildingCounts.get(type) || 0;
+
+            // Palette: Update/Create Owned Badge
+            let badge = option.querySelector('.owned-badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'owned-badge';
+                badge.setAttribute('aria-hidden', 'true');
+                option.appendChild(badge);
+            }
+
+            // Update visual badge
+            if (badge.textContent !== String(currentCount)) {
+                badge.textContent = currentCount;
+            }
+            badge.style.display = currentCount > 0 ? 'flex' : 'none';
 
             // Palette: Visual affordability check
             if (cost) {
@@ -1079,6 +1103,19 @@ export class Game {
                     }
                 });
 
+                // Palette: Robust ARIA Label Management
+                // Store original label once to prevent accumulation
+                if (!option.dataset.originalLabel) {
+                    let rawLabel = option.getAttribute('aria-label') || '';
+                    // Clean up potential previous debris if re-initializing
+                    if (rawLabel.includes(' - Insuficiente:')) rawLabel = rawLabel.split(' - Insuficiente:')[0];
+                    if (rawLabel.includes('. Tienes:')) rawLabel = rawLabel.split('. Tienes:')[0];
+                    option.dataset.originalLabel = rawLabel;
+                }
+
+                const baseLabel = option.dataset.originalLabel;
+                let newLabel = `${baseLabel}. Tienes: ${currentCount}`;
+
                 // Check total affordability
                 if (!this.canAfford(cost)) {
                     option.classList.add('disabled');
@@ -1095,14 +1132,8 @@ export class Game {
                         }
                     }
 
-                    // Update aria-label with specific reason
-                    let originalLabel = option.getAttribute('aria-label');
-                    if (originalLabel && originalLabel.includes(' - Insuficiente:')) {
-                        originalLabel = originalLabel.split(' - Insuficiente:')[0];
-                    }
-
                     if (missing.length > 0) {
-                        option.setAttribute('aria-label', `${originalLabel} - Insuficiente: ${missing.join(', ')}`);
+                        newLabel += ` - Insuficiente: ${missing.join(', ')}`;
 
                         // Add visual warning (if not already present)
                         if (!option.querySelector('.build-warning')) {
@@ -1120,13 +1151,10 @@ export class Game {
                     // Remove warning if present
                     const warning = option.querySelector('.build-warning');
                     if (warning) warning.remove();
-
-                    // Restore original label (clean up "Insuficiente" suffix)
-                    const currentLabel = option.getAttribute('aria-label');
-                    if (currentLabel && currentLabel.includes(' - Insuficiente:')) {
-                        option.setAttribute('aria-label', currentLabel.split(' - Insuficiente:')[0]);
-                    }
                 }
+
+                // Update final label
+                option.setAttribute('aria-label', newLabel);
             }
         });
     }

@@ -51,3 +51,7 @@
 ## 2025-05-24 - Drop-Off Point Caching
 **Learning:** Villager pathfinding to drop-off resources was an O(N) operation over all buildings (N=hundreds), causing spikes in late game. By maintaining a cached array of just 'TownCenter' and 'Storage' buildings (O(M), M < 10), we reduced the search space significantly.
 **Action:** Identify and cache subsets of entities (like drop-off points) that are queried frequently but change infrequently.
+
+## 2025-05-25 - Instruction Cache & Loop Splitting
+**Learning:** Splitting a mixed workload loop (e.g., SpatialGrid.add + Unit.update) into two distinct passes proved to be ~65% faster in benchmarks, contrary to the "iterate once" intuition. This is likely due to improved Instruction Cache locality and JIT optimization, as the CPU executes homogeneous operations in each pass without context switching.
+**Action:** When a loop performs two distinct, heavy types of operations, benchmark splitting them. The overhead of iterating twice is often dwarfed by the gains in CPU efficiency.

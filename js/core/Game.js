@@ -883,7 +883,61 @@ export class Game {
         this.updateSelectionInfo();
     }
 
+    /**
+     * Destruye las entidades seleccionadas del jugador (con confirmación)
+     * Palette: UX Enhancement for destructive actions
+     */
+    deleteSelectedEntities() {
+        const toDelete = this.selectedEntities.filter(e => e.team === 'player' && !e.isDead);
+
+        if (toDelete.length === 0) {
+            // Si hay selección pero no es propia
+            if (this.selectedEntities.length > 0 && this.selectedEntities.some(e => e.team !== 'player')) {
+                this.showNotification('No puedes destruir unidades enemigas', 'error');
+            }
+            return;
+        }
+
+        const count = toDelete.length;
+        const type = count === 1 ? toDelete[0].name : `${count} entidades`;
+
+        // Usar el helper global definido en main.js
+        if (window.showConfirmation) {
+            window.showConfirmation(
+                `¿Destruir ${type}? Esta acción no se puede deshacer.`,
+                () => {
+                    // Confirm callback
+                    let destroyedCount = 0;
+                    for (const entity of toDelete) {
+                        if (!entity.isDead) {
+                            entity.hp = 0;
+                            entity.isDead = true;
+                            destroyedCount++;
+                        }
+                    }
+
+                    if (destroyedCount > 0) {
+                        this.showNotification(`${type} destruido(s)`, 'info');
+                        // Feedback auditivo (usamos error como sonido de destrucción por ahora)
+                        if (typeof soundManager !== 'undefined') {
+                            soundManager.play('error');
+                        }
+                        this.selectedEntities = [];
+                        this.updateSelectionPanel();
+                        this.updateActionsPanel();
+                    }
+                }
+            );
+        }
+    }
+
     handleKeyPress(e) {
+        // Delete - Destruir selección (Palette)
+        if (e.key === 'Delete') {
+            this.deleteSelectedEntities();
+            return;
+        }
+
         // P - Toggle Pause (Palette)
         if (e.key === 'p' || e.key === 'P') {
             this.togglePause();
@@ -3271,6 +3325,18 @@ export class Game {
             }
         }
 
+        // Palette: Add Destroy Button for all player entities
+        buttons.push({
+            iconKey: 'skull', // Will fallback
+            iconFallback: '💀',
+            label: 'Destruir',
+            description: 'Elimina la unidad o edificio seleccionado',
+            hotkey: 'Supr',
+            action: () => this.deleteSelectedEntities(),
+            enabled: true,
+            isDestructive: true
+        });
+
         // OPTIMIZATION: Reuse DOM elements
         const gridButtons = Array.from(grid.children);
 
@@ -3306,6 +3372,18 @@ export class Game {
 
                     // Remove native tooltip
                     btn.removeAttribute('title');
+
+                    if (buttonData.isDestructive) {
+                        btn.style.borderColor = '#c53030'; // var(--blood-red)
+                        btn.style.color = '#fc8181'; // light red
+                        // Add subtle red background
+                        btn.style.background = 'linear-gradient(180deg, rgba(197, 48, 48, 0.1) 0%, rgba(197, 48, 48, 0.2) 100%)';
+                    } else {
+                        // Reset specific styles if reused
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
+                        btn.style.background = '';
+                    }
 
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');

@@ -93,31 +93,33 @@ export class AssetLoader {
     }
 
     getSrc(key) {
-        const map = {
-            'villager': 'assets/icons/villager.png',
-            'warrior': 'assets/icons/warrior.png',
-            'archer': 'assets/icons/archer.png',
-            'townCenter': 'assets/icons/townCenter.png',
-            'house': 'assets/icons/house.png',
-            'barracks': 'assets/icons/barracks.png',
-            'storage': 'assets/icons/storage.png',
-            'storageWood': 'assets/icons/storageWood.png',
-            'market': 'assets/icons/market.png',
-            'temple': 'assets/icons/temple.png',
-            'workshop': 'assets/icons/workshop.png',
-            'wood': 'assets/icons/storageWood.png',
-            'food': 'assets/icons/house.png',
-            'gold': 'assets/icons/market.png',
-            'stone': 'assets/icons/storage.png',
-            'tech_economy': 'assets/icons/tech_economy.png',
-            'tech_military': 'assets/icons/tech_military.png',
-            'tech_defense': 'assets/icons/tech_defense.png',
-            'science': 'assets/icons/science.png',
-            'build': 'assets/icons/build.png'
-        };
-        return map[key] || '';
+        return AssetLoader.ASSET_MAP[key] || '';
     }
 }
+
+// Static map to avoid allocation on every getSrc call
+AssetLoader.ASSET_MAP = {
+    'villager': 'assets/icons/villager.png',
+    'warrior': 'assets/icons/warrior.png',
+    'archer': 'assets/icons/archer.png',
+    'townCenter': 'assets/icons/townCenter.png',
+    'house': 'assets/icons/house.png',
+    'barracks': 'assets/icons/barracks.png',
+    'storage': 'assets/icons/storage.png',
+    'storageWood': 'assets/icons/storageWood.png',
+    'market': 'assets/icons/market.png',
+    'temple': 'assets/icons/temple.png',
+    'workshop': 'assets/icons/workshop.png',
+    'wood': 'assets/icons/storageWood.png',
+    'food': 'assets/icons/house.png',
+    'gold': 'assets/icons/market.png',
+    'stone': 'assets/icons/storage.png',
+    'tech_economy': 'assets/icons/tech_economy.png',
+    'tech_military': 'assets/icons/tech_military.png',
+    'tech_defense': 'assets/icons/tech_defense.png',
+    'science': 'assets/icons/science.png',
+    'build': 'assets/icons/build.png'
+};
 
 // Instancia global del loader
 export const assetLoader = new AssetLoader();

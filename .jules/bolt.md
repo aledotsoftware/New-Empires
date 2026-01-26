@@ -55,3 +55,7 @@
 ## 2025-05-25 - Instruction Cache & Loop Splitting
 **Learning:** Splitting a mixed workload loop (e.g., SpatialGrid.add + Unit.update) into two distinct passes proved to be ~65% faster in benchmarks, contrary to the "iterate once" intuition. This is likely due to improved Instruction Cache locality and JIT optimization, as the CPU executes homogeneous operations in each pass without context switching.
 **Action:** When a loop performs two distinct, heavy types of operations, benchmark splitting them. The overhead of iterating twice is often dwarfed by the gains in CPU efficiency.
+
+## 2025-05-26 - Pre-Pass Visualization & SoA
+**Learning:** In complex render loops (like `drawResourceNodes`) that require multiple passes (e.g., background then foreground), calculating coordinates and checking frustum visibility repeatedly is wasteful. A "Pre-Pass" that calculates these once and stores them in Struct-of-Arrays (SoA) flat arrays (`_visibleNodes`, `_visibleX`, `_visibleY`) significantly tightens the inner render loops.
+**Action:** For multi-pass rendering, use a pre-pass to filter and calculate visibility into flat cache arrays.

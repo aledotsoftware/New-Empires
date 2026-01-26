@@ -219,6 +219,10 @@ export class Game {
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
         this._resourceRenderCache = [];
+        // BOLT OPTIMIZATION: Pre-allocated arrays for visibility pass (SoA pattern)
+        this._visibleNodes = [];
+        this._visibleNodesX = [];
+        this._visibleNodesY = [];
         this._rowCache = []; // BOLT OPTIMIZATION: Cache for row-wise sorting
         this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
         this._gridPath = null; // BOLT OPTIMIZATION: Cache for grid path
@@ -2286,27 +2290,47 @@ export class Game {
         const margin = 50;
         this.resourceGrid.queryRect(this.camera.x - margin, this.camera.y - margin, this.viewWidth + margin * 2, this.viewHeight + margin * 2, this._resourceRenderCache);
 
+        // BOLT OPTIMIZATION: Pre-pass to calculate visibility and coords (SoA)
+        // Eliminates redundant arithmetic and bounds checking in the double loop below.
+        let visibleCount = 0;
+        const nodesLen = this._resourceRenderCache.length;
+        const visibleNodes = this._visibleNodes;
+        const visibleX = this._visibleNodesX;
+        const visibleY = this._visibleNodesY;
+        const camX = this.camera.x;
+        const camY = this.camera.y;
+        const viewW = this.viewWidth;
+        const viewH = this.viewHeight;
+
+        for (let i = 0; i < nodesLen; i++) {
+            const node = this._resourceRenderCache[i];
+            if (node.amount <= 0) continue;
+
+            const screenX = (node.x - camX) | 0;
+            const screenY = (node.y - camY) | 0;
+
+            // Frustum culling
+            if (screenX < -node.radius || screenX > viewW + node.radius ||
+                screenY < -node.radius || screenY > viewH + node.radius) {
+                continue;
+            }
+
+            visibleNodes[visibleCount] = node;
+            visibleX[visibleCount] = screenX;
+            visibleY[visibleCount] = screenY;
+            visibleCount++;
+        }
+
         // OPTIMIZATION: Batch background circles to reduce draw calls
         // from ~N calls to 1 call.
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         this.ctx.beginPath();
 
-        const nodesLen = this._resourceRenderCache.length;
-
         // Pass 1: Build batched path for backgrounds
-        for (let i = 0; i < nodesLen; i++) {
-            const node = this._resourceRenderCache[i];
-            if (node.amount <= 0) continue;
-
-            // BOLT OPTIMIZATION: Truncate to integer
-            const screenX = (node.x - this.camera.x) | 0;
-            const screenY = (node.y - this.camera.y) | 0;
-
-            // Frustum culling
-            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
-                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
-                continue;
-            }
+        for (let i = 0; i < visibleCount; i++) {
+            const node = visibleNodes[i];
+            const screenX = visibleX[i];
+            const screenY = visibleY[i];
 
             // Move to start of arc to prevent connecting lines
             this.ctx.moveTo(screenX + node.radius, screenY);
@@ -2315,19 +2339,10 @@ export class Game {
         this.ctx.fill();
 
         // Pass 2: Draw icons
-        for (let i = 0; i < nodesLen; i++) {
-            const node = this._resourceRenderCache[i];
-            if (node.amount <= 0) continue;
-
-            // BOLT OPTIMIZATION: Truncate to integer
-            const screenX = (node.x - this.camera.x) | 0;
-            const screenY = (node.y - this.camera.y) | 0;
-
-            // Frustum culling (same check, cost is negligible compared to draw calls)
-            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
-                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
-                continue;
-            }
+        for (let i = 0; i < visibleCount; i++) {
+            const node = visibleNodes[i];
+            const screenX = visibleX[i];
+            const screenY = visibleY[i];
 
             // Icon
             // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop

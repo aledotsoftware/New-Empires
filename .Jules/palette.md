@@ -41,3 +41,7 @@
 ## 2026-01-24 - [Sub-Selection Filtering]
 **Learning:** In RTS games, precise control over unit subgroups is essential. Players often drag-select a mixed group but need to command only specific units (e.g., "Archers only"). A static "Multiple Selection" text provides no utility.
 **Action:** Replaced the generic multi-selection label with interactive buttons for each unit type selected. Clicking a button filters the selection to that specific type, enabling rapid "Select All Army -> Filter to Archers" workflows without needing complex hotkeys.
+
+## 2026-01-25 - [Rich Tooltip Accessibility]
+**Learning:** Rich HTML tooltips (containing lists, stats) inside interactive elements are invisible to screen readers if the parent has an `aria-label` (which overrides content) and no link to the tooltip.
+**Action:** Implemented unique IDs for tooltips and linked them using `aria-describedby`. This ensures screen readers announce the full detailed content (flattened to text) while keeping the concise name as the primary label.

@@ -2206,3 +2206,28 @@ button:focus-visible,
         animation: none !important;
     }
 }
+
+/* Palette: Skip Link */
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background: var(--gold);
+    color: var(--stone-darkest);
+    padding: 8px 16px;
+    z-index: 2000;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 0 0 4px 4px;
+    transition: transform 0.2s ease-out;
+    box-shadow: var(--shadow-strong);
+    border: 2px solid var(--gold-dark);
+    border-top: none;
+}
+
+.skip-link:focus {
+    transform: translateX(-50%) translateY(0);
+    outline: 2px solid var(--gold-light);
+    outline-offset: -2px;
+}

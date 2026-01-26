@@ -3663,6 +3663,15 @@ export class Game {
             }
         });
 
+        // Palette: Pause on focus for accessibility
+        notification.addEventListener('focusin', pauseTimer);
+        notification.addEventListener('focusout', () => {
+            if (isPaused) {
+                isPaused = false;
+                startTimer();
+            }
+        });
+
         // Start initial timer
         startTimer();
     }

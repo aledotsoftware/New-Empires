@@ -17,3 +17,8 @@
 **Vulnerability:** The server blocked common sensitive files but missed `yarn.lock`, `.npmrc`, `.nvmrc` and the `test-results` directory, potentially exposing dependency versions, private registry configurations, and test artifacts.
 **Learning:** Blocklists in custom servers often lag behind project evolution (e.g. switching package managers or adding new build artifacts).
 **Prevention:** Expanded the blocklist in `server.js` and added `test-results` to the directory deny-list. Regular security audits of file structure changes are necessary when using custom file servers.
+
+## 2026-01-26 - [MEDIUM] Unhandled Stream Errors in Static Server
+**Vulnerability:** `server.js` used `fs.createReadStream().pipe(res)` without an error handler on the read stream. If a file became unreadable after the `fs.stat` check (e.g., race condition, I/O error), the unhandled `error` event would crash the Node.js process, causing a Denial of Service.
+**Learning:** In Node.js, streams emit `error` events that must be handled. Relying on an initial `fs.stat` check is insufficient because it doesn't guarantee the stream creation or reading will succeed (TOCTOU).
+**Prevention:** Added `.on('error', ...)` handler to the read stream to catch errors and return a 500 status code, preventing process crashes. Also added a `clientError` handler for robustness against malformed requests.

@@ -175,8 +175,26 @@ const server = http.createServer((req, res) => {
         });
 
         const readStream = fs.createReadStream(filePath);
+
+        // Security: Handle stream errors to prevent server crash (DoS)
+        readStream.on('error', (streamErr) => {
+            console.error('Stream error:', streamErr);
+            if (!res.headersSent) {
+                res.writeHead(500);
+                res.end('Internal Server Error');
+            }
+        });
+
         readStream.pipe(res);
     });
+});
+
+// Security: Handle client connection errors
+server.on('clientError', (err, socket) => {
+    if (err.code === 'ECONNRESET' || !socket.writable) {
+        return;
+    }
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 });
 
 server.listen(PORT, () => {

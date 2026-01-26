@@ -2206,3 +2206,35 @@ button:focus-visible,
         animation: none !important;
     }
 }
+
+/* ==========================================
+   22. PALETTE SKIP LINK
+   ========================================== */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--stone-dark);
+    color: var(--gold);
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--gold);
+    border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+    z-index: 2000; /* Higher than HUD */
+    font-family: var(--font-title);
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: var(--shadow-strong);
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 2px solid var(--gold-bright);
+    outline-offset: -4px;
+    box-shadow:
+        var(--shadow-strong),
+        0 0 20px rgba(201, 162, 39, 0.4);
+}

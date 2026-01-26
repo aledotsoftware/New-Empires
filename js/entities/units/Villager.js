@@ -63,15 +63,9 @@ export class Villager extends Unit {
                     this.currentResourceNode = null;
                     break;
                 }
-                // OPTIMIZATION: Use squared distance check to avoid Math.hypot (sqrt)
-                // 30^2 = 900
-                const dxRes = this.x - this.currentResourceNode.x;
-                const dyRes = this.y - this.currentResourceNode.y;
-                const distResSq = dxRes * dxRes + dyRes * dyRes;
-
-                if (distResSq > 900) {
-                    this.moveTowardsTarget(this.currentResourceNode.x, this.currentResourceNode.y, deltaTime, game);
-                } else {
+                // BOLT OPTIMIZATION: Pass threshold (30^2 = 900) to moveTowardsTarget directly.
+                // Avoids calculating distance locally. moveTowardsTarget calculates it once.
+                if (this.moveTowardsTarget(this.currentResourceNode.x, this.currentResourceNode.y, deltaTime, game, 900)) {
                     this.gatherTimer += deltaTime;
                     if (this.gatherTimer >= 1.0) {
                         this.gatherTimer = 0;
@@ -97,15 +91,10 @@ export class Villager extends Unit {
                         break;
                     }
                 }
-                // OPTIMIZATION: Use squared distance check
-                const dxDrop = this.x - this.dropOffTarget.x;
-                const dyDrop = this.y - this.dropOffTarget.y;
-                const distDropSq = dxDrop * dxDrop + dyDrop * dyDrop;
+                // BOLT OPTIMIZATION: Pass dynamic threshold to moveTowardsTarget
                 const minDist = this.dropOffTarget.size + 10;
 
-                if (distDropSq > minDist * minDist) {
-                    this.moveTowardsTarget(this.dropOffTarget.x, this.dropOffTarget.y, deltaTime, game);
-                } else {
+                if (this.moveTowardsTarget(this.dropOffTarget.x, this.dropOffTarget.y, deltaTime, game, minDist * minDist)) {
                     game.resources[this.carryType] += this.carryAmount;
                     console.log(`💰 Depositado: ${Math.floor(this.carryAmount)} ${this.carryType}`);
                     this.carryAmount = 0;
@@ -124,15 +113,10 @@ export class Villager extends Unit {
                     this.buildTarget = null;
                     break;
                 }
-                // OPTIMIZATION: Use squared distance check
-                const dxBuild = this.x - this.buildTarget.x;
-                const dyBuild = this.y - this.buildTarget.y;
-                const distBuildSq = dxBuild * dxBuild + dyBuild * dyBuild;
+                // BOLT OPTIMIZATION: Pass dynamic threshold to moveTowardsTarget
                 const minBuildDist = this.buildTarget.size + 20;
 
-                if (distBuildSq > minBuildDist * minBuildDist) {
-                    this.moveTowardsTarget(this.buildTarget.x, this.buildTarget.y, deltaTime, game);
-                } else {
+                if (this.moveTowardsTarget(this.buildTarget.x, this.buildTarget.y, deltaTime, game, minBuildDist * minBuildDist)) {
                     let buildSpeed = 50;
                     // civilizationManager es una variable global
                     if (game && game.civilizationId && typeof civilizationManager !== 'undefined') {

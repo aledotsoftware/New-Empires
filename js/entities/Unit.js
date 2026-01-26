@@ -99,14 +99,14 @@ export class Unit extends Entity {
         }
     }
 
-    moveTowardsTarget(targetX, targetY, deltaTime, game) {
+    moveTowardsTarget(targetX, targetY, deltaTime, game, minDistSq = 25) {
         const dx = targetX - this.x;
         const dy = targetY - this.y;
         const distSq = dx * dx + dy * dy;
 
         // OPTIMIZATION: Check squared distance first to avoid sqrt if already close
         // threshold 5px -> 25 squared
-        if (distSq > 25) {
+        if (distSq > minDistSq) {
             // OPTIMIZATION: Math.sqrt is faster than Math.hypot for simple 2D distance
             const dist = Math.sqrt(distSq);
 

@@ -1037,7 +1037,11 @@ function populateMapSizes() {
         // Accessibility attributes
         option.setAttribute('role', 'button');
         option.setAttribute('tabindex', '0');
-        option.setAttribute('aria-label', `Seleccionar mapa ${mapData.name} (${mapData.width} por ${mapData.height} casillas)`);
+        option.setAttribute('aria-label', `Seleccionar mapa ${mapData.name}`); // Concise label
+
+        // Palette: Generate unique ID for description
+        const tooltipId = `map-tooltip-${key}`;
+        option.setAttribute('aria-describedby', tooltipId);
 
         // Tooltip description (preserved from legacy logic)
         let sizeDesc = '';
@@ -1048,6 +1052,7 @@ function populateMapSizes() {
         // Palette: Rich Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
+        tooltip.id = tooltipId;
 
         const tipHeader = document.createElement('div');
         tipHeader.style.fontWeight = 'bold';
@@ -1207,9 +1212,14 @@ function populateCivilizations() {
         option.setAttribute('tabindex', '0');
         option.setAttribute('aria-label', `Seleccionar civilización ${civ.name}`);
 
+        // Palette: Generate unique ID for description
+        const tooltipId = `civ-tooltip-${civ.civilizationId}`;
+        option.setAttribute('aria-describedby', tooltipId);
+
         // Palette: Rich HTML Tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'card-tooltip';
+        tooltip.id = tooltipId;
         tooltip.style.width = '240px'; // Slightly wider for bonuses
 
         // Header

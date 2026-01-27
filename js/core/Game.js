@@ -2617,22 +2617,79 @@ export class Game {
             }
 
             // Optimize: Only update DOM if content changed
-            const tooltipHtml = `
-                <div style="text-align:left; min-width:140px">
-                    <div style="margin-bottom:4px" class="text-gold"><strong>Población:</strong></div>
-                    <div style="display:flex;justify-content:space-between"><span>👨‍🌾 Aldeanos:</span> <span class="text-light">${villagers}</span></div>
-                    <div style="display:flex;justify-content:space-between"><span>⚔️ Militares:</span> <span class="text-light">${military}</span></div>
-                    <div style="margin-top:6px; border-top:1px solid rgba(255,255,255,0.2); padding-top:4px">
-                        <div style="margin-bottom:2px" class="text-gold"><strong>Capacidad:</strong></div>
-                        <div style="display:flex;justify-content:space-between; font-size:0.8rem" class="text-medium"><span>🏠 Casas:</span> <span>${houses}</span></div>
-                        <div style="display:flex;justify-content:space-between; font-size:0.8rem" class="text-medium"><span>🏰 Centros:</span> <span>${this.townCenterCounts.player}</span></div>
-                    </div>
-                </div>
-            `;
+            // Security: Use DOM creation instead of innerHTML to prevent XSS
+            const currentPopState = `${villagers},${military},${houses},${this.townCenterCounts.player}`;
 
-            if (this._lastPopTooltipHtml !== tooltipHtml) {
-                popTooltip.innerHTML = tooltipHtml;
-                this._lastPopTooltipHtml = tooltipHtml;
+            if (this._lastPopTooltipState !== currentPopState) {
+                this._lastPopTooltipState = currentPopState;
+                popTooltip.textContent = ''; // Clear previous content
+
+                const container = document.createElement('div');
+                container.style.textAlign = 'left';
+                container.style.minWidth = '140px';
+
+                // Population Header
+                const popHeader = document.createElement('div');
+                popHeader.style.marginBottom = '4px';
+                popHeader.className = 'text-gold';
+                const popHeaderStrong = document.createElement('strong');
+                popHeaderStrong.textContent = 'Población:';
+                popHeader.appendChild(popHeaderStrong);
+                container.appendChild(popHeader);
+
+                // Helper for rows
+                const createRow = (label, value) => {
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.justifyContent = 'space-between';
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = label;
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'text-light';
+                    valueSpan.textContent = value;
+                    row.appendChild(labelSpan);
+                    row.appendChild(valueSpan);
+                    return row;
+                };
+
+                container.appendChild(createRow('👨‍🌾 Aldeanos:', villagers));
+                container.appendChild(createRow('⚔️ Militares:', military));
+
+                // Capacity Section
+                const capSection = document.createElement('div');
+                capSection.style.marginTop = '6px';
+                capSection.style.borderTop = '1px solid rgba(255,255,255,0.2)';
+                capSection.style.paddingTop = '4px';
+
+                const capHeader = document.createElement('div');
+                capHeader.style.marginBottom = '2px';
+                capHeader.className = 'text-gold';
+                const capHeaderStrong = document.createElement('strong');
+                capHeaderStrong.textContent = 'Capacidad:';
+                capHeader.appendChild(capHeaderStrong);
+                capSection.appendChild(capHeader);
+
+                // Helper for capacity rows
+                const createCapRow = (label, value) => {
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.justifyContent = 'space-between';
+                    row.style.fontSize = '0.8rem';
+                    row.className = 'text-medium';
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = label;
+                    const valueSpan = document.createElement('span');
+                    valueSpan.textContent = value;
+                    row.appendChild(labelSpan);
+                    row.appendChild(valueSpan);
+                    return row;
+                };
+
+                capSection.appendChild(createCapRow('🏠 Casas:', houses));
+                capSection.appendChild(createCapRow('🏰 Centros:', this.townCenterCounts.player));
+
+                container.appendChild(capSection);
+                popTooltip.appendChild(container);
             }
         }
 

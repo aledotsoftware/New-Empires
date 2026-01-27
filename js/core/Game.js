@@ -332,7 +332,19 @@ export class Game {
         if (typeof ProceduralMapGenerator !== 'undefined') {
             console.log('Usando generador procedural de mapas');
 
-            const mapGen = new ProceduralMapGenerator(this.mapConfig);
+            // Adaptar configuración para el generador (pixels -> tiles)
+            // Fix: ProceduralMapGenerator espera dimensiones en tiles, no en píxeles
+            const genConfig = { ...this.mapConfig };
+            if (genConfig.tiles) {
+                genConfig.width = genConfig.tiles;
+                genConfig.height = genConfig.tiles;
+            } else if (genConfig.width > 1000) {
+                // Heurística: si el ancho es muy grande, asumir que está en píxeles
+                genConfig.width = Math.floor(genConfig.width / TILE_SIZE);
+                genConfig.height = Math.floor(genConfig.height / TILE_SIZE);
+            }
+
+            const mapGen = new ProceduralMapGenerator(genConfig);
             const generatedMap = mapGen.generate();
 
             // Aplicar el mapa generado al TerrainMap existente
@@ -2286,27 +2298,56 @@ export class Game {
         const margin = 50;
         this.resourceGrid.queryRect(this.camera.x - margin, this.camera.y - margin, this.viewWidth + margin * 2, this.viewHeight + margin * 2, this._resourceRenderCache);
 
+        // BOLT OPTIMIZATION: Hoist camera and view properties
+        const camX = this.camera.x;
+        const camY = this.camera.y;
+        const viewW = this.viewWidth;
+        const viewH = this.viewHeight;
+        const hasAssetLoader = typeof assetLoader !== 'undefined';
+
+        // BOLT OPTIMIZATION: Filter & Pre-calculate pass
+        // Reduces 2N loops + 2N calc + 2N culling to 1N calc/cull + 2M loops (where M << N)
+        let visibleCount = 0;
+        const nodes = this._resourceRenderCache;
+        const len = nodes.length;
+
+        for (let i = 0; i < len; i++) {
+            const node = nodes[i];
+            if (node.amount <= 0) continue;
+
+            const screenX = (node.x - camX) | 0;
+            const screenY = (node.y - camY) | 0;
+
+            // Frustum culling
+            if (screenX < -node.radius || screenX > viewW + node.radius ||
+                screenY < -node.radius || screenY > viewH + node.radius) {
+                continue;
+            }
+
+            // Node is visible
+            node._screenX = screenX;
+            node._screenY = screenY;
+
+            // Pre-cache image
+            if (!node._cachedImage && hasAssetLoader) {
+                const img = assetLoader.getImage(node.type);
+                if (img) node._cachedImage = img;
+            }
+
+            // Compact array
+            nodes[visibleCount++] = node;
+        }
+
         // OPTIMIZATION: Batch background circles to reduce draw calls
         // from ~N calls to 1 call.
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         this.ctx.beginPath();
 
-        const nodesLen = this._resourceRenderCache.length;
-
-        // Pass 1: Build batched path for backgrounds
-        for (let i = 0; i < nodesLen; i++) {
-            const node = this._resourceRenderCache[i];
-            if (node.amount <= 0) continue;
-
-            // BOLT OPTIMIZATION: Truncate to integer
-            const screenX = (node.x - this.camera.x) | 0;
-            const screenY = (node.y - this.camera.y) | 0;
-
-            // Frustum culling
-            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
-                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
-                continue;
-            }
+        // Pass 1: Draw backgrounds
+        for (let i = 0; i < visibleCount; i++) {
+            const node = nodes[i];
+            const screenX = node._screenX;
+            const screenY = node._screenY;
 
             // Move to start of arc to prevent connecting lines
             this.ctx.moveTo(screenX + node.radius, screenY);
@@ -2315,32 +2356,17 @@ export class Game {
         this.ctx.fill();
 
         // Pass 2: Draw icons
-        for (let i = 0; i < nodesLen; i++) {
-            const node = this._resourceRenderCache[i];
-            if (node.amount <= 0) continue;
+        for (let i = 0; i < visibleCount; i++) {
+            const node = nodes[i];
+            const screenX = node._screenX;
+            const screenY = node._screenY;
 
-            // BOLT OPTIMIZATION: Truncate to integer
-            const screenX = (node.x - this.camera.x) | 0;
-            const screenY = (node.y - this.camera.y) | 0;
-
-            // Frustum culling (same check, cost is negligible compared to draw calls)
-            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
-                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
-                continue;
-            }
-
-            // Icon
-            // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop
-            let img = node._cachedImage;
-            if (!img && typeof assetLoader !== 'undefined') {
-                img = assetLoader.getImage(node.type);
-                if (img) node._cachedImage = img;
-            }
+            const img = node._cachedImage;
 
             if (img && img.complete) {
                 const size = node.radius * 1.5;
                 this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
-            } else if (typeof assetLoader !== 'undefined') {
+            } else if (hasAssetLoader) {
                 // Fallback to square if image not ready
                 this.ctx.fillStyle = '#FFD700';
                 this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);

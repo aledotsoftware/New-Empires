@@ -2145,14 +2145,57 @@ export class Game {
         // BOLT OPTIMIZATION: Global sort removed as row-wise sort + grid order is sufficient
         // this._renderCache.sort((a, b) => a.y - b.y);
 
-        // Render entities (Pass 1: Main sprites)
+        // Render entities
+        const renderLen = this._renderCache.length;
+
+        // BOLT OPTIMIZATION: Batch Entity Backgrounds (Ground Pass)
+        // Reduces state changes (fillStyle) and draw calls (fillRect -> fill)
+        // Groups entities by team to minimize context switching.
+        if (renderLen > 0) {
+            // Retrieve team colors (cached or from manager)
+            let playerColor = 'rgba(72, 187, 120, 0.3)';
+            let enemyColor = 'rgba(197, 48, 48, 0.3)';
+
+            if (typeof civilizationManager !== 'undefined') {
+                playerColor = civilizationManager.getTeamColor(this.civilizationId, 'player');
+                enemyColor = civilizationManager.getTeamColor(this.civilizationId, 'enemy');
+            }
+
+            // Batch Player
+            this.ctx.fillStyle = playerColor;
+            this.ctx.beginPath();
+            let hasPlayer = false;
+            for (let i = 0; i < renderLen; i++) {
+                const ent = this._renderCache[i];
+                if (ent.team === 'player') {
+                    ent.addBackgroundToPath(this.ctx, this.camera);
+                    hasPlayer = true;
+                }
+            }
+            if (hasPlayer) this.ctx.fill();
+
+            // Batch Enemy
+            this.ctx.fillStyle = enemyColor;
+            this.ctx.beginPath();
+            let hasEnemy = false;
+            for (let i = 0; i < renderLen; i++) {
+                const ent = this._renderCache[i];
+                if (ent.team === 'enemy') {
+                    ent.addBackgroundToPath(this.ctx, this.camera);
+                    hasEnemy = true;
+                }
+            }
+            if (hasEnemy) this.ctx.fill();
+        }
+
+        // Render entities (Pass 2: Sprites)
         // OPTIMIZATION: Use standard for loop with cached length instead of for...of
         // Benchmark: ~1.5x faster in hot loops and avoids iterator allocation
-        const renderLen = this._renderCache.length;
         for (let i = 0; i < renderLen; i++) {
             // OPTIMIZATION: Pass viewport size to Entity.render for fine-grained culling
             // Pass false to skip HP bars (we batch them later)
-            this._renderCache[i].render(this.ctx, this.camera, this.viewWidth, this.viewHeight, false);
+            // Pass false to skip Backgrounds (we batched them above)
+            this._renderCache[i].render(this.ctx, this.camera, this.viewWidth, this.viewHeight, false, false);
         }
 
         // OPTIMIZATION: Batch HP bars (Pass 2)

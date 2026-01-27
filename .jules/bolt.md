@@ -55,3 +55,7 @@
 ## 2025-05-25 - Instruction Cache & Loop Splitting
 **Learning:** Splitting a mixed workload loop (e.g., SpatialGrid.add + Unit.update) into two distinct passes proved to be ~65% faster in benchmarks, contrary to the "iterate once" intuition. This is likely due to improved Instruction Cache locality and JIT optimization, as the CPU executes homogeneous operations in each pass without context switching.
 **Action:** When a loop performs two distinct, heavy types of operations, benchmark splitting them. The overhead of iterating twice is often dwarfed by the gains in CPU efficiency.
+
+## 2025-05-26 - Draw Call Batching & Z-Ordering
+**Learning:** Batching `ctx.fillRect` calls for entity backgrounds (team bases) by team color reduced N draw calls to 2 draw calls per frame. Crucially, drawing these backgrounds in a separate "Ground Pass" before sorting sprites not only optimized performance but also fixed a visual artifact where the "base" of a foreground unit would be drawn over the head of a background unit.
+**Action:** When optimizing rendering, look for opportunities to split layers (Ground, Sprite, UI) to enable batching and improve visual correctness simultaneously.

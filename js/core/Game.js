@@ -218,6 +218,7 @@ export class Game {
 
         // Cache para renderizado (evita alocación de arrays en cada frame)
         this._renderCache = [];
+        this._dragSelectCache = []; // Palette: Cache for drag selection counting
         this._resourceRenderCache = [];
         this._rowCache = []; // BOLT OPTIMIZATION: Cache for row-wise sorting
         this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
@@ -2383,6 +2384,61 @@ export class Game {
 
         this.ctx.fillRect(startX, startY, width, height);
         this.ctx.strokeRect(startX, startY, width, height);
+
+        // Palette: Drag Selection Counter
+        if (this.spatialGrid && this._dragSelectCache) {
+            const minX = Math.min(this.dragStart.x, this.mouse.worldX);
+            const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
+            const minY = Math.min(this.dragStart.y, this.mouse.worldY);
+            const maxY = Math.max(this.dragStart.y, this.mouse.worldY);
+            const w = maxX - minX;
+            const h = maxY - minY;
+
+            // Reuse cache
+            this.spatialGrid.queryRect(minX, minY, w, h, this._dragSelectCache);
+
+            let count = 0;
+            const len = this._dragSelectCache.length;
+            for (let i = 0; i < len; i++) {
+                const ent = this._dragSelectCache[i];
+                // Check if it's a valid player unit inside the selection box
+                if (ent.team === 'player' && ent.isUnit && !ent.isDead) {
+                    if (ent.x >= minX && ent.x <= maxX &&
+                        ent.y >= minY && ent.y <= maxY) {
+                        count++;
+                    }
+                }
+            }
+
+            if (count > 0) {
+                const text = `${count}`;
+                this.ctx.font = 'bold 12px "Inter", sans-serif';
+                const metrics = this.ctx.measureText(text);
+                const padding = 6;
+                const bgW = metrics.width + padding * 2;
+                const bgH = 20;
+
+                // Position near cursor but not overlapping
+                const bgX = this.mouse.x + 24;
+                const bgY = this.mouse.y + 24;
+
+                // Draw background
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                this.ctx.strokeStyle = '#48bb78';
+                this.ctx.lineWidth = 1;
+
+                this.ctx.beginPath();
+                this.ctx.rect(bgX, bgY, bgW, bgH);
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Draw text
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.textAlign = 'left';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(text, bgX + padding, bgY + bgH / 2);
+            }
+        }
     }
 
     drawBuildGhost() {

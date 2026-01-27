@@ -980,6 +980,16 @@ export class Game {
             if (this.selectedEntities.length === 1 &&
                 this.selectedEntities[0].type === 'villager') {
                 this.openBuildMenu();
+            } else {
+                // Palette: Feedback for invalid action
+                if (this.selectedEntities.length === 0) {
+                    this.showNotification('Selecciona un aldeano para construir', 'error');
+                } else if (this.selectedEntities.some(e => e.type !== 'villager')) {
+                    this.showNotification('Solo los aldeanos pueden construir', 'error');
+                } else {
+                    this.showNotification('Selecciona un solo aldeano para construir', 'error');
+                }
+                if (typeof soundManager !== 'undefined') soundManager.play('error');
             }
         }
 
@@ -1100,6 +1110,12 @@ export class Game {
                 this.showNotification(`Formación: ${formation}`, 'info');
                 e.preventDefault();
                 return;
+            } else {
+                // Palette: Feedback for invalid action
+                if (selectedUnits.length <= 1) {
+                    this.showNotification('Formaciones requieren múltiples unidades', 'error');
+                }
+                if (typeof soundManager !== 'undefined') soundManager.play('error');
             }
         }
 

@@ -44,6 +44,38 @@ export class Game {
             style: 'continental'
         };
 
+        // BOLT FIX: Determine Map Dimensions in Pixels
+        // mapConfig might have width/height in pixels (from main.js) or we calculate from tiles
+        // Logic: If width > 500, assume pixels. Else assume tiles and convert.
+        // TILE_SIZE is 32. 500 tiles = 16000px (larger than max map).
+        // 500 px = 15 tiles (too small). So threshold check is safe.
+        // Better: Check if mapConfig.tiles exists.
+
+        if (this.mapConfig.width && this.mapConfig.width > 2000) {
+            this.mapWidth = this.mapConfig.width;
+            this.mapHeight = this.mapConfig.height || this.mapConfig.width;
+        } else if (this.mapConfig.tiles) {
+            this.mapWidth = this.mapConfig.tiles * TILE_SIZE;
+            this.mapHeight = this.mapConfig.tiles * TILE_SIZE;
+        } else {
+            // Fallback or tile count based
+            // If width is small (e.g. 200), it's tiles
+            const w = this.mapConfig.width || 200;
+            const h = this.mapConfig.height || 200;
+
+            if (w < 2000) {
+                this.mapWidth = w * TILE_SIZE;
+                this.mapHeight = h * TILE_SIZE;
+            } else {
+                this.mapWidth = w;
+                this.mapHeight = h;
+            }
+        }
+
+        // Ensure defaults if something went wrong
+        this.mapWidth = this.mapWidth || CONFIG.CANVAS_WIDTH;
+        this.mapHeight = this.mapHeight || CONFIG.CANVAS_HEIGHT;
+
         // Configurar dimensiones
         this.resizeCanvas();
         this._resizeHandler = () => this.resizeCanvas();
@@ -121,19 +153,19 @@ export class Game {
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
         // Grid dinámico para unidades (se actualiza cada frame)
-        this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.spatialGrid = new SpatialGrid(this.mapWidth, this.mapHeight, 100);
 
         // Grid estático para edificios (se actualiza solo al construir/destruir)
-        this.buildingGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.buildingGrid = new SpatialGrid(this.mapWidth, this.mapHeight, 100);
 
         // OPTIMIZACIÓN: Spatial Grid para recursos estáticos (evita iterar miles de recursos por frame)
-        this.resourceGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.resourceGrid = new SpatialGrid(this.mapWidth, this.mapHeight, 100);
 
         // SISTEMA DE GRID (Cuadrícula de construcción y colisiones)
-        this.gridMap = new GridMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
+        this.gridMap = new GridMap(this.mapWidth, this.mapHeight, TILE_SIZE);
 
         // SISTEMA DE TERRENOS
-        this.terrainMap = new TerrainMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
+        this.terrainMap = new TerrainMap(this.mapWidth, this.mapHeight, TILE_SIZE);
 
         // SISTEMA DE TECNOLOGÍAS (variable global temporal)
         this.techManager = new TechManager(this);
@@ -332,7 +364,18 @@ export class Game {
         if (typeof ProceduralMapGenerator !== 'undefined') {
             console.log('Usando generador procedural de mapas');
 
-            const mapGen = new ProceduralMapGenerator(this.mapConfig);
+            // BOLT FIX: Pass dimensions in tiles, not pixels
+            // ProceduralMapGenerator expects width/height in TILES.
+            const widthInTiles = Math.floor(this.mapWidth / TILE_SIZE);
+            const heightInTiles = Math.floor(this.mapHeight / TILE_SIZE);
+
+            const genConfig = {
+                ...this.mapConfig,
+                width: widthInTiles,
+                height: heightInTiles
+            };
+
+            const mapGen = new ProceduralMapGenerator(genConfig);
             const generatedMap = mapGen.generate();
 
             // Aplicar el mapa generado al TerrainMap existente
@@ -441,8 +484,8 @@ export class Game {
                 }
             }
 
-            const x = Math.random() * CONFIG.CANVAS_WIDTH;
-            const y = Math.random() * CONFIG.CANVAS_HEIGHT;
+            const x = Math.random() * this.mapWidth;
+            const y = Math.random() * this.mapHeight;
 
             // Evitar spawn cerca del centro inicial (jugador)
             // OPTIMIZATION: Squared distance check
@@ -451,8 +494,8 @@ export class Game {
             const distSqPlayer = dxPlayer * dxPlayer + dyPlayer * dyPlayer;
 
             // Evitar spawn cerca de la base enemiga
-            const dxEnemy = x - (CONFIG.CANVAS_WIDTH - 400);
-            const dyEnemy = y - (CONFIG.CANVAS_HEIGHT - 400);
+            const dxEnemy = x - (this.mapWidth - 400);
+            const dyEnemy = y - (this.mapHeight - 400);
             const distSqEnemy = dxEnemy * dxEnemy + dyEnemy * dyEnemy;
 
             // Solo colocar si está lejos de ambas bases (mínimo 200 unidades, 200^2 = 40000)
@@ -475,15 +518,15 @@ export class Game {
     spawnEnemies() {
         // Spawn enemigos en el lado opuesto
         for (let i = 0; i < 5; i++) {
-            const x = CONFIG.CANVAS_WIDTH - 400 + Math.random() * 200 - 100;
-            const y = CONFIG.CANVAS_HEIGHT - 400 + Math.random() * 200 - 100;
+            const x = this.mapWidth - 400 + Math.random() * 200 - 100;
+            const y = this.mapHeight - 400 + Math.random() * 200 - 100;
             const enemy = new Warrior(x, y, 'enemy');
             this.enemies.push(enemy);
             this.entities.push(enemy);
         }
 
         // Enemy town center
-        const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
+        const enemyTC = new TownCenter(this.mapWidth - 400, this.mapHeight - 400, 'enemy');
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
         this.buildingGrid.add(enemyTC);
@@ -581,8 +624,8 @@ export class Game {
         const width = rect.width || this.minimap.width;
         const height = rect.height || this.minimap.height;
 
-        const worldX = (x / width) * CONFIG.CANVAS_WIDTH;
-        const worldY = (y / height) * CONFIG.CANVAS_HEIGHT;
+        const worldX = (x / width) * this.mapWidth;
+        const worldY = (y / height) * this.mapHeight;
 
         // Center camera on click
         this.camera.x = worldX - this.viewWidth / 2;
@@ -593,8 +636,8 @@ export class Game {
 
     // Palette: Helper to keep camera in bounds
     clampCamera() {
-        const maxCamX = CONFIG.CANVAS_WIDTH - this.viewWidth;
-        const maxCamY = CONFIG.CANVAS_HEIGHT - this.viewHeight;
+        const maxCamX = this.mapWidth - this.viewWidth;
+        const maxCamY = this.mapHeight - this.viewHeight;
 
         if (this.camera.x < 0) this.camera.x = 0;
         else if (this.camera.x > maxCamX) this.camera.x = maxCamX;

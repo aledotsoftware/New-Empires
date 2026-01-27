@@ -55,3 +55,7 @@
 ## 2025-05-25 - Instruction Cache & Loop Splitting
 **Learning:** Splitting a mixed workload loop (e.g., SpatialGrid.add + Unit.update) into two distinct passes proved to be ~65% faster in benchmarks, contrary to the "iterate once" intuition. This is likely due to improved Instruction Cache locality and JIT optimization, as the CPU executes homogeneous operations in each pass without context switching.
 **Action:** When a loop performs two distinct, heavy types of operations, benchmark splitting them. The overhead of iterating twice is often dwarfed by the gains in CPU efficiency.
+
+## 2025-05-26 - Input Confusion & 100x Gains
+**Learning:** Sometimes "Optimization" is actually "Bug Fixing". A mismatch between "pixel width" and "tile width" inputs caused the Map Generator to create a map 1024x larger than intended (3840 tiles vs 120 tiles), taking 6 seconds to generate. Fixing the input reduced it to 33ms (~185x speedup).
+**Action:** Before optimizing algorithms, verify that the input data scale matches expectations.

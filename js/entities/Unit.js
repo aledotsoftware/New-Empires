@@ -213,11 +213,15 @@ export class Unit extends Entity {
             this.y += moveY;
 
             // BOLT OPTIMIZATION: Use local CONFIG (imported) and explicit checks instead of Math.min/max
+            // Also support dynamic map sizes via game instance
+            const maxX = game ? (game.mapWidth || CONFIG.CANVAS_WIDTH) : CONFIG.CANVAS_WIDTH;
+            const maxY = game ? (game.mapHeight || CONFIG.CANVAS_HEIGHT) : CONFIG.CANVAS_HEIGHT;
+
             if (this.x < 0) this.x = 0;
-            else if (this.x > CONFIG.CANVAS_WIDTH) this.x = CONFIG.CANVAS_WIDTH;
+            else if (this.x > maxX) this.x = maxX;
 
             if (this.y < 0) this.y = 0;
-            else if (this.y > CONFIG.CANVAS_HEIGHT) this.y = CONFIG.CANVAS_HEIGHT;
+            else if (this.y > maxY) this.y = maxY;
 
             return false; // Still moving
         }

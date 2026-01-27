@@ -567,6 +567,12 @@ export class Game {
             this.isMinimapDragging = true;
             this.handleMinimapInput(e.clientX, e.clientY);
         });
+
+        // Palette: Bind Resume Button
+        const resumeBtn = document.getElementById('resumeButton');
+        if (resumeBtn) {
+            resumeBtn.onclick = () => this.togglePause();
+        }
     }
 
     // Palette: Helper for Minimap Navigation
@@ -1849,6 +1855,23 @@ export class Game {
             }
         }
 
+        // Palette: Toggle DOM Pause Overlay
+        const overlay = document.getElementById('pauseOverlay');
+        if (overlay) {
+            if (this._isPaused && !this.isGameOver) {
+                overlay.classList.remove('hidden');
+                // Focus resume button for a11y
+                const resumeBtn = document.getElementById('resumeButton');
+                if (resumeBtn) setTimeout(() => resumeBtn.focus(), 50);
+            } else {
+                overlay.classList.add('hidden');
+                // Return focus to canvas if resuming
+                if (!this._isPaused && this.canvas) {
+                    this.canvas.focus();
+                }
+            }
+        }
+
         // Timer Logic: Adjust start time to ignore pause duration
         if (this._isPaused) {
             this.pauseStartTime = Date.now();
@@ -2204,30 +2227,7 @@ export class Game {
         // Renderizar minimapa
         this.renderMinimap();
 
-        // Palette: Draw Pause Overlay
-        if (this.isPaused && !this.isGameOver) {
-            this.ctx.save();
-            // Overlay oscuro
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            this.ctx.fillRect(0, 0, this.viewWidth, this.viewHeight);
-
-            // Título
-            this.ctx.font = 'bold 48px "Cinzel", serif';
-            this.ctx.fillStyle = '#c9a227'; // var(--gold)
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            this.ctx.shadowBlur = 10;
-            this.ctx.fillText('PAUSA', this.viewWidth / 2, this.viewHeight / 2 - 20);
-
-            // Subtítulo
-            this.ctx.font = '20px "Inter", sans-serif';
-            this.ctx.fillStyle = '#e8d48b'; // var(--text-gold)
-            this.ctx.shadowBlur = 4;
-            this.ctx.fillText('Presiona P para reanudar', this.viewWidth / 2, this.viewHeight / 2 + 30);
-
-            this.ctx.restore();
-        }
+        // Palette: Draw Pause Overlay removed (Moved to DOM in _updatePauseState)
     }
 
     drawGrid() {

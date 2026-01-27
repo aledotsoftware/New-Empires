@@ -2238,3 +2238,17 @@ button:focus-visible,
         var(--shadow-strong),
         0 0 20px rgba(201, 162, 39, 0.4);
 }
+
+/* ==========================================
+   23. PALETTE PAUSE OVERLAY
+   ========================================== */
+.pause-overlay {
+    z-index: 50 !important; /* Between Canvas (0) and HUD (100) - Override modal-overlay */
+    background: rgba(0, 0, 0, 0.4) !important; /* Override modal-overlay */
+    pointer-events: none;
+}
+
+.pause-content {
+    pointer-events: auto;
+    text-align: center;
+}

@@ -133,6 +133,17 @@
         <!-- Skip Link for Accessibility -->
         <a href="#commandPanel" class="skip-link">Saltar a Comandos</a>
 
+        <!-- Palette: Pause Overlay (DOM-based for accessibility) -->
+        <div id="pauseOverlay" class="modal-overlay pause-overlay hidden" role="dialog" aria-modal="false" aria-labelledby="pauseTitle">
+            <div class="pause-content">
+                <h1 id="pauseTitle" class="game-over-title" style="font-size: 3rem; margin-bottom: 0.5rem;">PAUSA</h1>
+                <p style="color: var(--text-gold); font-size: 1.2rem; margin-bottom: 1.5rem;">Juego en Pausa</p>
+                <button id="resumeButton" class="btn-start" style="padding: 0.8rem 2rem; font-size: 1rem;">
+                    Reanudar
+                </button>
+            </div>
+        </div>
+
         <!-- Contenedor Principal del Juego -->
 
         <!-- Top HUD: recursos, población, tiempo y settings -->

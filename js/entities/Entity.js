@@ -49,7 +49,7 @@ export class Entity {
         // Override en subclases
     }
 
-    render(ctx, camera, viewWidth, viewHeight, drawHp = true) {
+    render(ctx, camera, viewWidth, viewHeight, drawHp = true, drawBackground = true) {
         // BOLT OPTIMIZATION: Truncate to integer to avoid sub-pixel rendering cost
         const screenX = (this.x - camera.x) | 0;
         const screenY = (this.y - camera.y) | 0;
@@ -64,12 +64,14 @@ export class Entity {
              }
         }
 
-        // Dibujar fondo cuadrado en lugar de redondo
-        if (!this.color) {
-            this.color = this.getTeamColor();
+        if (drawBackground) {
+            // Dibujar fondo cuadrado en lugar de redondo
+            if (!this.color) {
+                this.color = this.getTeamColor();
+            }
+            ctx.fillStyle = this.color;
+            ctx.fillRect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
         }
-        ctx.fillStyle = this.color;
-        ctx.fillRect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
 
         if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
             ctx.drawImage(this.image, screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
@@ -83,6 +85,13 @@ export class Entity {
         if (drawHp && this.hp < this.maxHp) {
             this.drawHpBar(ctx, camera);
         }
+    }
+
+    // BOLT OPTIMIZATION: Batching support for backgrounds
+    addBackgroundToPath(ctx, camera) {
+        const screenX = (this.x - camera.x) | 0;
+        const screenY = (this.y - camera.y) | 0;
+        ctx.rect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
     }
 
     drawHpBar(ctx, camera) {

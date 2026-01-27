@@ -2238,3 +2238,51 @@ button:focus-visible,
         var(--shadow-strong),
         0 0 20px rgba(201, 162, 39, 0.4);
 }
+
+/* ==========================================
+   23. PALETTE PAUSE OVERLAY
+   ========================================== */
+.pause-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 90; /* Below HUD (100) */
+}
+
+.pause-title {
+    font-family: var(--font-title);
+    font-size: 4rem;
+    color: var(--gold);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+    margin-bottom: 20px;
+    animation: titleGlow 4s ease-in-out infinite alternate;
+}
+
+.pause-subtitle {
+    color: var(--text-light);
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+.pause-btn {
+    min-width: 200px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.pause-hint {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--text-medium);
+}

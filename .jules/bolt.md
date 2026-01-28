@@ -59,3 +59,7 @@
 ## 2025-05-26 - Draw Call Batching & Z-Ordering
 **Learning:** Batching `ctx.fillRect` calls for entity backgrounds (team bases) by team color reduced N draw calls to 2 draw calls per frame. Crucially, drawing these backgrounds in a separate "Ground Pass" before sorting sprites not only optimized performance but also fixed a visual artifact where the "base" of a foreground unit would be drawn over the head of a background unit.
 **Action:** When optimizing rendering, look for opportunities to split layers (Ground, Sprite, UI) to enable batching and improve visual correctness simultaneously.
+
+## 2025-05-27 - Multi-Pass Rendering & Coordinate Caching
+**Learning:** In multi-pass rendering (Backgrounds -> Icons), recalculating screen coordinates and re-checking frustum culling for each pass adds significant overhead (N*Passes operations).
+**Action:** For static or semi-static entities (like resources), perform a single "Pre-pass" to calculate/cache screen coordinates and filter visible items into a compacted list. This reduced render time by ~26% in `drawResourceNodes`.

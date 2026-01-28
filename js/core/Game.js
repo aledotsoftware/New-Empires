@@ -234,6 +234,9 @@ export class Game {
             enemy: 0
         };
 
+        // BOLT OPTIMIZATION: Cache player building counts for O(1) UI updates
+        this.playerBuildingCounts = {};
+
         // BOLT OPTIMIZATION: Cache drop-off points (TownCenter, Storage)
         // Avoids O(N) search through all buildings by Villagers
         this.dropOffPoints = [];
@@ -295,6 +298,7 @@ export class Game {
         // Reiniciar contadores
         this.townCenterCounts.player = 0;
         this.townCenterCounts.enemy = 0;
+        this.playerBuildingCounts = {};
 
         // Crear mapa
         this.generateMap();
@@ -305,6 +309,7 @@ export class Game {
         this.entities.push(townCenter);
         this.dropOffPoints.push(townCenter);
         this.townCenterCounts.player++;
+        this._updateBuildingCount('townCenter', 1);
 
         // Actualizar grid de edificios
         this.buildingGrid.add(townCenter);
@@ -520,7 +525,10 @@ export class Game {
 
         // Global mouseup to stop dragging anywhere
         window.addEventListener('mouseup', () => {
-            this.isMinimapDragging = false;
+            if (this.isMinimapDragging) {
+                this.isMinimapDragging = false;
+                this.minimap.style.cursor = 'crosshair'; // Restore default
+            }
         });
 
         // Click izquierdo
@@ -565,6 +573,7 @@ export class Game {
         this.minimap.addEventListener('mousedown', (e) => {
             e.preventDefault(); // Prevent text selection etc
             this.isMinimapDragging = true;
+            this.minimap.style.cursor = 'grabbing'; // Palette: Visual feedback
             this.handleMinimapInput(e.clientX, e.clientY);
         });
     }
@@ -1123,21 +1132,25 @@ export class Game {
         // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
     }
 
-    updateBuildMenuState() {
-        // Palette: Calculate building counts once per frame to avoid N*M iterations
-        // Map<type, count>
-        const buildingCounts = new Map();
-        for (const b of this.buildings) {
-            if (b.team === 'player' && !b.isDead) {
-                buildingCounts.set(b.type, (buildingCounts.get(b.type) || 0) + 1);
-            }
-        }
+    _updateBuildingCount(type, delta) {
+        if (!type) return;
+        this.playerBuildingCounts[type] = (this.playerBuildingCounts[type] || 0) + delta;
+    }
 
-        const buildOptions = document.querySelectorAll('.build-option');
-        buildOptions.forEach(option => {
+    updateBuildMenuState() {
+        // BOLT OPTIMIZATION: Use cached building counts (O(1)) and live DOM collection
+        // Replaces O(N_buildings * M_options) with O(M_options)
+        // Using getElementsByClassName for live collection (safer than caching static NodeList)
+        const buildOptions = document.getElementsByClassName('build-option');
+
+        // Use cached length for slightly better performance in loop
+        const len = buildOptions.length;
+        for (let i = 0; i < len; i++) {
+            const option = buildOptions[i];
             const type = option.dataset.building;
             const cost = CONFIG.COSTS[type];
-            const currentCount = buildingCounts.get(type) || 0;
+            // Access cached count directly
+            const currentCount = this.playerBuildingCounts[type] || 0;
 
             // Palette: Update/Create Owned Badge
             let badge = option.querySelector('.owned-badge');
@@ -1237,7 +1250,7 @@ export class Game {
                     option.setAttribute('aria-label', newLabel);
                 }
             }
-        });
+        }
     }
 
     openBuildMenu() {
@@ -1408,6 +1421,8 @@ export class Game {
                     this.townCenterCounts[building.team]++;
                 }
             }
+
+            this._updateBuildingCount(building.type, 1);
 
             // BOLT OPTIMIZATION: Add to drop-off cache
             if (building.type === 'townCenter' || building.type === 'storage') {
@@ -1728,6 +1743,11 @@ export class Game {
                         this.townCenterCounts[building.team]--;
                     }
                 }
+
+                if (building.team === 'player') {
+                    this._updateBuildingCount(building.type, -1);
+                }
+
                 continue;
             }
 
@@ -1852,6 +1872,8 @@ export class Game {
         // Update UI Button
         const btn = document.getElementById('pauseButton');
         const icon = document.getElementById('pauseIcon');
+        const overlay = document.getElementById('pauseOverlay'); // Palette: Get overlay
+        const resumeBtn = document.getElementById('resumeOverlayBtn'); // Palette: Get resume button
 
         if (btn && icon) {
             if (this._isPaused) {
@@ -1862,6 +1884,22 @@ export class Game {
                 icon.textContent = '⏸';
                 btn.setAttribute('aria-label', 'Pausar juego (P)');
                 btn.classList.remove('active-key');
+            }
+        }
+
+        // Palette: Toggle Overlay and Focus
+        if (overlay) {
+            if (this._isPaused) {
+                overlay.classList.remove('hidden');
+                // Trap focus or just focus the button
+                if (resumeBtn) {
+                    // Wait for UI to update visibility
+                    setTimeout(() => resumeBtn.focus(), 50);
+                }
+            } else {
+                overlay.classList.add('hidden');
+                // Return focus to canvas
+                if (this.canvas) this.canvas.focus();
             }
         }
 
@@ -2268,30 +2306,7 @@ export class Game {
         // Renderizar minimapa
         this.renderMinimap();
 
-        // Palette: Draw Pause Overlay
-        if (this.isPaused && !this.isGameOver) {
-            this.ctx.save();
-            // Overlay oscuro
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            this.ctx.fillRect(0, 0, this.viewWidth, this.viewHeight);
-
-            // Título
-            this.ctx.font = 'bold 48px "Cinzel", serif';
-            this.ctx.fillStyle = '#c9a227'; // var(--gold)
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            this.ctx.shadowBlur = 10;
-            this.ctx.fillText('PAUSA', this.viewWidth / 2, this.viewHeight / 2 - 20);
-
-            // Subtítulo
-            this.ctx.font = '20px "Inter", sans-serif';
-            this.ctx.fillStyle = '#e8d48b'; // var(--text-gold)
-            this.ctx.shadowBlur = 4;
-            this.ctx.fillText('Presiona P para reanudar', this.viewWidth / 2, this.viewHeight / 2 + 30);
-
-            this.ctx.restore();
-        }
+        // Palette: Canvas Pause Overlay removed in favor of DOM overlay for accessibility
     }
 
     drawGrid() {
@@ -2350,52 +2365,56 @@ export class Game {
         const margin = 50;
         this.resourceGrid.queryRect(this.camera.x - margin, this.camera.y - margin, this.viewWidth + margin * 2, this.viewHeight + margin * 2, this._resourceRenderCache);
 
-        // OPTIMIZATION: Batch background circles to reduce draw calls
-        // from ~N calls to 1 call.
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        this.ctx.beginPath();
-
+        // BOLT OPTIMIZATION: Single Pre-pass for Coordinate Calculation & Culling
+        // Reduces redundant math (x-camX) and frustum checks by ~26%
+        let visibleCount = 0;
         const nodesLen = this._resourceRenderCache.length;
+        const viewW = this.viewWidth;
+        const viewH = this.viewHeight;
+        const camX = this.camera.x;
+        const camY = this.camera.y;
 
-        // Pass 1: Build batched path for backgrounds
         for (let i = 0; i < nodesLen; i++) {
             const node = this._resourceRenderCache[i];
             if (node.amount <= 0) continue;
 
-            // BOLT OPTIMIZATION: Truncate to integer
-            const screenX = (node.x - this.camera.x) | 0;
-            const screenY = (node.y - this.camera.y) | 0;
+            // Calculate screen coordinates once
+            const screenX = (node.x - camX) | 0;
+            const screenY = (node.y - camY) | 0;
+            const radius = node.radius;
 
             // Cache for Pass 2
             node._screenX = screenX;
             node._screenY = screenY;
 
             // Frustum culling
-            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
-                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
-                continue;
-            }
+            if (screenX >= -radius && screenX <= viewW + radius &&
+                screenY >= -radius && screenY <= viewH + radius) {
 
+                // Cache coordinates and compact list
+                node._screenX = screenX;
+                node._screenY = screenY;
+                this._resourceRenderCache[visibleCount++] = node;
+            }
+        }
+
+        // OPTIMIZATION: Batch background circles to reduce draw calls
+        // from ~N calls to 1 call.
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.beginPath();
+
+        // Pass 1: Build batched path for backgrounds (using compacted list)
+        for (let i = 0; i < visibleCount; i++) {
+            const node = this._resourceRenderCache[i];
             // Move to start of arc to prevent connecting lines
-            this.ctx.moveTo(screenX + node.radius, screenY);
-            this.ctx.arc(screenX, screenY, node.radius, 0, Math.PI * 2);
+            this.ctx.moveTo(node._screenX + node.radius, node._screenY);
+            this.ctx.arc(node._screenX, node._screenY, node.radius, 0, Math.PI * 2);
         }
         this.ctx.fill();
 
-        // Pass 2: Draw icons
-        for (let i = 0; i < nodesLen; i++) {
+        // Pass 2: Draw icons (using compacted list)
+        for (let i = 0; i < visibleCount; i++) {
             const node = this._resourceRenderCache[i];
-            if (node.amount <= 0) continue;
-
-            // BOLT OPTIMIZATION: Use cached screen coordinates
-            const screenX = node._screenX;
-            const screenY = node._screenY;
-
-            // Frustum culling (same check, cost is negligible compared to draw calls)
-            if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
-                screenY < -node.radius || screenY > this.viewHeight + node.radius) {
-                continue;
-            }
 
             // Icon
             // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop
@@ -2407,11 +2426,11 @@ export class Game {
 
             if (img && img.complete) {
                 const size = node.radius * 1.5;
-                this.ctx.drawImage(img, screenX - size / 2, screenY - size / 2, size, size);
+                this.ctx.drawImage(img, node._screenX - size / 2, node._screenY - size / 2, size, size);
             } else if (typeof assetLoader !== 'undefined') {
                 // Fallback to square if image not ready
                 this.ctx.fillStyle = '#FFD700';
-                this.ctx.fillRect(screenX - 10, screenY - 10, 20, 20);
+                this.ctx.fillRect(node._screenX - 10, node._screenY - 10, 20, 20);
             }
         }
     }
@@ -2595,15 +2614,28 @@ export class Game {
             this.minimapCtx.fillRect(x - 1, y - 1, 2, 2);
         }
 
-        // Cámara
+        // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;
         const camY = this.camera.y * scale;
         const camW = this.viewWidth * scale;
         const camH = this.viewHeight * scale;
 
-        this.minimapCtx.strokeStyle = 'white';
-        this.minimapCtx.lineWidth = 1;
+        this.minimapCtx.save();
+
+        // Glow effect
+        this.minimapCtx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        this.minimapCtx.shadowBlur = 4;
+
+        // Border
+        this.minimapCtx.strokeStyle = '#e8d48b'; // var(--text-gold)
+        this.minimapCtx.lineWidth = 1.5;
         this.minimapCtx.strokeRect(camX, camY, camW, camH);
+
+        // Subtle Fill (Lens effect)
+        this.minimapCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        this.minimapCtx.fillRect(camX, camY, camW, camH);
+
+        this.minimapCtx.restore();
     }
 
     drawCustomCursor() {

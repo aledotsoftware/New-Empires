@@ -38,7 +38,13 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
     // Security: Rate Limiting (Fixed Window Counter)
-    const ip = req.socket.remoteAddress || 'unknown';
+    // Support for reverse proxies (e.g. Heroku, AWS) if configured
+    const trustProxy = process.env.TRUST_PROXY === 'true';
+    const rawIp = req.socket.remoteAddress || 'unknown';
+    const ip = (trustProxy && req.headers['x-forwarded-for'])
+        ? req.headers['x-forwarded-for'].split(',')[0].trim()
+        : rawIp;
+
     const now = Date.now();
 
     let clientData = ipCounts.get(ip);
@@ -196,6 +202,12 @@ server.on('clientError', (err, socket) => {
     }
     socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 });
+
+// Security: Timeouts to prevent Slowloris attacks
+// Set timeouts to ensure connections don't hang indefinitely
+server.keepAliveTimeout = 60000; // 1 minute
+server.headersTimeout = 65000; // Must be greater than keepAliveTimeout
+server.requestTimeout = 30000; // 30 seconds for receiving the request body
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -520,7 +520,10 @@ export class Game {
 
         // Global mouseup to stop dragging anywhere
         window.addEventListener('mouseup', () => {
-            this.isMinimapDragging = false;
+            if (this.isMinimapDragging) {
+                this.isMinimapDragging = false;
+                this.minimap.style.cursor = 'crosshair'; // Restore default
+            }
         });
 
         // Click izquierdo
@@ -565,6 +568,7 @@ export class Game {
         this.minimap.addEventListener('mousedown', (e) => {
             e.preventDefault(); // Prevent text selection etc
             this.isMinimapDragging = true;
+            this.minimap.style.cursor = 'grabbing'; // Palette: Visual feedback
             this.handleMinimapInput(e.clientX, e.clientY);
         });
     }
@@ -2586,15 +2590,28 @@ export class Game {
             this.minimapCtx.fillRect(x - 1, y - 1, 2, 2);
         }
 
-        // Cámara
+        // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;
         const camY = this.camera.y * scale;
         const camW = this.viewWidth * scale;
         const camH = this.viewHeight * scale;
 
-        this.minimapCtx.strokeStyle = 'white';
-        this.minimapCtx.lineWidth = 1;
+        this.minimapCtx.save();
+
+        // Glow effect
+        this.minimapCtx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+        this.minimapCtx.shadowBlur = 4;
+
+        // Border
+        this.minimapCtx.strokeStyle = '#e8d48b'; // var(--text-gold)
+        this.minimapCtx.lineWidth = 1.5;
         this.minimapCtx.strokeRect(camX, camY, camW, camH);
+
+        // Subtle Fill (Lens effect)
+        this.minimapCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        this.minimapCtx.fillRect(camX, camY, camW, camH);
+
+        this.minimapCtx.restore();
     }
 
     drawCustomCursor() {

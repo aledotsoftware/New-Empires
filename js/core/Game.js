@@ -191,6 +191,9 @@ export class Game {
         // Cache para queries de cursor
         this._cursorQueryCache = [];
 
+        // Cache para selección de arrastre (Palette)
+        this._dragSelectCache = [];
+
         // OPTIMIZACIÓN: Cache de elementos DOM para UI
         this.uiElements = {
             woodCount: document.getElementById('woodCount'),
@@ -2470,6 +2473,62 @@ export class Game {
 
         this.ctx.fillRect(startX, startY, width, height);
         this.ctx.strokeRect(startX, startY, width, height);
+
+        // Palette: Live Selection Count Badge
+        const minX = Math.min(this.dragStart.x, this.mouse.worldX);
+        const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
+        const minY = Math.min(this.dragStart.y, this.mouse.worldY);
+        const maxY = Math.max(this.dragStart.y, this.mouse.worldY);
+        const widthW = maxX - minX;
+        const heightW = maxY - minY;
+
+        // Query Spatial Grid (Reuse cache array)
+        if (!this._dragSelectCache) this._dragSelectCache = [];
+        this.spatialGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache);
+
+        let count = 0;
+        const len = this._dragSelectCache.length;
+        for (let i = 0; i < len; i++) {
+            const ent = this._dragSelectCache[i];
+            // Match selectEntities logic (player team only)
+            if (ent.team === 'player' && !ent.isDead) {
+                // Precise check
+                if (ent.x >= minX && ent.x <= maxX && ent.y >= minY && ent.y <= maxY) {
+                    count++;
+                }
+            }
+        }
+
+        if (count > 0) {
+            const badgeX = this.mouse.x + 24; // Offset from cursor
+            const badgeY = this.mouse.y + 24;
+
+            this.ctx.font = 'bold 12px "Inter", sans-serif';
+            const text = `${count}`;
+            const metrics = this.ctx.measureText(text);
+            const badgeW = Math.max(20, metrics.width + 10);
+            const badgeH = 20;
+
+            // Background
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            this.ctx.strokeStyle = '#e8d48b'; // Gold
+            this.ctx.lineWidth = 1;
+
+            this.ctx.beginPath();
+            if (this.ctx.roundRect) {
+                this.ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
+            } else {
+                this.ctx.rect(badgeX, badgeY, badgeW, badgeH);
+            }
+            this.ctx.fill();
+            this.ctx.stroke();
+
+            // Text
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(text, badgeX + badgeW / 2, badgeY + badgeH / 2);
+        }
     }
 
     drawBuildGhost() {

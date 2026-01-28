@@ -1852,6 +1852,8 @@ export class Game {
         // Update UI Button
         const btn = document.getElementById('pauseButton');
         const icon = document.getElementById('pauseIcon');
+        const overlay = document.getElementById('pauseOverlay'); // Palette: Get overlay
+        const resumeBtn = document.getElementById('resumeOverlayBtn'); // Palette: Get resume button
 
         if (btn && icon) {
             if (this._isPaused) {
@@ -1862,6 +1864,22 @@ export class Game {
                 icon.textContent = '⏸';
                 btn.setAttribute('aria-label', 'Pausar juego (P)');
                 btn.classList.remove('active-key');
+            }
+        }
+
+        // Palette: Toggle Overlay and Focus
+        if (overlay) {
+            if (this._isPaused) {
+                overlay.classList.remove('hidden');
+                // Trap focus or just focus the button
+                if (resumeBtn) {
+                    // Wait for UI to update visibility
+                    setTimeout(() => resumeBtn.focus(), 50);
+                }
+            } else {
+                overlay.classList.add('hidden');
+                // Return focus to canvas
+                if (this.canvas) this.canvas.focus();
             }
         }
 
@@ -2263,30 +2281,7 @@ export class Game {
         // Renderizar minimapa
         this.renderMinimap();
 
-        // Palette: Draw Pause Overlay
-        if (this.isPaused && !this.isGameOver) {
-            this.ctx.save();
-            // Overlay oscuro
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-            this.ctx.fillRect(0, 0, this.viewWidth, this.viewHeight);
-
-            // Título
-            this.ctx.font = 'bold 48px "Cinzel", serif';
-            this.ctx.fillStyle = '#c9a227'; // var(--gold)
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            this.ctx.shadowBlur = 10;
-            this.ctx.fillText('PAUSA', this.viewWidth / 2, this.viewHeight / 2 - 20);
-
-            // Subtítulo
-            this.ctx.font = '20px "Inter", sans-serif';
-            this.ctx.fillStyle = '#e8d48b'; // var(--text-gold)
-            this.ctx.shadowBlur = 4;
-            this.ctx.fillText('Presiona P para reanudar', this.viewWidth / 2, this.viewHeight / 2 + 30);
-
-            this.ctx.restore();
-        }
+        // Palette: Canvas Pause Overlay removed in favor of DOM overlay for accessibility
     }
 
     drawGrid() {

@@ -1,46 +1,39 @@
 from playwright.sync_api import sync_playwright
 import time
 
-def verify_render():
+def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
-
-        # 1. Start Application
-        print("Navigating to app...")
         page.goto("http://localhost:3000")
 
-        # 2. Click Start Button
+        # 1. Click Start Game
         print("Clicking Start Game...")
         page.click("#startButton")
 
-        # 3. Select Map Size
-        print("Selecting Map Size...")
-        # Wait for map size options to populate
+        # 2. Map Size Selection
+        print("Waiting for Map Size options...")
         page.wait_for_selector(".map-size-option")
-        # Click the 'normal' map size or just the first one
-        page.click(".map-size-option")
+        # Click the first one
+        page.click(".map-size-option >> nth=0")
 
-        # 4. Select Civilization
-        print("Selecting Civilization...")
-        # Wait for civ options to populate
+        # 3. Civilization Selection
+        print("Waiting for Civ options...")
         page.wait_for_selector(".civ-option")
-        # Click the first civ option
-        page.click(".civ-option")
+        # Click the first one
+        page.click(".civ-option >> nth=0")
 
-        # 5. Wait for Game to Load
+        # 4. Wait for Game Canvas
         print("Waiting for game canvas...")
-        page.wait_for_selector("#gameCanvas")
+        page.wait_for_selector("#gameCanvas", state="visible")
 
-        # Wait a bit for rendering loop to run a few frames
+        # Wait a bit for render loop to run
         time.sleep(2)
 
-        # 6. Screenshot
-        print("Taking screenshot...")
-        page.screenshot(path="verification/render_verify.png")
-        print("Screenshot saved to verification/render_verify.png")
-
+        # Take screenshot
+        page.screenshot(path="verification/game_render.png")
+        print("Screenshot taken.")
         browser.close()
 
 if __name__ == "__main__":
-    verify_render()
+    run()

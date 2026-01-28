@@ -2153,7 +2153,12 @@ export class Game {
             const rowLen = this._rowCache.length;
             let renderIdx = this._renderCache.length;
             for (let i = 0; i < rowLen; i++) {
-                this._renderCache[renderIdx++] = this._rowCache[i];
+                const ent = this._rowCache[i];
+                // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
+                ent._screenX = (ent.x - this.camera.x) | 0;
+                ent._screenY = (ent.y - this.camera.y) | 0;
+
+                this._renderCache[renderIdx++] = ent;
             }
         }
 
@@ -2361,6 +2366,10 @@ export class Game {
             const screenX = (node.x - this.camera.x) | 0;
             const screenY = (node.y - this.camera.y) | 0;
 
+            // Cache for Pass 2
+            node._screenX = screenX;
+            node._screenY = screenY;
+
             // Frustum culling
             if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||
                 screenY < -node.radius || screenY > this.viewHeight + node.radius) {
@@ -2378,9 +2387,9 @@ export class Game {
             const node = this._resourceRenderCache[i];
             if (node.amount <= 0) continue;
 
-            // BOLT OPTIMIZATION: Truncate to integer
-            const screenX = (node.x - this.camera.x) | 0;
-            const screenY = (node.y - this.camera.y) | 0;
+            // BOLT OPTIMIZATION: Use cached screen coordinates
+            const screenX = node._screenX;
+            const screenY = node._screenY;
 
             // Frustum culling (same check, cost is negligible compared to draw calls)
             if (screenX < -node.radius || screenX > this.viewWidth + node.radius ||

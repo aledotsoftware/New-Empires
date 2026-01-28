@@ -2191,7 +2191,12 @@ export class Game {
             const rowLen = this._rowCache.length;
             let renderIdx = this._renderCache.length;
             for (let i = 0; i < rowLen; i++) {
-                this._renderCache[renderIdx++] = this._rowCache[i];
+                const ent = this._rowCache[i];
+                // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
+                ent._screenX = (ent.x - this.camera.x) | 0;
+                ent._screenY = (ent.y - this.camera.y) | 0;
+
+                this._renderCache[renderIdx++] = ent;
             }
         }
 
@@ -2377,6 +2382,10 @@ export class Game {
             const screenX = (node.x - camX) | 0;
             const screenY = (node.y - camY) | 0;
             const radius = node.radius;
+
+            // Cache for Pass 2
+            node._screenX = screenX;
+            node._screenY = screenY;
 
             // Frustum culling
             if (screenX >= -radius && screenX <= viewW + radius &&

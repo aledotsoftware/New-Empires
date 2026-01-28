@@ -27,6 +27,10 @@ export class Entity {
         // BOLT OPTIMIZATION: Removed setTimeout/direct call.
         // Icon will be lazily loaded in render() to ensure subclass constructor
         // has finished setting this.type (avoiding race condition).
+
+        // BOLT OPTIMIZATION: Cache screen coordinates to avoid recalculating 4x per frame
+        this._screenX = 0;
+        this._screenY = 0;
     }
 
     loadIcon() {
@@ -55,9 +59,10 @@ export class Entity {
             this.loadIcon();
         }
 
-        // BOLT OPTIMIZATION: Truncate to integer to avoid sub-pixel rendering cost
-        const screenX = (this.x - camera.x) | 0;
-        const screenY = (this.y - camera.y) | 0;
+        // BOLT OPTIMIZATION: Use cached screen coordinates
+        // These are updated once per frame in Game.js render loop
+        const screenX = this._screenX;
+        const screenY = this._screenY;
 
         // OPTIMIZATION: Removed redundant global CONFIG check and loose culling.
         // Game.js handles frustum culling via SpatialGrid before calling this.
@@ -97,14 +102,14 @@ export class Entity {
 
     // BOLT OPTIMIZATION: Batching support for backgrounds
     addBackgroundToPath(ctx, camera) {
-        const screenX = (this.x - camera.x) | 0;
-        const screenY = (this.y - camera.y) | 0;
+        const screenX = this._screenX;
+        const screenY = this._screenY;
         ctx.rect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
     }
 
     drawHpBar(ctx, camera) {
-        const screenX = (this.x - camera.x) | 0;
-        const screenY = (this.y - camera.y) | 0;
+        const screenX = this._screenX;
+        const screenY = this._screenY;
         const barWidth = this.size * 2;
         const barHeight = 4;
         const barX = screenX - barWidth / 2;
@@ -119,8 +124,8 @@ export class Entity {
 
     // OPTIMIZATION: Batching support methods for HP bars
     addHpBarBackgroundToPath(ctx, camera) {
-        const screenX = (this.x - camera.x) | 0;
-        const screenY = (this.y - camera.y) | 0;
+        const screenX = this._screenX;
+        const screenY = this._screenY;
         const barWidth = this.size * 2;
         const barHeight = 4;
         const barX = screenX - barWidth / 2;
@@ -129,8 +134,8 @@ export class Entity {
     }
 
     addHpBarForegroundToPath(ctx, camera) {
-        const screenX = (this.x - camera.x) | 0;
-        const screenY = (this.y - camera.y) | 0;
+        const screenX = this._screenX;
+        const screenY = this._screenY;
         const barWidth = this.size * 2;
         const barHeight = 4;
         const barX = screenX - barWidth / 2;

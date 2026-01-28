@@ -27,12 +27,6 @@ export class Unit extends Entity {
 
         this.aiTimer = Math.random() * 0.5;
         this.aiCheckInterval = 0.5;
-
-        // Optimización: Cache para consultas de terreno (Unit.js)
-        this._lastGridCol = -1;
-        this._lastGridRow = -1;
-        this._cachedTerrainSpeed = 1.0;
-        this._cachedTerrainData = null;
     }
 
     update(deltaTime, game) {

@@ -1849,7 +1849,9 @@ body,
 .map-size-option:hover .card-tooltip,
 .map-size-option:focus-visible .card-tooltip,
 .civ-option:hover .card-tooltip,
-.civ-option:focus-visible .card-tooltip {
+.civ-option:focus-visible .card-tooltip,
+.build-option:hover .card-tooltip,
+.build-option:focus-visible .card-tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(-4px);

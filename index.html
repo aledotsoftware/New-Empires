@@ -554,6 +554,18 @@
         <!-- Canvas del Juego -->
         <canvas id="gameCanvas"></canvas>
 
+        <!-- Palette: Pause Overlay (Replaces Canvas Text) -->
+        <div id="pauseOverlay" class="pause-overlay hidden">
+            <h1 class="pause-title">PAUSA</h1>
+            <p class="pause-subtitle">El juego está detenido</p>
+            <button id="resumeOverlayBtn" class="btn-start pause-btn" onclick="togglePauseGame()">
+                ▶ Reanudar
+            </button>
+            <div class="pause-hint">
+                o presiona <span class="kbd-inline">P</span>
+            </div>
+        </div>
+
         <!-- HUD Inferior (Nuevo) -->
         <div id="gameHUD">
             <!-- 1. Panel de Información (Izquierda) -->

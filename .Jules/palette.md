@@ -45,3 +45,7 @@
 ## 2026-01-25 - [Rich Tooltip Accessibility]
 **Learning:** Rich HTML tooltips (containing lists, stats) inside interactive elements are invisible to screen readers if the parent has an `aria-label` (which overrides content) and no link to the tooltip.
 **Action:** Implemented unique IDs for tooltips and linked them using `aria-describedby`. This ensures screen readers announce the full detailed content (flattened to text) while keeping the concise name as the primary label.
+
+## 2026-01-26 - [Minimap Viewport Metaphor]
+**Learning:** A simple 1px outline for a minimap viewport is often lost on complex terrain backgrounds. Users need a clear visual indicator of their "lens" into the world.
+**Action:** Implemented a "Viewport Lens" style using a semi-transparent fill (`rgba(255,255,255,0.08)`) combined with a glow effect. This creates a physical metaphor of a glass lens sliding over the map, improving both visibility and the sense of interactivity.

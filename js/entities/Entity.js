@@ -1,3 +1,5 @@
+import { assetLoader } from '../managers/AssetLoader.js';
+
 /**
  * Entity - Clase base para todas las entidades del juego
  * Unidades, edificios y otros objetos del juego heredan de esta clase
@@ -22,18 +24,16 @@ export class Entity {
 
         // Sistema de imágenes
         this.image = null;
-        // Intentar cargar imagen automáticamente en el próximo ciclo
-        setTimeout(() => this.loadIcon(), 0);
+        // BOLT OPTIMIZATION: Removed setTimeout/direct call.
+        // Icon will be lazily loaded in render() to ensure subclass constructor
+        // has finished setting this.type (avoiding race condition).
     }
 
     loadIcon() {
         if (!this.type) return;
-        // assetLoader es una variable global disponible en el scope del juego
-        if (typeof assetLoader !== 'undefined') {
-            const preloadedImage = assetLoader.getImage(this.type);
-            if (preloadedImage) {
-                this.image = preloadedImage;
-            }
+        const preloadedImage = assetLoader.getImage(this.type);
+        if (preloadedImage) {
+            this.image = preloadedImage;
         }
     }
 
@@ -50,6 +50,11 @@ export class Entity {
     }
 
     render(ctx, camera, viewWidth, viewHeight, drawHp = true, drawBackground = true) {
+        // BOLT OPTIMIZATION: Lazy load icon to handle subclass initialization
+        if (!this.image) {
+            this.loadIcon();
+        }
+
         // BOLT OPTIMIZATION: Truncate to integer to avoid sub-pixel rendering cost
         const screenX = (this.x - camera.x) | 0;
         const screenY = (this.y - camera.y) | 0;
@@ -76,10 +81,13 @@ export class Entity {
         if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
             ctx.drawImage(this.image, screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
         } else {
-            ctx.font = `${this.size * 1.5}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(this.icon, screenX, screenY);
+            // BOLT OPTIMIZATION: Don't render file paths as text fallback
+            if (this.icon && !this.icon.startsWith('assets/')) {
+                ctx.font = `${this.size * 1.5}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.icon, screenX, screenY);
+            }
         }
 
         if (drawHp && this.hp < this.maxHp) {

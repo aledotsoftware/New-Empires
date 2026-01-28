@@ -234,6 +234,9 @@ export class Game {
             enemy: 0
         };
 
+        // BOLT OPTIMIZATION: Cache player building counts for O(1) UI updates
+        this.playerBuildingCounts = {};
+
         // BOLT OPTIMIZATION: Cache drop-off points (TownCenter, Storage)
         // Avoids O(N) search through all buildings by Villagers
         this.dropOffPoints = [];
@@ -295,6 +298,7 @@ export class Game {
         // Reiniciar contadores
         this.townCenterCounts.player = 0;
         this.townCenterCounts.enemy = 0;
+        this.playerBuildingCounts = {};
 
         // Crear mapa
         this.generateMap();
@@ -305,6 +309,7 @@ export class Game {
         this.entities.push(townCenter);
         this.dropOffPoints.push(townCenter);
         this.townCenterCounts.player++;
+        this._updateBuildingCount('townCenter', 1);
 
         // Actualizar grid de edificios
         this.buildingGrid.add(townCenter);
@@ -1123,21 +1128,25 @@ export class Game {
         // Eliminado manejo directo aquí para usar deltaTime y movimiento suave
     }
 
-    updateBuildMenuState() {
-        // Palette: Calculate building counts once per frame to avoid N*M iterations
-        // Map<type, count>
-        const buildingCounts = new Map();
-        for (const b of this.buildings) {
-            if (b.team === 'player' && !b.isDead) {
-                buildingCounts.set(b.type, (buildingCounts.get(b.type) || 0) + 1);
-            }
-        }
+    _updateBuildingCount(type, delta) {
+        if (!type) return;
+        this.playerBuildingCounts[type] = (this.playerBuildingCounts[type] || 0) + delta;
+    }
 
-        const buildOptions = document.querySelectorAll('.build-option');
-        buildOptions.forEach(option => {
+    updateBuildMenuState() {
+        // BOLT OPTIMIZATION: Use cached building counts (O(1)) and live DOM collection
+        // Replaces O(N_buildings * M_options) with O(M_options)
+        // Using getElementsByClassName for live collection (safer than caching static NodeList)
+        const buildOptions = document.getElementsByClassName('build-option');
+
+        // Use cached length for slightly better performance in loop
+        const len = buildOptions.length;
+        for (let i = 0; i < len; i++) {
+            const option = buildOptions[i];
             const type = option.dataset.building;
             const cost = CONFIG.COSTS[type];
-            const currentCount = buildingCounts.get(type) || 0;
+            // Access cached count directly
+            const currentCount = this.playerBuildingCounts[type] || 0;
 
             // Palette: Update/Create Owned Badge
             let badge = option.querySelector('.owned-badge');
@@ -1237,7 +1246,7 @@ export class Game {
                     option.setAttribute('aria-label', newLabel);
                 }
             }
-        });
+        }
     }
 
     openBuildMenu() {
@@ -1408,6 +1417,8 @@ export class Game {
                     this.townCenterCounts[building.team]++;
                 }
             }
+
+            this._updateBuildingCount(building.type, 1);
 
             // BOLT OPTIMIZATION: Add to drop-off cache
             if (building.type === 'townCenter' || building.type === 'storage') {
@@ -1728,6 +1739,11 @@ export class Game {
                         this.townCenterCounts[building.team]--;
                     }
                 }
+
+                if (building.team === 'player') {
+                    this._updateBuildingCount(building.type, -1);
+                }
+
                 continue;
             }
 

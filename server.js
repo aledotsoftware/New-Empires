@@ -95,6 +95,7 @@ const server = http.createServer((req, res) => {
     const filename = path.basename(safePath);
     const isSensitive = [
         'server.js',
+        'server.log',
         'package.json',
         'package-lock.json',
         'pnpm-lock.yaml',
@@ -104,6 +105,9 @@ const server = http.createServer((req, res) => {
         'Dockerfile',
         'docker-compose.yml',
         '.env',
+        '.gitignore',
+        '.gitattributes',
+        '.editorconfig',
         'AGENTS.md'
     ].includes(filename);
 
@@ -121,7 +125,8 @@ const server = http.createServer((req, res) => {
         '.vscode',
         '.idea',
         'test-results',
-        'tests'
+        'tests',
+        'verification'
     ];
 
     // Check for dotfiles in any part of the path (hidden files)

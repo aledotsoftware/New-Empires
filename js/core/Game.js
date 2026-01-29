@@ -223,12 +223,16 @@ export class Game {
         this._renderCache = [];
         this._resourceRenderCache = [];
         this._rowCache = []; // BOLT OPTIMIZATION: Cache for row-wise sorting
-        this._terrainPaths = []; // Cache for terrain paths (avoids Array alloc per frame)
         this._gridPath = null; // BOLT OPTIMIZATION: Cache for grid path
-        this.lastCameraX = -1; // BOLT OPTIMIZATION: Track camera for static terrain rendering
-        this.lastCameraY = -1;
         this.lastViewWidth = -1;
         this.lastViewHeight = -1;
+
+        // BOLT OPTIMIZATION: Offscreen Terrain Buffer
+        // Replaces per-frame tile iteration with a cached large canvas (~1.5x viewport)
+        // Only re-renders when camera moves near the edge of the buffer.
+        this._terrainBufferCanvas = document.createElement('canvas');
+        this._terrainBufferCtx = this._terrainBufferCanvas.getContext('2d');
+        this._terrainBufferRect = { x: -99999, y: -99999, width: 0, height: 0 };
 
         // OPTIMIZACIÓN: Rastreo de Centros Urbanos (O(1) CheckGameOver)
         // Evita iterar todos los edificios para verificar condiciones de victoria
@@ -278,6 +282,14 @@ export class Game {
         this.canvas.height = container.clientHeight;
         this.viewWidth = this.canvas.width;
         this.viewHeight = this.canvas.height;
+
+        // Resize terrain buffer (1.5x viewport to allow scrolling without immediate re-render)
+        if (this._terrainBufferCanvas) {
+            this._terrainBufferCanvas.width = Math.floor(this.viewWidth * 1.5);
+            this._terrainBufferCanvas.height = Math.floor(this.viewHeight * 1.5);
+            // Invalidate buffer
+            this._terrainBufferRect.x = -99999;
+        }
 
         // Palette: Fix Minimap Resolution (Match CSS display size)
         // This prevents image distortion (squashing 2:1 canvas into 1:1 container)
@@ -2090,94 +2102,133 @@ export class Game {
     }
 
     drawTerrain() {
-        if (!this.terrainMap) return;
+        if (!this.terrainMap || !this._terrainBufferCanvas) return;
 
+        // Check if current camera is fully covered by the buffer (with margin)
+        // We use a safe margin of 100px to avoid visible edges during fast scrolls
+        const margin = 100;
+        const viewW = this.viewWidth;
+        const viewH = this.viewHeight;
+        const buffer = this._terrainBufferRect;
+
+        if (this.camera.x >= buffer.x + margin &&
+            this.camera.x + viewW <= buffer.x + buffer.width - margin &&
+            this.camera.y >= buffer.y + margin &&
+            this.camera.y + viewH <= buffer.y + buffer.height - margin) {
+
+            // HIT: Draw from buffer
+            // Calculate integer offsets to avoid blurring
+            const sx = (this.camera.x - buffer.x) | 0;
+            const sy = (this.camera.y - buffer.y) | 0;
+
+            this.ctx.drawImage(this._terrainBufferCanvas,
+                sx, sy, viewW, viewH,
+                0, 0, viewW, viewH
+            );
+            return;
+        }
+
+        // MISS: Re-render buffer
+        this._renderTerrainToBuffer();
+
+        // Draw the newly rendered buffer
+        const sx = (this.camera.x - buffer.x) | 0;
+        const sy = (this.camera.y - buffer.y) | 0;
+
+        this.ctx.drawImage(this._terrainBufferCanvas,
+            sx, sy, viewW, viewH,
+            0, 0, viewW, viewH
+        );
+    }
+
+    _renderTerrainToBuffer() {
+        const viewW = this.viewWidth;
+        const viewH = this.viewHeight;
+        const bufferW = this._terrainBufferCanvas.width;
+        const bufferH = this._terrainBufferCanvas.height;
+
+        // Center buffer on current camera
+        // Align to TILE_SIZE to ensure tiles are drawn at integer positions relative to buffer origin
+        const centerX = this.camera.x + viewW / 2;
+        const centerY = this.camera.y + viewH / 2;
+
+        const newX = (Math.floor((centerX - bufferW / 2) / TILE_SIZE) * TILE_SIZE);
+        const newY = (Math.floor((centerY - bufferH / 2) / TILE_SIZE) * TILE_SIZE);
+
+        this._terrainBufferRect.x = newX;
+        this._terrainBufferRect.y = newY;
+        this._terrainBufferRect.width = bufferW;
+        this._terrainBufferRect.height = bufferH;
+
+        // Clear buffer
+        const ctx = this._terrainBufferCtx;
+        ctx.clearRect(0, 0, bufferW, bufferH);
+
+        // Render parameters
+        const startCol = Math.max(0, Math.floor(newX / TILE_SIZE));
+        const startRow = Math.max(0, Math.floor(newY / TILE_SIZE));
+        const endCol = Math.min(this.terrainMap.cols, Math.ceil((newX + bufferW) / TILE_SIZE));
+        const endRow = Math.min(this.terrainMap.rows, Math.ceil((newY + bufferH) / TILE_SIZE));
+
+        const grid = this.terrainMap.grid;
+        const mapCols = this.terrainMap.cols;
         const idToName = this.terrainMap._idToName;
-        const paths = this._terrainPaths;
 
-        // BOLT OPTIMIZATION: If camera hasn't moved, reuse existing Path2D objects
-        // This avoids creating ~600 Path2D objects/sec (GC pressure) and recalculating tiles
-        const cameraChanged = Math.abs(this.camera.x - this.lastCameraX) > 0.1 ||
-            Math.abs(this.camera.y - this.lastCameraY) > 0.1 ||
-            this.viewWidth !== this.lastViewWidth ||
-            this.viewHeight !== this.lastViewHeight;
+        // Create paths for batching
+        const paths = new Array(idToName.length);
+        for (let i = 0; i < idToName.length; i++) paths[i] = new Path2D();
+        const fallbackPath = new Path2D();
 
-        if (cameraChanged || paths.length === 0) {
-            this.lastCameraX = this.camera.x;
-            this.lastCameraY = this.camera.y;
-            this.lastViewWidth = this.viewWidth;
-            this.lastViewHeight = this.viewHeight;
+        for (let row = startRow; row < endRow; row++) {
+            let index = row * mapCols + startCol;
+            // Draw relative to buffer origin
+            const y = row * TILE_SIZE - newY;
 
-            // OPTIMIZATION: Clamp bounds and hoist variables
-            const startCol = Math.max(0, Math.floor(this.camera.x / TILE_SIZE));
-            const startRow = Math.max(0, Math.floor(this.camera.y / TILE_SIZE));
-            const endCol = Math.min(this.terrainMap.cols, Math.ceil((this.camera.x + this.viewWidth) / TILE_SIZE));
-            const endRow = Math.min(this.terrainMap.rows, Math.ceil((this.camera.y + this.viewHeight) / TILE_SIZE));
+            // Optimization variables
+            let x = startCol * TILE_SIZE - newX;
+            let runStartX = x;
+            let runLength = 0;
+            let currentTerrainId = -1;
 
-            const mapCols = this.terrainMap.cols;
-            const grid = this.terrainMap.grid;
+            for (let col = startCol; col < endCol; col++) {
+                const terrainId = grid[index];
 
-            // Reset paths array
-            if (paths.length < idToName.length) paths.length = idToName.length;
-
-            for (let i = 0; i < idToName.length; i++) {
-                // Note: Path2D cannot be cleared, so we must instantiate new ones only when camera moves
-                paths[i] = new Path2D();
-            }
-            const fallbackPath = new Path2D();
-
-            for (let row = startRow; row < endRow; row++) {
-                let index = row * mapCols + startCol;
-                const y = Math.floor(row * TILE_SIZE - this.camera.y);
-
-                // OPTIMIZATION: Pre-calculate X and update incrementally
-                let x = Math.floor(startCol * TILE_SIZE - this.camera.x);
-
-                // OPTIMIZATION: Horizontal Run-Length Encoding (RLE)
-                let runStartX = x;
-                let runLength = 0;
-                let currentTerrainId = -1;
-
-                for (let col = startCol; col < endCol; col++) {
-                    const terrainId = grid[index];
-
-                    if (terrainId !== currentTerrainId) {
-                        if (currentTerrainId !== -1) {
-                            if (currentTerrainId < paths.length) {
-                                paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
-                            } else {
-                                fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
-                            }
+                if (terrainId !== currentTerrainId) {
+                    if (currentTerrainId !== -1) {
+                        if (currentTerrainId < paths.length) {
+                            paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                        } else {
+                            fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
                         }
-                        currentTerrainId = terrainId;
-                        runStartX = x;
-                        runLength = 1;
-                    } else {
-                        runLength++;
                     }
-
-                    x += TILE_SIZE;
-                    index++;
+                    currentTerrainId = terrainId;
+                    runStartX = x;
+                    runLength = 1;
+                } else {
+                    runLength++;
                 }
 
-                if (currentTerrainId !== -1) {
-                    if (currentTerrainId < paths.length) {
-                        paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
-                    } else {
-                        fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
-                    }
+                x += TILE_SIZE;
+                index++;
+            }
+
+            // Flush last run
+            if (currentTerrainId !== -1) {
+                if (currentTerrainId < paths.length) {
+                    paths[currentTerrainId].rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
+                } else {
+                    fallbackPath.rect(runStartX, y, runLength * TILE_SIZE, TILE_SIZE);
                 }
             }
         }
 
-        // Draw batched paths (reused if static)
+        // Draw paths to buffer context
         for (let i = 0; i < paths.length; i++) {
-            if (!paths[i]) continue; // Safety check
             const type = idToName[i];
             const terrainData = TERRAIN_TYPES[type];
             if (terrainData) {
-                this.ctx.fillStyle = terrainData.color;
-                this.ctx.fill(paths[i]);
+                ctx.fillStyle = terrainData.color;
+                ctx.fill(paths[i]);
             }
         }
     }

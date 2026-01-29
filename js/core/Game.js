@@ -777,6 +777,9 @@ export class Game {
 
         // Comandar unidades
         let moveCommandTriggered = false;
+        let attackCommandTriggered = false;
+        let gatherCommandTriggered = false;
+        let buildCommandTriggered = false;
 
         for (let entity of this.selectedEntities) {
             if (entity.isUnit) {
@@ -785,6 +788,7 @@ export class Game {
                     entity.gatherTarget = null;
                     entity.targetX = null;
                     if (entity.type === 'villager') entity.state = 'ATTACKING';
+                    attackCommandTriggered = true;
                 } else if (targetResource && entity.canGather) {
                     entity.gatherTarget = targetResource;
                     entity.attackTarget = null;
@@ -794,6 +798,7 @@ export class Game {
                         entity.state = 'GATHERING';
                         entity.currentResourceNode = targetResource;
                     }
+                    gatherCommandTriggered = true;
                 } else if (targetBuilding && entity.type === 'villager') {
                     // Asignar construcción
                     entity.state = 'BUILDING';
@@ -801,6 +806,7 @@ export class Game {
                     entity.attackTarget = null;
                     entity.gatherTarget = null;
                     entity.targetX = null;
+                    buildCommandTriggered = true;
                 } else {
                     entity.targetX = this.mouse.worldX;
                     entity.targetY = this.mouse.worldY;
@@ -812,9 +818,17 @@ export class Game {
             }
         }
 
-        // Palette: Visual feedback for move command
-        if (moveCommandTriggered && this.particleSystem) {
-            this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
+        // Palette: Visual feedback for commands
+        if (this.particleSystem) {
+            if (attackCommandTriggered) {
+                this.particleSystem.createAttackRipple(this.mouse.worldX, this.mouse.worldY);
+            } else if (gatherCommandTriggered) {
+                this.particleSystem.createGatherRipple(this.mouse.worldX, this.mouse.worldY);
+            } else if (buildCommandTriggered) {
+                this.particleSystem.createBuildRipple(this.mouse.worldX, this.mouse.worldY);
+            } else if (moveCommandTriggered) {
+                this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
+            }
         }
     }
 

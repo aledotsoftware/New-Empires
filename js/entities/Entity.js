@@ -31,6 +31,13 @@ export class Entity {
         // BOLT OPTIMIZATION: Cache screen coordinates to avoid recalculating 4x per frame
         this._screenX = 0;
         this._screenY = 0;
+
+        // OPTIMIZATION: Cache terrain data for combat calculations (Entity.js)
+        // Moved from Unit.js to allow static entities (Buildings) to benefit from cached lookups.
+        this._lastGridCol = -1;
+        this._lastGridRow = -1;
+        this._cachedTerrainSpeed = 1.0;
+        this._cachedTerrainData = null;
     }
 
     loadIcon() {

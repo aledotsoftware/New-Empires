@@ -305,6 +305,7 @@ export class Game {
 
         // Crear Centro Urbano inicial (jugador)
         const townCenter = new TownCenter(400, 400, 'player');
+        this._cacheEntityTerrain(townCenter); // OPTIMIZATION
         this.buildings.push(townCenter);
         this.entities.push(townCenter);
         this.dropOffPoints.push(townCenter);
@@ -320,6 +321,7 @@ export class Game {
             const x = 400 + Math.cos(angle) * 100;
             const y = 400 + Math.sin(angle) * 100;
             const villager = new Villager(x, y, 'player');
+            this._cacheEntityTerrain(villager); // OPTIMIZATION
             this.units.push(villager);
             this.entities.push(villager);
         }
@@ -483,12 +485,14 @@ export class Game {
             const x = CONFIG.CANVAS_WIDTH - 400 + Math.random() * 200 - 100;
             const y = CONFIG.CANVAS_HEIGHT - 400 + Math.random() * 200 - 100;
             const enemy = new Warrior(x, y, 'enemy');
+            this._cacheEntityTerrain(enemy); // OPTIMIZATION
             this.enemies.push(enemy);
             this.entities.push(enemy);
         }
 
         // Enemy town center
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
+        this._cacheEntityTerrain(enemyTC); // OPTIMIZATION
         this.buildings.push(enemyTC);
         this.entities.push(enemyTC);
         this.buildingGrid.add(enemyTC);
@@ -1137,6 +1141,32 @@ export class Game {
         this.playerBuildingCounts[type] = (this.playerBuildingCounts[type] || 0) + delta;
     }
 
+    /**
+     * OPTIMIZATION: Cache terrain data on the entity to avoid expensive lookups
+     * during combat and movement. Static entities (buildings) benefit the most.
+     */
+    _cacheEntityTerrain(entity) {
+        if (!this.terrainMap || !entity) return;
+
+        // Calculate grid coordinates once
+        const invTileSize = this.terrainMap.invTileSize || (1 / TILE_SIZE);
+        const col = (entity.x * invTileSize) | 0;
+        const row = (entity.y * invTileSize) | 0;
+
+        // Set cached properties
+        entity._lastGridCol = col;
+        entity._lastGridRow = row;
+
+        // Fetch and store data
+        const terrainData = this.terrainMap.getTerrainDataByGrid(col, row);
+
+        if (terrainData) {
+            entity._cachedTerrainData = terrainData;
+            // Only relevant for units, but harmless to set for all
+            entity._cachedTerrainSpeed = terrainData.movementSpeed;
+        }
+    }
+
     updateBuildMenuState() {
         // BOLT OPTIMIZATION: Use cached building counts (O(1)) and live DOM collection
         // Replaces O(N_buildings * M_options) with O(M_options)
@@ -1411,6 +1441,7 @@ export class Game {
             // Aplicar bonificaciones de civilización (variable global temporal)
             civilizationManager.applyBuildingBonuses(building, this.civilizationId);
 
+            this._cacheEntityTerrain(building); // OPTIMIZATION
             this.buildings.push(building);
             this.entities.push(building);
             this.buildingGrid.add(building);
@@ -1582,6 +1613,7 @@ export class Game {
         if (unit) {
             civilizationManager.applyUnitBonuses(unit, this.civilizationId);
 
+            this._cacheEntityTerrain(unit); // OPTIMIZATION
             this.units.push(unit);
             this.entities.push(unit);
             this.population++;

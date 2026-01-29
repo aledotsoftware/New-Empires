@@ -63,3 +63,7 @@
 ## 2025-05-27 - Multi-Pass Rendering & Coordinate Caching
 **Learning:** In multi-pass rendering (Backgrounds -> Icons), recalculating screen coordinates and re-checking frustum culling for each pass adds significant overhead (N*Passes operations).
 **Action:** For static or semi-static entities (like resources), perform a single "Pre-pass" to calculate/cache screen coordinates and filter visible items into a compacted list. This reduced render time by ~26% in `drawResourceNodes`.
+
+## 2025-05-28 - Minimap Layer Caching
+**Learning:** Even with batched drawing calls, iterating over static entities (resources/buildings) and performing `ctx` calls (even if batched) every frame adds significant overhead to the main thread. Caching the static layer (background + resources + buildings) into an offscreen canvas reduced draw calls by ~87% (120k -> 15k in benchmark) and eliminated iteration logic from the hot path.
+**Action:** Identify static layers in UI/HUD elements (like minimaps) and cache them in offscreen canvases, updating only when the underlying state changes (dirty flag pattern).

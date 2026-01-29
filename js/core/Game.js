@@ -227,6 +227,12 @@ export class Game {
         this.lastViewWidth = -1;
         this.lastViewHeight = -1;
 
+        // BOLT OPTIMIZATION: Minimap Buffer
+        // Cache static layers (Background, Resources, Buildings) to avoid re-drawing them every frame.
+        this._minimapBufferCanvas = document.createElement('canvas');
+        this._minimapBufferCtx = this._minimapBufferCanvas.getContext('2d');
+        this._minimapDirty = true;
+
         // BOLT OPTIMIZATION: Offscreen Terrain Buffer
         // Replaces per-frame tile iteration with a cached large canvas (~1.5x viewport)
         // Only re-renders when camera moves near the edge of the buffer.
@@ -300,6 +306,13 @@ export class Game {
                 this.minimap.width = rect.width;
                 this.minimap.height = rect.height;
             }
+
+            // BOLT OPTIMIZATION: Resize minimap buffer
+            if (this._minimapBufferCanvas) {
+                this._minimapBufferCanvas.width = this.minimap.width;
+                this._minimapBufferCanvas.height = this.minimap.height;
+                this._minimapDirty = true;
+            }
         }
 
         // OPTIMIZATION: Pre-calculate culling radius to avoid Math.hypot in render loop
@@ -314,6 +327,8 @@ export class Game {
         this.townCenterCounts.player = 0;
         this.townCenterCounts.enemy = 0;
         this.playerBuildingCounts = {};
+
+        this._minimapDirty = true;
 
         // Crear mapa
         this.generateMap();
@@ -383,6 +398,8 @@ export class Game {
     updateResourceGrid() {
         if (!this.resourceGrid) return;
 
+        this._minimapDirty = true;
+
         this.resourceGrid.clear();
         for (const node of this.resourceNodes) {
             if (node.amount > 0) {
@@ -393,6 +410,8 @@ export class Game {
 
     updateBuildingGrid() {
         if (!this.buildingGrid) return;
+
+        this._minimapDirty = true;
 
         this.buildingGrid.clear();
         // Solo añadir edificios vivos
@@ -1475,6 +1494,8 @@ export class Game {
             this.entities.push(building);
             this.buildingGrid.add(building);
 
+            this._minimapDirty = true;
+
             // Actualizar contadores si es un Centro Urbano
             if (building.type === 'townCenter') {
                 if (this.townCenterCounts[building.team] !== undefined) {
@@ -1797,6 +1818,7 @@ export class Game {
             if (building.isDead) {
                 hasDeadEntities = true;
                 hasDeadBuildings = true;
+                this._minimapDirty = true;
 
                 // Actualizar contadores de TC al morir
                 if (building.type === 'townCenter') {
@@ -2733,36 +2755,62 @@ export class Game {
         }
     }
 
-    renderMinimap() {
-        const scale = this.minimap.width / CONFIG.CANVAS_WIDTH;
+    _renderMinimapBuffer() {
+        if (!this._minimapBufferCtx) return;
 
-        // Fondo
-        this.minimapCtx.fillStyle = '#1a1a2e';
-        this.minimapCtx.fillRect(0, 0, this.minimap.width, this.minimap.height);
+        const ctx = this._minimapBufferCtx;
+        const width = this._minimapBufferCanvas.width;
+        const height = this._minimapBufferCanvas.height;
+        const scale = width / CONFIG.CANVAS_WIDTH;
 
-        // Recursos
-        // BOLT OPTIMIZATION: Batch draw calls for resources (1 call vs N calls)
-        this.minimapCtx.fillStyle = '#4a5568';
-        this.minimapCtx.beginPath();
+        // Clear & Background
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, width, height);
+
+        // Resources
+        ctx.fillStyle = '#4a5568';
+        ctx.beginPath();
         for (let node of this.resourceNodes) {
             if (node.amount > 0) {
-                this.minimapCtx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
+                ctx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
             }
         }
-        this.minimapCtx.fill();
+        ctx.fill();
 
-        // Edificios
+        // Buildings
         for (let building of this.buildings) {
+            if (building.isDead) continue;
+
             const x = building.x * scale;
             const y = building.y * scale;
             const size = Math.max(4, building.size * scale * 2);
 
             if (building.image && building.image.complete) {
-                this.minimapCtx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
+                ctx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
             } else {
-                this.minimapCtx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
-                this.minimapCtx.fillRect(x - size / 2, y - size / 2, size, size);
+                ctx.fillStyle = building.team === 'player' ? '#48bb78' : '#c53030';
+                ctx.fillRect(x - size / 2, y - size / 2, size, size);
             }
+        }
+
+        this._minimapDirty = false;
+    }
+
+    renderMinimap() {
+        const scale = this.minimap.width / CONFIG.CANVAS_WIDTH;
+
+        // BOLT OPTIMIZATION: Render static layer to buffer if dirty
+        if (this._minimapDirty) {
+            this._renderMinimapBuffer();
+        }
+
+        // Draw Cached Static Layer (Background + Resources + Buildings)
+        if (this._minimapBufferCanvas) {
+            this.minimapCtx.drawImage(this._minimapBufferCanvas, 0, 0);
+        } else {
+            // Fallback if buffer not initialized
+            this.minimapCtx.fillStyle = '#1a1a2e';
+            this.minimapCtx.fillRect(0, 0, this.minimap.width, this.minimap.height);
         }
 
         // Unidades
@@ -4091,6 +4139,10 @@ export class Game {
     /**
      * Palette: Helper to flash all missing resources for a given cost
      */
+    notifyResourceDepleted(node) {
+        this._minimapDirty = true;
+    }
+
     flashMissingResources(cost) {
         for (let [resource, amount] of Object.entries(cost)) {
             if (this.resources[resource] < amount) {

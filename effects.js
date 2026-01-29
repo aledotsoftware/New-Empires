@@ -223,6 +223,21 @@ class ParticleSystem {
         this.particles.push(new Ripple(x, y));
     }
 
+    // Efecto de ataque (Ripple Rojo)
+    createAttackRipple(x, y) {
+        this.particles.push(new Ripple(x, y, '#c53030'));
+    }
+
+    // Efecto de recolección (Ripple Dorado)
+    createGatherRipple(x, y) {
+        this.particles.push(new Ripple(x, y, '#ecc94b'));
+    }
+
+    // Efecto de construcción (Ripple Azul)
+    createBuildRipple(x, y) {
+        this.particles.push(new Ripple(x, y, '#4299e1'));
+    }
+
     update(deltaTime) {
         // BOLT OPTIMIZATION: In-place removal to avoid Array allocation (GC pressure)
         // Reduces garbage collection by reusing the existing array

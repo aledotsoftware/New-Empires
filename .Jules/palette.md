@@ -49,3 +49,7 @@
 ## 2026-01-26 - [Minimap Viewport Metaphor]
 **Learning:** A simple 1px outline for a minimap viewport is often lost on complex terrain backgrounds. Users need a clear visual indicator of their "lens" into the world.
 **Action:** Implemented a "Viewport Lens" style using a semi-transparent fill (`rgba(255,255,255,0.08)`) combined with a glow effect. This creates a physical metaphor of a glass lens sliding over the map, improving both visibility and the sense of interactivity.
+
+## 2026-05-31 - Immediate Feedback for Drag Selection
+**Learning:** Drag selection in RTS games often involves a "blind guess" until the mouse is released. Players don't know if they've successfully captured the intended units (e.g., "Did I get that extra villager?") until the action is complete.
+**Action:** Implemented a real-time badge near the cursor during the drag operation that displays the count of currently selected units. This provides immediate, continuous feedback, allowing players to adjust their selection area with precision before committing to the action.

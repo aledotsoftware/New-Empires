@@ -775,6 +775,15 @@ export class Game {
             }
         }
 
+        // Palette: Establecer punto de reunión para edificios
+        let rallyPointSet = false;
+        for (let entity of this.selectedEntities) {
+            if (entity.team === 'player' && typeof entity.setRallyPoint === 'function') {
+                entity.setRallyPoint(this.mouse.worldX, this.mouse.worldY);
+                rallyPointSet = true;
+            }
+        }
+
         // Comandar unidades
         let moveCommandTriggered = false;
 
@@ -813,7 +822,7 @@ export class Game {
         }
 
         // Palette: Visual feedback for move command
-        if (moveCommandTriggered && this.particleSystem) {
+        if ((moveCommandTriggered || rallyPointSet) && this.particleSystem) {
             this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
         }
     }
@@ -2288,6 +2297,9 @@ export class Game {
         // Dibujar selección
         this.drawSelection();
 
+        // Palette: Dibujar puntos de reunión
+        this.drawRallyPoints();
+
         // Dibujar rectángulo de arrastre
         if (this.isDragging) {
             this.drawDragSelection();
@@ -2470,6 +2482,54 @@ export class Game {
 
         this.ctx.fillRect(startX, startY, width, height);
         this.ctx.strokeRect(startX, startY, width, height);
+    }
+
+    drawRallyPoints() {
+        if (this.selectedEntities.length === 0) return;
+
+        this.ctx.strokeStyle = '#e8d48b'; // var(--text-gold)
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([5, 5]);
+
+        for (let entity of this.selectedEntities) {
+            if (entity.rallyPoint && entity.team === 'player') {
+                const startX = (entity.x - this.camera.x) | 0;
+                const startY = (entity.y - this.camera.y) | 0;
+                const endX = (entity.rallyPoint.x - this.camera.x) | 0;
+                const endY = (entity.rallyPoint.y - this.camera.y) | 0;
+
+                // Línea
+                this.ctx.beginPath();
+                this.ctx.moveTo(startX, startY);
+                this.ctx.lineTo(endX, endY);
+                this.ctx.stroke();
+
+                // Bandera
+                this.ctx.setLineDash([]);
+                this.ctx.fillStyle = '#e8d48b';
+
+                // Base
+                this.ctx.beginPath();
+                this.ctx.arc(endX, endY, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Asta
+                this.ctx.beginPath();
+                this.ctx.moveTo(endX, endY);
+                this.ctx.lineTo(endX, endY - 20);
+                this.ctx.stroke();
+
+                // Tela
+                this.ctx.beginPath();
+                this.ctx.moveTo(endX, endY - 20);
+                this.ctx.lineTo(endX + 12, endY - 15);
+                this.ctx.lineTo(endX, endY - 10);
+                this.ctx.fill();
+
+                this.ctx.setLineDash([5, 5]); // Restaurar para siguiente iteración
+            }
+        }
+        this.ctx.setLineDash([]); // Limpiar al final
     }
 
     drawBuildGhost() {

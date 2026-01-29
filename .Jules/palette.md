@@ -49,3 +49,7 @@
 ## 2026-01-26 - [Minimap Viewport Metaphor]
 **Learning:** A simple 1px outline for a minimap viewport is often lost on complex terrain backgrounds. Users need a clear visual indicator of their "lens" into the world.
 **Action:** Implemented a "Viewport Lens" style using a semi-transparent fill (`rgba(255,255,255,0.08)`) combined with a glow effect. This creates a physical metaphor of a glass lens sliding over the map, improving both visibility and the sense of interactivity.
+
+## 2026-01-29 - [Rally Point Visualization]
+**Learning:** In RTS games, the "spawn and forget" mechanic for buildings requires explicit feedback. Players need to trust that their new units will go where intended without having to babysit the building. A hidden rally point creates anxiety and inefficiency.
+**Action:** Implemented a high-contrast visual indicator (Dashed Line + Flag) that appears when a building is selected, connecting it to its rally point. This transforms an invisible logic state into a visible, tangible game element, reducing cognitive load and improving strategic planning.

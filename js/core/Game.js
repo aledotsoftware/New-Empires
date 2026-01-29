@@ -2741,12 +2741,15 @@ export class Game {
         this.minimapCtx.fillRect(0, 0, this.minimap.width, this.minimap.height);
 
         // Recursos
+        // BOLT OPTIMIZATION: Batch draw calls for resources (1 call vs N calls)
         this.minimapCtx.fillStyle = '#4a5568';
+        this.minimapCtx.beginPath();
         for (let node of this.resourceNodes) {
             if (node.amount > 0) {
-                this.minimapCtx.fillRect(node.x * scale - 1, node.y * scale - 1, 2, 2);
+                this.minimapCtx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
             }
         }
+        this.minimapCtx.fill();
 
         // Edificios
         for (let building of this.buildings) {
@@ -2763,12 +2766,27 @@ export class Game {
         }
 
         // Unidades
+        // BOLT OPTIMIZATION: Batch draw calls for units (2 calls vs N calls)
+
+        // Batch 1: Player Units
+        this.minimapCtx.fillStyle = '#48bb78';
+        this.minimapCtx.beginPath();
         for (let unit of this.units) {
-            const x = unit.x * scale;
-            const y = unit.y * scale;
-            this.minimapCtx.fillStyle = unit.team === 'player' ? '#48bb78' : '#c53030';
-            this.minimapCtx.fillRect(x - 1, y - 1, 2, 2);
+            if (unit.team === 'player') {
+                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+            }
         }
+        this.minimapCtx.fill();
+
+        // Batch 2: Enemy/Other Units
+        this.minimapCtx.fillStyle = '#c53030';
+        this.minimapCtx.beginPath();
+        for (let unit of this.units) {
+            if (unit.team !== 'player') {
+                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+            }
+        }
+        this.minimapCtx.fill();
 
         // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;

@@ -53,3 +53,7 @@
 ## 2026-05-31 - Immediate Feedback for Drag Selection
 **Learning:** Drag selection in RTS games often involves a "blind guess" until the mouse is released. Players don't know if they've successfully captured the intended units (e.g., "Did I get that extra villager?") until the action is complete.
 **Action:** Implemented a real-time badge near the cursor during the drag operation that displays the count of currently selected units. This provides immediate, continuous feedback, allowing players to adjust their selection area with precision before committing to the action.
+
+## 2026-06-01 - Quick Restart Flow
+**Learning:** When players lose or finish a game, they often want to retry immediately with similar settings ("just one more turn"). Forcing them back to the main menu creates friction and breaks the "flow" state.
+**Action:** Implemented a "Play Again" button on the Game Over screen that bypasses the setup screens. It reuses the previous configuration (Civilization, Map Size) but regenerates the seed, allowing for an instant, fresh start.

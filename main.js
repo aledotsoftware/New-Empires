@@ -383,6 +383,32 @@ window.updateCameraSpeed = function (value) {
 };
 
 /**
+ * Reinicia la partida con la misma configuración
+ */
+window.playAgain = function () {
+    if (!game) return;
+
+    debugLogger.info('Reiniciando partida (Play Again)...', 'game');
+
+    // Capturar configuración actual
+    const currentCiv = game.civilizationId;
+    const currentMapConfig = { ...game.mapConfig };
+
+    // Actualizar semilla para nuevo mapa
+    currentMapConfig.seed = Date.now();
+
+    // Limpiar juego actual
+    if (game.destroy) game.destroy();
+    game = null;
+
+    // Ocultar pantalla de Game Over
+    document.getElementById('gameOverScreen').classList.add('hidden');
+
+    // Iniciar nuevo juego
+    startGame(currentCiv, currentMapConfig);
+};
+
+/**
  * Regresa al menú principal
  */
 window.loadMainMenu = function () {
@@ -1567,11 +1593,19 @@ const initApp = async () => {
         });
     }
 
-    // Botón de reiniciar desde game over
-    const restartButton = document.getElementById('restartButton');
-    if (restartButton) {
-        restartButton.addEventListener('click', () => {
+    // Botón de volver al menú desde game over
+    const returnMenuButton = document.getElementById('returnMenuButton');
+    if (returnMenuButton) {
+        returnMenuButton.addEventListener('click', () => {
             loadMainMenu();
+        });
+    }
+
+    // Botón de jugar de nuevo desde game over
+    const playAgainButton = document.getElementById('playAgainButton');
+    if (playAgainButton) {
+        playAgainButton.addEventListener('click', () => {
+            playAgain();
         });
     }
 

@@ -2086,17 +2086,10 @@ export class Game {
         gameOverScreen.classList.remove('hidden');
 
         // Manage Focus for Accessibility
-        const restartBtn = document.getElementById('restartButton');
-        if (restartBtn) {
-            // Restore click functionality if missing (safety net for SPA logic)
-            restartBtn.onclick = () => {
-                if (window.loadMainMenu) {
-                    window.loadMainMenu();
-                } else {
-                    location.reload();
-                }
-            };
-            setTimeout(() => restartBtn.focus(), 50);
+        const playAgainBtn = document.getElementById('playAgainButton');
+        if (playAgainBtn) {
+            // Focus primary action
+            setTimeout(() => playAgainBtn.focus(), 50);
         }
 
         // Palette: View Map Functionality

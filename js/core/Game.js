@@ -3250,10 +3250,24 @@ export class Game {
             hpContainer.className = 'hp-container';
             hpContainer.style.marginBottom = '6px';
 
-            const hpText = document.createElement('div');
-            hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
-            hpText.style.marginBottom = '2px';
-            hpText.style.fontSize = '0.8rem';
+            const hpPercent = Math.max(0, Math.min(100, (entity.hp / entity.maxHp) * 100));
+
+            // Palette: Construction Progress Indicator
+            if (entity.isUnderConstruction) {
+                const statusText = document.createElement('div');
+                statusText.style.fontSize = '0.8rem';
+                statusText.style.color = '#ecc94b'; // Yellow/Gold
+                statusText.style.marginBottom = '2px';
+                statusText.style.fontWeight = 'bold';
+                statusText.textContent = `🚧 Construyendo: ${Math.floor(hpPercent)}%`;
+                hpContainer.appendChild(statusText);
+            } else {
+                const hpText = document.createElement('div');
+                hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+                hpText.style.marginBottom = '2px';
+                hpText.style.fontSize = '0.8rem';
+                hpContainer.appendChild(hpText);
+            }
 
             const hpBar = document.createElement('div');
             hpBar.className = 'health-bar';
@@ -3263,20 +3277,24 @@ export class Game {
             hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
             hpBar.setAttribute('aria-valuemin', '0');
             hpBar.setAttribute('aria-valuemax', entity.maxHp);
-            hpBar.setAttribute('aria-label', `Salud de ${entity.name}`);
+            hpBar.setAttribute('aria-label', entity.isUnderConstruction ? `Progreso de construcción de ${entity.name}` : `Salud de ${entity.name}`);
 
             const hpFill = document.createElement('div');
             hpFill.className = 'health-fill';
-            const hpPercent = Math.max(0, Math.min(100, (entity.hp / entity.maxHp) * 100));
             hpFill.style.width = `${hpPercent}%`;
 
-            // Color logic based on health percentage
-            if (hpPercent < 25) hpFill.style.background = '#c53030'; // Red
-            else if (hpPercent < 50) hpFill.style.background = '#ecc94b'; // Yellow
-            else hpFill.style.background = '#48bb78'; // Green
+            // Color logic based on state and health percentage
+            if (entity.isUnderConstruction) {
+                hpFill.style.background = '#3182ce'; // Construction Blue
+            } else if (hpPercent < 25) {
+                hpFill.style.background = '#c53030'; // Red
+            } else if (hpPercent < 50) {
+                hpFill.style.background = '#ecc94b'; // Yellow
+            } else {
+                hpFill.style.background = '#48bb78'; // Green
+            }
 
             hpBar.appendChild(hpFill);
-            hpContainer.appendChild(hpText);
             hpContainer.appendChild(hpBar);
             statsDiv.appendChild(hpContainer);
 

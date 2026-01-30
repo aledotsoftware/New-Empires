@@ -2535,13 +2535,16 @@ export class Game {
         this.ctx.fill();
 
         // Pass 2: Draw icons (using compacted list)
+        // BOLT OPTIMIZATION: Hoist assetLoader check
+        const hasAssetLoader = typeof assetLoader !== 'undefined';
+
         for (let i = 0; i < visibleCount; i++) {
             const node = this._resourceRenderCache[i];
 
             // Icon
             // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop
             let img = node._cachedImage;
-            if (!img && typeof assetLoader !== 'undefined') {
+            if (!img && hasAssetLoader) {
                 img = assetLoader.getImage(node.type);
                 if (img) node._cachedImage = img;
             }
@@ -2549,7 +2552,7 @@ export class Game {
             if (img && img.complete) {
                 const size = node.radius * 1.5;
                 this.ctx.drawImage(img, node._screenX - size / 2, node._screenY - size / 2, size, size);
-            } else if (typeof assetLoader !== 'undefined') {
+            } else if (hasAssetLoader) {
                 // Fallback to square if image not ready
                 this.ctx.fillStyle = '#FFD700';
                 this.ctx.fillRect(node._screenX - 10, node._screenY - 10, 20, 20);
@@ -2815,24 +2818,29 @@ export class Game {
 
         // Unidades
         // BOLT OPTIMIZATION: Batch draw calls for units (2 calls vs N calls)
+        // Fixed: Iterate separately over enemies array to avoid missing them and redundant loops.
 
         // Batch 1: Player Units
         this.minimapCtx.fillStyle = '#48bb78';
         this.minimapCtx.beginPath();
-        for (let unit of this.units) {
+        const unitsLen = this.units.length;
+        for (let i = 0; i < unitsLen; i++) {
+            const unit = this.units[i];
             if (unit.team === 'player') {
-                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+                // Integer truncation for speed
+                this.minimapCtx.rect((unit.x * scale - 1) | 0, (unit.y * scale - 1) | 0, 2, 2);
             }
         }
         this.minimapCtx.fill();
 
-        // Batch 2: Enemy/Other Units
+        // Batch 2: Enemy Units
         this.minimapCtx.fillStyle = '#c53030';
         this.minimapCtx.beginPath();
-        for (let unit of this.units) {
-            if (unit.team !== 'player') {
-                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
-            }
+        const enemiesLen = this.enemies.length;
+        for (let i = 0; i < enemiesLen; i++) {
+            const enemy = this.enemies[i];
+            // Integer truncation for speed
+            this.minimapCtx.rect((enemy.x * scale - 1) | 0, (enemy.y * scale - 1) | 0, 2, 2);
         }
         this.minimapCtx.fill();
 

@@ -281,6 +281,11 @@ export class Unit extends Entity {
 
             node.amount -= actualGather;
             game.resources[node.type] += actualGather;
+
+            // BOLT OPTIMIZATION: Notify game if resource depleted to update minimap cache
+            if (node.amount <= 0 && game.notifyResourceDepleted) {
+                game.notifyResourceDepleted(node);
+            }
         }
     }
 }

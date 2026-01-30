@@ -43,9 +43,15 @@ class Particle {
         ctx.globalAlpha = this.alpha;
 
         if (this.emoji) {
-            ctx.font = `${this.size}px Arial`;
+            ctx.font = `bold ${this.size}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            // Palette: Outline for visibility against any background
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            ctx.strokeText(this.emoji, screenX, screenY);
+            // Palette: Fill with specific color
+            ctx.fillStyle = this.color;
             ctx.fillText(this.emoji, screenX, screenY);
         } else {
             ctx.fillStyle = this.color;
@@ -236,6 +242,21 @@ class ParticleSystem {
     // Efecto de construcción (Ripple Azul)
     createBuildRipple(x, y) {
         this.particles.push(new Ripple(x, y, '#4299e1'));
+    }
+
+    // Efecto de texto flotante (Palette)
+    createFloatingText(x, y, text, color = '#fff') {
+        this.particles.push(new Particle(x, y, {
+            vx: (Math.random() - 0.5) * 10, // Slight horizontal drift
+            vy: -40, // Move up
+            life: 1.5,
+            size: 14,
+            emoji: text, // Abusing emoji property for text
+            color: color,
+            gravity: 0, // No gravity, float straight up
+            friction: 0.98,
+            fadeRate: 1.5
+        }));
     }
 
     update(deltaTime) {

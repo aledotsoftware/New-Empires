@@ -96,6 +96,21 @@ export class Villager extends Unit {
 
                 if (this.moveTowardsTarget(this.dropOffTarget.x, this.dropOffTarget.y, deltaTime, game, minDist * minDist)) {
                     game.resources[this.carryType] += this.carryAmount;
+
+                    // Palette: Visual Feedback for Deposit
+                    if (game.particleSystem) {
+                        const amount = Math.floor(this.carryAmount);
+                        let color = '#fff';
+                        let icon = '';
+                        switch (this.carryType) {
+                            case 'wood': color = '#8b5a2b'; icon = '🌲'; break;
+                            case 'food': color = '#7cb342'; icon = '🌾'; break;
+                            case 'gold': color = '#ffc107'; icon = '💰'; break;
+                            case 'stone': color = '#78909c'; icon = '🪨'; break;
+                        }
+                        game.particleSystem.createFloatingText(this.x, this.y - 20, `+${amount} ${icon}`, color);
+                    }
+
                     console.log(`💰 Depositado: ${Math.floor(this.carryAmount)} ${this.carryType}`);
                     this.carryAmount = 0;
                     this.carryType = null;

@@ -53,3 +53,7 @@
 ## 2026-05-31 - Immediate Feedback for Drag Selection
 **Learning:** Drag selection in RTS games often involves a "blind guess" until the mouse is released. Players don't know if they've successfully captured the intended units (e.g., "Did I get that extra villager?") until the action is complete.
 **Action:** Implemented a real-time badge near the cursor during the drag operation that displays the count of currently selected units. This provides immediate, continuous feedback, allowing players to adjust their selection area with precision before committing to the action.
+
+## 2026-06-01 - In-Development Feature Visibility
+**Learning:** Players may waste resources on features marked "Coming Soon" only in tooltips, leading to confusion and frustration. Explicit visual indicators in the primary UI layer are necessary to manage expectations before interaction.
+**Action:** Implemented a high-contrast "WIP" badge directly on the build icons for incomplete features, ensuring the state is visible at a glance without requiring hover interaction.

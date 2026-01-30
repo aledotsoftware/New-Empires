@@ -2819,22 +2819,26 @@ export class Game {
         // Batch 1: Player Units
         this.minimapCtx.fillStyle = '#48bb78';
         this.minimapCtx.beginPath();
-        for (let unit of this.units) {
+        const unitsLen = this.units.length;
+        for (let i = 0; i < unitsLen; i++) {
+            const unit = this.units[i];
             if (unit.team === 'player') {
-                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+                this.minimapCtx.rect((unit.x * scale - 1) | 0, (unit.y * scale - 1) | 0, 2, 2);
             }
         }
         this.minimapCtx.fill();
 
-        // Batch 2: Enemy/Other Units
-        this.minimapCtx.fillStyle = '#c53030';
-        this.minimapCtx.beginPath();
-        for (let unit of this.units) {
-            if (unit.team !== 'player') {
-                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+        // Batch 2: Enemy Units
+        if (this.enemies) {
+            this.minimapCtx.fillStyle = '#c53030';
+            this.minimapCtx.beginPath();
+            const enemiesLen = this.enemies.length;
+            for (let i = 0; i < enemiesLen; i++) {
+                const enemy = this.enemies[i];
+                this.minimapCtx.rect((enemy.x * scale - 1) | 0, (enemy.y * scale - 1) | 0, 2, 2);
             }
+            this.minimapCtx.fill();
         }
-        this.minimapCtx.fill();
 
         // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;

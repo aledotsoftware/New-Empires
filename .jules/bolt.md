@@ -67,3 +67,7 @@
 ## 2025-05-28 - Minimap Layer Caching
 **Learning:** Even with batched drawing calls, iterating over static entities (resources/buildings) and performing `ctx` calls (even if batched) every frame adds significant overhead to the main thread. Caching the static layer (background + resources + buildings) into an offscreen canvas reduced draw calls by ~87% (120k -> 15k in benchmark) and eliminated iteration logic from the hot path.
 **Action:** Identify static layers in UI/HUD elements (like minimaps) and cache them in offscreen canvases, updating only when the underlying state changes (dirty flag pattern).
+
+## 2025-05-29 - Minimap Loop Optimization & Correctness
+**Learning:** `renderMinimap` was iterating `this.units` (player only) twice—once for players and once checking for non-players (always empty). This was not only O(2N) but also failed to render enemies at all, as they reside in `this.enemies`. Replacing it with distinct, optimized `for` loops for `units` and `enemies` reduced overhead by ~50% (removed 2nd pass) and fixed the visibility bug.
+**Action:** Always verify that iteration sources match the intended data (e.g. `units` vs `enemies`) and avoid filtering loops when distinct arrays are available.

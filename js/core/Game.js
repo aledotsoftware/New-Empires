@@ -2815,26 +2815,37 @@ export class Game {
 
         // Unidades
         // BOLT OPTIMIZATION: Batch draw calls for units (2 calls vs N calls)
+        // Optimized loops: cached length, integer math, and correct enemy iteration.
+
+        const unitsLen = this.units.length;
+        const enemiesLen = this.enemies.length;
 
         // Batch 1: Player Units
-        this.minimapCtx.fillStyle = '#48bb78';
-        this.minimapCtx.beginPath();
-        for (let unit of this.units) {
-            if (unit.team === 'player') {
-                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+        if (unitsLen > 0) {
+            this.minimapCtx.fillStyle = '#48bb78';
+            this.minimapCtx.beginPath();
+            for (let i = 0; i < unitsLen; i++) {
+                const unit = this.units[i];
+                // OPTIMIZATION: Integer math for speed and crisp rendering
+                const x = (unit.x * scale) | 0;
+                const y = (unit.y * scale) | 0;
+                this.minimapCtx.rect(x - 1, y - 1, 2, 2);
             }
+            this.minimapCtx.fill();
         }
-        this.minimapCtx.fill();
 
-        // Batch 2: Enemy/Other Units
-        this.minimapCtx.fillStyle = '#c53030';
-        this.minimapCtx.beginPath();
-        for (let unit of this.units) {
-            if (unit.team !== 'player') {
-                this.minimapCtx.rect(unit.x * scale - 1, unit.y * scale - 1, 2, 2);
+        // Batch 2: Enemy Units
+        if (enemiesLen > 0) {
+            this.minimapCtx.fillStyle = '#c53030';
+            this.minimapCtx.beginPath();
+            for (let i = 0; i < enemiesLen; i++) {
+                const unit = this.enemies[i];
+                const x = (unit.x * scale) | 0;
+                const y = (unit.y * scale) | 0;
+                this.minimapCtx.rect(x - 1, y - 1, 2, 2);
             }
+            this.minimapCtx.fill();
         }
-        this.minimapCtx.fill();
 
         // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;

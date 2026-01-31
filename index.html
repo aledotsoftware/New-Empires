@@ -390,11 +390,16 @@
                 <h1 id="gameOverTitle" class="game-over-title">Victoria</h1>
                 <p id="gameOverMessage" class="game-over-message"></p>
                 <div class="game-over-stats" id="gameOverStats"></div>
-                <div class="game-over-actions" style="display:flex; gap:15px; justify-content:center;">
+                <div class="game-over-actions" style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                    <button id="playAgainButton" class="btn-restart" style="font-size: 1.2rem; padding: 1rem 2rem;">
+                        🔄 Jugar de Nuevo
+                    </button>
+                    <button id="returnMenuButton" class="btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
+                        🏠 Volver al Menú
+                    </button>
                     <button id="viewMapButton" class="btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
                         👁️ Ver Mapa
                     </button>
-                    <button id="restartButton" class="btn-restart">Volver al Menú</button>
                 </div>
             </div>
         </div>

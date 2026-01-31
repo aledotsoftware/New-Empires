@@ -210,6 +210,9 @@ export class Game {
         // Cache para selección de arrastre (Palette)
         this._dragSelectCache = [];
 
+        // OPTIMIZACIÓN: Cache para actualizaciones de visión (FOW)
+        this._visionEntitiesCache = [];
+
         // OPTIMIZACIÓN: Cache de elementos DOM para UI
         this.uiElements = {
             woodCount: document.getElementById('woodCount'),
@@ -1864,15 +1867,21 @@ export class Game {
             this.visionTimer = 0;
 
             // Recolectar entidades del jugador para actualizar visión
-            const playerEntities = [];
-            for (let i = 0; i < this.units.length; i++) {
-                if (this.units[i].team === 'player') playerEntities.push(this.units[i]);
-            }
-            for (let i = 0; i < this.buildings.length; i++) {
-                if (this.buildings[i].team === 'player') playerEntities.push(this.buildings[i]);
+            // BOLT OPTIMIZATION: Reuse cache array to avoid allocation (GC pressure)
+            this._visionEntitiesCache.length = 0;
+
+            const unitsLen = this.units.length;
+            for (let i = 0; i < unitsLen; i++) {
+                if (this.units[i].team === 'player') this._visionEntitiesCache.push(this.units[i]);
             }
 
-            this.fow.update(playerEntities);
+            const buildingsLen = this.buildings.length;
+            for (let i = 0; i < buildingsLen; i++) {
+                const b = this.buildings[i];
+                if (b.team === 'player') this._visionEntitiesCache.push(b);
+            }
+
+            this.fow.update(this._visionEntitiesCache);
             this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
 
             // BOLT OPTIMIZATION: Update FOW bitmap buffer

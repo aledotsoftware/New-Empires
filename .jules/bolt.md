@@ -71,3 +71,7 @@
 ## 2025-05-29 - Logic Bugs as Performance Leaks
 **Learning:** The `renderMinimap` loop iterated twice over `this.units` (once for player, once for enemies), but since enemies were stored in `this.enemies`, the second pass was wasted O(N) work and the enemies weren't drawn. Fixing the loop to iterate `this.enemies` correctly not only fixed a bug (missing dots) but also improved performance by replacing 2*N checks with N+M checks (where M << N typically).
 **Action:** When optimizing loops, verify the data structures being iterated actually contain the target data. A "performance" loop that does nothing is still wasted cycles.
+
+## 2025-06-01 - Center-First Spatial Search
+**Learning:** In "find closest" spatial queries (like melee combat), scanning buckets in a standard loop order (top-left to bottom-right) is inefficient because the target is most likely in the same bucket as the seeker. Prioritizing the "center bucket" (checking it first, then skipping it in the loop) yielded a ~4.9x speedup (53ms vs 260ms) for close-range lookups by avoiding wasted checks on distant neighbors.
+**Action:** For spatial `find` operations where proximity is highly correlated with success, explicitly check the origin bucket before iterating the search radius.

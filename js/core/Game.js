@@ -3421,14 +3421,76 @@ export class Game {
                     progressBar.appendChild(progressFill);
                     prodContainer.appendChild(progressBar);
 
-                    // Mostrar cola restante
+                    // Mostrar cola restante (Palette: Interactive Queue)
                     if (entity.productionQueue.length > 1) {
-                        const queueDiv = document.createElement('div');
-                        queueDiv.style.fontSize = '0.7rem';
-                        queueDiv.style.opacity = '0.6';
-                        queueDiv.style.marginTop = '4px';
-                        queueDiv.textContent = `+${entity.productionQueue.length - 1} en cola`;
-                        prodContainer.appendChild(queueDiv);
+                        const queueList = document.createElement('div');
+                        queueList.className = 'queue-list';
+
+                        const queueItems = entity.productionQueue.getQueue();
+                        // Skip first (current)
+                        for (let i = 1; i < queueItems.length; i++) {
+                            const item = queueItems[i];
+                            const queueItem = document.createElement('div');
+                            queueItem.className = 'queue-item';
+
+                            // Accessibility
+                            queueItem.setAttribute('role', 'button');
+                            queueItem.setAttribute('tabindex', '0');
+                            const unitName = item.unitType.charAt(0).toUpperCase() + item.unitType.slice(1);
+                            queueItem.setAttribute('aria-label', `Cancelar ${item.unitType}`);
+                            queueItem.title = `Cancelar ${unitName} (Click para cancelar)`;
+
+                            // Icon
+                            if (typeof assetLoader !== 'undefined') {
+                                const src = assetLoader.getSrc(item.unitType);
+                                if (src) {
+                                    const img = document.createElement('img');
+                                    img.src = src;
+                                    img.alt = item.unitType;
+                                    queueItem.appendChild(img);
+                                } else {
+                                    queueItem.textContent = item.unitType.charAt(0).toUpperCase();
+                                }
+                            } else {
+                                queueItem.textContent = item.unitType.charAt(0).toUpperCase();
+                            }
+
+                            // Interaction
+                            const handleCancel = (e) => {
+                                e.stopPropagation();
+                                const cancelled = entity.productionQueue.cancelAt(i);
+                                if (cancelled) {
+                                    // Refund resources
+                                    if (cancelled.cost) {
+                                        for (const [res, amount] of Object.entries(cancelled.cost)) {
+                                            this.resources[res] += amount;
+                                            // Palette: Flash resource gain
+                                            this.flashResource(res);
+                                        }
+                                        this.showNotification(`Cancelado: ${unitName} (Recursos devueltos)`, 'info');
+                                    } else {
+                                        this.showNotification(`Cancelado: ${unitName}`, 'info');
+                                    }
+
+                                    if (typeof soundManager !== 'undefined') {
+                                        soundManager.play('click');
+                                    }
+
+                                    this.updateUI();
+                                }
+                            };
+
+                            queueItem.onclick = handleCancel;
+                            queueItem.onkeydown = (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleCancel(e);
+                                }
+                            };
+
+                            queueList.appendChild(queueItem);
+                        }
+                        prodContainer.appendChild(queueList);
                     }
                 }
 

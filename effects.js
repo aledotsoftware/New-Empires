@@ -244,6 +244,16 @@ class ParticleSystem {
         this.particles.push(new Ripple(x, y, '#4299e1'));
     }
 
+    // Efecto de enfoque de cámara (Palette)
+    createFocusPing(x, y) {
+        // Cyan ripple for focus
+        this.particles.push(new Ripple(x, y, '#4299e1'));
+        // Smaller secondary ripple for emphasis
+        const r = new Ripple(x, y, '#ffffff');
+        r.maxSize = 15;
+        this.particles.push(r);
+    }
+
     // Efecto de texto flotante (Palette)
     createFloatingText(x, y, text, color = '#fff') {
         this.particles.push(new Particle(x, y, {

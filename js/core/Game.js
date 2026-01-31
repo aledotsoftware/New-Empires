@@ -576,7 +576,7 @@ export class Game {
         // Palette: Dedicated Minimap Drag Handler
         window.addEventListener('mousemove', (e) => {
             if (this.isMinimapDragging) {
-                this.handleMinimapInput(e.clientX, e.clientY);
+                this.handleMinimapInput(e.clientX, e.clientY, false);
             }
         });
 
@@ -631,7 +631,7 @@ export class Game {
             e.preventDefault(); // Prevent text selection etc
             this.isMinimapDragging = true;
             this.minimap.style.cursor = 'grabbing'; // Palette: Visual feedback
-            this.handleMinimapInput(e.clientX, e.clientY);
+            this.handleMinimapInput(e.clientX, e.clientY, true);
         });
 
         // Double click selection (Palette)
@@ -641,7 +641,7 @@ export class Game {
     }
 
     // Palette: Helper for Minimap Navigation
-    handleMinimapInput(clientX, clientY) {
+    handleMinimapInput(clientX, clientY, triggerPing = false) {
         const rect = this.minimap.getBoundingClientRect();
         const x = clientX - rect.left;
         const y = clientY - rect.top;
@@ -655,11 +655,19 @@ export class Game {
         const worldX = (x / width) * CONFIG.CANVAS_WIDTH;
         const worldY = (y / height) * CONFIG.CANVAS_HEIGHT;
 
-        // Center camera on click
-        this.camera.x = worldX - this.viewWidth / 2;
-        this.camera.y = worldY - this.viewHeight / 2;
+        // Use centralized focus method
+        this.focusCamera(worldX, worldY, triggerPing);
+    }
 
+    // Palette: Centralized Camera Focus with Visual Feedback
+    focusCamera(targetX, targetY, triggerPing = true) {
+        this.camera.x = targetX - this.viewWidth / 2;
+        this.camera.y = targetY - this.viewHeight / 2;
         this.clampCamera();
+
+        if (triggerPing && this.particleSystem && this.particleSystem.createFocusPing) {
+            this.particleSystem.createFocusPing(targetX, targetY);
+        }
     }
 
     // Palette: Helper to keep camera in bounds
@@ -839,8 +847,7 @@ export class Game {
         this.updateActionsPanel();
 
         // Centrar cámara en el aldeano
-        this.camera.x = villager.x - this.viewWidth / 2;
-        this.camera.y = villager.y - this.viewHeight / 2;
+        this.focusCamera(villager.x, villager.y);
 
         // Incrementar índice para la próxima vez
         this.idleVillagerIndex++;
@@ -1173,8 +1180,7 @@ export class Game {
             e.preventDefault();
             const tc = this.buildings.find(b => b.type === 'townCenter' && b.team === 'player');
             if (tc) {
-                this.camera.x = tc.x - this.viewWidth / 2;
-                this.camera.y = tc.y - this.viewHeight / 2;
+                this.focusCamera(tc.x, tc.y);
 
                 // Palette: Visual feedback for Town Center button if visible (in quick actions)
                 const content = document.getElementById('selectionContent');
@@ -3475,7 +3481,7 @@ export class Game {
             // Action 1: Focus Town Center
             actionsDiv.appendChild(createActionBtn('townCenter', 'Ir al Centro Urbano', 'Espacio', () => {
                 const tc = this.buildings.find(b => b.type === 'townCenter' && b.team === 'player');
-                if (tc) { this.camera.x = tc.x - this.viewWidth / 2; this.camera.y = tc.y - this.viewHeight / 2; }
+                if (tc) { this.focusCamera(tc.x, tc.y); }
                 else this.showNotification('No tienes Centro Urbano', 'error');
             }));
 

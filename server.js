@@ -21,22 +21,30 @@ setInterval(() => {
 
 // Whitelist of allowed extensions
 const MIME_TYPES = {
-    '.html': 'text/html',
-    '.js': 'text/javascript',
-    '.css': 'text/css',
-    '.json': 'application/json',
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
     '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
+    '.svg': 'image/svg+xml; charset=utf-8',
     '.wav': 'audio/wav',
     '.mp3': 'audio/mpeg',
     '.ico': 'image/x-icon',
-    '.webmanifest': 'application/manifest+json',
-    '.txt': 'text/plain'
+    '.webmanifest': 'application/manifest+json; charset=utf-8',
+    '.txt': 'text/plain; charset=utf-8'
 };
 
 const server = http.createServer((req, res) => {
+    // Security: Restrict HTTP Methods
+    // Only allow GET and HEAD requests to reduce attack surface
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+        res.writeHead(405, { 'Allow': 'GET, HEAD' });
+        res.end('Method Not Allowed');
+        return;
+    }
+
     // Security: Rate Limiting (Fixed Window Counter)
     // Support for reverse proxies (e.g. Heroku, AWS) if configured
     const trustProxy = process.env.TRUST_PROXY === 'true';
@@ -169,7 +177,7 @@ const server = http.createServer((req, res) => {
 
         const contentType = MIME_TYPES[ext];
 
-        res.writeHead(200, {
+        const headers = {
             'Content-Type': contentType,
             // Security headers
             'X-Content-Type-Options': 'nosniff',
@@ -183,7 +191,14 @@ const server = http.createServer((req, res) => {
             'Referrer-Policy': 'strict-origin-when-cross-origin',
             // Permissions: Disable sensitive features
             'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()'
-        });
+        };
+
+        // Cache-Control: no-cache for index.html to ensure users get latest version
+        if (safePath === '/index.html') {
+            headers['Cache-Control'] = 'no-cache';
+        }
+
+        res.writeHead(200, headers);
 
         const readStream = fs.createReadStream(filePath);
 

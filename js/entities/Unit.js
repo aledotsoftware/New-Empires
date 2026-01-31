@@ -25,6 +25,9 @@ export class Unit extends Entity {
         this.canAttack = false;
         this.canGather = false;
 
+        // Vision
+        this.visionRadius = CONFIG.VISION.DEFAULT_UNIT;
+
         this.aiTimer = Math.random() * 0.5;
         this.aiCheckInterval = 0.5;
     }

@@ -1,5 +1,6 @@
 // Imports de módulos creados
-import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS } from './constants.js';
+import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS, FOW_STATES } from './constants.js';
+import { FogOfWar } from '../map/FogOfWar.js';
 import { FocusManager } from '../utils/FocusManager.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
@@ -141,10 +142,18 @@ export class Game {
         // SISTEMA DE TECNOLOGÍAS (variable global temporal)
         this.techManager = new TechManager(this);
 
+        // SISTEMA DE FOG OF WAR (Niebla de Guerra)
+        this.fow = new FogOfWar(this.terrainMap.cols, this.terrainMap.rows);
+        this.visionTimer = 0;
+
         // SISTEMA DE PARTÍCULAS (Palette: Visual Feedback)
         if (typeof ParticleSystem !== 'undefined') {
             this.particleSystem = new ParticleSystem();
         }
+
+        // Offscreen canvas for FOW rendering optimization
+        this._fowBufferCanvas = document.createElement('canvas');
+        this._fowBufferCtx = this._fowBufferCanvas.getContext('2d');
 
         // Cargar imagen del cursor personalizado
         this.cursorImage = new Image();
@@ -697,7 +706,12 @@ export class Game {
         let closestDistSq = Infinity;
 
         for (let entity of this.entities) {
-            if (entity.team !== 'player') continue;
+            // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
+            if (entity.team !== 'player') {
+                if (!this.fow.isVisible((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+                    continue;
+                }
+            }
 
             const dx = entity.x - worldX;
             const dy = entity.y - worldY;
@@ -831,6 +845,11 @@ export class Game {
         // Verificar si clickeó en un enemigo
         let targetEnemy = null;
         for (let enemy of this.enemies) {
+            // Solo permitir atacar si el enemigo es visible
+            if (!this.fow.isVisible((enemy.x / TILE_SIZE) | 0, (enemy.y / TILE_SIZE) | 0)) {
+                continue;
+            }
+
             const dx = enemy.x - this.mouse.worldX;
             const dy = enemy.y - this.mouse.worldY;
             const distSq = dx * dx + dy * dy;
@@ -844,6 +863,11 @@ export class Game {
         // Verificar si clickeó en un nodo de recursos
         let targetResource = null;
         for (let node of this.resourceNodes) {
+            // Solo permitir recolectar si el nodo está explorado
+            if (!this.fow.isExplored((node.x / TILE_SIZE) | 0, (node.y / TILE_SIZE) | 0)) {
+                continue;
+            }
+
             const dx = node.x - this.mouse.worldX;
             const dy = node.y - this.mouse.worldY;
             const distSq = dx * dx + dy * dy;
@@ -1830,6 +1854,24 @@ export class Game {
         // Actualizar partículas (Palette)
         if (this.particleSystem) this.particleSystem.update(deltaTime);
 
+        // Actualizar Niebla de Guerra (Optimizado)
+        this.visionTimer += deltaTime;
+        if (this.visionTimer >= CONFIG.VISION.UPDATE_INTERVAL) {
+            this.visionTimer = 0;
+
+            // Recolectar entidades del jugador para actualizar visión
+            const playerEntities = [];
+            for (let i = 0; i < this.units.length; i++) {
+                if (this.units[i].team === 'player') playerEntities.push(this.units[i]);
+            }
+            for (let i = 0; i < this.buildings.length; i++) {
+                if (this.buildings[i].team === 'player') playerEntities.push(this.buildings[i]);
+            }
+
+            this.fow.update(playerEntities);
+            this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
+        }
+
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
         // Separamos el bucle para iterar solo sobre unidades dinámicas (Jugador + Enemigos)
         // Los edificios son estáticos y no necesitan update() ni reinserción en spatialGrid cada frame.
@@ -2176,6 +2218,49 @@ export class Game {
         }
     }
 
+    drawFOW() {
+        if (!this.fow) return;
+
+        const ctx = this.ctx;
+        const fow = this.fow;
+        const tileSize = TILE_SIZE;
+        const camX = this.camera.x;
+        const camY = this.camera.y;
+
+        // Calculate visible grid range
+        const startCol = Math.max(0, Math.floor(camX / tileSize));
+        const endCol = Math.min(fow.cols, Math.ceil((camX + this.viewWidth) / tileSize));
+        const startRow = Math.max(0, Math.floor(camY / tileSize));
+        const endRow = Math.min(fow.rows, Math.ceil((camY + this.viewHeight) / tileSize));
+
+        // Use offscreen buffer if we want to optimize further, but for now direct batching
+        // OPTIMIZATION: Batch rectangles by state
+        const hiddenPath = new Path2D();
+        const exploredPath = new Path2D();
+
+        for (let row = startRow; row < endRow; row++) {
+            const y = row * tileSize - camY;
+            for (let col = startCol; col < endCol; col++) {
+                const state = fow.grid[row * fow.cols + col];
+                const x = col * tileSize - camX;
+
+                if (state === FOW_STATES.HIDDEN) {
+                    hiddenPath.rect(x, y, tileSize, tileSize);
+                } else if (state === FOW_STATES.EXPLORED) {
+                    exploredPath.rect(x, y, tileSize, tileSize);
+                }
+            }
+        }
+
+        // Draw HIDDEN (Black)
+        ctx.fillStyle = '#000000';
+        ctx.fill(hiddenPath);
+
+        // Draw EXPLORED (Dimmed)
+        ctx.fillStyle = `rgba(0, 0, 0, ${CONFIG.VISION.EXPLORED_OPACITY})`;
+        ctx.fill(exploredPath);
+    }
+
     drawTerrain() {
         if (!this.terrainMap || !this._terrainBufferCanvas) return;
 
@@ -2315,6 +2400,9 @@ export class Game {
         // Dibujar terreno
         this.drawTerrain();
 
+        // Dibujar niebla de guerra (Pass 1: Terreno)
+        this.drawFOW();
+
         // Dibujar grid (solo si está activado)
         if (this.showGrid) {
             this.drawGrid();
@@ -2368,6 +2456,13 @@ export class Game {
             let renderIdx = this._renderCache.length;
             for (let i = 0; i < rowLen; i++) {
                 const ent = this._rowCache[i];
+
+                // FILTRADO POR NIEBLA DE GUERRA
+                // Si es enemigo, solo renderizar si es visible
+                if (ent.team === 'enemy' && !this.fow.isVisible((ent.x * this.fow.invTileSize) | 0, (ent.y * this.fow.invTileSize) | 0)) {
+                    continue;
+                }
+
                 // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
                 ent._screenX = (ent.x - this.camera.x) | 0;
                 ent._screenY = (ent.y - this.camera.y) | 0;
@@ -2553,6 +2648,12 @@ export class Game {
         for (let i = 0; i < nodesLen; i++) {
             const node = this._resourceRenderCache[i];
             if (node.amount <= 0) continue;
+
+            // FILTRADO POR NIEBLA DE GUERRA
+            // Solo dibujar si la zona está explorada
+            if (!this.fow.isExplored((node.x * this.fow.invTileSize) | 0, (node.y * this.fow.invTileSize) | 0)) {
+                continue;
+            }
 
             // Calculate screen coordinates once
             const screenX = (node.x - camX) | 0;
@@ -2830,7 +2931,10 @@ export class Game {
         ctx.beginPath();
         for (let node of this.resourceNodes) {
             if (node.amount > 0) {
-                ctx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
+                // Solo mostrar en el minimapa si la zona ha sido explorada
+                if (this.fow.isExplored((node.x / TILE_SIZE) | 0, (node.y / TILE_SIZE) | 0)) {
+                    ctx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
+                }
             }
         }
         ctx.fill();
@@ -2838,6 +2942,11 @@ export class Game {
         // Buildings
         for (let building of this.buildings) {
             if (building.isDead) continue;
+
+            // Solo mostrar en el minimapa si la zona ha sido explorada
+            if (!this.fow.isExplored((building.x / TILE_SIZE) | 0, (building.y / TILE_SIZE) | 0)) {
+                continue;
+            }
 
             const x = building.x * scale;
             const y = building.y * scale;
@@ -2896,10 +3005,21 @@ export class Game {
         const enemiesLen = this.enemies.length;
         for (let i = 0; i < enemiesLen; i++) {
             const enemy = this.enemies[i];
+
+            // FILTRADO POR NIEBLA DE GUERRA
+            // Solo mostrar enemigos si están en zona visible
+            if (!this.fow.isVisible((enemy.x / TILE_SIZE) | 0, (enemy.y / TILE_SIZE) | 0)) {
+                continue;
+            }
+
             const x = (enemy.x * scale) | 0;
             const y = (enemy.y * scale) | 0;
             this.minimapCtx.rect(x - 1, y - 1, 2, 2);
         }
+        this.minimapCtx.fill();
+
+        // 3. Niebla de Guerra en Minimapa
+        this.renderMinimapFOW();
 
         // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;
@@ -2923,6 +3043,45 @@ export class Game {
         this.minimapCtx.fillRect(camX, camY, camW, camH);
 
         this.minimapCtx.restore();
+    }
+
+    renderMinimapFOW() {
+        if (!this.fow || !this.minimapCtx) return;
+
+        const ctx = this.minimapCtx;
+        const width = this.minimap.width;
+        const height = this.minimap.height;
+        const cols = this.fow.cols;
+        const rows = this.fow.rows;
+
+        // El minimapa es pequeño, así que una resolución de tile de 1x1 o similar es suficiente
+        // Calculamos escala de tiles a píxeles de minimapa
+        const scaleX = width / cols;
+        const scaleY = height / rows;
+
+        // OPTIMIZATION: Use a smaller offscreen canvas for FOW if performance is an issue,
+        // but since it's just a few hundred tiles, direct rendering is fine.
+
+        const hiddenPath = new Path2D();
+        const exploredPath = new Path2D();
+
+        for (let r = 0; r < rows; r++) {
+            const y = r * scaleY;
+            for (let c = 0; c < cols; c++) {
+                const state = this.fow.grid[r * cols + c];
+                if (state === FOW_STATES.HIDDEN) {
+                    hiddenPath.rect(c * scaleX, y, scaleX, scaleY);
+                } else if (state === FOW_STATES.EXPLORED) {
+                    exploredPath.rect(c * scaleX, y, scaleX, scaleY);
+                }
+            }
+        }
+
+        ctx.fillStyle = '#000000';
+        ctx.fill(hiddenPath);
+
+        ctx.fillStyle = `rgba(0, 0, 0, ${CONFIG.VISION.EXPLORED_OPACITY})`;
+        ctx.fill(exploredPath);
     }
 
     drawCustomCursor() {

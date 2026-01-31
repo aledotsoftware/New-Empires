@@ -4,6 +4,13 @@
 // ==========================================
 export const TILE_SIZE = 32; // Tamaño de celda en píxeles
 
+// Fog of War States
+export const FOW_STATES = {
+    HIDDEN: 0,
+    EXPLORED: 1,
+    VISIBLE: 2
+};
+
 // Tamaños de mapa (en tiles de 32px)
 export const MAP_SIZES = {
     tiny: { name: 'Pequeño', tiles: 120, width: 3840, height: 3840 },
@@ -151,5 +158,13 @@ export const CONFIG = {
         food: 8,
         gold: 5,
         stone: 4
+    },
+
+    // Fog of War & Vision
+    VISION: {
+        UPDATE_INTERVAL: 0.2, // Segundos entre actualizaciones de visión
+        DEFAULT_UNIT: 250,    // Radio de visión por defecto para unidades
+        DEFAULT_BUILDING: 350, // Radio de visión por defecto para edificios
+        EXPLORED_OPACITY: 0.5  // Opacidad del terreno explorado pero no visible
     }
 };

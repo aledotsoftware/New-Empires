@@ -1,4 +1,5 @@
 import { Entity } from './Entity.js';
+import { CONFIG } from '../core/constants.js';
 
 /**
  * Building - Clase base para edificios
@@ -10,5 +11,8 @@ export class Building extends Entity {
         this.isBuilding = true;
         this.isUnderConstruction = false;
         this.constructionMaxHp = 0;
+
+        // Vision
+        this.visionRadius = CONFIG.VISION.DEFAULT_BUILDING;
     }
 }

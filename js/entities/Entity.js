@@ -38,6 +38,9 @@ export class Entity {
         this._lastGridRow = -1;
         this._cachedTerrainSpeed = 1.0;
         this._cachedTerrainData = null;
+
+        // Fog of War / Vision
+        this.visionRadius = 0; // Default: no vision
     }
 
     loadIcon() {
@@ -75,10 +78,10 @@ export class Entity {
         // Game.js handles frustum culling via SpatialGrid before calling this.
         // But if viewWidth/viewHeight are passed, we can do a cheap fine-grained check.
         if (viewWidth && viewHeight) {
-             if (screenX < -this.size || screenX > viewWidth + this.size ||
-                 screenY < -this.size || screenY > viewHeight + this.size) {
-                 return;
-             }
+            if (screenX < -this.size || screenX > viewWidth + this.size ||
+                screenY < -this.size || screenY > viewHeight + this.size) {
+                return;
+            }
         }
 
         if (drawBackground) {

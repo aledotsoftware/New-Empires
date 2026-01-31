@@ -146,14 +146,18 @@ export class Game {
         this.fow = new FogOfWar(this.terrainMap.cols, this.terrainMap.rows);
         this.visionTimer = 0;
 
+        // BOLT OPTIMIZATION: Resize FOW buffer to match tile grid
+        this._fowBufferCanvas = document.createElement('canvas');
+        this._fowBufferCanvas.width = this.fow.cols;
+        this._fowBufferCanvas.height = this.fow.rows;
+        this._fowBufferCtx = this._fowBufferCanvas.getContext('2d', { alpha: true });
+        this._fowImageData = this._fowBufferCtx.createImageData(this.fow.cols, this.fow.rows);
+
         // SISTEMA DE PARTÍCULAS (Palette: Visual Feedback)
         if (typeof ParticleSystem !== 'undefined') {
             this.particleSystem = new ParticleSystem();
         }
 
-        // Offscreen canvas for FOW rendering optimization
-        this._fowBufferCanvas = document.createElement('canvas');
-        this._fowBufferCtx = this._fowBufferCanvas.getContext('2d');
 
         // Cargar imagen del cursor personalizado
         this.cursorImage = new Image();
@@ -1870,6 +1874,9 @@ export class Game {
 
             this.fow.update(playerEntities);
             this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
+
+            // BOLT OPTIMIZATION: Update FOW bitmap buffer
+            this._updateFOWBuffer();
         }
 
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
@@ -2218,47 +2225,54 @@ export class Game {
         }
     }
 
-    drawFOW() {
-        if (!this.fow) return;
+    /**
+     * BOLT OPTIMIZATION: Converts FOW grid state to a bitmap buffer.
+     * Dramatically reduces CPU overhead by avoiding thousands of Path2D.rect calls.
+     */
+    _updateFOWBuffer() {
+        if (!this.fow || !this._fowImageData) return;
 
-        const ctx = this.ctx;
-        const fow = this.fow;
-        const tileSize = TILE_SIZE;
-        const camX = this.camera.x;
-        const camY = this.camera.y;
+        const data = this._fowImageData.data;
+        const grid = this.fow.grid;
+        const len = this.fow.totalTiles;
+        const exploredAlpha = Math.floor(CONFIG.VISION.EXPLORED_OPACITY * 255);
 
-        // Calculate visible grid range
-        const startCol = Math.max(0, Math.floor(camX / tileSize));
-        const endCol = Math.min(fow.cols, Math.ceil((camX + this.viewWidth) / tileSize));
-        const startRow = Math.max(0, Math.floor(camY / tileSize));
-        const endRow = Math.min(fow.rows, Math.ceil((camY + this.viewHeight) / tileSize));
+        for (let i = 0; i < len; i++) {
+            const state = grid[i];
+            const pxIdx = i * 4;
 
-        // Use offscreen buffer if we want to optimize further, but for now direct batching
-        // OPTIMIZATION: Batch rectangles by state
-        const hiddenPath = new Path2D();
-        const exploredPath = new Path2D();
+            // FOW is drawn as a black overlay with varied alpha
+            data[pxIdx] = 0;     // R
+            data[pxIdx + 1] = 0; // G
+            data[pxIdx + 2] = 0; // B
 
-        for (let row = startRow; row < endRow; row++) {
-            const y = row * tileSize - camY;
-            for (let col = startCol; col < endCol; col++) {
-                const state = fow.grid[row * fow.cols + col];
-                const x = col * tileSize - camX;
-
-                if (state === FOW_STATES.HIDDEN) {
-                    hiddenPath.rect(x, y, tileSize, tileSize);
-                } else if (state === FOW_STATES.EXPLORED) {
-                    exploredPath.rect(x, y, tileSize, tileSize);
-                }
+            if (state === FOW_STATES.HIDDEN) {
+                data[pxIdx + 3] = 255; // Fully opaque
+            } else if (state === FOW_STATES.EXPLORED) {
+                data[pxIdx + 3] = exploredAlpha; // Semi-transparent
+            } else {
+                data[pxIdx + 3] = 0; // Fully transparent (VISIBLE)
             }
         }
 
-        // Draw HIDDEN (Black)
-        ctx.fillStyle = '#000000';
-        ctx.fill(hiddenPath);
+        this._fowBufferCtx.putImageData(this._fowImageData, 0, 0);
+    }
 
-        // Draw EXPLORED (Dimmed)
-        ctx.fillStyle = `rgba(0, 0, 0, ${CONFIG.VISION.EXPLORED_OPACITY})`;
-        ctx.fill(exploredPath);
+    drawFOW() {
+        if (!this.fow || !this._fowBufferCanvas) return;
+
+        // BOLT OPTIMIZATION: Single drawImage call instead of thousands of Path2D rects.
+        // The browser handles the interpolation and scaling efficiently.
+        this.ctx.drawImage(
+            this._fowBufferCanvas,
+            this.camera.x / TILE_SIZE,
+            this.camera.y / TILE_SIZE,
+            this.viewWidth / TILE_SIZE,
+            this.viewHeight / TILE_SIZE,
+            0, 0,
+            this.viewWidth,
+            this.viewHeight
+        );
     }
 
     drawTerrain() {

@@ -72,7 +72,11 @@ export class FogOfWar {
                 const distSq = dx * dx + dySq;
 
                 if (distSq <= gridRadiusSq) {
-                    this.grid[y * this.cols + x] = FOW_STATES.VISIBLE;
+                    const idx = y * this.cols + x;
+                    if (this.grid[idx] !== FOW_STATES.VISIBLE) {
+                        this.grid[idx] = FOW_STATES.VISIBLE;
+                        this.isDirty = true;
+                    }
                 }
             }
         }

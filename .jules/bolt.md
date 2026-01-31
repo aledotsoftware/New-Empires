@@ -75,6 +75,11 @@
 ## 2025-06-01 - Center-First Spatial Search
 **Learning:** In "find closest" spatial queries (like melee combat), scanning buckets in a standard loop order (top-left to bottom-right) is inefficient because the target is most likely in the same bucket as the seeker. Prioritizing the "center bucket" (checking it first, then skipping it in the loop) yielded a ~4.9x speedup (53ms vs 260ms) for close-range lookups by avoiding wasted checks on distant neighbors.
 **Action:** For spatial `find` operations where proximity is highly correlated with success, explicitly check the origin bucket before iterating the search radius.
+
 ## 2026-01-31 - Fog of War Bitmap Buffering
 **Learning:** Rebuilding `Path2D` with thousands of `rect()` calls every frame is extremely expensive for the CPU and GPU. Caching the 2D grid state into a low-resolution offscreen canvas using `putImageData` and then using `drawImage` with scaling is ~90% faster. Browser interpolation handles the tile-to-pixel scaling smoothly.
 **Action:** Use bitmap buffers for any tile-based overlays that change infrequently but cover large areas.
+
+## 2026-01-31 - Allocation Hot Spots (FOW)
+**Learning:** Allocating temporary arrays (e.g., `[]`) inside frequent update loops (10Hz+) generates significant Garbage Collection pressure. Reusing a persistent cache array (`this._cache.length = 0` then `push`) reduced execution time by ~17% in FOW updates and eliminated thousands of short-lived object allocations per minute.
+**Action:** For any collection built inside a loop (update/render), prefer a persistent member variable cache over local array allocation.

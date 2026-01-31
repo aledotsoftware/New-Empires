@@ -617,6 +617,11 @@ export class Game {
             this.minimap.style.cursor = 'grabbing'; // Palette: Visual feedback
             this.handleMinimapInput(e.clientX, e.clientY);
         });
+
+        // Double click selection (Palette)
+        this.canvas.addEventListener('dblclick', (e) => {
+            this.handleDoubleClick(e);
+        });
     }
 
     // Palette: Helper for Minimap Navigation
@@ -681,6 +686,32 @@ export class Game {
         }
     }
 
+    /**
+     * Gets the closest player entity at the specified world coordinates.
+     * @param {number} worldX - World X coordinate
+     * @param {number} worldY - World Y coordinate
+     * @returns {Entity|null} The closest entity or null
+     */
+    getEntityAt(worldX, worldY) {
+        let closest = null;
+        let closestDistSq = Infinity;
+
+        for (let entity of this.entities) {
+            if (entity.team !== 'player') continue;
+
+            const dx = entity.x - worldX;
+            const dy = entity.y - worldY;
+            const distSq = dx * dx + dy * dy;
+            const sizeSq = entity.size * entity.size;
+
+            if (distSq < sizeSq && distSq < closestDistSq) {
+                closest = entity;
+                closestDistSq = distSq;
+            }
+        }
+        return closest;
+    }
+
     selectEntities() {
         const minX = Math.min(this.dragStart.x, this.mouse.worldX);
         const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
@@ -693,22 +724,7 @@ export class Game {
         if (Math.abs(this.dragStart.x - this.mouse.worldX) < 10 &&
             Math.abs(this.dragStart.y - this.mouse.worldY) < 10) {
 
-            let closest = null;
-            let closestDistSq = Infinity;
-
-            for (let entity of this.entities) {
-                if (entity.team !== 'player') continue;
-
-                const dx = entity.x - this.mouse.worldX;
-                const dy = entity.y - this.mouse.worldY;
-                const distSq = dx * dx + dy * dy;
-                const sizeSq = entity.size * entity.size;
-
-                if (distSq < sizeSq && distSq < closestDistSq) {
-                    closest = entity;
-                    closestDistSq = distSq;
-                }
-            }
+            const closest = this.getEntityAt(this.mouse.worldX, this.mouse.worldY);
 
             if (closest) {
                 this.selectedEntities = [closest];
@@ -732,6 +748,45 @@ export class Game {
 
         this.updateSelectionPanel();
         this.updateActionsPanel();
+    }
+
+    /**
+     * Handles double click to select all visible units of the same type.
+     */
+    handleDoubleClick(e) {
+        // Prevent default behavior (though not strictly needed on canvas usually)
+        if (e && e.preventDefault) e.preventDefault();
+
+        // 1. Check if we double-clicked on a player entity
+        // We reuse the mouse coordinates as they are updated on mousemove
+        const target = this.getEntityAt(this.mouse.worldX, this.mouse.worldY);
+
+        if (target && target.team === 'player') {
+            const type = target.type;
+
+            // 2. Find all visible entities of the same type and team
+            const visibleSameType = this.entities.filter(u =>
+                u.team === 'player' &&
+                u.type === type &&
+                !u.isDead &&
+                u.x >= this.camera.x && u.x <= this.camera.x + this.viewWidth &&
+                u.y >= this.camera.y && u.y <= this.camera.y + this.viewHeight
+            );
+
+            if (visibleSameType.length > 0) {
+                this.selectedEntities = visibleSameType;
+                this.updateSelectionPanel();
+                this.updateActionsPanel();
+
+                // Feedback
+                const name = target.name || type;
+                this.showNotification(`Seleccionados todos los visibles: ${name}`, 'info');
+
+                if (typeof soundManager !== 'undefined') {
+                    soundManager.play('click');
+                }
+            }
+        }
     }
 
     selectNextIdleVillager() {

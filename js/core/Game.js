@@ -121,7 +121,10 @@ export class Game {
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
         // Grid dinámico para unidades (se actualiza cada frame)
-        this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        // BOLT OPTIMIZATION: Split spatial grid by team to optimize search queries
+        // Queries (O(N)) no longer need to check team or iterate over 50% of irrelevant entities.
+        this.playerUnitGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.enemyUnitGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
 
         // Grid estático para edificios (se actualiza solo al construir/destruir)
         this.buildingGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
@@ -1775,7 +1778,8 @@ export class Game {
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
         // Separamos el bucle para iterar solo sobre unidades dinámicas (Jugador + Enemigos)
         // Los edificios son estáticos y no necesitan update() ni reinserción en spatialGrid cada frame.
-        this.spatialGrid.clear();
+        this.playerUnitGrid.clear();
+        this.enemyUnitGrid.clear();
 
         // BOLT OPTIMIZATION: Split loop into Pass 1 (Grid Populate) and Pass 2 (Update Logic)
         // This fixes the "blind unit" bug where units processed early in the loop couldn't see units processed later.
@@ -1784,12 +1788,12 @@ export class Game {
         // Pass 1: Populate Spatial Grid (O(N) - Fast integer arithmetic)
         const unitsLen = this.units.length;
         for (let i = 0; i < unitsLen; i++) {
-            this.spatialGrid.add(this.units[i]);
+            this.playerUnitGrid.add(this.units[i]);
         }
 
         const enemiesLen = this.enemies.length;
         for (let i = 0; i < enemiesLen; i++) {
-            this.spatialGrid.add(this.enemies[i]);
+            this.enemyUnitGrid.add(this.enemies[i]);
         }
 
         let hasDeadEntities = false;
@@ -1891,10 +1895,11 @@ export class Game {
                 if (entity.canAttack) {
                     // BOLT OPTIMIZATION: Pass cache array to query to avoid per-frame allocation
                     // query() clears the array automatically by default
-                    const nearby = this.spatialGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
+                    // BOLT OPTIMIZATION: Query enemyUnitGrid directly, skipping player units
+                    const nearby = this.enemyUnitGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
                     for (let i = 0; i < nearby.length; i++) {
                         const other = nearby[i];
-                        if (other.team === 'enemy' && !other.isDead) {
+                        if (!other.isDead) {
                             const distSq = (other.x - this.mouse.worldX) ** 2 + (other.y - this.mouse.worldY) ** 2;
                             if (distSq < other.size * other.size) {
                                 badgeIcon = 'assets/icons/swords.png';
@@ -2279,7 +2284,7 @@ export class Game {
 
         this._renderCache.length = 0;
 
-        const grid = this.spatialGrid; // Both grids share dimensions
+        const grid = this.playerUnitGrid; // All grids share dimensions
         const invCellSize = grid.invCellSize;
         const cols = grid.cols;
         const rows = grid.rows;
@@ -2295,7 +2300,8 @@ export class Game {
             // This exploits the fact that rows are already mostly sorted by Y
             // and avoids the O(N log N) cost of sorting the entire visible set at once.
             this._rowCache.length = 0;
-            this.spatialGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            this.playerUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
             this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
 
             // Sort only this row's entities
@@ -2599,14 +2605,15 @@ export class Game {
 
         // Query Spatial Grid (Reuse cache array)
         if (!this._dragSelectCache) this._dragSelectCache = [];
-        this.spatialGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache);
+        // BOLT OPTIMIZATION: Query playerUnitGrid only for drag selection badge
+        this.playerUnitGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache);
 
         let count = 0;
         const len = this._dragSelectCache.length;
         for (let i = 0; i < len; i++) {
             const ent = this._dragSelectCache[i];
-            // Match selectEntities logic (player team only)
-            if (ent.team === 'player' && !ent.isDead) {
+            // BOLT OPTIMIZATION: Implicitly 'player' team from grid.
+            if (!ent.isDead) {
                 // Precise check
                 if (ent.x >= minX && ent.x <= maxX && ent.y >= minY && ent.y <= maxY) {
                     count++;
@@ -3421,24 +3428,26 @@ export class Game {
                     progressBar.appendChild(progressFill);
                     prodContainer.appendChild(progressBar);
 
-                    // Mostrar cola restante (Palette: Interactive Queue)
+                    // Mostrar cola restante (Palette: Visual Queue)
                     if (entity.productionQueue.length > 1) {
-                        const queueList = document.createElement('div');
-                        queueList.className = 'queue-list';
+                        const queueDiv = document.createElement('div');
+                        queueDiv.className = 'queue-container';
+                        // Styles moved to CSS
 
                         const queueItems = entity.productionQueue.getQueue();
-                        // Skip first (current)
+
+                        // Start from 1 because 0 is the current active item
                         for (let i = 1; i < queueItems.length; i++) {
                             const item = queueItems[i];
-                            const queueItem = document.createElement('div');
-                            queueItem.className = 'queue-item';
+                            const qItem = document.createElement('div');
+                            qItem.className = 'queue-item';
+                            // Styles moved to CSS
 
-                            // Accessibility
-                            queueItem.setAttribute('role', 'button');
-                            queueItem.setAttribute('tabindex', '0');
-                            const unitName = item.unitType.charAt(0).toUpperCase() + item.unitType.slice(1);
-                            queueItem.setAttribute('aria-label', `Cancelar ${item.unitType}`);
-                            queueItem.title = `Cancelar ${unitName} (Click para cancelar)`;
+                            // Tooltip / Label
+                            qItem.setAttribute('role', 'button');
+                            qItem.setAttribute('tabindex', '0'); // Accessibility: Keyboard focus
+                            qItem.setAttribute('aria-label', `Cancelar ${item.unitType}`);
+                            qItem.title = `Cancelar ${item.unitType} (Click para reembolsar)`;
 
                             // Icon
                             if (typeof assetLoader !== 'undefined') {
@@ -3447,50 +3456,64 @@ export class Game {
                                     const img = document.createElement('img');
                                     img.src = src;
                                     img.alt = item.unitType;
-                                    queueItem.appendChild(img);
+                                    // Styles moved to CSS
+                                    qItem.appendChild(img);
                                 } else {
-                                    queueItem.textContent = item.unitType.charAt(0).toUpperCase();
+                                    qItem.textContent = item.unitType.charAt(0).toUpperCase();
+                                    qItem.classList.add('queue-item-text');
                                 }
-                            } else {
-                                queueItem.textContent = item.unitType.charAt(0).toUpperCase();
                             }
 
-                            // Interaction
-                            const handleCancel = (e) => {
-                                e.stopPropagation();
+                            // Cancel Badge (on hover via CSS)
+                            const badge = document.createElement('div');
+                            badge.className = 'queue-item-badge';
+                            badge.textContent = '×';
+                            qItem.appendChild(badge);
+
+                            // Hover effects handled by CSS
+
+                            // Action Logic (Shared)
+                            const cancelAction = () => {
+                                // Note: We use the index at the time of iteration.
+                                // Since we rebuild the UI immediately after modification, this is safe.
                                 const cancelled = entity.productionQueue.cancelAt(i);
-                                if (cancelled) {
-                                    // Refund resources
-                                    if (cancelled.cost) {
-                                        for (const [res, amount] of Object.entries(cancelled.cost)) {
-                                            this.resources[res] += amount;
-                                            // Palette: Flash resource gain
-                                            this.flashResource(res);
-                                        }
-                                        this.showNotification(`Cancelado: ${unitName} (Recursos devueltos)`, 'info');
-                                    } else {
-                                        this.showNotification(`Cancelado: ${unitName}`, 'info');
+
+                                if (cancelled && cancelled.cost) {
+                                    // Refund Resources
+                                    for (const [res, amount] of Object.entries(cancelled.cost)) {
+                                        this.resources[res] = (this.resources[res] || 0) + amount;
+                                        this.flashResource(res);
                                     }
 
-                                    if (typeof soundManager !== 'undefined') {
-                                        soundManager.play('click');
-                                    }
+                                    // Feedback
+                                    this.showNotification(`${item.unitType} cancelado`, 'info');
+                                    if (typeof soundManager !== 'undefined') soundManager.play('click');
 
+                                    // Force UI Refresh
+                                    this.updateSelectionPanel();
                                     this.updateUI();
                                 }
                             };
 
-                            queueItem.onclick = handleCancel;
-                            queueItem.onkeydown = (e) => {
+                            // Click Handler
+                            qItem.onclick = (e) => {
+                                e.stopPropagation();
+                                cancelAction();
+                            };
+
+                            // Keyboard Handler
+                            qItem.onkeydown = (e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                     e.preventDefault();
-                                    handleCancel(e);
+                                    e.stopPropagation();
+                                    cancelAction();
                                 }
                             };
 
-                            queueList.appendChild(queueItem);
+                            queueDiv.appendChild(qItem);
                         }
-                        prodContainer.appendChild(queueList);
+
+                        prodContainer.appendChild(queueDiv);
                     }
                 }
 

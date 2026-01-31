@@ -57,3 +57,7 @@
 ## 2026-06-01 - Quick Restart Flow
 **Learning:** When players lose or finish a game, they often want to retry immediately with similar settings ("just one more turn"). Forcing them back to the main menu creates friction and breaks the "flow" state.
 **Action:** Implemented a "Play Again" button on the Game Over screen that bypasses the setup screens. It reuses the previous configuration (Civilization, Map Size) but regenerates the seed, allowing for an instant, fresh start.
+
+## 2026-06-02 - Visual Production Queue
+**Learning:** Players need to see exactly what units are queued and have the ability to cancel specific orders. A simple text summary (e.g., "+2 in queue") hides critical information and prevents granular control.
+**Action:** Replaced the text summary with an interactive visual queue. Queued units are now displayed as clickable icons with tooltips. Clicking an icon cancels that specific order and refunds the resources, providing immediate and transparent feedback.

@@ -579,11 +579,18 @@
                     </div>
 
                     <div class="settings-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                        <button id="quitGameBtn" class="btn-secondary hidden" onclick="confirmQuitGame()"
-                            style="border-color: #c53030; color: #c53030;"
-                            aria-label="Abandonar la partida actual y volver al menú">
-                            🏳️ Abandonar
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="quitGameBtn" class="btn-secondary hidden" onclick="confirmQuitGame()"
+                                style="border-color: #c53030; color: #c53030;"
+                                aria-label="Abandonar la partida actual y volver al menú">
+                                🏳️ Abandonar
+                            </button>
+                            <button id="restartGameBtn" class="btn-secondary hidden" onclick="confirmRestartGame()"
+                                style="border-color: #d69e2e; color: #d69e2e;"
+                                aria-label="Reiniciar la partida actual con un nuevo mapa">
+                                🔄 Reiniciar
+                            </button>
+                        </div>
                         <button class="btn-secondary" onclick="hideSettings()" style="min-width: 100px;">Cerrar</button>
                     </div>
                 </div>

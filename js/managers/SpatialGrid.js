@@ -87,6 +87,21 @@ export class SpatialGrid {
         const centerCol = (x * this.invCellSize) | 0;
         const centerRow = (y * this.invCellSize) | 0;
 
+        // BOLT OPTIMIZATION: Check center bucket first (highest probability of finding target in melee/close range)
+        // This avoids checking potentially dozens of empty or irrelevant buckets in the spiral.
+        if (centerCol >= 0 && centerCol < cols && centerRow >= 0 && centerRow < rows) {
+            const index = centerRow * cols + centerCol;
+            const bucket = buckets[index];
+            const bLen = bucket.length;
+            if (bLen > 0) {
+                for (let i = 0; i < bLen; i++) {
+                    if (predicate(bucket[i], context)) {
+                        return bucket[i];
+                    }
+                }
+            }
+        }
+
         // Clamping para no salir de los bordes al iterar
         const startRow = Math.max(0, centerRow - cellRadius);
         const endRow = Math.min(rows - 1, centerRow + cellRadius);
@@ -97,6 +112,9 @@ export class SpatialGrid {
             // Optimización: calcular índice base de la fila
             const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
+                // BOLT OPTIMIZATION: Skip center bucket as it was already checked
+                if (r === centerRow && c === centerCol) continue;
+
                 const index = rowBase + c;
                 const bucket = buckets[index];
 

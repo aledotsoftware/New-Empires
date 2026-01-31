@@ -2838,7 +2838,6 @@ export class Game {
             const y = (enemy.y * scale) | 0;
             this.minimapCtx.rect(x - 1, y - 1, 2, 2);
         }
-        this.minimapCtx.fill();
 
         // Cámara Viewport (Palette: Enhanced styling)
         const camX = this.camera.x * scale;

@@ -2818,7 +2818,7 @@ export class Game {
 
         // Unidades
         // BOLT OPTIMIZATION: Batch draw calls for units (2 calls vs N calls)
-        // Fixed: Iterate separately over enemies array to avoid missing them and redundant loops.
+        // Replaced for...of with standard loops and integer truncation for performance.
 
         // Batch 1: Player Units
         this.minimapCtx.fillStyle = '#48bb78';
@@ -2826,9 +2826,11 @@ export class Game {
         const unitsLen = this.units.length;
         for (let i = 0; i < unitsLen; i++) {
             const unit = this.units[i];
+            // Safety check: ensure we only draw player units as green
             if (unit.team === 'player') {
-                // Integer truncation for speed
-                this.minimapCtx.rect((unit.x * scale - 1) | 0, (unit.y * scale - 1) | 0, 2, 2);
+                const x = (unit.x * scale) | 0;
+                const y = (unit.y * scale) | 0;
+                this.minimapCtx.rect(x - 1, y - 1, 2, 2);
             }
         }
         this.minimapCtx.fill();
@@ -2839,8 +2841,9 @@ export class Game {
         const enemiesLen = this.enemies.length;
         for (let i = 0; i < enemiesLen; i++) {
             const enemy = this.enemies[i];
-            // Integer truncation for speed
-            this.minimapCtx.rect((enemy.x * scale - 1) | 0, (enemy.y * scale - 1) | 0, 2, 2);
+            const x = (enemy.x * scale) | 0;
+            const y = (enemy.y * scale) | 0;
+            this.minimapCtx.rect(x - 1, y - 1, 2, 2);
         }
         this.minimapCtx.fill();
 

@@ -109,7 +109,7 @@ const server = http.createServer((req, res) => {
         '.gitattributes',
         '.editorconfig',
         'AGENTS.md'
-    ].includes(filename);
+    ].some(f => f.toLowerCase() === filename.toLowerCase());
 
     // Security: Block sensitive directories
     // Explicitly deny access to internal folders
@@ -132,7 +132,7 @@ const server = http.createServer((req, res) => {
     // Check for dotfiles in any part of the path (hidden files)
     const isHidden = safePath.split(path.sep).some(part => part.startsWith('.') && part !== '.' && part !== '..');
 
-    if (isSensitive || isHidden || BLOCKED_DIRS.includes(firstDir)) {
+    if (isSensitive || isHidden || BLOCKED_DIRS.some(d => d.toLowerCase() === firstDir.toLowerCase())) {
         res.writeHead(403);
         res.end('Forbidden');
         return;

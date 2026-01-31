@@ -109,15 +109,24 @@ window.showSettings = function () {
     const screen = document.getElementById('settingsScreen');
     screen.classList.remove('hidden');
 
-    // Palette: Show quit button only if game is active
+    // Palette: Show quit and restart buttons only if game is active
+    const isGameActive = typeof game !== 'undefined' && game && !game.isGameOver;
+
     const quitBtn = document.getElementById('quitGameBtn');
     if (quitBtn) {
-        // Show only if game exists and is NOT game over (since Restart handles game over)
-        // Note: game variable is global in main.js
-        if (typeof game !== 'undefined' && game && !game.isGameOver) {
+        if (isGameActive) {
             quitBtn.classList.remove('hidden');
         } else {
             quitBtn.classList.add('hidden');
+        }
+    }
+
+    const restartBtn = document.getElementById('restartGameBtn');
+    if (restartBtn) {
+        if (isGameActive) {
+            restartBtn.classList.remove('hidden');
+        } else {
+            restartBtn.classList.add('hidden');
         }
     }
 
@@ -171,6 +180,17 @@ window.confirmQuitGame = function() {
         () => {
             hideSettings();
             loadMainMenu();
+        }
+    );
+};
+
+// Palette: Handle restart game action with custom modal
+window.confirmRestartGame = function() {
+    showConfirmation(
+        '¿Estás seguro de que quieres reiniciar? El progreso actual se perderá y se generará un nuevo mapa.',
+        () => {
+            hideSettings();
+            playAgain();
         }
     );
 };

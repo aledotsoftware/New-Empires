@@ -68,9 +68,9 @@ export class Unit extends Entity {
 
     // OPTIMIZATION: Static predicate to avoid closure allocation in hot path
     static _enemyPredicate(entity, unit) {
-        // OPTIMIZATION: Removed redundant isUnit check (SpatialGrid only holds units).
+        // BOLT OPTIMIZATION: Removed team check as grids are now split by team.
         // Kept !isDead because units can die during the current frame update loop.
-        if (entity.team !== unit.team && entity.team !== 'neutral' && !entity.isDead) {
+        if (!entity.isDead) {
             const dx = unit.x - entity.x;
             const dy = unit.y - entity.y;
             const distSq = dx * dx + dy * dy;
@@ -83,10 +83,23 @@ export class Unit extends Entity {
     findNearbyEnemy(game) {
         const searchRadius = 200;
 
+        // BOLT OPTIMIZATION: Select target grid based on team to reduce search space (O(N/2))
+        // If I am player, I only search enemy grid. If I am enemy, I search player grid.
+        let targetGrid;
+        if (this.team === 'player') {
+            targetGrid = game.enemyUnitGrid;
+        } else if (this.team === 'enemy') {
+            targetGrid = game.playerUnitGrid;
+        } else {
+            return; // Neutral units don't attack
+        }
+
+        if (!targetGrid) return; // Safety check
+
         // OPTIMIZACIÓN: Usar find() para salir temprano si se encuentra un objetivo
         // Evita poblar un array intermedio y lo recorre solo hasta encontrar coincidencia.
         // OPTIMIZATION: Use static predicate and context to avoid closure allocation
-        const target = game.spatialGrid.find(this.x, this.y, searchRadius, Unit._enemyPredicate, this);
+        const target = targetGrid.find(this.x, this.y, searchRadius, Unit._enemyPredicate, this);
 
         if (target) {
             this.attackTarget = target;

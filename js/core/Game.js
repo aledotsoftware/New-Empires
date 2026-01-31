@@ -121,7 +121,10 @@ export class Game {
 
         // OPTIMIZACIÓN: Inicializar Spatial Grid
         // Grid dinámico para unidades (se actualiza cada frame)
-        this.spatialGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        // BOLT OPTIMIZATION: Split spatial grid by team to optimize search queries
+        // Queries (O(N)) no longer need to check team or iterate over 50% of irrelevant entities.
+        this.playerUnitGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
+        this.enemyUnitGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
 
         // Grid estático para edificios (se actualiza solo al construir/destruir)
         this.buildingGrid = new SpatialGrid(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, 100);
@@ -1775,7 +1778,8 @@ export class Game {
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
         // Separamos el bucle para iterar solo sobre unidades dinámicas (Jugador + Enemigos)
         // Los edificios son estáticos y no necesitan update() ni reinserción en spatialGrid cada frame.
-        this.spatialGrid.clear();
+        this.playerUnitGrid.clear();
+        this.enemyUnitGrid.clear();
 
         // BOLT OPTIMIZATION: Split loop into Pass 1 (Grid Populate) and Pass 2 (Update Logic)
         // This fixes the "blind unit" bug where units processed early in the loop couldn't see units processed later.
@@ -1784,12 +1788,12 @@ export class Game {
         // Pass 1: Populate Spatial Grid (O(N) - Fast integer arithmetic)
         const unitsLen = this.units.length;
         for (let i = 0; i < unitsLen; i++) {
-            this.spatialGrid.add(this.units[i]);
+            this.playerUnitGrid.add(this.units[i]);
         }
 
         const enemiesLen = this.enemies.length;
         for (let i = 0; i < enemiesLen; i++) {
-            this.spatialGrid.add(this.enemies[i]);
+            this.enemyUnitGrid.add(this.enemies[i]);
         }
 
         let hasDeadEntities = false;
@@ -1891,10 +1895,11 @@ export class Game {
                 if (entity.canAttack) {
                     // BOLT OPTIMIZATION: Pass cache array to query to avoid per-frame allocation
                     // query() clears the array automatically by default
-                    const nearby = this.spatialGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
+                    // BOLT OPTIMIZATION: Query enemyUnitGrid directly, skipping player units
+                    const nearby = this.enemyUnitGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
                     for (let i = 0; i < nearby.length; i++) {
                         const other = nearby[i];
-                        if (other.team === 'enemy' && !other.isDead) {
+                        if (!other.isDead) {
                             const distSq = (other.x - this.mouse.worldX) ** 2 + (other.y - this.mouse.worldY) ** 2;
                             if (distSq < other.size * other.size) {
                                 badgeIcon = 'assets/icons/swords.png';
@@ -2279,7 +2284,7 @@ export class Game {
 
         this._renderCache.length = 0;
 
-        const grid = this.spatialGrid; // Both grids share dimensions
+        const grid = this.playerUnitGrid; // All grids share dimensions
         const invCellSize = grid.invCellSize;
         const cols = grid.cols;
         const rows = grid.rows;
@@ -2295,7 +2300,8 @@ export class Game {
             // This exploits the fact that rows are already mostly sorted by Y
             // and avoids the O(N log N) cost of sorting the entire visible set at once.
             this._rowCache.length = 0;
-            this.spatialGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            this.playerUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
             this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
 
             // Sort only this row's entities
@@ -2599,14 +2605,15 @@ export class Game {
 
         // Query Spatial Grid (Reuse cache array)
         if (!this._dragSelectCache) this._dragSelectCache = [];
-        this.spatialGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache);
+        // BOLT OPTIMIZATION: Query playerUnitGrid only for drag selection badge
+        this.playerUnitGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache);
 
         let count = 0;
         const len = this._dragSelectCache.length;
         for (let i = 0; i < len; i++) {
             const ent = this._dragSelectCache[i];
-            // Match selectEntities logic (player team only)
-            if (ent.team === 'player' && !ent.isDead) {
+            // BOLT OPTIMIZATION: Implicitly 'player' team from grid.
+            if (!ent.isDead) {
                 // Precise check
                 if (ent.x >= minX && ent.x <= maxX && ent.y >= minY && ent.y <= maxY) {
                     count++;

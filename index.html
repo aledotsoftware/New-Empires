@@ -42,11 +42,9 @@
                 <p>Construye tu civilización, recolecta recursos y conquista tus enemigos</p>
             </div>
             <button id="startButton" class="btn-start">
-                <span class="btn-icon"><img src="assets/icons/swords.png" onerror="this.style.display='none'"
-                        style="width:24px;vertical-align:middle" alt=""></span>
+
                 Comenzar Juego
-                <span class="btn-icon"><img src="assets/icons/townCenter.png" onerror="this.style.display='none'"
-                        style="width:24px;vertical-align:middle" alt=""></span>
+
             </button>
 
             <div class="start-buttons">
@@ -110,7 +108,7 @@
                 <!-- Se llena dinámicamente con JS -->
             </div>
             <button id="backToStartButton" class="btn-secondary" style="margin-top: 20px;" aria-keyshortcuts="Escape">
-                ⬅ Volver <span class="kbd-inline">Esc</span>
+                VOLVER <span class="kbd-inline">Esc</span>
             </button>
         </div>
     </div>
@@ -123,7 +121,7 @@
                 <!-- Se llena dinámicamente con JS -->
             </div>
             <button id="backToMapSizeButton" class="btn-secondary" style="margin-top: 20px;" aria-keyshortcuts="Escape">
-                ⬅ Volver al Tamaño de Mapa <span class="kbd-inline">Esc</span>
+                VOLVER AL TAMAÑO DE MAPA <span class="kbd-inline">Esc</span>
             </button>
         </div>
     </div>
@@ -138,16 +136,19 @@
         <!-- Top HUD: recursos, población, tiempo y settings -->
         <div class="top-panel">
             <div class="resources-panel" role="region" aria-label="Recursos">
-                <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount" aria-describedby="woodTooltip" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount"
+                    aria-describedby="woodTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/wood.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div id="woodLabel" class="resource-label">Madera</div>
                         <div id="woodCount" class="resource-value">0</div>
                     </div>
-                    <div id="woodTooltip" class="card-tooltip">Recurso básico para construcción y unidades a distancia.</div>
+                    <div id="woodTooltip" class="card-tooltip">Recurso básico para construcción y unidades a distancia.
+                    </div>
                 </div>
-                <div class="resource-item" role="group" aria-labelledby="foodLabel foodCount" aria-describedby="foodTooltip" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="foodLabel foodCount"
+                    aria-describedby="foodTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/food.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
@@ -156,7 +157,8 @@
                     </div>
                     <div id="foodTooltip" class="card-tooltip">Vital para entrenar aldeanos y unidades militares.</div>
                 </div>
-                <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount" aria-describedby="goldTooltip" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount"
+                    aria-describedby="goldTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/gold.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
@@ -165,16 +167,19 @@
                     </div>
                     <div id="goldTooltip" class="card-tooltip">Moneda para tecnologías avanzadas y comercio.</div>
                 </div>
-                <div class="resource-item" role="group" aria-labelledby="stoneLabel stoneCount" aria-describedby="stoneTooltip" tabindex="0">
+                <div class="resource-item" role="group" aria-labelledby="stoneLabel stoneCount"
+                    aria-describedby="stoneTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/stone.png" onerror="this.style.display='none'"
                             style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
                         <div id="stoneLabel" class="resource-label">Piedra</div>
                         <div id="stoneCount" class="resource-value">0</div>
                     </div>
-                    <div id="stoneTooltip" class="card-tooltip">Material defensivo para murallas y centros urbanos.</div>
+                    <div id="stoneTooltip" class="card-tooltip">Material defensivo para murallas y centros urbanos.
+                    </div>
                 </div>
-                <div class="resource-item resource-population" role="group" aria-label="Población" aria-describedby="popTooltip" tabindex="0">
+                <div class="resource-item resource-population" role="group" aria-label="Población"
+                    aria-describedby="popTooltip" tabindex="0">
                     <div class="resource-icon"><img src="assets/icons/population.png"
                             onerror="this.style.display='none'" style="width:24px;height:24px;" alt=""></div>
                     <div class="resource-info">
@@ -186,20 +191,25 @@
             </div>
 
             <div style="display:flex; align-items:center; gap:12px;">
-                <div class="game-time" role="timer" aria-label="Tiempo de partida" aria-describedby="timeTooltip" tabindex="0">
+                <div class="game-time" role="timer" aria-label="Tiempo de partida" aria-describedby="timeTooltip"
+                    tabindex="0">
                     <span class="time-icon"><img src="assets/icons/time.png" onerror="this.style.display='none'"
                             style="width:20px;height:20px;" alt=""></span>
                     <span id="gameTime">00:00</span>
                     <div id="timeTooltip" class="card-tooltip">
-                        <div style="font-weight:bold;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:4px">Tiempo de Partida</div>
+                        <div style="font-weight:bold;border-bottom:1px solid rgba(255,255,255,0.2);margin-bottom:4px">
+                            Tiempo de Partida</div>
                         <div style="font-size:0.8rem">Duración de la sesión actual.</div>
-                        <div style="font-size:0.75rem;color:#48bb78;margin-top:4px;font-style:italic">Velocidad: Normal</div>
+                        <div style="font-size:0.75rem;color:#48bb78;margin-top:4px;font-style:italic">Velocidad: Normal
+                        </div>
                     </div>
                 </div>
 
                 <!-- Palette: Pause Button -->
-                <button id="pauseButton" class="btn-secondary" onclick="togglePauseGame()" style="padding:8px 12px;" aria-label="Pausar juego (P)">
-                    <span id="pauseIcon" style="font-size: 1.2rem; line-height: 1;">⏸</span>
+                <button id="pauseButton" class="btn-secondary" onclick="togglePauseGame()" style="padding:8px 12px;"
+                    aria-label="Pausar juego (P)">
+                    <img src="assets/icons/pause.png" alt="Pausa" id="pauseIcon"
+                        style="width: 20px; height: 20px; object-fit: contain;">
                     <div class="btn-tooltip" role="tooltip">
                         <div class="tooltip-header">Pausar <span class="tooltip-hotkey">[P]</span></div>
                         <div class="tooltip-desc">Detener temporalmente el juego</div>
@@ -210,7 +220,7 @@
                 <button id="returnToStatsBtn" class="btn-secondary hidden"
                     style="padding:8px 12px; border-color: var(--gold); background: var(--stone-dark); color: var(--gold);"
                     aria-label="Volver a los resultados">
-                    🏆 Resultados
+                    <img src="assets/icons/trophy.png" alt="" class="btn-icon"> Resultados
                 </button>
 
                 <!-- Palette: Idle Villager Indicator (Hidden by default) -->
@@ -261,8 +271,10 @@
                         <div class="build-info">+5 población</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Casa</div>
-                            <div class="tooltip-desc">Aumenta el límite de población en +5. Necesaria para entrenar más unidades.</div>
-                            <div class="tooltip-stats" style="color: #48bb78; font-size: 0.75rem; margin-top: 4px;">Bonus: +5 Pob</div>
+                            <div class="tooltip-desc">Aumenta el límite de población en +5. Necesaria para entrenar más
+                                unidades.</div>
+                            <div class="tooltip-stats" style="color: #48bb78; font-size: 0.75rem; margin-top: 4px;">
+                                Bonus: +5 Pob</div>
                         </div>
                     </div>
                     <div class="build-option" data-building="barracks" role="button" tabindex="0" aria-keyshortcuts="W"
@@ -277,7 +289,8 @@
                         <div class="build-info">Entrena unidades</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Cuartel</div>
-                            <div class="tooltip-desc">Edificio militar básico. Entrena Guerreros (cuerpo a cuerpo) y Arqueros (distancia).</div>
+                            <div class="tooltip-desc">Edificio militar básico. Entrena Guerreros (cuerpo a cuerpo) y
+                                Arqueros (distancia).</div>
                         </div>
                     </div>
                     <div class="build-option" data-building="townCenter" role="button" tabindex="0"
@@ -295,8 +308,10 @@
                         <div class="build-info">Entrena aldeanos</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Centro Urbano</div>
-                            <div class="tooltip-desc">Corazón de tu civilización. Entrena Aldeanos y sirve como punto de entrega de recursos.</div>
-                            <div class="tooltip-stats" style="color: #48bb78; font-size: 0.75rem; margin-top: 4px;">Bonus: +5 Pob</div>
+                            <div class="tooltip-desc">Corazón de tu civilización. Entrena Aldeanos y sirve como punto de
+                                entrega de recursos.</div>
+                            <div class="tooltip-stats" style="color: #48bb78; font-size: 0.75rem; margin-top: 4px;">
+                                Bonus: +5 Pob</div>
                         </div>
                     </div>
                     <div class="build-option" data-building="storage" role="button" tabindex="0" aria-keyshortcuts="R"
@@ -311,7 +326,8 @@
                         <div class="build-info">Almacena recursos</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Depósito</div>
-                            <div class="tooltip-desc">Punto de entrega universal para Madera, Comida, Oro y Piedra. Construir cerca de recursos para optimizar.</div>
+                            <div class="tooltip-desc">Punto de entrega universal para Madera, Comida, Oro y Piedra.
+                                Construir cerca de recursos para optimizar.</div>
                         </div>
                     </div>
                     <div class="build-option" data-building="storageWood" role="button" tabindex="0"
@@ -344,7 +360,8 @@
                         <div class="build-info">Almacena recursos</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Mercado</div>
-                            <div class="tooltip-desc">Centro económico. Permite el comercio de recursos. (En desarrollo)</div>
+                            <div class="tooltip-desc">Centro económico. Permite el comercio de recursos. (En desarrollo)
+                            </div>
                         </div>
                     </div>
                     <div class="build-option" data-building="temple" role="button" tabindex="0" aria-keyshortcuts="U"
@@ -394,7 +411,8 @@
                     <button id="playAgainButton" class="btn-restart" style="font-size: 1.2rem; padding: 1rem 2rem;">
                         🔄 Jugar de Nuevo
                     </button>
-                    <button id="returnMenuButton" class="btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
+                    <button id="returnMenuButton" class="btn-secondary"
+                        style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
                         🏠 Volver al Menú
                     </button>
                     <button id="viewMapButton" class="btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
@@ -404,23 +422,23 @@
             </div>
         </div>
 
-    <!-- Modal de Confirmación Genérico (Palette) -->
-    <div id="confirmationModal" class="modal-overlay hidden" role="dialog" aria-modal="true"
-        aria-labelledby="confirmTitle" tabindex="-1">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <div class="modal-header">
-                <h2 id="confirmTitle" style="font-size: 1.2rem; margin: 0 auto;">Confirmación</h2>
-            </div>
-            <div style="padding: 20px;">
-                <p id="confirmMessage" style="margin-bottom: 20px; color: #e2e8f0;">¿Estás seguro?</p>
-                <div style="display: flex; justify-content: center; gap: 15px;">
-                    <button id="confirmYesBtn" class="btn-secondary"
-                        style="border-color: #c53030; color: #c53030;">Sí, confirmar</button>
-                    <button id="confirmNoBtn" class="btn-secondary">Cancelar</button>
+        <!-- Modal de Confirmación Genérico (Palette) -->
+        <div id="confirmationModal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+            aria-labelledby="confirmTitle" tabindex="-1">
+            <div class="modal-content" style="max-width: 400px; text-align: center;">
+                <div class="modal-header">
+                    <h2 id="confirmTitle" style="font-size: 1.2rem; margin: 0 auto;">Confirmación</h2>
+                </div>
+                <div style="padding: 20px;">
+                    <p id="confirmMessage" style="margin-bottom: 20px; color: #e2e8f0;">¿Estás seguro?</p>
+                    <div style="display: flex; justify-content: center; gap: 15px;">
+                        <button id="confirmYesBtn" class="btn-secondary"
+                            style="border-color: #c53030; color: #c53030;">Sí, confirmar</button>
+                        <button id="confirmNoBtn" class="btn-secondary">Cancelar</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
         <!-- Pantalla de Configuración -->
         <div id="settingsScreen" class="modal-overlay hidden" role="dialog" aria-modal="true"
@@ -449,7 +467,8 @@
 
                         <div style="margin-bottom: 15px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label for="volumeSlider" style="font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px;">
+                                <label for="volumeSlider"
+                                    style="font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px;">
                                     <span id="volumeIcon" aria-hidden="true" style="font-size: 1.2rem;">🔊</span>
                                     Volumen Maestro
                                 </label>
@@ -524,33 +543,42 @@
 
                     <!-- Palette: Controls Section -->
                     <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                        <h3 style="margin-bottom: 20px; color: #d4af37;">⌨️ Controles</h3>
-                        <div class="controls-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between;">
+                        <h3 style="margin-bottom: 20px; color: #d4af37;"><img src="assets/icons/settings.png" alt=""
+                                class="btn-icon"> Controles</h3>
+                        <div class="controls-grid"
+                            style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between;">
                                 <span class="control-key">B</span>
                                 <span class="control-desc">Construir</span>
                             </div>
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between;">
                                 <span class="control-key">Tab</span>
                                 <span class="control-desc">Aldeano Inactivo</span>
                             </div>
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between;">
                                 <span class="control-key">Espacio</span>
                                 <span class="control-desc">Centro Urbano</span>
                             </div>
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between;">
                                 <span class="control-key">F</span>
                                 <span class="control-desc">Formación</span>
                             </div>
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between;">
                                 <span class="control-key">Click Izq</span>
                                 <span class="control-desc">Seleccionar</span>
                             </div>
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between;">
                                 <span class="control-key">Click Der</span>
                                 <span class="control-desc">Acción</span>
                             </div>
-                            <div class="control-item" style="display: flex; padding: 8px; justify-content: space-between; grid-column: span 2;">
+                            <div class="control-item"
+                                style="display: flex; padding: 8px; justify-content: space-between; grid-column: span 2;">
                                 <span class="control-key">Ctrl + 0-9</span>
                                 <span class="control-desc">Guardar Grupo</span>
                             </div>
@@ -563,22 +591,23 @@
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
                             <button id="saveGameBtn" class="btn-secondary" onclick="saveGame()"
                                 style="padding: 10px 20px;">
-                                💾 Guardar Partida
+                                <img src="assets/icons/save.png" alt="" class="btn-icon"> Guardar Partida
                             </button>
                             <button id="loadGameBtn" class="btn-secondary" onclick="loadGame()"
                                 style="padding: 10px 20px;">
-                                📂 Cargar Partida
+                                <img src="assets/icons/load.png" alt="" class="btn-icon"> Cargar Partida
                             </button>
                             <button id="exportGameBtn" class="btn-secondary" onclick="exportGameToFile()"
                                 style="padding: 10px 20px;">
-                                📤 Exportar a Archivo
+                                <img src="assets/icons/export.png" alt="" class="btn-icon"> Exportar a Archivo
                             </button>
                         </div>
                         <p id="saveStatus"
                             style="text-align: center; margin-top: 10px; color: #a0aec0; font-size: 0.85rem;"></p>
                     </div>
 
-                    <div class="settings-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="settings-footer"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                         <div style="display: flex; gap: 10px;">
                             <button id="quitGameBtn" class="btn-secondary hidden" onclick="confirmQuitGame()"
                                 style="border-color: #c53030; color: #c53030;"

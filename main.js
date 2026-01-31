@@ -174,7 +174,7 @@ window.showConfirmation = function (message, onConfirm, onCancel) {
 };
 
 // Palette: Handle quit game action with custom modal
-window.confirmQuitGame = function() {
+window.confirmQuitGame = function () {
     showConfirmation(
         '¿Estás seguro de que quieres abandonar? El progreso no guardado se perderá.',
         () => {
@@ -185,7 +185,7 @@ window.confirmQuitGame = function() {
 };
 
 // Palette: Handle restart game action with custom modal
-window.confirmRestartGame = function() {
+window.confirmRestartGame = function () {
     showConfirmation(
         '¿Estás seguro de que quieres reiniciar? El progreso actual se perderá y se generará un nuevo mapa.',
         () => {
@@ -345,16 +345,16 @@ window.updateSoundVolume = function (value) {
         const isEnabled = typeof soundManager !== 'undefined' ? soundManager.enabled : true;
 
         if (!isEnabled || volume === 0) {
-            icon.textContent = '🔇';
+            icon.textContent = 'MUTE';
             icon.setAttribute('aria-label', 'Silenciado');
         } else if (volume < 30) {
-            icon.textContent = '🔈';
+            icon.textContent = 'LOW';
             icon.setAttribute('aria-label', 'Volumen bajo');
         } else if (volume < 70) {
-            icon.textContent = '🔉';
+            icon.textContent = 'MED';
             icon.setAttribute('aria-label', 'Volumen medio');
         } else {
-            icon.textContent = '🔊';
+            icon.textContent = 'HIGH';
             icon.setAttribute('aria-label', 'Volumen alto');
         }
     }

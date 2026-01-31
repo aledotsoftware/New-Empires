@@ -72,7 +72,7 @@ Object.assign(TECHNOLOGIES, {
     flintKnapping: {
         id: 'flintKnapping',
         name: 'Talla de Sílex',
-        icon: '🪨',
+        icon: 'assets/icons/stone.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 1,
         description: 'Arte de tallar sílex para crear herramientas cortantes.',
@@ -88,7 +88,7 @@ Object.assign(TECHNOLOGIES, {
     caveArt: {
         id: 'caveArt',
         name: 'Arte Rupestre',
-        icon: '🎨',
+        icon: 'assets/icons/science.png',
         category: TECH_CATEGORIES.CULTURE,
         age: 2,
         description: 'Primeras expresiones artísticas humanas.',
@@ -105,7 +105,7 @@ Object.assign(TECHNOLOGIES, {
     huntingBow: {
         id: 'huntingBow',
         name: 'Arco de Caza',
-        icon: '🏹',
+        icon: 'assets/icons/archer.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 3,
         description: 'Invención del arco para caza y guerra.',
@@ -125,7 +125,7 @@ Object.assign(TECHNOLOGIES, {
     microliths: {
         id: 'microliths',
         name: 'Microlitos',
-        icon: '🔪',
+        icon: 'assets/icons/warrior.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 4,
         description: 'Pequeñas herramientas de piedra muy afiladas.',
@@ -142,7 +142,7 @@ Object.assign(TECHNOLOGIES, {
     domestication: {
         id: 'domestication',
         name: 'Domesticación Animal',
-        icon: '🐑',
+        icon: 'assets/icons/food.png',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 5,
         description: 'Domesticación de los primeros animales.',
@@ -158,7 +158,7 @@ Object.assign(TECHNOLOGIES, {
     agriculture: {
         id: 'agriculture',
         name: 'Agricultura',
-        icon: '🌾',
+        icon: 'assets/icons/food.png',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 6,
         description: 'Cultivo de las primeras plantas.',
@@ -174,7 +174,7 @@ Object.assign(TECHNOLOGIES, {
     pottery: {
         id: 'pottery',
         name: 'Cerámica',
-        icon: '🏺',
+        icon: 'assets/icons/storage.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 7,
         description: 'Creación de recipientes de arcilla cocida.',
@@ -191,7 +191,7 @@ Object.assign(TECHNOLOGIES, {
     weaving: {
         id: 'weaving',
         name: 'Tejido',
-        icon: '🧵',
+        icon: 'assets/icons/tech.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 8,
         description: 'Arte de tejer fibras para crear telas.',
@@ -213,7 +213,7 @@ Object.assign(TECHNOLOGIES, {
     mudBricks: {
         id: 'mudBricks',
         name: 'Ladrillos de Adobe',
-        icon: '🧱',
+        icon: 'assets/icons/house.png',
         category: TECH_CATEGORIES.ARCHITECTURE,
         age: 9,
         description: 'Construcción con ladrillos de barro secados al sol.',
@@ -232,7 +232,7 @@ Object.assign(TECHNOLOGIES, {
     irrigation: {
         id: 'irrigation',
         name: 'Irrigación',
-        icon: '💧',
+        icon: 'assets/icons/food.png',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 10,
         description: 'Sistemas de riego para cultivos.',
@@ -249,7 +249,7 @@ Object.assign(TECHNOLOGIES, {
     copperWorking: {
         id: 'copperWorking',
         name: 'Trabajo del Cobre',
-        icon: '🔨',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 11,
         description: 'Primera metalurgia: trabajo del cobre.',
@@ -265,7 +265,7 @@ Object.assign(TECHNOLOGIES, {
     wheel: {
         id: 'wheel',
         name: 'La Rueda',
-        icon: '☸️',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 12,
         description: 'Invención revolucionaria para transporte.',
@@ -285,7 +285,7 @@ Object.assign(TECHNOLOGIES, {
     loom: {
         id: 'loom',
         name: 'Telar',
-        icon: '🧶',
+        icon: 'assets/icons/tech.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 13,
         description: 'Telar mejorado para producción textil.',
@@ -306,7 +306,7 @@ Object.assign(TECHNOLOGIES, {
     writing: {
         id: 'writing',
         name: 'Escritura',
-        icon: '📜',
+        icon: 'assets/icons/science.png',
         category: TECH_CATEGORIES.CULTURE,
         age: 15,
         description: 'Desarrollo de la escritura cuneiforme.',
@@ -323,7 +323,7 @@ Object.assign(TECHNOLOGIES, {
     bronzeWorking: {
         id: 'bronzeWorking',
         name: 'Trabajo del Bronce',
-        icon: '⚒️',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 16,
         description: 'Aleación de cobre y estaño: el bronce.',
@@ -339,7 +339,7 @@ Object.assign(TECHNOLOGIES, {
     horseColar: {
         id: 'horseColar',
         name: 'Doma de Caballos',
-        icon: '🐴',
+        icon: 'assets/icons/Caballeria_Exploracion_aoe2DE.webp',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 17,
         description: 'Domesticación del caballo.',
@@ -356,7 +356,7 @@ Object.assign(TECHNOLOGIES, {
     plow: {
         id: 'plow',
         name: 'Arado',
-        icon: '🚜',
+        icon: 'assets/icons/FarmDE.webp',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 18,
         description: 'Arado para agricultura intensiva.',
@@ -372,7 +372,7 @@ Object.assign(TECHNOLOGIES, {
     stoneMasonry: {
         id: 'stoneMasonry',
         name: 'Albañilería en Piedra',
-        icon: '🗿',
+        icon: 'assets/icons/stone.png',
         category: TECH_CATEGORIES.ARCHITECTURE,
         age: 19,
         description: 'Construcción con bloques de piedra tallada.',
@@ -391,7 +391,7 @@ Object.assign(TECHNOLOGIES, {
     sailBoat: {
         id: 'sailBoat',
         name: 'Barco de Vela',
-        icon: '⛵',
+        icon: 'assets/icons/Carabela_Icono-DE.webp',
         category: TECH_CATEGORIES.ECONOMY,
         age: 20,
         description: 'Navegación con vela para comercio.',
@@ -408,7 +408,7 @@ Object.assign(TECHNOLOGIES, {
     doubleBitAxe: {
         id: 'doubleBitAxe',
         name: 'Hacha de Doble Filo',
-        icon: '🪓',
+        icon: 'assets/icons/Lumber_camp_aoe2de.webp',
         category: TECH_CATEGORIES.TOOLS,
         age: 21,
         description: 'Hacha de bronce con doble filo.',
@@ -424,7 +424,7 @@ Object.assign(TECHNOLOGIES, {
     goldMining: {
         id: 'goldMining',
         name: 'Minería de Oro',
-        icon: '⛏️',
+        icon: 'assets/icons/GoldMiningDE.webp',
         category: TECH_CATEGORIES.ECONOMY,
         age: 21,
         description: 'Técnicas avanzadas de extracción de oro.',
@@ -440,7 +440,7 @@ Object.assign(TECHNOLOGIES, {
     wheelbarrow: {
         id: 'wheelbarrow',
         name: 'Carretilla',
-        icon: '🛞',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 22,
         description: 'Carretilla para transportar materiales.',
@@ -463,7 +463,7 @@ Object.assign(TECHNOLOGIES, {
     bronzeArmor: {
         id: 'bronzeArmor',
         name: 'Armadura de Bronce',
-        icon: '🛡️',
+        icon: 'assets/icons/tech_defense.png',
         category: TECH_CATEGORIES.DEFENSE,
         age: 23,
         description: 'Armaduras completas de bronce.',
@@ -484,7 +484,7 @@ Object.assign(TECHNOLOGIES, {
     ironWorking: {
         id: 'ironWorking',
         name: 'Trabajo del Hierro',
-        icon: '⚙️',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 24,
         description: 'Forja del hierro, más fuerte que el bronce.',
@@ -501,7 +501,7 @@ Object.assign(TECHNOLOGIES, {
     forging: {
         id: 'forging',
         name: 'Forja',
-        icon: '🔥',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 25,
         description: 'Técnicas avanzadas de forja de hierro.',
@@ -521,7 +521,7 @@ Object.assign(TECHNOLOGIES, {
     scaleMailArmor: {
         id: 'scaleMailArmor',
         name: 'Cota de Escamas',
-        icon: '🥋',
+        icon: 'assets/icons/tech_defense.png',
         category: TECH_CATEGORIES.DEFENSE,
         age: 25,
         description: 'Armadura de escamas de hierro.',
@@ -542,7 +542,7 @@ Object.assign(TECHNOLOGIES, {
     fletching: {
         id: 'fletching',
         name: 'Flechas con Plumas',
-        icon: '🏹',
+        icon: 'assets/icons/archer.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 25,
         description: 'Flechas mejoradas con plumas estabilizadoras.',
@@ -564,7 +564,7 @@ Object.assign(TECHNOLOGIES, {
     bowSaw: {
         id: 'bowSaw',
         name: 'Sierra de Arco',
-        icon: '🪚',
+        icon: 'assets/icons/Lumber_camp_aoe2de.webp',
         category: TECH_CATEGORIES.TOOLS,
         age: 26,
         description: 'Sierra mejorada para corte de madera.',
@@ -580,7 +580,7 @@ Object.assign(TECHNOLOGIES, {
     philosophy: {
         id: 'philosophy',
         name: 'Filosofía',
-        icon: '📚',
+        icon: 'assets/icons/science.png',
         category: TECH_CATEGORIES.CULTURE,
         age: 26,
         description: 'Desarrollo del pensamiento filosófico.',
@@ -596,7 +596,7 @@ Object.assign(TECHNOLOGIES, {
     ironCasting: {
         id: 'ironCasting',
         name: 'Fundición de Hierro',
-        icon: '🔧',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 27,
         description: 'Técnicas de fundición para hierro de alta calidad.',
@@ -616,7 +616,7 @@ Object.assign(TECHNOLOGIES, {
     chainMailArmor: {
         id: 'chainMailArmor',
         name: 'Cota de Malla',
-        icon: '⛓️',
+        icon: 'assets/icons/tech_defense.png',
         category: TECH_CATEGORIES.DEFENSE,
         age: 27,
         description: 'Armadura flexible de anillas entrelazadas.',
@@ -637,7 +637,7 @@ Object.assign(TECHNOLOGIES, {
     bodkinArrow: {
         id: 'bodkinArrow',
         name: 'Flecha Bodkin',
-        icon: '➶',
+        icon: 'assets/icons/archer.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 27,
         description: 'Flechas con punta de acero para penetrar armaduras.',
@@ -658,7 +658,7 @@ Object.assign(TECHNOLOGIES, {
     architecture: {
         id: 'architecture',
         name: 'Arquitectura',
-        icon: '🏛️',
+        icon: 'assets/icons/townCenter.png',
         category: TECH_CATEGORIES.ARCHITECTURE,
         age: 27,
         description: 'Arquitectura clásica romana y griega.',
@@ -678,7 +678,7 @@ Object.assign(TECHNOLOGIES, {
     heavyPlow: {
         id: 'heavyPlow',
         name: 'Arado Pesado',
-        icon: '🚜',
+        icon: 'assets/icons/FarmDE.webp',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 28,
         description: 'Arado pesado para tierras difíciles.',
@@ -694,7 +694,7 @@ Object.assign(TECHNOLOGIES, {
     stirrup: {
         id: 'stirrup',
         name: 'Estribo',
-        icon: '🏇',
+        icon: 'assets/icons/Jinete_aoe2DE.webp',
         category: TECH_CATEGORIES.MILITARY,
         age: 28,
         description: 'Estribo para mejor control en caballería.',
@@ -710,7 +710,7 @@ Object.assign(TECHNOLOGIES, {
     paddedArmorArcher: {
         id: 'paddedArmorArcher',
         name: 'Armadura Acolchada',
-        icon: '🦺',
+        icon: 'assets/icons/tech_defense.png',
         category: TECH_CATEGORIES.DEFENSE,
         age: 28,
         description: 'Armadura acolchada para arqueros.',
@@ -732,7 +732,7 @@ Object.assign(TECHNOLOGIES, {
     goldShaftMining: {
         id: 'goldShaftMining',
         name: 'Minería de Pozo Profundo',
-        icon: '⚒️',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 29,
         description: 'Técnicas avanzadas para minas profundas.',
@@ -748,7 +748,7 @@ Object.assign(TECHNOLOGIES, {
     plateMailArmor: {
         id: 'plateMailArmor',
         name: 'Armadura de Placas',
-        icon: '🪖',
+        icon: 'assets/icons/tech_defense.png',
         category: TECH_CATEGORIES.DEFENSE,
         age: 29,
         description: 'Armadura completa de placas de acero.',
@@ -769,7 +769,7 @@ Object.assign(TECHNOLOGIES, {
     leatherArmorArcher: {
         id: 'leatherArmorArcher',
         name: 'Armadura de Cuero Reforzado',
-        icon: '🦺',
+        icon: 'assets/icons/tech_defense.png',
         category: TECH_CATEGORIES.DEFENSE,
         age: 29,
         description: 'Armadura de cuero con refuerzos metálicos.',
@@ -790,7 +790,7 @@ Object.assign(TECHNOLOGIES, {
     bracer: {
         id: 'bracer',
         name: 'Brazal y Arco Largo',
-        icon: '🎯',
+        icon: 'assets/icons/archer.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 29,
         description: 'Arco largo con mayor alcance y potencia.',
@@ -811,7 +811,7 @@ Object.assign(TECHNOLOGIES, {
     blastFurnace: {
         id: 'blastFurnace',
         name: 'Alto Horno',
-        icon: '🏭',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 29,
         description: 'Alto horno para acero de alta calidad.',
@@ -831,7 +831,7 @@ Object.assign(TECHNOLOGIES, {
     guilds: {
         id: 'guilds',
         name: 'Gremios',
-        icon: '👥',
+        icon: 'assets/icons/science.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 29,
         description: 'Organización de artesanos en gremios.',
@@ -848,7 +848,7 @@ Object.assign(TECHNOLOGIES, {
     gunpowder: {
         id: 'gunpowder',
         name: 'Pólvora',
-        icon: '💥',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 30,
         description: 'Invención de la pólvora y armas de fuego.',
@@ -864,7 +864,7 @@ Object.assign(TECHNOLOGIES, {
     printingPress: {
         id: 'printingPress',
         name: 'Imprenta',
-        icon: '📰',
+        icon: 'assets/icons/science.png',
         category: TECH_CATEGORIES.CULTURE,
         age: 30,
         description: 'Imprenta de tipos móviles.',
@@ -880,7 +880,7 @@ Object.assign(TECHNOLOGIES, {
     navigation: {
         id: 'navigation',
         name: 'Navegación Oceánica',
-        icon: '🧭',
+        icon: 'assets/icons/market.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 30,
         description: 'Técnicas de navegación para exploración global.',
@@ -896,7 +896,7 @@ Object.assign(TECHNOLOGIES, {
     banking: {
         id: 'banking',
         name: 'Banca',
-        icon: '🏦',
+        icon: 'assets/icons/gold.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 30,
         description: 'Sistema bancario moderno.',

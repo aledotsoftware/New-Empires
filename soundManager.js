@@ -25,7 +25,7 @@ class SoundManager {
                 if (typeof debugLogger !== 'undefined') {
                     debugLogger.debug(`Sonido cargado: ${key}`, 'sound', { src, duration: audio.duration });
                 } else {
-                    console.log(`🔊 Sonido cargado: ${key}`);
+                    console.log(`[SOUND] Sonido cargado: ${key}`);
                 }
                 resolve(audio);
             }, { once: true });
@@ -39,7 +39,7 @@ class SoundManager {
                         errorCode: e.target?.error?.code
                     });
                 } else {
-                    console.warn(`⚠️ No se pudo cargar sonido: ${key} (${src})`, e);
+                    console.warn(`[WARN] No se pudo cargar sonido: ${key} (${src})`, e);
                 }
                 // Resolvemos igual para no bloquear el juego
                 resolve(null);
@@ -86,7 +86,7 @@ class SoundManager {
             debugLogger.start('Cargando sonidos del juego', 'sound');
             debugLogger.time('Carga de sonidos', 'sound');
         } else {
-            console.log('🔄 Iniciando carga de sonidos...');
+            console.log('[SOUND] Iniciando carga de sonidos...');
         }
 
         const promises = soundsToLoad.map(sound => this.loadSound(sound.key, sound.src));
@@ -100,7 +100,7 @@ class SoundManager {
                 total: soundsToLoad.length
             });
         } else {
-            console.log('✨ Todos los sonidos procesados.');
+            console.log('[SOUND] Todos los sonidos procesados.');
         }
     }
 
@@ -133,7 +133,7 @@ class SoundManager {
                     volume: clone.volume
                 });
             } else {
-                console.warn(`⚠️ Error al reproducir sonido ${key}:`, err);
+                console.warn(`[WARN] Error al reproducir sonido ${key}:`, err);
             }
         });
 

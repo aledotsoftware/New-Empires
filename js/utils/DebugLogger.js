@@ -104,7 +104,7 @@ export class DebugLogger {
         if (!this.shouldLog('debug', category)) return;
 
         const formatted = this.formatMessage('debug', category, message);
-        console.log(`🔍 ${formatted}`, data || '');
+        console.log(`[DEBUG] ${formatted}`, data || '');
     }
 
     /**
@@ -114,7 +114,7 @@ export class DebugLogger {
         if (!this.shouldLog('info', category)) return;
 
         const formatted = this.formatMessage('info', category, message);
-        console.log(`ℹ️ ${formatted}`, data || '');
+        console.log(`[INFO] ${formatted}`, data || '');
     }
 
     /**
@@ -125,7 +125,7 @@ export class DebugLogger {
 
         this.stats.warnings++;
         const formatted = this.formatMessage('warn', category, message);
-        console.warn(`⚠️ ${formatted}`, data || '');
+        console.warn(`[WARN] ${formatted}`, data || '');
     }
 
     /**
@@ -152,13 +152,13 @@ export class DebugLogger {
         const formatted = this.formatMessage('error', category, message);
 
         if (error) {
-            console.error(`❌ ${formatted}`, {
+            console.error(`[ERROR] ${formatted}`, {
                 error: error.message,
                 stack: this.config.showStackTrace ? error.stack : undefined,
                 context
             });
         } else {
-            console.error(`❌ ${formatted}`, context || '');
+            console.error(`[ERROR] ${formatted}`, context || '');
         }
     }
 
@@ -169,7 +169,7 @@ export class DebugLogger {
         if (!this.shouldLog('info', category)) return;
 
         const formatted = this.formatMessage('info', category, message);
-        console.log(`✅ ${formatted}`, data || '');
+        console.log(`[SUCCESS] ${formatted}`, data || '');
     }
 
     /**
@@ -179,7 +179,7 @@ export class DebugLogger {
         if (!this.shouldLog('info', category)) return;
 
         const formatted = this.formatMessage('info', category, message);
-        console.log(`🔄 ${formatted}`);
+        console.log(`[START] ${formatted}`);
     }
 
     /**
@@ -187,7 +187,7 @@ export class DebugLogger {
      */
     time(label, category = 'performance') {
         if (!this.shouldLog('debug', category)) return;
-        console.time(`⏱️ [${category.toUpperCase()}] ${label}`);
+        console.time(`[TIME] [${category.toUpperCase()}] ${label}`);
     }
 
     /**
@@ -195,7 +195,7 @@ export class DebugLogger {
      */
     timeEnd(label, category = 'performance') {
         if (!this.shouldLog('debug', category)) return;
-        console.timeEnd(`⏱️ [${category.toUpperCase()}] ${label}`);
+        console.timeEnd(`[TIME] [${category.toUpperCase()}] ${label}`);
     }
 
     /**
@@ -218,7 +218,7 @@ export class DebugLogger {
      * Muestra estadísticas de debug
      */
     showStats() {
-        console.log('📊 Estadísticas de Debug:', {
+        console.log('[STATS] Estadísticas de Debug:', {
             errores: this.stats.errors,
             advertencias: this.stats.warnings,
             ultimoError: this.stats.lastError,

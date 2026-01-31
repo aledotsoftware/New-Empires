@@ -3421,13 +3421,91 @@ export class Game {
                     progressBar.appendChild(progressFill);
                     prodContainer.appendChild(progressBar);
 
-                    // Mostrar cola restante
+                    // Mostrar cola restante (Palette: Visual Queue)
                     if (entity.productionQueue.length > 1) {
                         const queueDiv = document.createElement('div');
-                        queueDiv.style.fontSize = '0.7rem';
-                        queueDiv.style.opacity = '0.6';
-                        queueDiv.style.marginTop = '4px';
-                        queueDiv.textContent = `+${entity.productionQueue.length - 1} en cola`;
+                        queueDiv.className = 'queue-container';
+                        // Styles moved to CSS
+
+                        const queueItems = entity.productionQueue.getQueue();
+
+                        // Start from 1 because 0 is the current active item
+                        for (let i = 1; i < queueItems.length; i++) {
+                            const item = queueItems[i];
+                            const qItem = document.createElement('div');
+                            qItem.className = 'queue-item';
+                            // Styles moved to CSS
+
+                            // Tooltip / Label
+                            qItem.setAttribute('role', 'button');
+                            qItem.setAttribute('tabindex', '0'); // Accessibility: Keyboard focus
+                            qItem.setAttribute('aria-label', `Cancelar ${item.unitType}`);
+                            qItem.title = `Cancelar ${item.unitType} (Click para reembolsar)`;
+
+                            // Icon
+                            if (typeof assetLoader !== 'undefined') {
+                                const src = assetLoader.getSrc(item.unitType);
+                                if (src) {
+                                    const img = document.createElement('img');
+                                    img.src = src;
+                                    img.alt = item.unitType;
+                                    // Styles moved to CSS
+                                    qItem.appendChild(img);
+                                } else {
+                                    qItem.textContent = item.unitType.charAt(0).toUpperCase();
+                                    qItem.classList.add('queue-item-text');
+                                }
+                            }
+
+                            // Cancel Badge (on hover via CSS)
+                            const badge = document.createElement('div');
+                            badge.className = 'queue-item-badge';
+                            badge.textContent = '×';
+                            qItem.appendChild(badge);
+
+                            // Hover effects handled by CSS
+
+                            // Action Logic (Shared)
+                            const cancelAction = () => {
+                                // Note: We use the index at the time of iteration.
+                                // Since we rebuild the UI immediately after modification, this is safe.
+                                const cancelled = entity.productionQueue.cancelAt(i);
+
+                                if (cancelled && cancelled.cost) {
+                                    // Refund Resources
+                                    for (const [res, amount] of Object.entries(cancelled.cost)) {
+                                        this.resources[res] = (this.resources[res] || 0) + amount;
+                                        this.flashResource(res);
+                                    }
+
+                                    // Feedback
+                                    this.showNotification(`${item.unitType} cancelado`, 'info');
+                                    if (typeof soundManager !== 'undefined') soundManager.play('click');
+
+                                    // Force UI Refresh
+                                    this.updateSelectionPanel();
+                                    this.updateUI();
+                                }
+                            };
+
+                            // Click Handler
+                            qItem.onclick = (e) => {
+                                e.stopPropagation();
+                                cancelAction();
+                            };
+
+                            // Keyboard Handler
+                            qItem.onkeydown = (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    cancelAction();
+                                }
+                            };
+
+                            queueDiv.appendChild(qItem);
+                        }
+
                         prodContainer.appendChild(queueDiv);
                     }
                 }

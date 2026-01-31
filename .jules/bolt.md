@@ -53,7 +53,7 @@
 **Action:** Identify and cache subsets of entities (like drop-off points) that are queried frequently but change infrequently.
 
 ## 2025-05-25 - Instruction Cache & Loop Splitting
-**Learning:** Splitting a mixed workload loop (e.g., SpatialGrid.add + Unit.update) into two distinct passes proved to be ~65% faster in benchmarks, contrary to the "iterate once" intuition. This is likely due to improved Instruction Cache locality and JIT optimization, as the CPU executes homogeneous operations in each pass without context switching.
+**Learning:** Splitting a mixed workload loop (e.g. SpatialGrid.add + Unit.update) into two distinct passes proved to be ~65% faster in benchmarks, contrary to the "iterate once" intuition. This is likely due to improved Instruction Cache locality and JIT optimization, as the CPU executes homogeneous operations in each pass without context switching.
 **Action:** When a loop performs two distinct, heavy types of operations, benchmark splitting them. The overhead of iterating twice is often dwarfed by the gains in CPU efficiency.
 
 ## 2025-05-26 - Draw Call Batching & Z-Ordering
@@ -67,3 +67,7 @@
 ## 2025-05-28 - Minimap Layer Caching
 **Learning:** Even with batched drawing calls, iterating over static entities (resources/buildings) and performing `ctx` calls (even if batched) every frame adds significant overhead to the main thread. Caching the static layer (background + resources + buildings) into an offscreen canvas reduced draw calls by ~87% (120k -> 15k in benchmark) and eliminated iteration logic from the hot path.
 **Action:** Identify static layers in UI/HUD elements (like minimaps) and cache them in offscreen canvases, updating only when the underlying state changes (dirty flag pattern).
+
+## 2025-05-29 - Logic Bugs as Performance Leaks
+**Learning:** The `renderMinimap` loop iterated twice over `this.units` (once for player, once for enemies), but since enemies were stored in `this.enemies`, the second pass was wasted O(N) work and the enemies weren't drawn. Fixing the loop to iterate `this.enemies` correctly not only fixed a bug (missing dots) but also improved performance by replacing 2*N checks with N+M checks (where M << N typically).
+**Action:** When optimizing loops, verify the data structures being iterated actually contain the target data. A "performance" loop that does nothing is still wasted cycles.

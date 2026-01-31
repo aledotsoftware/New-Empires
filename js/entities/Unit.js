@@ -122,15 +122,12 @@ export class Unit extends Entity {
 
             // OPTIMIZATION: Hoist grid calculation to reuse in collision logic
             // Avoids re-calculating currCol/currRow in the collision block (~30% faster in hot path)
+            const gridMap = game && game.gridMap;
             let currCol = -1;
             let currRow = -1;
-            let hasGridMap = false;
-            let gridMap = null;
             let invTileSize = 0;
 
-            if (game && game.gridMap) {
-                hasGridMap = true;
-                gridMap = game.gridMap;
+            if (gridMap) {
                 invTileSize = gridMap.invTileSize;
 
                 // OPTIMIZATION: Bitwise OR is faster than Math.floor for positive coordinates
@@ -166,7 +163,7 @@ export class Unit extends Entity {
             let moveY = dy * moveStep;
 
             // Colisiones con edificios (GridMap)
-            if (hasGridMap) {
+            if (gridMap) {
                 // Verificar nueva posición propuesta
                 const nextX = this.x + moveX;
                 const nextY = this.y + moveY;

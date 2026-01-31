@@ -2086,17 +2086,10 @@ export class Game {
         gameOverScreen.classList.remove('hidden');
 
         // Manage Focus for Accessibility
-        const restartBtn = document.getElementById('restartButton');
-        if (restartBtn) {
-            // Restore click functionality if missing (safety net for SPA logic)
-            restartBtn.onclick = () => {
-                if (window.loadMainMenu) {
-                    window.loadMainMenu();
-                } else {
-                    location.reload();
-                }
-            };
-            setTimeout(() => restartBtn.focus(), 50);
+        const playAgainBtn = document.getElementById('playAgainButton');
+        if (playAgainBtn) {
+            // Focus primary action
+            setTimeout(() => playAgainBtn.focus(), 50);
         }
 
         // Palette: View Map Functionality
@@ -2535,13 +2528,16 @@ export class Game {
         this.ctx.fill();
 
         // Pass 2: Draw icons (using compacted list)
+        // BOLT OPTIMIZATION: Hoist assetLoader check
+        const hasAssetLoader = typeof assetLoader !== 'undefined';
+
         for (let i = 0; i < visibleCount; i++) {
             const node = this._resourceRenderCache[i];
 
             // Icon
             // BOLT OPTIMIZATION: Cache image reference on node to avoid global lookup loop
             let img = node._cachedImage;
-            if (!img && typeof assetLoader !== 'undefined') {
+            if (!img && hasAssetLoader) {
                 img = assetLoader.getImage(node.type);
                 if (img) node._cachedImage = img;
             }
@@ -2549,7 +2545,7 @@ export class Game {
             if (img && img.complete) {
                 const size = node.radius * 1.5;
                 this.ctx.drawImage(img, node._screenX - size / 2, node._screenY - size / 2, size, size);
-            } else if (typeof assetLoader !== 'undefined') {
+            } else if (hasAssetLoader) {
                 // Fallback to square if image not ready
                 this.ctx.fillStyle = '#FFD700';
                 this.ctx.fillRect(node._screenX - 10, node._screenY - 10, 20, 20);
@@ -2815,36 +2811,32 @@ export class Game {
 
         // Unidades
         // BOLT OPTIMIZATION: Batch draw calls for units (2 calls vs N calls)
-        // Optimized loops: cached length, integer math, and correct enemy iteration.
-
-        const unitsLen = this.units.length;
-        const enemiesLen = this.enemies.length;
+        // Replaced for...of with standard loops and integer truncation for performance.
 
         // Batch 1: Player Units
-        if (unitsLen > 0) {
-            this.minimapCtx.fillStyle = '#48bb78';
-            this.minimapCtx.beginPath();
-            for (let i = 0; i < unitsLen; i++) {
-                const unit = this.units[i];
-                // OPTIMIZATION: Integer math for speed and crisp rendering
+        this.minimapCtx.fillStyle = '#48bb78';
+        this.minimapCtx.beginPath();
+        const unitsLen = this.units.length;
+        for (let i = 0; i < unitsLen; i++) {
+            const unit = this.units[i];
+            // Safety check: ensure we only draw player units as green
+            if (unit.team === 'player') {
                 const x = (unit.x * scale) | 0;
                 const y = (unit.y * scale) | 0;
                 this.minimapCtx.rect(x - 1, y - 1, 2, 2);
             }
-            this.minimapCtx.fill();
         }
+        this.minimapCtx.fill();
 
         // Batch 2: Enemy Units
-        if (enemiesLen > 0) {
-            this.minimapCtx.fillStyle = '#c53030';
-            this.minimapCtx.beginPath();
-            for (let i = 0; i < enemiesLen; i++) {
-                const unit = this.enemies[i];
-                const x = (unit.x * scale) | 0;
-                const y = (unit.y * scale) | 0;
-                this.minimapCtx.rect(x - 1, y - 1, 2, 2);
-            }
-            this.minimapCtx.fill();
+        this.minimapCtx.fillStyle = '#c53030';
+        this.minimapCtx.beginPath();
+        const enemiesLen = this.enemies.length;
+        for (let i = 0; i < enemiesLen; i++) {
+            const enemy = this.enemies[i];
+            const x = (enemy.x * scale) | 0;
+            const y = (enemy.y * scale) | 0;
+            this.minimapCtx.rect(x - 1, y - 1, 2, 2);
         }
 
         // Cámara Viewport (Palette: Enhanced styling)

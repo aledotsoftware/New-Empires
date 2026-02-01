@@ -58,27 +58,35 @@ export class FogOfWar {
         const gridRadius = (radius * this.invTileSize) | 0;
         const gridRadiusSq = gridRadius * gridRadius;
 
-        const startX = Math.max(0, gridX - gridRadius);
-        const endX = Math.min(this.cols - 1, gridX + gridRadius);
         const startY = Math.max(0, gridY - gridRadius);
         const endY = Math.min(this.rows - 1, gridY + gridRadius);
 
         for (let y = startY; y <= endY; y++) {
             const dy = y - gridY;
-            const dySq = dy * dy;
+            // Calculate span width at this Y using the circle equation: x^2 + dy^2 <= r^2
+            const term = gridRadiusSq - dy * dy;
 
-            for (let x = startX; x <= endX; x++) {
-                const dx = x - gridX;
-                const distSq = dx * dx + dySq;
+            // Skip if outside circle (corner cases with rounding)
+            if (term < 0) continue;
 
-                if (distSq <= gridRadiusSq) {
-                    const idx = y * this.cols + x;
-                    if (this.grid[idx] !== FOW_STATES.VISIBLE) {
-                        this.grid[idx] = FOW_STATES.VISIBLE;
-                        this.isDirty = true;
-                    }
-                }
-            }
+            // BOLT OPTIMIZATION: Scanline Fill
+            // Calculate horizontal span using sqrt once per row instead of checking distSq per pixel.
+            // Use TypedArray.fill for vectorized memory write (much faster than loop assignment).
+            const span = Math.floor(Math.sqrt(term));
+
+            const minX = Math.max(0, gridX - span);
+            const maxX = Math.min(this.cols - 1, gridX + span);
+
+            if (minX > maxX) continue;
+
+            const rowOffset = y * this.cols;
+            const startIdx = rowOffset + minX;
+            const endIdx = rowOffset + maxX;
+
+            // Fill range with VISIBLE
+            // Note: Overwriting VISIBLE with VISIBLE is fine and fast.
+            this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+            this.isDirty = true;
         }
     }
 

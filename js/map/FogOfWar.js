@@ -58,8 +58,6 @@ export class FogOfWar {
         const gridRadius = (radius * this.invTileSize) | 0;
         const gridRadiusSq = gridRadius * gridRadius;
 
-        const startX = Math.max(0, gridX - gridRadius);
-        const endX = Math.min(this.cols - 1, gridX + gridRadius);
         const startY = Math.max(0, gridY - gridRadius);
         const endY = Math.min(this.rows - 1, gridY + gridRadius);
 
@@ -67,19 +65,17 @@ export class FogOfWar {
             const dy = y - gridY;
             const dySq = dy * dy;
 
-            for (let x = startX; x <= endX; x++) {
-                const dx = x - gridX;
-                const distSq = dx * dx + dySq;
+            // BOLT OPTIMIZATION: Scanline fill (O(R)) instead of pixel check (O(R^2))
+            const halfWidth = Math.sqrt(Math.max(0, gridRadiusSq - dySq)) | 0;
+            const startX = Math.max(0, gridX - halfWidth);
+            const endX = Math.min(this.cols - 1, gridX + halfWidth);
 
-                if (distSq <= gridRadiusSq) {
-                    const idx = y * this.cols + x;
-                    if (this.grid[idx] !== FOW_STATES.VISIBLE) {
-                        this.grid[idx] = FOW_STATES.VISIBLE;
-                        this.isDirty = true;
-                    }
-                }
+            if (endX >= startX) {
+                const rowOffset = y * this.cols;
+                this.grid.fill(FOW_STATES.VISIBLE, rowOffset + startX, rowOffset + endX + 1);
             }
         }
+        this.isDirty = true;
     }
 
     /**

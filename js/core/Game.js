@@ -2029,6 +2029,25 @@ export class Game {
                     }
                 }
 
+                // Build/Repair Cursor Logic (Villager only) - Before Gather
+                if (!showBadge && entity.type === 'villager' && this.buildingGrid) {
+                    // Reuse cache array
+                    const buildings = this.buildingGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
+                    for (let i = 0; i < buildings.length; i++) {
+                        const b = buildings[i];
+                        if (b.team === 'player' && b.isUnderConstruction) {
+                            // Check approximate collision (consistent with handleRightClick)
+                            const checkRadius = b.size / 2 + 20;
+                            const distSq = (b.x - this.mouse.worldX) ** 2 + (b.y - this.mouse.worldY) ** 2;
+                            if (distSq < checkRadius * checkRadius) {
+                                badgeIcon = 'assets/icons/build.png';
+                                showBadge = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 // Gather Cursor Logic (Villager only) - Lower priority than attack
                 if (!showBadge && entity.canGather && entity.type === 'villager' && this.resourceGrid) {
                     // Reuse cache array for resources (BOLT OPTIMIZATION: Pass cache array)

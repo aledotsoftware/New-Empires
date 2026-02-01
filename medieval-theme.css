@@ -2346,3 +2346,16 @@ button:focus-visible,
 .queue-item:hover .queue-item-badge {
     display: flex;
 }
+
+/* Palette: Cursor Badge */
+.cursor-badge {
+    position: absolute;
+    bottom: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+    display: none; /* Managed by JS */
+    z-index: 2;
+}

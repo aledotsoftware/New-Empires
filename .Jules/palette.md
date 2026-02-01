@@ -65,3 +65,7 @@
 ## 2026-06-03 - [Focus Ping Feedback]
 **Learning:** In RTS games, camera jumps (via minimap, hotkeys, or buttons) can be disorienting. Players instantly lose context of where they were and need a visual anchor to understand where they have arrived and what they should be looking at.
 **Action:** Implemented a "Focus Ping" (expanding cyan ripple) that triggers automatically when the camera snaps to a target (Minimap click, "Go to TC", Idle Villager). This draws the eye immediately to the relevant location, reducing the cognitive re-orientation time.
+
+## 2026-06-04 - [Random Choice & Variety]
+**Learning:** Players often suffer from "choice paralysis" when presented with many similar options (civilizations). Providing a "Random" option reduces the cognitive load of decision-making and adds a layer of replayability and challenge for veteran players.
+**Action:** Added a prominent "Random Civilization" option in the selection grid. It uses a distinct icon (🎲) and provides immediate feedback upon selection (picking a civ and starting the game), removing the friction of manual selection for indecisive players.

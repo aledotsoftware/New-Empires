@@ -237,6 +237,15 @@
                     </div>
                 </button>
 
+                <button id="helpButton" class="btn-secondary" onclick="showShortcuts()" style="padding:8px 12px;"
+                    aria-label="Ayuda / Atajos (Shift + ?)">
+                    <span style="font-weight:bold; font-size:1.2rem; line-height:1; display:inline-block; width:20px; text-align:center;">?</span>
+                    <div class="btn-tooltip" role="tooltip">
+                        <div class="tooltip-header">Ayuda <span class="tooltip-hotkey">[?]</span></div>
+                        <div class="tooltip-desc">Ver atajos de teclado y controles</div>
+                    </div>
+                </button>
+
                 <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
                     aria-label="Configuración">
                     <img src="assets/icons/settings.png" onerror="this.style.display='none'"
@@ -621,6 +630,72 @@
                             </button>
                         </div>
                         <button class="btn-secondary" onclick="hideSettings()" style="min-width: 100px;">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Atajos de Teclado -->
+        <div id="shortcutsScreen" class="modal-overlay hidden" role="dialog" aria-modal="true"
+            aria-labelledby="shortcutsTitle" tabindex="-1">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h2 id="shortcutsTitle">⌨️ Atajos de Teclado</h2>
+                    <button class="btn-close" onclick="hideShortcuts()" aria-label="Cerrar">✕</button>
+                </div>
+                <div class="settings-content" style="padding: 20px;">
+                    <div class="controls-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <!-- General -->
+                        <h3 style="grid-column: span 2; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            General</h3>
+                        <div class="control-item"><span class="control-key">P</span> <span class="control-desc">Pausar
+                                Juego</span></div>
+                        <div class="control-item"><span class="control-key">Esc</span> <span class="control-desc">Menú /
+                                Cancelar</span></div>
+                        <div class="control-item"><span class="control-key">?</span> <span class="control-desc">Esta
+                                Ayuda</span></div>
+
+                        <!-- Cámara -->
+                        <h3
+                            style="grid-column: span 2; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
+                            Cámara</h3>
+                        <div class="control-item"><span class="control-key">WASD</span> <span class="control-desc">Mover
+                                Cámara</span></div>
+                        <div class="control-item"><span class="control-key">Espacio</span> <span class="control-desc">Ir
+                                a Centro Urbano</span></div>
+
+                        <!-- Selección -->
+                        <h3
+                            style="grid-column: span 2; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
+                            Selección y Grupos</h3>
+                        <div class="control-item"><span class="control-key">Click Izq</span> <span
+                                class="control-desc">Seleccionar</span></div>
+                        <div class="control-item"><span class="control-key">Doble Click</span> <span
+                                class="control-desc">Seleccionar Tipo</span></div>
+                        <div class="control-item"><span class="control-key">Tab</span> <span
+                                class="control-desc">Aldeano Inactivo</span></div>
+                        <div class="control-item"><span class="control-key">,</span> <span class="control-desc">Todo el
+                                Ejército</span></div>
+                        <div class="control-item"><span class="control-key">Ctrl + 0-9</span> <span
+                                class="control-desc">Guardar Grupo</span></div>
+                        <div class="control-item"><span class="control-key">0-9</span> <span
+                                class="control-desc">Cargar Grupo</span></div>
+
+                        <!-- Acciones -->
+                        <h3
+                            style="grid-column: span 2; color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
+                            Acciones</h3>
+                        <div class="control-item"><span class="control-key">Click Der</span> <span
+                                class="control-desc">Mover / Atacar / Recoger</span></div>
+                        <div class="control-item"><span class="control-key">B</span> <span class="control-desc">Menú
+                                Construcción</span></div>
+                        <div class="control-item"><span class="control-key">F</span> <span
+                                class="control-desc">Formación</span></div>
+                        <div class="control-item"><span class="control-key">Supr</span> <span
+                                class="control-desc">Destruir Unidad</span></div>
+                    </div>
+                    <div class="settings-footer" style="margin-top: 20px; text-align: right;">
+                        <button class="btn-secondary" onclick="hideShortcuts()">Cerrar</button>
                     </div>
                 </div>
             </div>

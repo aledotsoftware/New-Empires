@@ -93,6 +93,45 @@ window.hideTechTree = function () {
 };
 
 /**
+ * Muestra la pantalla de atajos de teclado
+ */
+window.showShortcuts = function () {
+    debugLogger.info('Abriendo atajos', 'ui');
+
+    // Palette: Auto-pause game
+    if (game && !game.isGameOver) {
+        game.isPaused = true;
+        debugLogger.info('Juego pausado', 'game');
+    }
+
+    FocusManager.saveFocus();
+
+    const screen = document.getElementById('shortcutsScreen');
+    screen.classList.remove('hidden');
+
+    // Mover foco al modal y activar trap
+    setTimeout(() => FocusManager.trapFocus(screen), 50);
+};
+
+/**
+ * Oculta la pantalla de atajos de teclado
+ */
+window.hideShortcuts = function () {
+    debugLogger.info('Cerrando atajos', 'ui');
+
+    FocusManager.releaseTrap();
+    document.getElementById('shortcutsScreen').classList.add('hidden');
+
+    // Palette: Resume game
+    if (game && !game.isGameOver) {
+        game.isPaused = false;
+        debugLogger.info('Juego reanudado', 'game');
+    }
+
+    FocusManager.restoreFocus();
+};
+
+/**
  * Muestra la pantalla de configuración
  */
 window.showSettings = function () {
@@ -964,6 +1003,7 @@ function initModalBackdropHandlers() {
     const modalMap = {
         'techTreeScreen': window.hideTechTree,
         'settingsScreen': window.hideSettings,
+        'shortcutsScreen': window.hideShortcuts,
         'buildMenu': window.closeBuildMenu,
         'confirmationModal': () => {
             // Para confirmación, click en fondo actúa como "Cancelar"
@@ -1753,14 +1793,38 @@ const initApp = async () => {
 
     // Global Keydown Handler for Escape (UX Improvement)
     document.addEventListener('keydown', (e) => {
+        // Toggle Shortcuts Help
+        if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+            // Check if no other modal is open
+            const settings = document.getElementById('settingsScreen');
+            const techTree = document.getElementById('techTreeScreen');
+            const shortcuts = document.getElementById('shortcutsScreen');
+
+            if (shortcuts && !shortcuts.classList.contains('hidden')) {
+                hideShortcuts();
+            } else if ((!settings || settings.classList.contains('hidden')) &&
+                (!techTree || techTree.classList.contains('hidden'))) {
+                showShortcuts();
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+
         if (e.key === 'Escape') {
             const settings = document.getElementById('settingsScreen');
             const techTree = document.getElementById('techTreeScreen');
+            const shortcuts = document.getElementById('shortcutsScreen');
             const mapSize = document.getElementById('mapSizeScreen');
             const civSelection = document.getElementById('civSelectionScreen');
             const gameScreen = document.getElementById('gameScreen');
 
-            // 1. Close Modals (Settings, Tech Tree)
+            // 1. Close Modals (Settings, Tech Tree, Shortcuts)
+            if (shortcuts && !shortcuts.classList.contains('hidden')) {
+                hideShortcuts();
+                e.stopImmediatePropagation();
+                return;
+            }
             if (settings && !settings.classList.contains('hidden')) {
                 hideSettings();
                 e.stopImmediatePropagation();

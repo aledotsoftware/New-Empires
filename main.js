@@ -1229,6 +1229,105 @@ function populateCivilizations() {
         return;
     }
 
+    // Palette: Random Civilization Option
+    const randomOption = document.createElement('div');
+    randomOption.className = 'civ-option';
+    randomOption.dataset.civ = 'random';
+    randomOption.setAttribute('role', 'button');
+    randomOption.setAttribute('tabindex', '0');
+    randomOption.setAttribute('aria-label', 'Seleccionar civilización aleatoria');
+
+    const randomIconDiv = document.createElement('div');
+    randomIconDiv.className = 'civ-icon';
+    randomIconDiv.appendChild(createSafeIconElement('🎲', 'Aleatorio', '80px'));
+
+    const randomNameDiv = document.createElement('div');
+    randomNameDiv.className = 'civ-name';
+    randomNameDiv.textContent = 'Aleatorio';
+
+    const randomDescDiv = document.createElement('div');
+    randomDescDiv.className = 'civ-desc';
+    randomDescDiv.textContent = 'Selecciona una civilización al azar para un desafío extra.';
+
+    randomOption.appendChild(randomIconDiv);
+    randomOption.appendChild(randomNameDiv);
+    randomOption.appendChild(randomDescDiv);
+
+    // Palette: Tooltip for Random
+    const randomTooltipId = 'civ-tooltip-random';
+    randomOption.setAttribute('aria-describedby', randomTooltipId);
+
+    const randomTooltip = document.createElement('div');
+    randomTooltip.className = 'card-tooltip';
+    randomTooltip.id = randomTooltipId;
+
+    const randomTipHeader = document.createElement('div');
+    randomTipHeader.className = 'tooltip-header';
+    randomTipHeader.textContent = 'Aleatorio';
+    randomTooltip.appendChild(randomTipHeader);
+
+    const randomTipDesc = document.createElement('div');
+    randomTipDesc.className = 'tooltip-desc';
+    randomTipDesc.style.fontStyle = 'italic';
+    randomTipDesc.textContent = '¿Indeciso? Deja que el destino decida tu civilización.';
+    randomTooltip.appendChild(randomTipDesc);
+
+    randomOption.appendChild(randomTooltip);
+
+    const selectRandomCiv = () => {
+        if (randomOption.classList.contains('loading')) return;
+
+        randomOption.classList.add('loading');
+        randomOption.setAttribute('aria-busy', 'true');
+        randomOption.style.cursor = 'wait';
+
+        const spinner = document.createElement('span');
+        spinner.className = 'spinner';
+        spinner.style.width = '0.8em';
+        spinner.style.height = '0.8em';
+        spinner.style.marginLeft = '8px';
+        spinner.style.borderWidth = '2px';
+        spinner.style.borderTopColor = 'var(--gold)';
+
+        const nameEl = randomOption.querySelector('.civ-name');
+        if (nameEl) nameEl.appendChild(spinner);
+
+        const grid = document.getElementById('civGrid');
+        if (grid) grid.style.pointerEvents = 'none';
+
+        // Logic to pick random civ
+        const randomIndex = Math.floor(Math.random() * civilizations.length);
+        const randomCiv = civilizations[randomIndex];
+        selectedCivilization = randomCiv.civilizationId;
+
+        debugLogger.info(`Civilización aleatoria seleccionada: ${randomCiv.civilizationId}`, 'ui');
+
+        setTimeout(() => {
+            const mapConfig = MAP_SIZES[selectedMapSize] || MAP_SIZES.normal;
+            startGame(randomCiv.civilizationId, {
+                ...mapConfig,
+                seed: Date.now(),
+                numPlayers: 2
+                // biome and style handled by ProceduralMapGenerator defaults
+            });
+
+            if (grid) grid.style.pointerEvents = '';
+            randomOption.classList.remove('loading');
+            randomOption.removeAttribute('aria-busy');
+            if (nameEl && nameEl.contains(spinner)) nameEl.removeChild(spinner);
+        }, 50);
+    };
+
+    randomOption.addEventListener('click', selectRandomCiv);
+    randomOption.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectRandomCiv();
+        }
+    });
+
+    civGrid.appendChild(randomOption);
+
     civilizations.forEach(civ => {
         const option = document.createElement('div');
         option.className = 'civ-option';

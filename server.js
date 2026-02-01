@@ -146,6 +146,20 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // Security: Block root-level data/config files
+    // Prevent exposure of config files (e.g. .json, .txt) that might be placed in root
+    // Only allow specific file types in root (html, js, css, etc.)
+    const isRootFile = normalizedPath === filename;
+    if (isRootFile) {
+        const ext = path.extname(filename).toLowerCase();
+        const allowedRootFiles = ['robots.txt', 'manifest.json'];
+        if ((ext === '.json' || ext === '.txt') && !allowedRootFiles.includes(filename.toLowerCase())) {
+            res.writeHead(403);
+            res.end('Forbidden');
+            return;
+        }
+    }
+
     // Construct full path
     const filePath = path.join(__dirname, safePath);
 

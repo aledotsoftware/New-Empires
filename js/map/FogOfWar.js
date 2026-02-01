@@ -51,6 +51,7 @@ export class FogOfWar {
 
     /**
      * Reveals a circular area on the FOW grid.
+     * OPTIMIZATION: Uses scanline fill (O(R)) instead of per-pixel checks (O(R^2)).
      */
     revealCircle(centerX, centerY, radius) {
         const gridX = (centerX * this.invTileSize) | 0;
@@ -58,8 +59,6 @@ export class FogOfWar {
         const gridRadius = (radius * this.invTileSize) | 0;
         const gridRadiusSq = gridRadius * gridRadius;
 
-        const startX = Math.max(0, gridX - gridRadius);
-        const endX = Math.min(this.cols - 1, gridX + gridRadius);
         const startY = Math.max(0, gridY - gridRadius);
         const endY = Math.min(this.rows - 1, gridY + gridRadius);
 
@@ -67,17 +66,22 @@ export class FogOfWar {
             const dy = y - gridY;
             const dySq = dy * dy;
 
-            for (let x = startX; x <= endX; x++) {
-                const dx = x - gridX;
-                const distSq = dx * dx + dySq;
+            if (dySq > gridRadiusSq) continue;
 
-                if (distSq <= gridRadiusSq) {
-                    const idx = y * this.cols + x;
-                    if (this.grid[idx] !== FOW_STATES.VISIBLE) {
-                        this.grid[idx] = FOW_STATES.VISIBLE;
-                        this.isDirty = true;
-                    }
-                }
+            // Calculate span width based on circle equation: x^2 + y^2 <= r^2
+            const spanHalfWidth = Math.sqrt(gridRadiusSq - dySq) | 0;
+
+            // Calculate segment bounds
+            const x0 = Math.max(0, gridX - spanHalfWidth);
+            const x1 = Math.min(this.cols, gridX + spanHalfWidth + 1); // Exclusive end for fill
+
+            if (x0 < x1) {
+                const rowOffset = y * this.cols;
+                // Use native fill for speed
+                // Note: fill overwrites EXPLORED/HIDDEN with VISIBLE, which is correct for current vision.
+                // resetVisible() handles reverting VISIBLE to EXPLORED for the next frame.
+                this.grid.fill(FOW_STATES.VISIBLE, rowOffset + x0, rowOffset + x1);
+                this.isDirty = true;
             }
         }
     }

@@ -6,6 +6,10 @@ def verify_minimap():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
+        # Capture console logs
+        page.on("console", lambda msg: print(f"Browser Console: {msg.text}"))
+        page.on("pageerror", lambda err: print(f"Browser Error: {err}"))
+
         print("Navigating to game...")
         page.goto("http://localhost:3000")
 

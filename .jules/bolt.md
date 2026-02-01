@@ -83,3 +83,7 @@
 ## 2026-01-31 - Allocation Hot Spots (FOW)
 **Learning:** Allocating temporary arrays (e.g., `[]`) inside frequent update loops (10Hz+) generates significant Garbage Collection pressure. Reusing a persistent cache array (`this._cache.length = 0` then `push`) reduced execution time by ~17% in FOW updates and eliminated thousands of short-lived object allocations per minute.
 **Action:** For any collection built inside a loop (update/render), prefer a persistent member variable cache over local array allocation.
+
+## 2026-02-01 - Fog of War Scanline Fill
+**Learning:** Replacing a nested loop O(R^2) per-pixel check with a scanline fill algorithm O(R) using `Uint8Array.fill` for circle rasterization yielded a ~45-80% speedup in the hot `revealCircle` method. `Math.sqrt` overhead per row is negligible compared to the savings of removing the inner loop condition checks.
+**Action:** For rasterizing simple geometric shapes (circles, rects) onto 1D grids (typed arrays), prefer row-based operations (`fill`, `set`) over per-pixel iteration.

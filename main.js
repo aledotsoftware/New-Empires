@@ -92,6 +92,148 @@ window.hideTechTree = function () {
     FocusManager.restoreFocus();
 };
 
+const SHORTCUTS_DATA = [
+    {
+        category: 'Global',
+        items: [
+            { key: '?', desc: 'Ayuda / Atajos' },
+            { key: 'P', desc: 'Pausar' },
+            { key: 'Esc', desc: 'Cerrar / Deseleccionar' },
+            { key: 'Espacio', desc: 'Centro Urbano' }
+        ]
+    },
+    {
+        category: 'Selección y Órdenes',
+        items: [
+            { key: 'Click Izq', desc: 'Seleccionar' },
+            { key: 'Doble Click', desc: 'Sel. Mismo Tipo' },
+            { key: 'Click Der', desc: 'Mover / Atacar' },
+            { key: ',', desc: 'Todo el Ejército' },
+            { key: 'Tab', desc: 'Aldeano Inactivo' },
+            { key: 'Supr', desc: 'Destruir Selección' },
+            { key: 'Ctrl + 1-9', desc: 'Guardar Grupo' },
+            { key: '1-9', desc: 'Usar Grupo' }
+        ]
+    },
+    {
+        category: 'Construcción (con Aldeano)',
+        items: [
+            { key: 'B', desc: 'Abrir Menú' },
+            { key: 'Q, W, E...', desc: 'Atajos de Edificios' }
+        ]
+    }
+];
+
+function createShortcutsModal() {
+    if (document.getElementById('shortcutsScreen')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'shortcutsScreen';
+    modal.className = 'modal-overlay hidden';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'shortcutsTitle');
+    modal.tabIndex = -1;
+
+    // Use innerHTML for structure (content is safe/static)
+    modal.innerHTML = `
+        <div class="modal-content settings-modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="shortcutsTitle">
+                    <img src="assets/icons/info.png" onerror="this.style.display='none'" style="width:24px;vertical-align:middle" alt="">
+                    Atajos de Teclado
+                </h2>
+                <button class="btn-close" onclick="hideShortcuts()" aria-label="Cerrar">✕</button>
+            </div>
+            <div class="settings-content" style="padding: 20px;">
+                <div id="shortcutsGrid" class="controls-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
+                <div class="settings-footer" style="display: flex; justify-content: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <button class="btn-secondary" onclick="hideShortcuts()" style="min-width: 100px;">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const grid = modal.querySelector('#shortcutsGrid');
+
+    SHORTCUTS_DATA.forEach(section => {
+        // Section Header
+        const header = document.createElement('div');
+        header.className = 'control-item';
+        header.style.cssText = 'grid-column: span 2; background: rgba(0,0,0,0.4); justify-content:center; color: var(--gold); margin-top: 5px;';
+        const strong = document.createElement('strong');
+        strong.textContent = section.category;
+        header.appendChild(strong);
+        grid.appendChild(header);
+
+        // Items
+        section.items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'control-item';
+            div.style.cssText = 'display: flex; padding: 8px; justify-content: space-between;';
+
+            const keySpan = document.createElement('span');
+            keySpan.className = 'control-key';
+            keySpan.textContent = item.key;
+
+            const descSpan = document.createElement('span');
+            descSpan.className = 'control-desc';
+            descSpan.textContent = item.desc;
+
+            div.appendChild(keySpan);
+            div.appendChild(descSpan);
+            grid.appendChild(div);
+        });
+    });
+
+    // Add to backdrop handlers logic if not already present
+    // Since initModalBackdropHandlers ran already, we need to attach listener manually
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) hideShortcuts();
+    });
+}
+
+/**
+ * Muestra la pantalla de atajos de teclado
+ */
+window.showShortcuts = function () {
+    debugLogger.info('Abriendo atajos', 'ui');
+
+    createShortcutsModal();
+
+    if (game && !game.isGameOver) {
+        game.isPaused = true;
+        debugLogger.info('Juego pausado', 'game');
+    }
+
+    FocusManager.saveFocus();
+
+    const screen = document.getElementById('shortcutsScreen');
+    screen.classList.remove('hidden');
+
+    setTimeout(() => FocusManager.trapFocus(screen), 50);
+};
+
+/**
+ * Oculta la pantalla de atajos de teclado
+ */
+window.hideShortcuts = function () {
+    debugLogger.info('Cerrando atajos', 'ui');
+
+    FocusManager.releaseTrap();
+    const screen = document.getElementById('shortcutsScreen');
+    if (screen) screen.classList.add('hidden');
+
+    if (game && !game.isGameOver) {
+        game.isPaused = false;
+        debugLogger.info('Juego reanudado', 'game');
+    }
+
+    FocusManager.restoreFocus();
+};
+
 /**
  * Muestra la pantalla de configuración
  */
@@ -964,6 +1106,7 @@ function initModalBackdropHandlers() {
     const modalMap = {
         'techTreeScreen': window.hideTechTree,
         'settingsScreen': window.hideSettings,
+        'shortcutsScreen': window.hideShortcuts,
         'buildMenu': window.closeBuildMenu,
         'confirmationModal': () => {
             // Para confirmación, click en fondo actúa como "Cancelar"
@@ -1654,14 +1797,38 @@ const initApp = async () => {
 
     // Global Keydown Handler for Escape (UX Improvement)
     document.addEventListener('keydown', (e) => {
+        // Toggle Shortcuts (?)
+        if (e.key === '?' && !e.repeat) {
+            // Prevent if typing
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+            // Check if any other modal is open to prevent stacking
+            const shortcuts = document.getElementById('shortcutsScreen');
+            // If modal doesn't exist yet (lazy load), show it
+            if (!shortcuts || shortcuts.classList.contains('hidden')) {
+                showShortcuts();
+            } else {
+                hideShortcuts();
+            }
+            e.preventDefault();
+            return;
+        }
+
         if (e.key === 'Escape') {
             const settings = document.getElementById('settingsScreen');
             const techTree = document.getElementById('techTreeScreen');
+            const shortcuts = document.getElementById('shortcutsScreen');
             const mapSize = document.getElementById('mapSizeScreen');
             const civSelection = document.getElementById('civSelectionScreen');
             const gameScreen = document.getElementById('gameScreen');
 
-            // 1. Close Modals (Settings, Tech Tree)
+            // 1. Close Modals
+            if (shortcuts && !shortcuts.classList.contains('hidden')) {
+                hideShortcuts();
+                e.stopImmediatePropagation();
+                return;
+            }
             if (settings && !settings.classList.contains('hidden')) {
                 hideSettings();
                 e.stopImmediatePropagation();

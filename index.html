@@ -237,6 +237,16 @@
                     </div>
                 </button>
 
+                <button id="shortcutsButton" class="btn-secondary" onclick="showShortcuts()" style="padding:8px 12px;"
+                    aria-label="Atajos de teclado (?)">
+                    <img src="assets/icons/info.png" onerror="this.style.display='none'"
+                        style="width:20px;height:20px;" alt="">
+                    <div class="btn-tooltip" role="tooltip">
+                        <div class="tooltip-header">Atajos <span class="tooltip-hotkey">[?]</span></div>
+                        <div class="tooltip-desc">Ver lista de controles</div>
+                    </div>
+                </button>
+
                 <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
                     aria-label="Configuración">
                     <img src="assets/icons/settings.png" onerror="this.style.display='none'"
@@ -668,6 +678,7 @@
         <!-- Mensajes de Notificación -->
         <div class="notifications" id="notifications" aria-live="polite" aria-atomic="false"></div>
     </div>
+
 
     <!-- Scripts globales que aún no están modularizados -->
     <script>

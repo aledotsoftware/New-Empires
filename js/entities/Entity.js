@@ -167,4 +167,33 @@ export class Entity {
             default: return 'rgba(160, 160, 160, 0.3)';
         }
     }
+
+    // Palette: Batching support for Production bars
+    addProductionBarBackgroundToPath(ctx, camera) {
+        const screenX = this._screenX;
+        const screenY = this._screenY;
+        const barWidth = this.size * 2;
+        const barHeight = 4;
+        const barX = screenX - barWidth / 2;
+        // Stack above HP bar (which is at -10 relative to top edge)
+        // Position at -16 (Top -16, Bottom -12) with 2px gap
+        const barY = screenY - this.size - 16;
+        ctx.rect(barX, barY, barWidth, barHeight);
+    }
+
+    addProductionBarForegroundToPath(ctx, camera) {
+        // Duck typing: assumes productionQueue exists if called
+        if (!this.productionQueue || typeof this.productionQueue.getProgress !== 'function') return;
+
+        const progress = this.productionQueue.getProgress();
+        if (progress <= 0) return;
+
+        const screenX = this._screenX;
+        const screenY = this._screenY;
+        const barWidth = this.size * 2;
+        const barHeight = 4;
+        const barX = screenX - barWidth / 2;
+        const barY = screenY - this.size - 16;
+        ctx.rect(barX, barY, barWidth * progress, barHeight);
+    }
 }

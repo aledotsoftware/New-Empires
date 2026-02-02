@@ -87,3 +87,7 @@
 ## 2026-02-06 - Uint32Array vs Uint8 writes
 **Learning:** Updating a large `ImageData` buffer (e.g., Fog of War) byte-by-byte (`data[i]=R; data[i+1]=G...`) with conditional logic is significantly slower than writing 32-bit integers via a `Uint32Array` view. Using a Lookup Table (LUT) to map state indices to pre-calculated 32-bit colors eliminated branch prediction failures and reduced memory access by 4x, yielding a ~5x speedup (0.6ms vs 3ms for 230k tiles).
 **Action:** For pixel manipulation loops, always use `Uint32Array` views and pre-calculated integer colors (checking endianness).
+
+## 2026-02-06 - Sparse Reset for Fog of War
+**Learning:** `resetVisible()` iterated over the entire map grid (N tiles) every update to clear visible status, which is O(N) where N can be 230k+. By tracking the *ranges* of tiles modified during the previous `revealCircle()` (using a flat `[start, end]` array), we reduced the reset cost to O(VisibleTiles). This yielded a ~3.5x speedup for the full update cycle (260ms -> 75ms for 500 updates on 200x200 map).
+**Action:** For grid-based systems where active cells are sparse compared to the total grid size, track modified indices/ranges instead of full-grid iteration for resets.

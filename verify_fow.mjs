@@ -15,14 +15,11 @@ function testFOW() {
 
     // Test reveal circle
     console.log("Revealing circle at (400, 400) with radius 200...");
-    // 400 / 32 = 12.5 -> (12, 12)
-    // Radius 200 / 32 = 6.25 -> ~6 tiles
-    fow.revealCircle(400, 400, 200);
+    fow.revealCircle(400, 400, 200); // 400/40 = 10 cols, rows
 
-    // Tiles around (12, 12) should be VISIBLE
-    if (!fow.isVisible(12, 12)) throw new Error("Tile (12,12) should be VISIBLE");
-    // (10, 10) is within range (dist 2.8 < 6)
+    // Tiles around (10, 10) should be VISIBLE
     if (!fow.isVisible(10, 10)) throw new Error("Tile (10,10) should be VISIBLE");
+    if (!fow.isVisible(11, 10)) throw new Error("Tile (11,10) should be VISIBLE");
 
     // Tiles far away should be HIDDEN
     if (fow.isVisible(50, 50)) throw new Error("Tile (50,50) should be HIDDEN");
@@ -41,9 +38,8 @@ function testFOW() {
     console.log("Updating visibility with mock entity at (2000, 2000)...");
     fow.update(mockEntities);
 
-    // 2000 / 32 = 62.5 -> (62, 62)
-    if (!fow.isVisible(62, 62)) throw new Error("Tile (62,62) should be VISIBLE after update");
-
+    // 2000 / 40 = 50
+    if (!fow.isVisible(50, 50)) throw new Error("Tile (50,50) should be VISIBLE after update");
     // (10, 10) was explored before, should still be explored (not hidden)
     if (!fow.isExplored(10, 10)) throw new Error("Tile (10,10) should still be EXPLORED");
     if (fow.isVisible(10, 10)) throw new Error("Tile (10,10) should NOT be VISIBLE");
@@ -53,3 +49,4 @@ function testFOW() {
 
 // Note: This script is intended to be run in a browser or environment where it can import these modules
 // For now, we just define it for reference.
+testFOW();

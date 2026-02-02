@@ -20,17 +20,26 @@ export class FogOfWar {
 
         // Buffer for offscreen FOW rendering if needed (optional optimization)
         this.isDirty = true;
+
+        // BOLT OPTIMIZATION: Track visible ranges to avoid O(N) iteration in resetVisible
+        // Stores flat pairs of [startIdx, endIdx]
+        this.visibleRanges = [];
     }
 
     /**
      * Resets currently visible tiles to 'EXPLORED' before re-calculating vision.
+     * BOLT OPTIMIZATION: Uses tracked ranges instead of iterating entire grid.
      */
     resetVisible() {
-        for (let i = 0; i < this.totalTiles; i++) {
-            if (this.grid[i] === FOW_STATES.VISIBLE) {
-                this.grid[i] = FOW_STATES.EXPLORED;
-            }
+        // Iterate only previously visible ranges
+        const len = this.visibleRanges.length;
+        for (let i = 0; i < len; i += 2) {
+            const start = this.visibleRanges[i];
+            const end = this.visibleRanges[i + 1];
+            // Using fill is fast (native memset)
+            this.grid.fill(FOW_STATES.EXPLORED, start, end + 1);
         }
+        this.visibleRanges.length = 0;
         this.isDirty = true;
     }
 
@@ -86,6 +95,10 @@ export class FogOfWar {
             // Fill range with VISIBLE
             // Note: Overwriting VISIBLE with VISIBLE is fine and fast.
             this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+
+            // BOLT OPTIMIZATION: Track range for fast reset
+            this.visibleRanges.push(startIdx, endIdx);
+
             this.isDirty = true;
         }
     }

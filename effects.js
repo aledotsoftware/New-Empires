@@ -18,6 +18,12 @@ class Particle {
         this.fadeRate = config.fadeRate || 1;
         this.shape = config.shape || 'circle';
         this.emoji = config.emoji || null;
+
+        // BOLT OPTIMIZATION: Pre-calculate font string
+        if (this.emoji) {
+            const fontSize = (this.size + 0.5) | 0;
+            this._cachedFont = `bold ${fontSize}px Arial`;
+        }
     }
 
     update(deltaTime) {
@@ -34,7 +40,7 @@ class Particle {
         return this.life > 0;
     }
 
-    render(ctx, camera) {
+    render(ctx, camera, lastFont) {
         // BOLT OPTIMIZATION: Truncate to integer
         const screenX = (this.x - camera.x) | 0;
         const screenY = (this.y - camera.y) | 0;
@@ -43,10 +49,11 @@ class Particle {
         ctx.globalAlpha = this.alpha;
 
         if (this.emoji) {
-            // BOLT OPTIMIZATION: Snap size to integer
+            // BOLT OPTIMIZATION: Only set font if changed
             // Float string construction is ~14x slower in JS and hurts glyph caching
-            const fontSize = (this.size + 0.5) | 0;
-            ctx.font = `bold ${fontSize}px Arial`;
+            if (this._cachedFont !== lastFont) {
+                ctx.font = this._cachedFont;
+            }
 
             // textAlign/textBaseline hoisted to ParticleSystem.render
 
@@ -57,6 +64,8 @@ class Particle {
             // Palette: Fill with specific color
             ctx.fillStyle = this.color;
             ctx.fillText(this.emoji, screenX, screenY);
+
+            return this._cachedFont;
         } else {
             ctx.fillStyle = this.color;
 
@@ -74,6 +83,7 @@ class Particle {
                 ctx.closePath();
                 ctx.fill();
             }
+            return lastFont;
         }
     }
 }
@@ -99,7 +109,7 @@ class Ripple {
         return this.life > 0;
     }
 
-    render(ctx, camera) {
+    render(ctx, camera, lastFont) {
         // BOLT OPTIMIZATION: Truncate to integer
         const screenX = (this.x - camera.x) | 0;
         const screenY = (this.y - camera.y) | 0;
@@ -112,6 +122,8 @@ class Ripple {
         // Flatten y to give 3D perspective effect (ellipse)
         ctx.ellipse(screenX, screenY, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
         ctx.stroke();
+
+        return lastFont;
     }
 }
 
@@ -304,16 +316,22 @@ class ParticleSystem {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
+        let currentFont = '';
+
         // BOLT OPTIMIZATION: Standard loop avoids iterator allocation
         for (let i = 0; i < this.particles.length; i++) {
-            this.particles[i].render(ctx, camera);
+            currentFont = this.particles[i].render(ctx, camera, currentFont);
         }
 
         // Reset critical state before next batch (future-proofing)
         ctx.globalAlpha = 1;
 
         for (let i = 0; i < this.projectiles.length; i++) {
-            this.projectiles[i].render(ctx, camera);
+            // Check if projectiles support font caching optimization (duck typing)
+            // If they return undefined (legacy/different class), currentFont becomes undefined,
+            // which correctly forces a reset on next particle that checks against it.
+            const result = this.projectiles[i].render(ctx, camera, currentFont);
+            if (result !== undefined) currentFont = result;
         }
 
         ctx.restore();

@@ -2,7 +2,7 @@
  * SaveManager - Sistema de guardado y carga del juego
  * Maneja persistencia del estado del juego en localStorage
  */
-export class SaveManager {
+class SaveManager {
     constructor() {
         this.SAVE_KEY = 'newempires_save';
         this.VERSION = '1.0';
@@ -350,7 +350,7 @@ export class SaveManager {
 }
 
 // Instancia global
-export const saveManager = new SaveManager();
+const saveManager = new SaveManager();
 
 // Compatibilidad con scripts tradicionales
 if (typeof window !== 'undefined') {

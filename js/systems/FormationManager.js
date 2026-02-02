@@ -6,7 +6,7 @@
 /**
  * Formaciones predefinidas
  */
-export const FORMATIONS = {
+const FORMATIONS = {
     /**
      * Formación en línea horizontal
      * @param {Array} units - Unidades a posicionar
@@ -185,7 +185,7 @@ export const FORMATIONS = {
 /**
  * Clase FormationManager para gestión de formaciones
  */
-export class FormationManager {
+class FormationManager {
     constructor() {
         this.currentFormation = 'box';
         this.spacing = 40;
@@ -243,7 +243,7 @@ export class FormationManager {
 }
 
 // Instancia global para compatibilidad
-export const formationManager = new FormationManager();
+const formationManager = new FormationManager();
 
 // Compatibilidad con scripts tradicionales
 if (typeof window !== 'undefined') {

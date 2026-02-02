@@ -183,6 +183,46 @@ export class Villager extends Unit {
     render(ctx, camera, viewWidth, viewHeight, drawHp) {
         super.render(ctx, camera, viewWidth, viewHeight, drawHp);
 
+        // Palette: Draw Idle Indicator (Zzz)
+        if (this.state === 'IDLE' && this.team === 'player') {
+            const screenX = this._screenX;
+            const screenY = this._screenY;
+
+            // Simple visibility check
+            if (screenX >= -20 && screenX <= viewWidth + 20 && screenY >= -20 && screenY <= viewHeight + 20) {
+                ctx.save(); // Save context to prevent leakage
+
+                // Bobbing animation
+                const time = Date.now();
+                const offsetY = Math.sin(time / 200) * 3; // +/- 3px
+
+                // Position above head (adjust if carrying resource)
+                let iconY = screenY - this.size - 25 + offsetY;
+
+                // If somehow carrying and idle (rare/stuck), shift up
+                if (this.carryAmount > 0 && this.carryType) {
+                    iconY -= 18;
+                }
+
+                const iconSize = 16;
+
+                // Background
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.beginPath();
+                ctx.arc(screenX, iconY + iconSize / 2, iconSize / 2 + 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Icon
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('💤', screenX, iconY + iconSize / 2 + 1);
+
+                ctx.restore(); // Restore context
+            }
+        }
+
         // Palette: Draw carried resource icon
         if (this.carryAmount > 0 && this.carryType) {
             // BOLT OPTIMIZATION: Use cached screen coordinates

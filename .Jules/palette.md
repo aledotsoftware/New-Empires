@@ -67,9 +67,9 @@
 **Action:** Implemented a "Focus Ping" (expanding cyan ripple) that triggers automatically when the camera snaps to a target (Minimap click, "Go to TC", Idle Villager). This draws the eye immediately to the relevant location, reducing the cognitive re-orientation time.
 
 ## 2026-06-04 - [Random Choice & Variety]
-**Learning:** Players often suffer from "choice paralysis" when presented with many similar options (civilizations). Providing a "Random" option reduces the cognitive load of decision-making and adds a layer of replayability and challenge for veteran players.
+**Learning:** Players often suffer from "choice paralysis" when presented with many similar options (civilizations). Providing a "Random" option reduces the cognitive load and adds a layer of replayability and challenge for veteran players.
 **Action:** Added a prominent "Random Civilization" option in the selection grid. It uses a distinct icon (🎲) and provides immediate feedback upon selection (picking a civ and starting the game), removing the friction of manual selection for indecisive players.
 
-## 2026-06-05 - [Idle Unit Visualization]
-**Learning:** Idle workers are wasted economy, but players often miss them in the heat of battle. Relying solely on a UI counter requires the player to constantly check the HUD, pulling focus from the main action.
-**Action:** Implemented a visual "Zzz" indicator (💤) that appears directly above idle villagers in the game world. This provides immediate, non-intrusive feedback about economic inefficiency where the player's eyes are already focused.
+## 2026-06-05 - Fallback to Unicode for Critical Icons
+**Learning:** Relying on external image assets for critical UI controls (like Pause) creates a single point of failure. If an asset fails to load (404), the control becomes unusable or confusing.
+**Action:** Replaced critical control icons with standard Unicode characters (⏸, ▶) wrapped in semantic HTML. This ensures the control remains functional and understandable even if assets fail, and simplifies state toggling logic (text vs image src).

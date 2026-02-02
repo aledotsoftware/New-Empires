@@ -208,8 +208,7 @@
                 <!-- Palette: Pause Button -->
                 <button id="pauseButton" class="btn-secondary" onclick="togglePauseGame()" style="padding:8px 12px;"
                     aria-label="Pausar juego (P)">
-                    <img src="assets/icons/pause.png" alt="Pausa" id="pauseIcon"
-                        style="width: 20px; height: 20px; object-fit: contain;">
+                    <span id="pauseIcon" style="font-size: 20px; line-height: 1;" role="img" aria-label="Pausa">⏸</span>
                     <div class="btn-tooltip" role="tooltip">
                         <div class="tooltip-header">Pausar <span class="tooltip-hotkey">[P]</span></div>
                         <div class="tooltip-desc">Detener temporalmente el juego</div>
@@ -220,7 +219,7 @@
                 <button id="returnToStatsBtn" class="btn-secondary hidden"
                     style="padding:8px 12px; border-color: var(--gold); background: var(--stone-dark); color: var(--gold);"
                     aria-label="Volver a los resultados">
-                    <img src="assets/icons/trophy.png" alt="" class="btn-icon"> Resultados
+                    <span class="btn-icon" style="font-size: 1.2em;" role="img" aria-label="Copa">🏆</span> Resultados
                 </button>
 
                 <!-- Palette: Idle Villager Indicator (Hidden by default) -->

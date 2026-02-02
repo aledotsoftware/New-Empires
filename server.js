@@ -7,9 +7,11 @@ const PORT = process.env.PORT || 3000;
 // Security: Rate Limiting Configuration
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 300; // 300 requests per minute per IP
+const MAX_TRACKED_IPS = 10000; // Security: Limit memory usage to prevent DoS
 const ipCounts = new Map();
 
-// Periodic cleanup of rate limit data (every 5 minutes)
+// Periodic cleanup of rate limit data (every 1 minute)
+// Security: cleanup interval matched to window to remove stale data faster
 setInterval(() => {
     const now = Date.now();
     for (const [ip, data] of ipCounts.entries()) {
@@ -17,7 +19,7 @@ setInterval(() => {
             ipCounts.delete(ip);
         }
     }
-}, 5 * 60 * 1000);
+}, 60 * 1000);
 
 // Whitelist of allowed extensions
 const MIME_TYPES = {
@@ -56,6 +58,14 @@ const server = http.createServer((req, res) => {
     const now = Date.now();
 
     let clientData = ipCounts.get(ip);
+
+    // Security: Prevent memory exhaustion by capping tracked IPs
+    if (!clientData && ipCounts.size >= MAX_TRACKED_IPS) {
+        // FIFO eviction: Remove oldest entry to make space
+        const oldestIp = ipCounts.keys().next().value;
+        ipCounts.delete(oldestIp);
+    }
+
     if (!clientData || now - clientData.startTime > RATE_LIMIT_WINDOW_MS) {
         clientData = { count: 0, startTime: now };
     }

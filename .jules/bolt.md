@@ -87,3 +87,7 @@
 ## 2026-02-06 - Uint32Array vs Uint8 writes
 **Learning:** Updating a large `ImageData` buffer (e.g., Fog of War) byte-by-byte (`data[i]=R; data[i+1]=G...`) with conditional logic is significantly slower than writing 32-bit integers via a `Uint32Array` view. Using a Lookup Table (LUT) to map state indices to pre-calculated 32-bit colors eliminated branch prediction failures and reduced memory access by 4x, yielding a ~5x speedup (0.6ms vs 3ms for 230k tiles).
 **Action:** For pixel manipulation loops, always use `Uint32Array` views and pre-calculated integer colors (checking endianness).
+
+## 2026-02-06 - Constant Hoisting & Property Access
+**Learning:** In extremely hot loops like `Unit.moveTowardsTarget`, repeated property access on nested objects (e.g. `gridMap.invTileSize`) adds up. Replacing dynamic lookups with a module-level constant (`1 / TILE_SIZE`) and hoisting `gridMap` checks reduced execution time by ~8-15% in benchmarks.
+**Action:** For per-frame/per-entity calculations, prefer module-level constants over object properties where values are static.

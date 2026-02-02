@@ -7,6 +7,10 @@ def verify_movement():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
+        # Capture console logs
+        page.on("console", lambda msg: print(f"Browser Console: {msg.text}"))
+        page.on("pageerror", lambda exc: print(f"Browser Error: {exc}"))
+
         # 1. Load the game
         page.goto("http://localhost:3000")
 
@@ -43,8 +47,16 @@ def verify_movement():
 
 
         # Wait for game canvas
-        page.wait_for_selector("#gameCanvas", state="visible", timeout=20000)
-        print("Game canvas visible")
+        try:
+            page.wait_for_selector("#gameCanvas", state="visible", timeout=20000)
+            print("Game canvas visible")
+        except Exception as e:
+            print(f"Error waiting for canvas: {e}")
+            page.screenshot(path="verification/error_canvas.png")
+            # Dump HTML to see what's going on
+            with open("verification/error_page.html", "w") as f:
+                f.write(page.content())
+            raise e
 
         time.sleep(3) # Wait for init and animations
 
@@ -58,13 +70,6 @@ def verify_movement():
         print(f"Viewport center: {center_x}, {center_y}")
 
         # Click near center to select a unit
-        # Units spawn around 400,400. Camera centers on 400,400.
-        # So units are near center of screen.
-
-        # Try clicking a few spots if first one fails?
-        # Villagers are at radius 100.
-        # Let's click at center_x + 80, center_y
-
         print(f"Clicking at {center_x + 80}, {center_y}")
         page.mouse.click(center_x + 80, center_y)
         time.sleep(0.5)
@@ -72,7 +77,7 @@ def verify_movement():
         # Take screenshot of selection
         page.screenshot(path="verification/step1_selected.png")
 
-        # Order move (Right click) to (center_x + 200, center_y + 100)
+        # Order move (Right click)
         print(f"Right clicking at {center_x + 200}, {center_y + 100}")
         page.mouse.click(center_x + 200, center_y + 100, button="right")
 

@@ -1,5 +1,5 @@
 import { Entity } from './Entity.js';
-import { CONFIG } from '../core/constants.js';
+import { CONFIG, TILE_SIZE } from '../core/constants.js';
 
 /**
  * Unit - Clase base para unidades móviles
@@ -7,6 +7,8 @@ import { CONFIG } from '../core/constants.js';
  */
 // OPTIMIZATION: Constant for aggro radius squared to avoid recalculation
 const AGGRO_RADIUS_SQ = 200 * 200;
+// BOLT OPTIMIZATION: Constant inverse tile size for faster math
+const INV_TILE_SIZE = 1 / TILE_SIZE;
 
 export class Unit extends Entity {
     constructor(x, y, team) {
@@ -123,38 +125,27 @@ export class Unit extends Entity {
             // Obtener modificador de terreno
             let speedModifier = 1.0;
 
-            // OPTIMIZATION: Hoist grid calculation to reuse in collision logic
-            // Avoids re-calculating currCol/currRow in the collision block (~30% faster in hot path)
-            const gridMap = game && game.gridMap;
-            let currCol = -1;
-            let currRow = -1;
-            let invTileSize = 0;
+            // BOLT OPTIMIZATION: Use constant INV_TILE_SIZE to avoid property lookups
+            // Entities are clamped to positive coordinates in update()
+            const currCol = (this.x * INV_TILE_SIZE) | 0;
+            const currRow = (this.y * INV_TILE_SIZE) | 0;
 
-            if (gridMap) {
-                invTileSize = gridMap.invTileSize;
+            if (currCol !== this._lastGridCol || currRow !== this._lastGridRow) {
+                this._lastGridCol = currCol;
+                this._lastGridRow = currRow;
 
-                // OPTIMIZATION: Bitwise OR is faster than Math.floor for positive coordinates
-                // Entities are clamped to positive coordinates in update()
-                currCol = (this.x * invTileSize) | 0;
-                currRow = (this.y * invTileSize) | 0;
-
-                if (currCol !== this._lastGridCol || currRow !== this._lastGridRow) {
-                    this._lastGridCol = currCol;
-                    this._lastGridRow = currRow;
-
-                    if (game.terrainMap) {
-                        // OPTIMIZATION: Use direct grid access to avoid redundant coordinate calculation
-                        const terrainData = game.terrainMap.getTerrainDataByGrid(currCol, currRow);
+                // Only check game.terrainMap if needed (hoisted check)
+                if (game && game.terrainMap) {
+                    // OPTIMIZATION: Use direct grid access
+                    // We can trust getTerrainDataByGrid handles bounds or returns valid data
+                    const terrainData = game.terrainMap.getTerrainDataByGrid(currCol, currRow);
+                    if (terrainData) {
                         this._cachedTerrainSpeed = terrainData.movementSpeed;
                         this._cachedTerrainData = terrainData;
                     }
                 }
-                speedModifier = this._cachedTerrainSpeed;
-            } else if (game && game.terrainMap) {
-                // Fallback por seguridad
-                const terrainData = game.terrainMap.getTerrainDataAt(this.x, this.y);
-                speedModifier = terrainData.movementSpeed;
             }
+            speedModifier = this._cachedTerrainSpeed;
 
             const effectiveSpeed = this.speed * speedModifier;
 
@@ -166,28 +157,26 @@ export class Unit extends Entity {
             let moveY = dy * moveStep;
 
             // Colisiones con edificios (GridMap)
-            if (gridMap) {
+            // BOLT OPTIMIZATION: Only access gridMap if we have moved enough to potentially cross a tile
+            // But we must check if game has gridMap first
+            if (game && game.gridMap) {
+                const gridMap = game.gridMap;
+
                 // Verificar nueva posición propuesta
                 const nextX = this.x + moveX;
                 const nextY = this.y + moveY;
 
-                // OPTIMIZATION: Inlined snapToGrid to avoid object allocation (10x faster)
-                // Usar multiplicación por invTileSize en lugar de división (más rápido)
-                // Using bitwise OR for truncation
-                const nextCol = (nextX * invTileSize) | 0;
-                const nextRow = (nextY * invTileSize) | 0;
+                // OPTIMIZATION: Use constant INV_TILE_SIZE
+                const nextCol = (nextX * INV_TILE_SIZE) | 0;
+                const nextRow = (nextY * INV_TILE_SIZE) | 0;
 
                 // OPTIMIZATION: Skip collision check if moving within the same tile (~97% of frames)
-                // If we are currently in a valid (non-building) tile, staying in it is safe.
                 if (nextCol !== currCol || nextRow !== currRow) {
                     // BOLT OPTIMIZATION: Use collisionGrid (Uint8Array) for collision checks
-                    // Avoids object access on grid[] and property check (.isBuilding)
-                    // This is ~1.2-1.3x faster for this block in benchmarks.
                     const collisionGrid = gridMap.collisionGrid;
                     const cols = gridMap.cols;
 
                     // OPTIMIZATION: Inline getIndex to avoid method call overhead
-                    // const cellIndex = gridMap.getIndex(nextCol, nextRow);
                     const cellIndex = nextRow * cols + nextCol;
 
                     // Si el índice es válido y hay algo en la celda
@@ -196,19 +185,16 @@ export class Unit extends Entity {
                         if (collisionGrid[cellIndex] !== 0) {
                             // Colisión simple: Intentar deslizarse
                             // OPTIMIZATION: Reuse calculated col/row indices
-                            // We avoid 2 Math.floor calls here by using currCol/currRow computed above
 
                             // Verificar movimiento solo en X
-                            // nextX col is 'nextCol', current y row is 'currRow'
                             const indexX = currRow * cols + nextCol;
-                            if (collisionGrid[indexX] !== 0) {
+                            if (indexX >= 0 && indexX < collisionGrid.length && collisionGrid[indexX] !== 0) {
                                 moveX = 0;
                             }
 
                             // Verificar movimiento solo en Y
-                            // current x col is 'currCol', nextY row is 'nextRow'
                             const indexY = nextRow * cols + currCol;
-                            if (collisionGrid[indexY] !== 0) {
+                            if (indexY >= 0 && indexY < collisionGrid.length && collisionGrid[indexY] !== 0) {
                                 moveY = 0;
                             }
                         }

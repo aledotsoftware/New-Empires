@@ -2618,6 +2618,33 @@ export class Game {
             this.ctx.fill();
         }
 
+        // Palette: Batch Production bars
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.beginPath();
+        let hasProdBars = false;
+
+        for (let i = 0; i < renderLen; i++) {
+            const entity = this._renderCache[i];
+            if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
+                entity.addProductionBarBackgroundToPath(this.ctx, this.camera);
+                hasProdBars = true;
+            }
+        }
+
+        if (hasProdBars) {
+            this.ctx.fill();
+
+            this.ctx.fillStyle = '#4299e1'; // Blue
+            this.ctx.beginPath();
+            for (let i = 0; i < renderLen; i++) {
+                const entity = this._renderCache[i];
+                if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
+                    entity.addProductionBarForegroundToPath(this.ctx, this.camera);
+                }
+            }
+            this.ctx.fill();
+        }
+
         // Dibujar selección
         this.drawSelection();
 

@@ -20,17 +20,42 @@ export class FogOfWar {
 
         // Buffer for offscreen FOW rendering if needed (optional optimization)
         this.isDirty = true;
+
+        // BOLT OPTIMIZATION: Sparse visibility tracking
+        // Stores [startIdx, endIdx, startIdx, endIdx...] for visible ranges
+        // Allows resetVisible to be O(VisibleTiles) instead of O(TotalTiles)
+        this.visibleRanges = [];
     }
 
     /**
      * Resets currently visible tiles to 'EXPLORED' before re-calculating vision.
      */
     resetVisible() {
-        for (let i = 0; i < this.totalTiles; i++) {
-            if (this.grid[i] === FOW_STATES.VISIBLE) {
-                this.grid[i] = FOW_STATES.EXPLORED;
+        // BOLT OPTIMIZATION: Only update previously visible ranges
+        // Replaces O(TotalTiles) loop (~230k iters) with O(VisibleRanges) loop (~500 iters)
+        const ranges = this.visibleRanges;
+        const len = ranges.length;
+
+        // Check if we have ranges to clear (normal case)
+        if (len > 0) {
+            for (let i = 0; i < len; i += 2) {
+                const start = ranges[i];
+                const end = ranges[i + 1];
+                // Use fill for fast block update
+                this.grid.fill(FOW_STATES.EXPLORED, start, end + 1);
+            }
+            // Reset buffer without deallocation
+            ranges.length = 0;
+        } else {
+            // Fallback/Safety: If no ranges tracked but grid might be dirty (e.g. initial load),
+            // perform full scan. This should rarely happen in steady state.
+            for (let i = 0; i < this.totalTiles; i++) {
+                if (this.grid[i] === FOW_STATES.VISIBLE) {
+                    this.grid[i] = FOW_STATES.EXPLORED;
+                }
             }
         }
+
         this.isDirty = true;
     }
 
@@ -86,6 +111,10 @@ export class FogOfWar {
             // Fill range with VISIBLE
             // Note: Overwriting VISIBLE with VISIBLE is fine and fast.
             this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+
+            // BOLT OPTIMIZATION: Track visible range for efficient reset
+            this.visibleRanges.push(startIdx, endIdx);
+
             this.isDirty = true;
         }
     }

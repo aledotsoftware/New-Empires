@@ -87,3 +87,7 @@
 ## 2026-02-06 - Uint32Array vs Uint8 writes
 **Learning:** Updating a large `ImageData` buffer (e.g., Fog of War) byte-by-byte (`data[i]=R; data[i+1]=G...`) with conditional logic is significantly slower than writing 32-bit integers via a `Uint32Array` view. Using a Lookup Table (LUT) to map state indices to pre-calculated 32-bit colors eliminated branch prediction failures and reduced memory access by 4x, yielding a ~5x speedup (0.6ms vs 3ms for 230k tiles).
 **Action:** For pixel manipulation loops, always use `Uint32Array` views and pre-calculated integer colors (checking endianness).
+
+## 2026-02-07 - Canvas State Caching (Font)
+**Learning:** Assigning `ctx.font` every frame forces the browser to parse the CSS font string and invalidate text metrics, even if the value is identical. In particle systems with many identical text particles (e.g. resource popups), checking the current font state against the cached value before assignment reduced redundant sets from N to 1 per batch.
+**Action:** Track critical Canvas state (like `font`, `fillStyle`, `globalAlpha`) in the render loop and only re-assign when values actually change.

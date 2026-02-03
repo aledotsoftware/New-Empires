@@ -62,18 +62,6 @@
 **Learning:** Players need to see exactly what units are queued and have the ability to cancel specific orders. A simple text summary (e.g., "+2 in queue") hides critical information and prevents granular control.
 **Action:** Replaced the text summary with an interactive visual queue. Queued units are now displayed as clickable icons with tooltips. Clicking an icon cancels that specific order and refunds the resources, providing immediate and transparent feedback.
 
-## 2026-06-03 - [Focus Ping Feedback]
-**Learning:** In RTS games, camera jumps (via minimap, hotkeys, or buttons) can be disorienting. Players instantly lose context of where they were and need a visual anchor to understand where they have arrived and what they should be looking at.
-**Action:** Implemented a "Focus Ping" (expanding cyan ripple) that triggers automatically when the camera snaps to a target (Minimap click, "Go to TC", Idle Villager). This draws the eye immediately to the relevant location, reducing the cognitive re-orientation time.
-
-## 2026-06-04 - [Random Choice & Variety]
-**Learning:** Players often suffer from "choice paralysis" when presented with many similar options (civilizations). Providing a "Random" option reduces the cognitive load and adds a layer of replayability and challenge for veteran players.
-**Action:** Added a prominent "Random Civilization" option in the selection grid. It uses a distinct icon (🎲) and provides immediate feedback upon selection (picking a civ and starting the game), removing the friction of manual selection for indecisive players.
-
-## 2026-06-05 - Fallback to Unicode for Critical Icons
-**Learning:** Relying on external image assets for critical UI controls (like Pause) creates a single point of failure. If an asset fails to load (404), the control becomes unusable or confusing.
-**Action:** Replaced critical control icons with standard Unicode characters (⏸, ▶) wrapped in semantic HTML. This ensures the control remains functional and understandable even if assets fail, and simplifies state toggling logic (text vs image src).
-
-## 2026-06-06 - [Map Seed Sharing]
-**Learning:** In procedural games, players often want to share interesting map layouts with friends or replay a specific scenario. Hiding the generation seed prevents this social interaction and reduces replay value.
-**Action:** Exposed the map seed in the in-game settings menu with a "Copy to Clipboard" button. This small addition empowers players to share their experiences ("Try this map!") without needing complex save file sharing mechanisms.
+## 2026-06-03 - Visual Rally Points
+**Learning:** Invisible game mechanics (like Rally Points) create uncertainty. Players right-click buildings expecting a response, but without visual feedback (a line or marker), they cannot confirm if the command was registered or where units will go.
+**Action:** Implemented a dashed line and flag marker connecting the selected building to its rally point. This visualizes the invisible "destination" state, providing immediate confirmation of the action and clarity on future unit movements.

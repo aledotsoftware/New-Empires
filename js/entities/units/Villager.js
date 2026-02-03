@@ -192,8 +192,9 @@ export class Villager extends Unit {
             if (screenX >= -20 && screenX <= viewWidth + 20 && screenY >= -20 && screenY <= viewHeight + 20) {
                 ctx.save(); // Save context to prevent leakage
 
-                // Bobbing animation
-                const time = Date.now();
+                // BOLT OPTIMIZATION: Use cached game.renderTime instead of Date.now()
+                // Eliminates 1 system call per idle villager per frame
+                const time = (typeof game !== 'undefined' && game && game.renderTime) ? game.renderTime : Date.now();
                 const offsetY = Math.sin(time / 200) * 3; // +/- 3px
 
                 // Position above head (adjust if carrying resource)

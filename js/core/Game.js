@@ -2478,6 +2478,10 @@ export class Game {
     }
 
     render() {
+        // BOLT OPTIMIZATION: Cache frame timestamp once per render
+        // Entities use this for animations instead of calling Date.now() per-entity
+        this.renderTime = Date.now();
+
         // Limpiar canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 

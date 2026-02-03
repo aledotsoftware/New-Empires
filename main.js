@@ -701,10 +701,49 @@ function createTechItemElement(tech, status, isInteractive) {
     techItem.appendChild(costDiv);
 
     if (status.researching) {
-        const progDiv = document.createElement('div');
-        progDiv.className = 'tech-progress';
-        progDiv.textContent = 'Investigando...';
-        techItem.appendChild(progDiv);
+        let percent = 0;
+        let remaining = 0;
+        let total = 1; // Avoid divide by zero
+
+        // Palette: Calculate real-time progress
+        if (typeof game !== 'undefined' && game && game.techManager && game.techManager.researchQueue) {
+            const item = game.techManager.researchQueue.find(i => i.techId === tech.id);
+            if (item) {
+                remaining = item.timer;
+                if (typeof tech.researchTime === 'number') {
+                    total = tech.researchTime;
+                } else if (typeof TECHNOLOGIES !== 'undefined' && TECHNOLOGIES[tech.id]) {
+                    total = TECHNOLOGIES[tech.id].researchTime;
+                }
+                percent = Math.max(0, Math.min(100, (1 - remaining / total) * 100));
+            }
+        }
+
+        const progContainer = document.createElement('div');
+        progContainer.className = 'tech-progress-container';
+        // Accessibility Attributes
+        progContainer.setAttribute('role', 'progressbar');
+        progContainer.setAttribute('aria-valuenow', Math.floor(percent));
+        progContainer.setAttribute('aria-valuemin', '0');
+        progContainer.setAttribute('aria-valuemax', '100');
+        progContainer.setAttribute('aria-label', `Investigando ${tech.name}: ${Math.floor(percent)}% completado`);
+
+        const progFill = document.createElement('div');
+        progFill.className = 'tech-progress-fill';
+        progFill.style.width = `${percent}%`;
+
+        const progText = document.createElement('div');
+        progText.className = 'tech-progress-text';
+        // Show remaining seconds if < 60s, else %
+        if (remaining > 0 && remaining < 60) {
+            progText.textContent = `${Math.ceil(remaining)}s`;
+        } else {
+            progText.textContent = `${Math.floor(percent)}%`;
+        }
+
+        progContainer.appendChild(progFill);
+        progContainer.appendChild(progText);
+        techItem.appendChild(progContainer);
     }
 
     return techItem;

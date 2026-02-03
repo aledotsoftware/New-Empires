@@ -99,3 +99,7 @@
 ## 2026-02-08 - Exponentiation vs Multiplication
 **Learning:** In high-frequency distance checks (every frame per entity), using `x ** 2` was measurably slower (~3.5x in micro-benchmarks) than simple multiplication `x * x`. While modern JS engines optimize `Math.pow` well, simple multiplication remains the fastest path for squaring and reduces overhead in the critical path of collision/cursor logic.
 **Action:** Prefer `x * x` over `x ** 2` or `Math.pow(x, 2)` in tight loops like physics or rendering.
+
+## 2026-02-03 - Minimap Path Caching
+**Learning:** Recreating `Path2D` objects and iterating the full grid every frame for minimap FOW was computationally expensive. Caching the paths and using a dirty flag tied to the FOW update interval (100ms) eliminated ~83% of the overhead in that specific function.
+**Action:** For any overlay that updates less frequently than the frame rate (like FOW or Minimap), use dirty flags and cached `Path2D` objects or bitmap buffers to avoid per-frame reconstruction.

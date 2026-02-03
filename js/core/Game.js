@@ -375,6 +375,7 @@ export class Game {
                 this._minimapBufferCanvas.width = this.minimap.width;
                 this._minimapBufferCanvas.height = this.minimap.height;
                 this._minimapDirty = true;
+                this._minimapFOWDirty = true;
             }
         }
 
@@ -392,6 +393,7 @@ export class Game {
         this.playerBuildingCounts = {};
 
         this._minimapDirty = true;
+        this._minimapFOWDirty = true;
 
         // Crear mapa
         this.generateMap();
@@ -1941,6 +1943,7 @@ export class Game {
 
                 this.fow.update(this._visionEntitiesCache);
                 this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
+                this._minimapFOWDirty = true; // Rebuild FOW Paths
 
                 // BOLT OPTIMIZATION: Update FOW bitmap buffer
                 this._updateFOWBuffer();

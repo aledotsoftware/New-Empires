@@ -157,6 +157,8 @@ export class Game {
         this._fowBufferCanvas.height = this.fow.rows;
         this._fowBufferCtx = this._fowBufferCanvas.getContext('2d', { alpha: true });
         this._fowImageData = this._fowBufferCtx.createImageData(this.fow.cols, this.fow.rows);
+        // BOLT OPTIMIZATION: Cache Uint32Array view to avoid allocation in hot path
+        this._fowImageData32 = new Uint32Array(this._fowImageData.data.buffer);
 
         // BOLT OPTIMIZATION: Initialize FOW Color Lookup Table (endian-safe)
         // We use a Uint32Array view to write pixels 4x faster (1 write vs 4 writes)
@@ -2313,10 +2315,9 @@ export class Game {
     _updateFOWBuffer() {
         if (!this.fow || !this._fowImageData) return;
 
-        // BOLT OPTIMIZATION: Use Uint32Array view for 4x faster writes and 1/4th array access
-        // Also uses a Lookup Table (LUT) to eliminate branch prediction failures inside the loop.
-        // Benchmark: ~5x faster on large maps.
-        const data32 = new Uint32Array(this._fowImageData.data.buffer);
+        // BOLT OPTIMIZATION: Use cached Uint32Array view (created in constructor)
+        // Avoids allocation overhead (~10 allocations/sec at 100ms update interval)
+        const data32 = this._fowImageData32;
         const grid = this.fow.grid;
         const len = this.fow.totalTiles;
         const lut = this._fowColorLUT;
@@ -2331,8 +2332,12 @@ export class Game {
     drawFOW() {
         if (!this.fow || !this._fowBufferCanvas) return;
 
-        // BOLT OPTIMIZATION: Single drawImage call instead of thousands of Path2D rects.
-        // The browser handles the interpolation and scaling efficiently.
+        // BOLT OPTIMIZATION: Disable smoothing to prevent blurry FOW edges
+        // Also slightly faster (skips interpolation calculations)
+        const wasSmoothing = this.ctx.imageSmoothingEnabled;
+        this.ctx.imageSmoothingEnabled = false;
+
+        // Single drawImage call instead of thousands of Path2D rects.
         this.ctx.drawImage(
             this._fowBufferCanvas,
             this.camera.x / TILE_SIZE,
@@ -2343,6 +2348,9 @@ export class Game {
             this.viewWidth,
             this.viewHeight
         );
+
+        // Restore smoothing for other draw operations
+        this.ctx.imageSmoothingEnabled = wasSmoothing;
     }
 
     drawTerrain() {

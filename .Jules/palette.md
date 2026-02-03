@@ -73,3 +73,7 @@
 ## 2026-06-05 - Fallback to Unicode for Critical Icons
 **Learning:** Relying on external image assets for critical UI controls (like Pause) creates a single point of failure. If an asset fails to load (404), the control becomes unusable or confusing.
 **Action:** Replaced critical control icons with standard Unicode characters (⏸, ▶) wrapped in semantic HTML. This ensures the control remains functional and understandable even if assets fail, and simplifies state toggling logic (text vs image src).
+
+## 2026-06-06 - [Map Seed Sharing]
+**Learning:** In procedural games, players often want to share interesting map layouts with friends or replay a specific scenario. Hiding the generation seed prevents this social interaction and reduces replay value.
+**Action:** Exposed the map seed in the in-game settings menu with a "Copy to Clipboard" button. This small addition empowers players to share their experiences ("Try this map!") without needing complex save file sharing mechanisms.

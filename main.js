@@ -169,6 +169,19 @@ window.showSettings = function () {
         }
     }
 
+    // Palette: Map Info Section Logic
+    const mapInfoSection = document.getElementById('mapInfoSection');
+    const mapSeedValue = document.getElementById('mapSeedValue');
+
+    if (mapInfoSection && mapSeedValue) {
+        if (game && game.mapConfig && game.mapConfig.seed) {
+            mapInfoSection.classList.remove('hidden');
+            mapSeedValue.textContent = game.mapConfig.seed;
+        } else {
+            mapInfoSection.classList.add('hidden');
+        }
+    }
+
     // Mover foco al modal y activar trap
     setTimeout(() => FocusManager.trapFocus(screen), 50);
 };
@@ -1568,6 +1581,78 @@ function populateCivilizations() {
 
 
 // ===== EVENT LISTENERS =====
+
+/**
+ * Palette: Copy Map Seed to Clipboard
+ */
+window.copyMapSeed = function () {
+    const seedEl = document.getElementById('mapSeedValue');
+    if (!seedEl || seedEl.textContent === '-') return;
+
+    const seed = seedEl.textContent;
+    const btn = document.getElementById('copySeedBtn');
+
+    // Helper to show visual feedback
+    const showFeedback = () => {
+        if (!btn) return;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✅ Copiado!';
+        btn.style.borderColor = '#48bb78'; // Green
+        btn.style.color = '#48bb78';
+
+        if (typeof soundManager !== 'undefined') {
+            soundManager.play('click');
+        }
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.borderColor = '';
+            btn.style.color = '';
+        }, 2000);
+    };
+
+    // Try Clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(seed).then(() => {
+            showFeedback();
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            fallbackCopy(seed, showFeedback);
+        });
+    } else {
+        fallbackCopy(seed, showFeedback);
+    }
+};
+
+function fallbackCopy(text, onSuccess) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // Ensure it's not visible but part of DOM
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            onSuccess();
+        } else {
+            if (window.game && window.game.showNotification) {
+                window.game.showNotification('Error al copiar semilla', 'error');
+            }
+        }
+    } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+    }
+
+    document.body.removeChild(textArea);
+}
 
 const initApp = async () => {
     debugLogger.info('DOM cargado, inicializando juego...', 'game');

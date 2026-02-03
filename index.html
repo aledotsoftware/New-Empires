@@ -593,6 +593,20 @@
                         </div>
                     </div>
 
+                    <!-- Palette: Map Info Section -->
+                    <div id="mapInfoSection" class="hidden" style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
+                        <h3 style="margin-bottom: 20px; color: #d4af37;">🗺️ Mapa</h3>
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 0.8rem; color: #a0aec0;">Semilla (Seed)</span>
+                                <span id="mapSeedValue" style="font-family: monospace; color: #e8d48b; font-weight: bold; font-size: 1.1rem; user-select: all;">-</span>
+                            </div>
+                            <button id="copySeedBtn" class="btn-secondary" onclick="copyMapSeed()" style="padding: 6px 12px; font-size: 0.9rem;" aria-label="Copiar semilla al portapapeles">
+                                📋 Copiar
+                            </button>
+                        </div>
+                    </div>
+
                     <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
                         <h3 style="margin-bottom: 20px; color: #d4af37;">💾 Partida</h3>
 

@@ -1486,6 +1486,12 @@ export class Game {
                     const msg = missing ? `Recursos insuficientes: ${missing}` : 'Recursos insuficientes';
                     this.showNotification(msg, 'error');
 
+                    // Palette: Visual feedback for resources
+                    const type = option.dataset.building;
+                    if (type && CONFIG.COSTS[type]) {
+                        this.flashMissingResources(CONFIG.COSTS[type]);
+                    }
+
                     return;
                 }
 

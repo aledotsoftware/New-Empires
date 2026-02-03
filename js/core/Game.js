@@ -2596,60 +2596,57 @@ export class Game {
             this._renderCache[i].render(this.ctx, this.camera, this.viewWidth, this.viewHeight, false, false);
         }
 
-        // OPTIMIZATION: Batch HP bars (Pass 2)
-        // Reduces context state changes and draw calls significantly (~14x speedup in benchmarks)
+        // BOLT OPTIMIZATION: Batch HP & Production Backgrounds (Pass 3)
+        // Fused loop to reduce array iterations and draw calls. Both use the same semi-transparent black.
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         this.ctx.beginPath();
-        let hasHpBars = false;
+        let hasBackgrounds = false;
 
+        for (let i = 0; i < renderLen; i++) {
+            const entity = this._renderCache[i];
+
+            // HP Bar Background
+            if (entity.hp < entity.maxHp) {
+                entity.addHpBarBackgroundToPath(this.ctx, this.camera);
+                hasBackgrounds = true;
+            }
+
+            // Production Bar Background
+            if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
+                entity.addProductionBarBackgroundToPath(this.ctx, this.camera);
+                hasBackgrounds = true;
+            }
+        }
+
+        if (hasBackgrounds) {
+            this.ctx.fill();
+        }
+
+        // Batch HP Foreground (Pass 4)
+        this.ctx.fillStyle = '#48bb78';
+        this.ctx.beginPath();
+        let hasHpFg = false;
         for (let i = 0; i < renderLen; i++) {
             const entity = this._renderCache[i];
             if (entity.hp < entity.maxHp) {
-                entity.addHpBarBackgroundToPath(this.ctx, this.camera);
-                hasHpBars = true;
+                entity.addHpBarForegroundToPath(this.ctx, this.camera);
+                hasHpFg = true;
             }
         }
+        if (hasHpFg) this.ctx.fill();
 
-        if (hasHpBars) {
-            this.ctx.fill();
-
-            this.ctx.fillStyle = '#48bb78';
-            this.ctx.beginPath();
-            for (let i = 0; i < renderLen; i++) {
-                const entity = this._renderCache[i];
-                if (entity.hp < entity.maxHp) {
-                    entity.addHpBarForegroundToPath(this.ctx, this.camera);
-                }
-            }
-            this.ctx.fill();
-        }
-
-        // Palette: Batch Production bars
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        // Batch Production Foreground (Pass 5)
+        this.ctx.fillStyle = '#4299e1'; // Blue
         this.ctx.beginPath();
-        let hasProdBars = false;
-
+        let hasProdFg = false;
         for (let i = 0; i < renderLen; i++) {
             const entity = this._renderCache[i];
             if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
-                entity.addProductionBarBackgroundToPath(this.ctx, this.camera);
-                hasProdBars = true;
+                entity.addProductionBarForegroundToPath(this.ctx, this.camera);
+                hasProdFg = true;
             }
         }
-
-        if (hasProdBars) {
-            this.ctx.fill();
-
-            this.ctx.fillStyle = '#4299e1'; // Blue
-            this.ctx.beginPath();
-            for (let i = 0; i < renderLen; i++) {
-                const entity = this._renderCache[i];
-                if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
-                    entity.addProductionBarForegroundToPath(this.ctx, this.camera);
-                }
-            }
-            this.ctx.fill();
-        }
+        if (hasProdFg) this.ctx.fill();
 
         // Dibujar selección
         this.drawSelection();

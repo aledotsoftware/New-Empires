@@ -61,3 +61,7 @@
 ## 2026-06-02 - Visual Production Queue
 **Learning:** Players need to see exactly what units are queued and have the ability to cancel specific orders. A simple text summary (e.g., "+2 in queue") hides critical information and prevents granular control.
 **Action:** Replaced the text summary with an interactive visual queue. Queued units are now displayed as clickable icons with tooltips. Clicking an icon cancels that specific order and refunds the resources, providing immediate and transparent feedback.
+
+## 2026-06-03 - Visual Rally Points
+**Learning:** Invisible game mechanics (like Rally Points) create uncertainty. Players right-click buildings expecting a response, but without visual feedback (a line or marker), they cannot confirm if the command was registered or where units will go.
+**Action:** Implemented a dashed line and flag marker connecting the selected building to its rally point. This visualizes the invisible "destination" state, providing immediate confirmation of the action and clarity on future unit movements.

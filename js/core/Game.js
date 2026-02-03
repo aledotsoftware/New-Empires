@@ -160,6 +160,12 @@ export class Game {
         // BOLT OPTIMIZATION: Cache Uint32Array view to avoid allocation in hot path
         this._fowImageData32 = new Uint32Array(this._fowImageData.data.buffer);
 
+        // BOLT OPTIMIZATION: Pre-fill buffer with black (HIDDEN state) at init time
+        // This avoids expensive first-frame full update (e.g., 230,400 iterations on ludicrous map)
+        // HIDDEN color is RGBA(0,0,0,255) = 0xFF000000 in little-endian
+        this._fowImageData32.fill(0xFF000000);
+        this._fowBufferCtx.putImageData(this._fowImageData, 0, 0);
+
         // BOLT OPTIMIZATION: Initialize FOW Color Lookup Table (endian-safe)
         // We use a Uint32Array view to write pixels 4x faster (1 write vs 4 writes)
         // This requires pre-calculating the 32-bit integer values for each state.
@@ -2324,24 +2330,19 @@ export class Game {
         const lut = this._fowColorLUT;
 
         // BOLT OPTIMIZATION: Incremental update using visible ranges
-        // Instead of iterating ALL tiles (e.g., 40,000 for normal map),
-        // we only update tiles that actually changed:
-        // 1. Previous visible tiles (now EXPLORED)
-        // 2. Current visible tiles (now VISIBLE)
+        // Buffer is pre-initialized with HIDDEN (black), so we only need to update changed tiles
 
         const prevRanges = this.fow._previousVisibleRanges;
         const currRanges = this.fow.visibleRanges;
 
-        // If this is the first frame or no ranges exist, do full update
-        if (!prevRanges || (prevRanges.length === 0 && currRanges.length === 0)) {
-            // Full update fallback (only on first frame or if no entities exist)
-            const len = this.fow.totalTiles;
-            for (let i = 0; i < len; i++) {
-                data32[i] = lut[grid[i]];
-            }
-        } else {
-            // Incremental update: only update changed ranges
-            // Update previous visible ranges (VISIBLE -> EXPLORED)
+        // Skip if nothing to update (buffer is pre-initialized with HIDDEN)
+        if ((!prevRanges || prevRanges.length === 0) && (!currRanges || currRanges.length === 0)) {
+            return;
+        }
+
+        // Incremental update: only update tiles that changed state
+        // Update previous visible ranges (VISIBLE -> EXPLORED)
+        if (prevRanges) {
             const prevLen = prevRanges.length;
             for (let r = 0; r < prevLen; r += 2) {
                 const start = prevRanges[r];
@@ -2350,8 +2351,10 @@ export class Game {
                     data32[i] = lut[grid[i]];
                 }
             }
+        }
 
-            // Update current visible ranges (-> VISIBLE)
+        // Update current visible ranges (-> VISIBLE)
+        if (currRanges) {
             const currLen = currRanges.length;
             for (let r = 0; r < currLen; r += 2) {
                 const start = currRanges[r];

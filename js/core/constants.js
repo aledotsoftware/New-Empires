@@ -162,7 +162,7 @@ export const CONFIG = {
 
     // Fog of War & Vision
     VISION: {
-        ENABLED: false, // BOLT DEBUG: Set to false to disable FOW for performance testing
+        ENABLED: true, // BOLT DEBUG: Set to false to disable FOW for performance testing
         UPDATE_INTERVAL: 0.2, // Segundos entre actualizaciones de visión
         DEFAULT_UNIT: 250,    // Radio de visión por defecto para unidades
         DEFAULT_BUILDING: 350, // Radio de visión por defecto para edificios

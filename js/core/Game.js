@@ -1906,30 +1906,33 @@ export class Game {
         if (this.particleSystem) this.particleSystem.update(deltaTime);
 
         // Actualizar Niebla de Guerra (Optimizado)
-        this.visionTimer += deltaTime;
-        if (this.visionTimer >= CONFIG.VISION.UPDATE_INTERVAL) {
-            this.visionTimer = 0;
+        // BOLT: Skip FOW entirely when disabled for performance testing
+        if (CONFIG.VISION.ENABLED) {
+            this.visionTimer += deltaTime;
+            if (this.visionTimer >= CONFIG.VISION.UPDATE_INTERVAL) {
+                this.visionTimer = 0;
 
-            // Recolectar entidades del jugador para actualizar visión
-            // BOLT OPTIMIZATION: Reuse cache array to avoid allocation (GC pressure)
-            this._visionEntitiesCache.length = 0;
+                // Recolectar entidades del jugador para actualizar visión
+                // BOLT OPTIMIZATION: Reuse cache array to avoid allocation (GC pressure)
+                this._visionEntitiesCache.length = 0;
 
-            const unitsLen = this.units.length;
-            for (let i = 0; i < unitsLen; i++) {
-                if (this.units[i].team === 'player') this._visionEntitiesCache.push(this.units[i]);
+                const unitsLen = this.units.length;
+                for (let i = 0; i < unitsLen; i++) {
+                    if (this.units[i].team === 'player') this._visionEntitiesCache.push(this.units[i]);
+                }
+
+                const buildingsLen = this.buildings.length;
+                for (let i = 0; i < buildingsLen; i++) {
+                    const b = this.buildings[i];
+                    if (b.team === 'player') this._visionEntitiesCache.push(b);
+                }
+
+                this.fow.update(this._visionEntitiesCache);
+                this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
+
+                // BOLT OPTIMIZATION: Update FOW bitmap buffer
+                this._updateFOWBuffer();
             }
-
-            const buildingsLen = this.buildings.length;
-            for (let i = 0; i < buildingsLen; i++) {
-                const b = this.buildings[i];
-                if (b.team === 'player') this._visionEntitiesCache.push(b);
-            }
-
-            this.fow.update(this._visionEntitiesCache);
-            this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
-
-            // BOLT OPTIMIZATION: Update FOW bitmap buffer
-            this._updateFOWBuffer();
         }
 
         // OPTIMIZACIÓN: Actualizar Spatial Grid y Entidades
@@ -2363,6 +2366,8 @@ export class Game {
     }
 
     drawFOW() {
+        // BOLT: Skip FOW rendering when disabled
+        if (!CONFIG.VISION.ENABLED) return;
         if (!this.fow || !this._fowBufferCanvas) return;
 
         // BOLT OPTIMIZATION: Disable smoothing to prevent blurry FOW edges

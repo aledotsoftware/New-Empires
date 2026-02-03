@@ -1,4 +1,4 @@
-import { FOW_STATES, TILE_SIZE } from '../core/constants.js';
+import { FOW_STATES, TILE_SIZE, CONFIG } from '../core/constants.js';
 
 /**
  * FogOfWar - Manages the visibility state of the map.
@@ -121,6 +121,8 @@ export class FogOfWar {
      * Checks if a specific tile is currently visible.
      */
     isVisible(col, row) {
+        // BOLT: When FOW is disabled, everything is visible
+        if (!CONFIG.VISION.ENABLED) return true;
         if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return false;
         return this.grid[row * this.cols + col] === FOW_STATES.VISIBLE;
     }
@@ -129,6 +131,8 @@ export class FogOfWar {
      * Checks if a specific tile has been explored.
      */
     isExplored(col, row) {
+        // BOLT: When FOW is disabled, everything is explored
+        if (!CONFIG.VISION.ENABLED) return true;
         if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return false;
         const state = this.grid[row * this.cols + col];
         return state === FOW_STATES.EXPLORED || state === FOW_STATES.VISIBLE;

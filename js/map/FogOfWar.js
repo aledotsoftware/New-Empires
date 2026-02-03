@@ -23,6 +23,8 @@ export class FogOfWar {
 
         // BOLT OPTIMIZATION: Track visible ranges to avoid O(TotalTiles) iteration in resetVisible
         this.visibleRanges = [];
+        // BOLT OPTIMIZATION: Track previous frame's ranges for incremental buffer update
+        this._previousVisibleRanges = [];
     }
 
     /**
@@ -33,12 +35,20 @@ export class FogOfWar {
         // Reduces cost from O(TotalTiles) to O(VisibleTiles) - typically >100x speedup
         const len = this.visibleRanges.length;
         if (len > 0) {
-            for (let i = 0; i < len; i += 2) {
-                const start = this.visibleRanges[i];
-                const end = this.visibleRanges[i + 1];
+            // BOLT OPTIMIZATION: Save previous ranges for incremental buffer update
+            // Swap arrays to avoid allocation
+            const temp = this._previousVisibleRanges;
+            this._previousVisibleRanges = this.visibleRanges;
+            this.visibleRanges = temp;
+            this.visibleRanges.length = 0;
+
+            // Reset tiles to EXPLORED using saved ranges
+            const prevLen = this._previousVisibleRanges.length;
+            for (let i = 0; i < prevLen; i += 2) {
+                const start = this._previousVisibleRanges[i];
+                const end = this._previousVisibleRanges[i + 1];
                 this.grid.fill(FOW_STATES.EXPLORED, start, end + 1);
             }
-            this.visibleRanges.length = 0;
             this.isDirty = true;
         }
     }

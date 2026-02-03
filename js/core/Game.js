@@ -229,9 +229,6 @@ export class Game {
         this.currentTipIndex = 0;
         this.lastTipTime = 0;
 
-        // Cache para queries de cursor
-        this._cursorQueryCache = [];
-
         // Cache para selección de arrastre (Palette)
         this._dragSelectCache = [];
 
@@ -2032,6 +2029,27 @@ export class Game {
         }
     }
 
+    // BOLT OPTIMIZATION: Static predicates for cursor logic
+    // Using static methods avoids closure allocation in the hot path (updateCursorState)
+    static _cursorEnemyPredicate(entity, mouse) {
+        if (entity.isDead) return false;
+        const distSq = (entity.x - mouse.worldX) ** 2 + (entity.y - mouse.worldY) ** 2;
+        return distSq < entity.size * entity.size;
+    }
+
+    static _cursorBuildingPredicate(entity, mouse) {
+        if (entity.team !== 'player' || !entity.isUnderConstruction) return false;
+        const checkRadius = entity.size / 2 + 20;
+        const distSq = (entity.x - mouse.worldX) ** 2 + (entity.y - mouse.worldY) ** 2;
+        return distSq < checkRadius * checkRadius;
+    }
+
+    static _cursorResourcePredicate(entity, mouse) {
+        if (entity.amount <= 0) return false;
+        const distSq = (entity.x - mouse.worldX) ** 2 + (entity.y - mouse.worldY) ** 2;
+        return distSq < entity.radius * entity.radius;
+    }
+
     updateCursorState() {
         if (!this.cursorBadge) return;
 
@@ -2043,62 +2061,35 @@ export class Game {
             if (entity.team === 'player' && entity.isUnit) {
                 // Attack Cursor Logic
                 if (entity.canAttack) {
-                    // BOLT OPTIMIZATION: Pass cache array to query to avoid per-frame allocation
-                    // query() clears the array automatically by default
-                    // BOLT OPTIMIZATION: Query enemyUnitGrid directly, skipping player units
-                    const nearby = this.enemyUnitGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
-                    for (let i = 0; i < nearby.length; i++) {
-                        const other = nearby[i];
-                        if (!other.isDead) {
-                            const distSq = (other.x - this.mouse.worldX) ** 2 + (other.y - this.mouse.worldY) ** 2;
-                            if (distSq < other.size * other.size) {
-                                badgeIcon = 'assets/icons/swords.png';
-                                showBadge = true;
-                                break;
-                            }
-                        }
+                    // BOLT OPTIMIZATION: Use find() with static predicate instead of query() + loop
+                    // This avoids filling the cursor query cache array, reducing GC pressure and cycles.
+                    // It also exits early on the first match.
+                    if (this.enemyUnitGrid.find(this.mouse.worldX, this.mouse.worldY, 30, Game._cursorEnemyPredicate, this.mouse)) {
+                        badgeIcon = 'assets/icons/swords.png';
+                        showBadge = true;
                     }
                 }
 
                 // Build/Repair Cursor Logic (Villager only) - Before Gather
                 if (!showBadge && entity.type === 'villager' && this.buildingGrid) {
-                    // Reuse cache array
-                    const buildings = this.buildingGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
-                    for (let i = 0; i < buildings.length; i++) {
-                        const b = buildings[i];
-                        if (b.team === 'player' && b.isUnderConstruction) {
-                            // Check approximate collision (consistent with handleRightClick)
-                            const checkRadius = b.size / 2 + 20;
-                            const distSq = (b.x - this.mouse.worldX) ** 2 + (b.y - this.mouse.worldY) ** 2;
-                            if (distSq < checkRadius * checkRadius) {
-                                badgeIcon = 'assets/icons/build.png';
-                                showBadge = true;
-                                break;
-                            }
-                        }
+                    if (this.buildingGrid.find(this.mouse.worldX, this.mouse.worldY, 30, Game._cursorBuildingPredicate, this.mouse)) {
+                        badgeIcon = 'assets/icons/build.png';
+                        showBadge = true;
                     }
                 }
 
                 // Gather Cursor Logic (Villager only) - Lower priority than attack
                 if (!showBadge && entity.canGather && entity.type === 'villager' && this.resourceGrid) {
-                    // Reuse cache array for resources (BOLT OPTIMIZATION: Pass cache array)
-                    const resources = this.resourceGrid.query(this.mouse.worldX, this.mouse.worldY, 30, this._cursorQueryCache);
-                    for (let i = 0; i < resources.length; i++) {
-                        const res = resources[i];
-                        if (res.amount > 0) {
-                            const distSq = (res.x - this.mouse.worldX) ** 2 + (res.y - this.mouse.worldY) ** 2;
-                            if (distSq < res.radius * res.radius) {
-                                // Map resource type to icon
-                                if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
-                                else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
-                                else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
-                                else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
-                                else badgeIcon = 'assets/icons/gold.png';
+                    const target = this.resourceGrid.find(this.mouse.worldX, this.mouse.worldY, 30, Game._cursorResourcePredicate, this.mouse);
+                    if (target) {
+                        // Map resource type to icon
+                        if (target.type === 'wood') badgeIcon = 'assets/icons/wood.png';
+                        else if (target.type === 'food') badgeIcon = 'assets/icons/food.png';
+                        else if (target.type === 'gold') badgeIcon = 'assets/icons/gold.png';
+                        else if (target.type === 'stone') badgeIcon = 'assets/icons/stone.png';
+                        else badgeIcon = 'assets/icons/gold.png';
 
-                                showBadge = true;
-                                break;
-                            }
-                        }
+                        showBadge = true;
                     }
                 }
             }

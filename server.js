@@ -51,8 +51,10 @@ const server = http.createServer((req, res) => {
     // Support for reverse proxies (e.g. Heroku, AWS) if configured
     const trustProxy = process.env.TRUST_PROXY === 'true';
     const rawIp = req.socket.remoteAddress || 'unknown';
+    // Security Fix: Use the last IP in X-Forwarded-For to prevent spoofing.
+    // The last IP is the one that connected to the trusted proxy.
     const ip = (trustProxy && req.headers['x-forwarded-for'])
-        ? req.headers['x-forwarded-for'].split(',')[0].trim()
+        ? req.headers['x-forwarded-for'].split(',').pop().trim()
         : rawIp;
 
     const now = Date.now();

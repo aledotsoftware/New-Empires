@@ -960,6 +960,7 @@ export class Game {
         let attackCommandTriggered = false;
         let gatherCommandTriggered = false;
         let buildCommandTriggered = false;
+        let rallyPointTriggered = false;
 
         for (let entity of this.selectedEntities) {
             if (entity.isUnit) {
@@ -995,6 +996,10 @@ export class Game {
                     if (entity.type === 'villager') entity.state = 'MOVING';
                     moveCommandTriggered = true;
                 }
+            } else if (entity.team === 'player' && typeof entity.setRallyPoint === 'function') {
+                // Configurar punto de reunión (Rally Point)
+                entity.setRallyPoint(this.mouse.worldX, this.mouse.worldY);
+                rallyPointTriggered = true;
             }
         }
 
@@ -1007,6 +1012,8 @@ export class Game {
             } else if (buildCommandTriggered) {
                 this.particleSystem.createBuildRipple(this.mouse.worldX, this.mouse.worldY);
             } else if (moveCommandTriggered) {
+                this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
+            } else if (rallyPointTriggered) {
                 this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
             }
         }
@@ -2907,6 +2914,56 @@ export class Game {
         }
 
         this.ctx.stroke();
+
+        // Palette: Visual Rally Points
+        this.drawRallyPoints();
+    }
+
+    drawRallyPoints() {
+        for (let entity of this.selectedEntities) {
+            if (entity.team === 'player' && entity.rallyPoint) {
+                const startX = (entity.x - this.camera.x) | 0;
+                const startY = (entity.y - this.camera.y) | 0;
+                const endX = (entity.rallyPoint.x - this.camera.x) | 0;
+                const endY = (entity.rallyPoint.y - this.camera.y) | 0;
+
+                this.ctx.save();
+
+                // Draw Dashed Line
+                this.ctx.strokeStyle = 'rgba(232, 212, 139, 0.6)'; // Gold with opacity
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.beginPath();
+                this.ctx.moveTo(startX, startY);
+                this.ctx.lineTo(endX, endY);
+                this.ctx.stroke();
+
+                // Draw Flag Marker
+                this.ctx.fillStyle = '#e8d48b';
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([]); // Reset dash for flag
+
+                // Pole
+                this.ctx.fillRect(endX, endY - 20, 2, 20);
+
+                // Flag Triangle
+                this.ctx.beginPath();
+                this.ctx.moveTo(endX + 2, endY - 20);
+                this.ctx.lineTo(endX + 12, endY - 15);
+                this.ctx.lineTo(endX + 2, endY - 10);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // Base Circle
+                this.ctx.beginPath();
+                this.ctx.arc(endX + 1, endY, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.restore();
+            }
+        }
     }
 
     drawDragSelection() {

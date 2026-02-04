@@ -3205,50 +3205,85 @@ export class Game {
     }
 
     drawRallyPoints() {
-        for (let entity of this.selectedEntities) {
+        // BOLT OPTIMIZATION: Filter entities first to batch draw calls
+        const entitiesWithRally = [];
+        const len = this.selectedEntities.length;
+        for (let i = 0; i < len; i++) {
+            const entity = this.selectedEntities[i];
             if (entity.team === 'player' && entity.rallyPoint) {
-                const startX = (entity.x - this.camera.x) | 0;
-                const startY = (entity.y - this.camera.y) | 0;
-                const endX = (entity.rallyPoint.x - this.camera.x) | 0;
-                const endY = (entity.rallyPoint.y - this.camera.y) | 0;
-
-                this.ctx.save();
-
-                // Draw Dashed Line
-                this.ctx.strokeStyle = 'rgba(232, 212, 139, 0.6)'; // Gold with opacity
-                this.ctx.lineWidth = 2;
-                this.ctx.setLineDash([5, 5]);
-                this.ctx.beginPath();
-                this.ctx.moveTo(startX, startY);
-                this.ctx.lineTo(endX, endY);
-                this.ctx.stroke();
-
-                // Draw Flag Marker
-                this.ctx.fillStyle = '#e8d48b';
-                this.ctx.strokeStyle = '#000';
-                this.ctx.lineWidth = 1;
-                this.ctx.setLineDash([]); // Reset dash for flag
-
-                // Pole
-                this.ctx.fillRect(endX, endY - 20, 2, 20);
-
-                // Flag Triangle
-                this.ctx.beginPath();
-                this.ctx.moveTo(endX + 2, endY - 20);
-                this.ctx.lineTo(endX + 12, endY - 15);
-                this.ctx.lineTo(endX + 2, endY - 10);
-                this.ctx.closePath();
-                this.ctx.fill();
-                this.ctx.stroke();
-
-                // Base Circle
-                this.ctx.beginPath();
-                this.ctx.arc(endX + 1, endY, 3, 0, Math.PI * 2);
-                this.ctx.fill();
-
-                this.ctx.restore();
+                entitiesWithRally.push(entity);
             }
         }
+
+        if (entitiesWithRally.length === 0) return;
+
+        // Save context once for all rally points
+        this.ctx.save();
+
+        // Batch 1: Dashed Lines
+        this.ctx.strokeStyle = 'rgba(232, 212, 139, 0.6)'; // Gold with opacity
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 5]);
+        this.ctx.beginPath();
+
+        const rallyLen = entitiesWithRally.length;
+        const camX = this.camera.x;
+        const camY = this.camera.y;
+
+        for (let i = 0; i < rallyLen; i++) {
+            const entity = entitiesWithRally[i];
+            const startX = (entity.x - camX) | 0;
+            const startY = (entity.y - camY) | 0;
+            const endX = (entity.rallyPoint.x - camX) | 0;
+            const endY = (entity.rallyPoint.y - camY) | 0;
+
+            this.ctx.moveTo(startX, startY);
+            this.ctx.lineTo(endX, endY);
+        }
+        this.ctx.stroke();
+
+        // Prepare for Flags
+        this.ctx.fillStyle = '#e8d48b';
+        this.ctx.strokeStyle = '#000';
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([]); // Reset dash
+
+        // Batch 2: Flag Poles
+        this.ctx.beginPath();
+        for (let i = 0; i < rallyLen; i++) {
+            const entity = entitiesWithRally[i];
+            const endX = (entity.rallyPoint.x - camX) | 0;
+            const endY = (entity.rallyPoint.y - camY) | 0;
+            this.ctx.rect(endX, endY - 20, 2, 20);
+        }
+        this.ctx.fill();
+
+        // Batch 3: Flag Triangles
+        this.ctx.beginPath();
+        for (let i = 0; i < rallyLen; i++) {
+            const entity = entitiesWithRally[i];
+            const endX = (entity.rallyPoint.x - camX) | 0;
+            const endY = (entity.rallyPoint.y - camY) | 0;
+            this.ctx.moveTo(endX + 2, endY - 20);
+            this.ctx.lineTo(endX + 12, endY - 15);
+            this.ctx.lineTo(endX + 2, endY - 10);
+            this.ctx.closePath();
+        }
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // Batch 4: Base Circles
+        this.ctx.beginPath();
+        for (let i = 0; i < rallyLen; i++) {
+            const entity = entitiesWithRally[i];
+            const endX = (entity.rallyPoint.x - camX) | 0;
+            const endY = (entity.rallyPoint.y - camY) | 0;
+            this.ctx.moveTo(endX + 1 + 3, endY); // Move to start of arc
+            this.ctx.arc(endX + 1, endY, 3, 0, Math.PI * 2);
+        }
+        this.ctx.fill();
+
+        this.ctx.restore();
     }
 
     drawDragSelection() {

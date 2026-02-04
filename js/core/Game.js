@@ -2795,7 +2795,7 @@ export class Game {
 
         // Renderizar partículas (Palette)
         if (this.particleSystem) {
-            this.particleSystem.render(this.ctx, this.camera);
+            this.particleSystem.render(this.ctx, this.camera, this.viewWidth, this.viewHeight);
         }
 
         // Renderizar minimapa

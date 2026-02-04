@@ -259,6 +259,7 @@ export class Game {
         this.lastUITime = 0;
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
+        this.lastSelectionIdKey = ''; // OPTIMIZATION: Track structural changes vs state changes
         this.lastResources = { ...this.resources }; // Palette: Track for animations
 
         // BOLT OPTIMIZATION: Track rendered values to avoid redundant DOM writes
@@ -3606,23 +3607,32 @@ export class Game {
         const content = this.uiElements.selectionContent || document.getElementById('selectionContent');
         if (!content) return;
 
-        // Generar clave de estado para evitar actualizaciones innecesarias del DOM
+        // BOLT OPTIMIZATION: Calculate ID and State keys separately
         let stateKey = '';
+        let idKey = ''; // Tracks structural identity (e.g. "single:123" or "multi:5")
+
         if (this.selectedEntities.length === 0) {
-            // Palette: Include army count in state key to update "Select Army" button
             const armyCount = this.getMilitaryUnits().length;
+            idKey = 'empty';
             stateKey = `empty:${armyCount}`;
         } else if (this.selectedEntities.length === 1) {
             const ent = this.selectedEntities[0];
-            // Incluir HP, estado, y progreso de producción en la clave
+            // Include dynamic structural factors in ID key
+            // If queue length changes or construction state changes, we need structure rebuild
+            const qLen = (ent.productionQueue && !ent.productionQueue.isEmpty()) ? ent.productionQueue.length : 0;
+            const isConst = ent.isUnderConstruction ? 1 : 0;
+            idKey = `single:${ent.id}:q${qLen}:c${isConst}`;
+
+            // Include HP, state, and progress in state key
             let prodKey = '';
-            if (ent.productionQueue && !ent.productionQueue.isEmpty()) {
+            if (qLen > 0) {
                 const prog = Math.floor(ent.productionQueue.getProgress() * 100);
-                prodKey = `:prod${ent.productionQueue.length}:${prog}`;
+                prodKey = `:prod${qLen}:${prog}`;
             }
             // BOLT OPTIMIZATION: Floor HP to avoid DOM thrashing on fractional damage/regen
             stateKey = `single:${ent.id}:${Math.floor(ent.hp)}:${ent.state}${prodKey}`;
         } else {
+            idKey = `multi:${this.selectedEntities.length}`;
             stateKey = `multi:${this.selectedEntities.length}`;
         }
 
@@ -3650,7 +3660,66 @@ export class Game {
 
         // Si el estado no ha cambiado, no tocar el DOM
         if (this.lastSelectionStateKey === stateKey) return;
+
+        // BOLT OPTIMIZATION: Partial Update Strategy
+        // If the identity of the selection hasn't changed (same unit), but the state has (e.g. HP change),
+        // we update the existing DOM elements instead of rebuilding the entire tree.
+        if (this.lastSelectionIdKey === idKey) {
+            if (this.selectedEntities.length === 1) {
+                const ent = this.selectedEntities[0];
+
+                // Update HP Text
+                const hpText = content.querySelector('.hp-text');
+                const hpPercent = Math.max(0, Math.min(100, (ent.hp / ent.maxHp) * 100));
+
+                if (hpText) {
+                    if (ent.isUnderConstruction) {
+                        hpText.textContent = `🚧 Construyendo: ${Math.floor(hpPercent)}%`;
+                    } else {
+                        hpText.textContent = `HP: ${Math.floor(ent.hp)}/${ent.maxHp}`;
+                    }
+                }
+
+                // Update HP Bar
+                const hpFill = content.querySelector('.health-fill');
+                if (hpFill) {
+                    hpFill.style.width = `${hpPercent}%`;
+
+                    // Update color logic
+                    if (ent.isUnderConstruction) {
+                        hpFill.style.background = '#3182ce'; // Construction Blue
+                    } else if (hpPercent < 25) {
+                        hpFill.style.background = '#c53030'; // Red
+                    } else if (hpPercent < 50) {
+                        hpFill.style.background = '#ecc94b'; // Yellow
+                    } else {
+                        hpFill.style.background = '#48bb78'; // Green
+                    }
+                }
+
+                // Update Production Progress (if visible)
+                if (ent.productionQueue && !ent.productionQueue.isEmpty()) {
+                    const prodFill = content.querySelector('.production-fill');
+                    if (prodFill) {
+                        const prog = ent.productionQueue.getProgress() * 100;
+                        prodFill.style.width = `${prog}%`;
+                    }
+
+                    const prodTime = content.querySelector('.production-time');
+                    const currentItem = ent.productionQueue.getCurrentItem();
+                    if (prodTime && currentItem) {
+                        prodTime.textContent = `${Math.ceil(currentItem.remaining)}s`;
+                    }
+                }
+
+                // Update State Key and Return (Skip full rebuild)
+                this.lastSelectionStateKey = stateKey;
+                return;
+            }
+        }
+
         this.lastSelectionStateKey = stateKey;
+        this.lastSelectionIdKey = idKey; // Update ID key
 
         // Limpiar contenido previo
         while (content.firstChild) {
@@ -3834,6 +3903,7 @@ export class Game {
             // Palette: Construction Progress Indicator
             if (entity.isUnderConstruction) {
                 const statusText = document.createElement('div');
+                statusText.className = 'hp-text'; // BOLT OPTIMIZATION: Added class for query
                 statusText.style.fontSize = '0.8rem';
                 statusText.style.color = '#ecc94b'; // Yellow/Gold
                 statusText.style.marginBottom = '2px';
@@ -3842,6 +3912,7 @@ export class Game {
                 hpContainer.appendChild(statusText);
             } else {
                 const hpText = document.createElement('div');
+                hpText.className = 'hp-text'; // BOLT OPTIMIZATION: Added class for query
                 hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
                 hpText.style.marginBottom = '2px';
                 hpText.style.fontSize = '0.8rem';
@@ -3923,6 +3994,7 @@ export class Game {
 
                     // Tiempo restante
                     const timeLeft = document.createElement('div');
+                    timeLeft.className = 'production-time'; // BOLT OPTIMIZATION: Added class for query
                     timeLeft.style.fontSize = '0.8rem';
                     timeLeft.style.color = '#48bb78';
                     timeLeft.textContent = `${Math.ceil(current.remaining)}s`;

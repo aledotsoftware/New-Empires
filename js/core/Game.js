@@ -456,6 +456,17 @@ export class Game {
         // Centrar cámara en el Centro Urbano
         this.camera.x = 400 - this.viewWidth / 2;
         this.camera.y = 400 - this.viewHeight / 2;
+
+        // Palette: Game Start Feedback
+        if (typeof soundManager !== 'undefined') {
+            soundManager.play('startGame');
+        }
+
+        if (this.particleSystem) {
+            // Visual flair at the starting position (Town Center is at 400, 400)
+            this.particleSystem.createFloatingText(400, 350, "¡A JUGAR!", '#d4af37');
+            this.particleSystem.createExplosion(400, 400, '#d4af37', 20);
+        }
     }
 
     /**

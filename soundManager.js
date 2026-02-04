@@ -226,4 +226,4 @@ class SoundManager {
 }
 
 // Instancia global del SoundManager
-const soundManager = new SoundManager();
+window.soundManager = new SoundManager();

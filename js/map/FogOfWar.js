@@ -25,6 +25,12 @@ export class FogOfWar {
         this.visibleRanges = [];
         // BOLT OPTIMIZATION: Track previous frame's ranges for incremental buffer update
         this._previousVisibleRanges = [];
+
+        // BOLT OPTIMIZATION: Buffers for batched update
+        // Stores triplets of [row, startCol, endCol]
+        this._batchRanges = new Int32Array(4096 * 3); // Start with reasonable size
+        this._batchCount = 0;
+        this._batchIndices = new Uint32Array(4096);
     }
 
     /**
@@ -59,19 +65,34 @@ export class FogOfWar {
      */
     update(entities) {
         this.resetVisible();
+        this._batchCount = 0;
 
         for (let i = 0; i < entities.length; i++) {
             const ent = entities[i];
             if (ent.isDead) continue;
 
-            this.revealCircle(ent.x, ent.y, ent.visionRadius || 200);
+            this._bufferCircle(ent.x, ent.y, ent.visionRadius || 200);
         }
+
+        this._flushBuffer();
     }
 
     /**
      * Reveals a circular area on the FOW grid.
+     * BOLT OPTIMIZATION: Now uses buffering + flush to ensure API compatibility
+     * while utilizing the batching optimization logic.
      */
     revealCircle(centerX, centerY, radius) {
+        this._batchCount = 0;
+        this._bufferCircle(centerX, centerY, radius);
+        this._flushBuffer();
+    }
+
+    /**
+     * Internal method to calculate scanlines and buffer them.
+     * Replaces previous immediate revealCircle logic.
+     */
+    _bufferCircle(centerX, centerY, radius) {
         const gridX = (centerX * this.invTileSize) | 0;
         const gridY = (centerY * this.invTileSize) | 0;
         const gridRadius = (radius * this.invTileSize) | 0;
@@ -89,32 +110,117 @@ export class FogOfWar {
             if (term < 0) continue;
 
             // BOLT OPTIMIZATION: Scanline Fill
-            // Calculate horizontal span using sqrt once per row instead of checking distSq per pixel.
-            // Use TypedArray.fill for vectorized memory write (much faster than loop assignment).
             const span = Math.floor(Math.sqrt(term));
-
             const minX = Math.max(0, gridX - span);
             const maxX = Math.min(this.cols - 1, gridX + span);
 
             if (minX > maxX) continue;
 
-            const rowOffset = y * this.cols;
-            const startIdx = rowOffset + minX;
-            const endIdx = rowOffset + maxX;
+            // Buffer the range [y, minX, maxX]
+            // Resize buffers if necessary
+            if (this._batchCount >= this._batchIndices.length) {
+                const newSize = this._batchIndices.length * 2;
+                const newIndices = new Uint32Array(newSize);
+                const newRanges = new Int32Array(newSize * 3);
 
-            // Fill range with VISIBLE
-            // Note: Overwriting VISIBLE with VISIBLE is fine and fast.
-            this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+                newIndices.set(this._batchIndices);
+                newRanges.set(this._batchRanges);
 
-            // BOLT OPTIMIZATION: Track range for fast reset
-            // We push pairs of [start, end]
-            // We use manual push for slight perf gain in hot loop
-            const vLen = this.visibleRanges.length;
-            this.visibleRanges[vLen] = startIdx;
-            this.visibleRanges[vLen + 1] = endIdx;
+                this._batchIndices = newIndices;
+                this._batchRanges = newRanges;
+            }
 
-            this.isDirty = true;
+            const idx = this._batchCount;
+            const rIdx = idx * 3;
+            this._batchRanges[rIdx] = y;
+            this._batchRanges[rIdx + 1] = minX;
+            this._batchRanges[rIdx + 2] = maxX;
+
+            // Set index for sorting
+            this._batchIndices[idx] = idx;
+            this._batchCount++;
         }
+    }
+
+    /**
+     * Sorts, merges, and applies buffered ranges.
+     * BOLT OPTIMIZATION: Reduces redundant memory writes by merging overlapping ranges
+     * before touching the Uint8Array.
+     */
+    _flushBuffer() {
+        if (this._batchCount === 0) return;
+
+        // 1. Sort Indices
+        // We only sort the active portion of the indices array
+        const indices = this._batchIndices.subarray(0, this._batchCount);
+        const ranges = this._batchRanges;
+
+        // Sort by Row, then Start Column
+        indices.sort((a, b) => {
+            const rA = a * 3;
+            const rB = b * 3;
+            const rowA = ranges[rA];
+            const rowB = ranges[rB];
+            if (rowA !== rowB) return rowA - rowB;
+            return ranges[rA + 1] - ranges[rB + 1];
+        });
+
+        // 2. Merge & Fill
+        let currentStart = -1;
+        let currentEnd = -1;
+        let currentRow = -1;
+        let rowOffset = 0;
+        let visibleCount = this.visibleRanges.length;
+
+        for (let i = 0; i < this._batchCount; i++) {
+            const rIdx = indices[i] * 3;
+            const r = ranges[rIdx];
+            const s = ranges[rIdx + 1];
+            const e = ranges[rIdx + 2];
+
+            if (r !== currentRow) {
+                // Flush previous range from different row
+                if (currentRow !== -1) {
+                    const startIdx = rowOffset + currentStart;
+                    const endIdx = rowOffset + currentEnd;
+                    this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+                    this.visibleRanges[visibleCount++] = startIdx;
+                    this.visibleRanges[visibleCount++] = endIdx;
+                }
+                // Start new row
+                currentRow = r;
+                rowOffset = r * this.cols;
+                currentStart = s;
+                currentEnd = e;
+            } else {
+                // Same row: Check overlap
+                // Ranges are sorted by start, so we only check if start <= oldEnd + 1
+                if (s <= currentEnd + 1) {
+                    currentEnd = Math.max(currentEnd, e);
+                } else {
+                    // Gap found: Flush previous range
+                    const startIdx = rowOffset + currentStart;
+                    const endIdx = rowOffset + currentEnd;
+                    this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+                    this.visibleRanges[visibleCount++] = startIdx;
+                    this.visibleRanges[visibleCount++] = endIdx;
+
+                    currentStart = s;
+                    currentEnd = e;
+                }
+            }
+        }
+
+        // Flush last range
+        if (currentRow !== -1) {
+            const startIdx = rowOffset + currentStart;
+            const endIdx = rowOffset + currentEnd;
+            this.grid.fill(FOW_STATES.VISIBLE, startIdx, endIdx + 1);
+            this.visibleRanges[visibleCount++] = startIdx;
+            this.visibleRanges[visibleCount++] = endIdx;
+        }
+
+        this.isDirty = true;
     }
 
     /**

@@ -103,3 +103,7 @@
 ## 2026-02-03 - Minimap Path Caching
 **Learning:** Recreating `Path2D` objects and iterating the full grid every frame for minimap FOW was computationally expensive. Caching the paths and using a dirty flag tied to the FOW update interval (100ms) eliminated ~83% of the overhead in that specific function.
 **Action:** For any overlay that updates less frequently than the frame rate (like FOW or Minimap), use dirty flags and cached `Path2D` objects or bitmap buffers to avoid per-frame reconstruction.
+
+## 2026-02-13 - Query vs Find in Spatial Search
+**Learning:** The `SpatialGrid.query` method populates a results array (even if cached), which then requires iteration. For "find first match" logic (like cursor hovering), `SpatialGrid.find` is ~4.8x faster because it avoids array writes and can stop checking buckets immediately after finding a match (leveraging the center-first optimization), whereas `query` must check all relevant buckets to populate the list before the caller can iterate it.
+**Action:** Use `SpatialGrid.find` with a static predicate for any "exists" or "first match" spatial queries in hot loops.

@@ -32,6 +32,34 @@ export class Game {
         return a.y - b.y;
     }
 
+    // BOLT OPTIMIZATION: Static predicates for spatial find (avoids closure allocation)
+    static _cursorEnemyPredicate(entity, mouse) {
+        if (entity.isDead) return false;
+        // Optimized distance check
+        const dx = entity.x - mouse.worldX;
+        const dy = entity.y - mouse.worldY;
+        // 30 * 30 = 900 (cursor radius squared)
+        // Check against entity size squared (hitbox)
+        // Logic matches original: distSq < other.size * other.size
+        return (dx * dx + dy * dy) < (entity.size * entity.size);
+    }
+
+    static _cursorBuildingPredicate(entity, mouse) {
+        if (entity.team !== 'player' || !entity.isUnderConstruction) return false;
+        // Check approximate collision
+        const checkRadius = entity.size / 2 + 20;
+        const dx = entity.x - mouse.worldX;
+        const dy = entity.y - mouse.worldY;
+        return (dx * dx + dy * dy) < (checkRadius * checkRadius);
+    }
+
+    static _cursorResourcePredicate(entity, mouse) {
+        if (entity.amount <= 0) return false;
+        const dx = entity.x - mouse.worldX;
+        const dy = entity.y - mouse.worldY;
+        return (dx * dx + dy * dy) < (entity.radius * entity.radius);
+    }
+
     constructor(civId = 'romans', mapConfig = null) {
         this.civilizationId = civId;
         this.civilization = civilizationManager.getCivilization(civId);
@@ -2073,75 +2101,62 @@ export class Game {
         if (this.selectedEntities.length === 1) {
             const entity = this.selectedEntities[0];
             if (entity.team === 'player' && entity.isUnit) {
-                // BOLT OPTIMIZATION: Hoist mouse coordinates to avoid repetitive property access
-                const mx = this.mouse.worldX;
-                const my = this.mouse.worldY;
+                // BOLT OPTIMIZATION: Use SpatialGrid.find() with static predicates
+                // This replaces the previous query() + manual loop approach.
+                // It avoids array allocation (writing to cache) and leverages early exit optimization.
+                // The 'this.mouse' object is passed as context to avoid creating new objects per frame.
 
                 // Attack Cursor Logic
                 if (entity.canAttack) {
-                    // BOLT OPTIMIZATION: Pass cache array to query to avoid per-frame allocation
-                    // query() clears the array automatically by default
-                    // BOLT OPTIMIZATION: Query enemyUnitGrid directly, skipping player units
-                    const nearby = this.enemyUnitGrid.query(mx, my, 30, this._cursorQueryCache);
-                    for (let i = 0; i < nearby.length; i++) {
-                        const other = nearby[i];
-                        if (!other.isDead) {
-                            // BOLT OPTIMIZATION: Use multiplication instead of exponentiation (** 2) for perf
-                            const dx = other.x - mx;
-                            const dy = other.y - my;
-                            const distSq = dx * dx + dy * dy;
-                            if (distSq < other.size * other.size) {
-                                badgeIcon = 'assets/icons/swords.png';
-                                showBadge = true;
-                                break;
-                            }
-                        }
+                    const target = this.enemyUnitGrid.find(
+                        this.mouse.worldX,
+                        this.mouse.worldY,
+                        30,
+                        Game._cursorEnemyPredicate,
+                        this.mouse
+                    );
+
+                    if (target) {
+                        badgeIcon = 'assets/icons/swords.png';
+                        showBadge = true;
                     }
                 }
 
                 // Build/Repair Cursor Logic (Villager only) - Before Gather
                 if (!showBadge && entity.type === 'villager' && this.buildingGrid) {
-                    // Reuse cache array
-                    const buildings = this.buildingGrid.query(mx, my, 30, this._cursorQueryCache);
-                    for (let i = 0; i < buildings.length; i++) {
-                        const b = buildings[i];
-                        if (b.team === 'player' && b.isUnderConstruction) {
-                            // Check approximate collision (consistent with handleRightClick)
-                            const checkRadius = b.size / 2 + 20;
-                            const dx = b.x - mx;
-                            const dy = b.y - my;
-                            const distSq = dx * dx + dy * dy;
-                            if (distSq < checkRadius * checkRadius) {
-                                badgeIcon = 'assets/icons/build.png';
-                                showBadge = true;
-                                break;
-                            }
-                        }
+                    const target = this.buildingGrid.find(
+                        this.mouse.worldX,
+                        this.mouse.worldY,
+                        30,
+                        Game._cursorBuildingPredicate,
+                        this.mouse
+                    );
+
+                    if (target) {
+                        badgeIcon = 'assets/icons/build.png';
+                        showBadge = true;
                     }
                 }
 
                 // Gather Cursor Logic (Villager only) - Lower priority than attack
                 if (!showBadge && entity.canGather && entity.type === 'villager' && this.resourceGrid) {
-                    // Reuse cache array for resources (BOLT OPTIMIZATION: Pass cache array)
-                    const resources = this.resourceGrid.query(mx, my, 30, this._cursorQueryCache);
-                    for (let i = 0; i < resources.length; i++) {
-                        const res = resources[i];
-                        if (res.amount > 0) {
-                            const dx = res.x - mx;
-                            const dy = res.y - my;
-                            const distSq = dx * dx + dy * dy;
-                            if (distSq < res.radius * res.radius) {
-                                // Map resource type to icon
-                                if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
-                                else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
-                                else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
-                                else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
-                                else badgeIcon = 'assets/icons/gold.png';
+                    const res = this.resourceGrid.find(
+                        this.mouse.worldX,
+                        this.mouse.worldY,
+                        30,
+                        Game._cursorResourcePredicate,
+                        this.mouse
+                    );
 
-                                showBadge = true;
-                                break;
-                            }
-                        }
+                    if (res) {
+                        // Map resource type to icon
+                        if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
+                        else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
+                        else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
+                        else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
+                        else badgeIcon = 'assets/icons/gold.png';
+
+                        showBadge = true;
                     }
                 }
             }

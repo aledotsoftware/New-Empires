@@ -1946,6 +1946,38 @@ export class Game {
         array.length = writeIdx;
     }
 
+    /**
+     * Reconstruye this.entities concatenando las listas de tipos.
+     * Más rápido que iterar y filtrar entities cuando ya hemos filtrado las sub-listas.
+     */
+    _rebuildEntities() {
+        let writeIdx = 0;
+        const entities = this.entities;
+
+        // Copy units
+        const units = this.units;
+        const uLen = units.length;
+        for (let i = 0; i < uLen; i++) {
+            entities[writeIdx++] = units[i];
+        }
+
+        // Copy buildings
+        const buildings = this.buildings;
+        const bLen = buildings.length;
+        for (let i = 0; i < bLen; i++) {
+            entities[writeIdx++] = buildings[i];
+        }
+
+        // Copy enemies
+        const enemies = this.enemies;
+        const eLen = enemies.length;
+        for (let i = 0; i < eLen; i++) {
+            entities[writeIdx++] = enemies[i];
+        }
+
+        entities.length = writeIdx;
+    }
+
     update(deltaTime) {
         if (this.isPaused) return;
 
@@ -2066,12 +2098,15 @@ export class Game {
 
         // Remover entidades muertas (OPTIMIZADO: in-place para evitar allocations)
         if (hasDeadEntities) {
-            this._removeDeadInPlace(this.entities);
             this._removeDeadInPlace(this.units);
             this._removeDeadInPlace(this.buildings);
             this._removeDeadInPlace(this.enemies);
             this._removeDeadInPlace(this.selectedEntities);
             this._removeDeadInPlace(this.dropOffPoints);
+
+            // Reconstruir this.entities desde los sub-arrays limpios
+            // Esto evita iterar entities para chequear isDead (ahorro de O(N) checks)
+            this._rebuildEntities();
 
             // Si murieron edificios, reconstruir el grid estático
             if (hasDeadBuildings) {

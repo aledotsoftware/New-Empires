@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 // Security: Rate Limiting Configuration
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 300; // 300 requests per minute per IP
+const RATE_LIMIT_MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 300; // 300 requests per minute per IP
 const MAX_TRACKED_IPS = 10000; // Security: Limit memory usage to prevent DoS
 const ipCounts = new Map();
 
@@ -20,6 +20,36 @@ setInterval(() => {
         }
     }
 }, 60 * 1000);
+
+// Optimization: Simple LRU Cache for static assets
+class SimpleLRUCache {
+    constructor(limit = 100) {
+        this.limit = limit;
+        this.cache = new Map();
+    }
+
+    get(key) {
+        if (!this.cache.has(key)) return null;
+        const value = this.cache.get(key);
+        // Refresh: remove and re-insert to mark as recently used
+        this.cache.delete(key);
+        this.cache.set(key, value);
+        return value;
+    }
+
+    set(key, value) {
+        if (this.cache.has(key)) {
+            this.cache.delete(key);
+        } else if (this.cache.size >= this.limit) {
+            // Evict oldest (first inserted in Map)
+            this.cache.delete(this.cache.keys().next().value);
+        }
+        this.cache.set(key, value);
+    }
+}
+
+const staticCache = new SimpleLRUCache(50);
+const MAX_FILE_SIZE_FOR_CACHE = 5 * 1024 * 1024; // 5MB
 
 // Whitelist of allowed extensions
 const MIME_TYPES = {
@@ -183,6 +213,14 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // Optimization: Check cache first
+    const cached = staticCache.get(filePath);
+    if (cached) {
+        res.writeHead(200, cached.headers);
+        res.end(cached.content);
+        return;
+    }
+
     // Check if file exists
     fs.stat(filePath, (err, stats) => {
         if (err || !stats.isFile()) {
@@ -228,20 +266,41 @@ const server = http.createServer((req, res) => {
             headers['Cache-Control'] = 'no-cache';
         }
 
-        res.writeHead(200, headers);
+        // Optimization: Cache small files
+        if (stats.size < MAX_FILE_SIZE_FOR_CACHE) {
+            fs.readFile(filePath, (readErr, data) => {
+                if (readErr) {
+                    console.error('Read error:', readErr);
+                    res.writeHead(500);
+                    res.end('Internal Server Error');
+                    return;
+                }
 
-        const readStream = fs.createReadStream(filePath);
+                staticCache.set(filePath, {
+                    headers: headers,
+                    content: data
+                });
 
-        // Security: Handle stream errors to prevent server crash (DoS)
-        readStream.on('error', (streamErr) => {
-            console.error('Stream error:', streamErr);
-            if (!res.headersSent) {
-                res.writeHead(500);
-                res.end('Internal Server Error');
-            }
-        });
+                res.writeHead(200, headers);
+                res.end(data);
+            });
+        } else {
+            // Stream large files
+            res.writeHead(200, headers);
 
-        readStream.pipe(res);
+            const readStream = fs.createReadStream(filePath);
+
+            // Security: Handle stream errors to prevent server crash (DoS)
+            readStream.on('error', (streamErr) => {
+                console.error('Stream error:', streamErr);
+                if (!res.headersSent) {
+                    res.writeHead(500);
+                    res.end('Internal Server Error');
+                }
+            });
+
+            readStream.pipe(res);
+        }
     });
 });
 

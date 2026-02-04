@@ -375,6 +375,36 @@ window.toggleSound = function () {
 };
 
 /**
+ * Helper to adjust range input values with buttons
+ * Palette: Stepper control logic
+ */
+window.adjustRange = function (id, direction) {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    const step = parseFloat(input.step) || 1;
+    const min = parseFloat(input.min) || 0;
+    const max = parseFloat(input.max) || 100;
+
+    // Calculate new value
+    let val = parseFloat(input.value) + (direction * step);
+
+    // Clamp
+    val = Math.max(min, Math.min(max, val));
+
+    // Update value
+    input.value = val;
+
+    // Dispatch input event so the existing oninput handler runs
+    input.dispatchEvent(new Event('input'));
+
+    // Audio Feedback
+    if (typeof soundManager !== 'undefined') {
+        soundManager.play('click');
+    }
+};
+
+/**
  * Update sound volume
  * Palette: Added dynamic icon feedback
  */

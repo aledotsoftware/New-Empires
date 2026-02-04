@@ -1055,8 +1055,28 @@ class TechManager {
     }
 
     completeResearch(techId) {
-        const tech = TECHNOLOGIES[techId];
         this.researchedTechs.add(techId);
+        this.applyTechEffects(techId);
+
+        const tech = TECHNOLOGIES[techId];
+        if (tech) {
+            this.game.showNotification(`¡${tech.name} investigado!`, 'success');
+        }
+        this.game.updateActionsPanel(); // Quitar botón de la tecnología
+    }
+
+    applyResearchedEffects() {
+        for (const techId of this.researchedTechs) {
+            this.applyTechEffects(techId);
+        }
+        // Force update of actions panel in case techs unlock new things
+        if (this.game && this.game.updateActionsPanel) {
+            this.game.updateActionsPanel();
+        }
+    }
+
+    applyTechEffects(techId) {
+        const tech = TECHNOLOGIES[techId];
         // Backwards-compatible application of effects:
         // If the tech provides an `apply` function (legacy), call it.
         // Otherwise, if the tech defines an `effects` object (JSON data), apply those effects.
@@ -1140,8 +1160,6 @@ class TechManager {
         } catch (e) {
             console.error('Error aplicando efectos de la tecnología', techId, e);
         }
-        this.game.showNotification(`¡${tech.name} investigado!`, 'success');
-        this.game.updateActionsPanel(); // Quitar botón de la tecnología
     }
 
     isResearched(techId) {

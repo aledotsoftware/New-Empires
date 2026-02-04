@@ -26,6 +26,7 @@ import { assetLoader } from './js/managers/AssetLoader.js';
 
 // ===== VARIABLES GLOBALES =====
 let game = null;
+let gameLoopId = null; // Manage animation frame request
 let selectedCivilization = 'sumeria';
 let selectedMapSize = 'normal';
 
@@ -571,18 +572,21 @@ window.loadGame = function () {
         return;
     }
 
-    const saveInfo = saveManager.getSaveInfo();
-    if (!saveInfo) {
+    const state = saveManager.load(); // Load full state
+    if (!state) {
         updateSaveStatus('No hay partida guardada', 'info');
         return;
     }
 
-    // Por ahora solo mostramos info, la carga completa requiere más trabajo
-    const date = new Date(saveInfo.timestamp).toLocaleString();
-    updateSaveStatus(`📁 Última partida: ${saveInfo.civilizationId} - ${date}`, 'info');
+    // Clean up old game if exists
+    if (game && game.destroy) game.destroy();
+    game = null; // Prevent loop updates
 
-    // TODO: Implementar carga completa del estado del juego
-    debugLogger.info('Información de guardado:', 'save', saveInfo);
+    // Start game with loaded state
+    // We pass state.mapConfig and state.civilizationId
+    startGame(state.civilizationId, state.mapConfig, state);
+
+    updateSaveStatus('✅ Partida cargada', 'success');
 };
 
 /**
@@ -982,10 +986,16 @@ window.closeBuildMenu = function () {
 /**
  * Inicia una nueva partida
  */
-function startGame(civId, mapConfig) {
+function startGame(civId, mapConfig, loadedState = null) {
     debugLogger.start('Iniciando nuevo juego', 'game');
     debugLogger.info(`Civilización: ${civId}`, 'game');
     debugLogger.info(`Mapa: ${mapConfig.name || 'Normal'}`, 'game');
+
+    // Cancel existing loop
+    if (gameLoopId) {
+        cancelAnimationFrame(gameLoopId);
+        gameLoopId = null;
+    }
 
     // Iniciar música
     if (typeof soundManager !== 'undefined') {
@@ -1004,6 +1014,11 @@ function startGame(civId, mapConfig) {
 
     // Exponer game globalmente para compatibilidad con HTML (onclick handlers)
     window.game = game;
+
+    // Load state if provided
+    if (loadedState) {
+        game.loadState(loadedState);
+    }
 
     // Forzar un resize inmediato por si el render inicial se hizo antes de que
     // el layout estuviera listo en algunos navegadores
@@ -1024,14 +1039,17 @@ function startGame(civId, mapConfig) {
         lastTime = currentTime;
 
         // Actualizar y renderizar
-        game.update(deltaTime);
-        game.render();
+        // Check game existence to prevent crashes if game is destroyed/nulled
+        if (game) {
+            game.update(deltaTime);
+            game.render();
+        }
 
         // Continuar el loop
-        requestAnimationFrame(gameLoop);
+        gameLoopId = requestAnimationFrame(gameLoop);
     }
 
-    requestAnimationFrame(gameLoop);
+    gameLoopId = requestAnimationFrame(gameLoop);
 
     debugLogger.success('Juego iniciado correctamente', 'game');
 }

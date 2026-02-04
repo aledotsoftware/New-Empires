@@ -457,6 +457,192 @@ export class Game {
         this.camera.y = 400 - this.viewHeight / 2;
     }
 
+    /**
+     * Carga el estado del juego desde un objeto guardado
+     * @param {Object} state - Estado del juego
+     */
+    loadState(state) {
+        if (!state) return;
+
+        console.log('Cargando estado del juego...', state);
+
+        // 1. Restore Scalars
+        this.civilizationId = state.civilizationId || this.civilizationId;
+        // Recalculate start time so that (now - startTime) equals saved gameTime
+        this.gameStartTime = Date.now() - (state.gameTime || 0);
+
+        if (state.resources) this.resources = { ...state.resources };
+        if (state.population !== undefined) this.population = state.population;
+        if (state.maxPopulation !== undefined) this.maxPopulation = state.maxPopulation;
+
+        if (state.camera) {
+            this.camera.x = state.camera.x;
+            this.camera.y = state.camera.y;
+            this.clampCamera();
+        }
+
+        // 2. Clear Entities & Grids
+        this.entities = [];
+        this.units = [];
+        this.buildings = [];
+        this.enemies = [];
+        this.selectedEntities = [];
+        this.dropOffPoints = [];
+
+        // Reset counters
+        this.townCenterCounts = { player: 0, enemy: 0 };
+        this.playerBuildingCounts = {};
+
+        // Clear grids
+        if (this.playerUnitGrid) this.playerUnitGrid.clear();
+        if (this.enemyUnitGrid) this.enemyUnitGrid.clear();
+        if (this.buildingGrid) this.buildingGrid.clear();
+        if (this.resourceGrid) this.resourceGrid.clear();
+
+        // 3. Restore Resources
+        this.resourceNodes = [];
+        if (state.resourceNodes) {
+            for (const r of state.resourceNodes) {
+                // Ensure radius is set (default 20)
+                const radius = r.radius || 20;
+                const node = {
+                    x: r.x,
+                    y: r.y,
+                    type: r.type,
+                    amount: r.amount,
+                    radius: radius,
+                    playerId: r.playerId || null,
+                    // Pre-calculate grid coords
+                    _gridCol: (r.x / TILE_SIZE) | 0,
+                    _gridRow: (r.y / TILE_SIZE) | 0
+                };
+                this.resourceNodes.push(node);
+                if (this.resourceGrid && node.amount > 0) {
+                    this.resourceGrid.add(node);
+                }
+            }
+        }
+
+        // 4. Restore Entities
+        const ENTITY_CLASSES = {
+            'villager': Villager,
+            'warrior': Warrior,
+            'archer': Archer,
+            'townCenter': TownCenter,
+            'house': House,
+            'barracks': Barracks,
+            'storage': Storage,
+            'storageWood': StorageWood,
+            'market': Market,
+            'temple': Temple,
+            'workshop': Workshop
+        };
+
+        const restoreEntity = (eData, list, grid) => {
+            const ClassRef = ENTITY_CLASSES[eData.type];
+            if (!ClassRef) return;
+
+            // Constructor usually expects (x, y, team)
+            const entity = new ClassRef(eData.x, eData.y, eData.team);
+
+            // Restore props
+            entity.hp = eData.hp;
+            if (eData.maxHp) entity.maxHp = eData.maxHp;
+
+            // Unit specifics
+            if (entity.isUnit) {
+                if (eData.state) entity.state = eData.state;
+                if (eData.carryAmount) entity.carryAmount = eData.carryAmount;
+                if (eData.carryType) entity.carryType = eData.carryType;
+            }
+
+            // Building specifics
+            if (entity.isBuilding) {
+                if (eData.isUnderConstruction) {
+                    entity.isUnderConstruction = true;
+                    entity.constructionMaxHp = entity.maxHp; // Usually correct
+                    // eData.constructionProgress is ratio 0-1
+                } else {
+                    entity.isUnderConstruction = false;
+                }
+
+                // Grid props
+                if (eData.widthTiles) entity.widthTiles = eData.widthTiles;
+                if (eData.heightTiles) entity.heightTiles = eData.heightTiles;
+                if (eData.gridCol !== undefined) entity.gridCol = eData.gridCol;
+                else entity.gridCol = (eData.x / TILE_SIZE) | 0; // Fallback
+
+                if (eData.gridRow !== undefined) entity.gridRow = eData.gridRow;
+                else entity.gridRow = (eData.y / TILE_SIZE) | 0;
+
+                // Update counts
+                if (entity.team === 'player') {
+                    this._updateBuildingCount(entity.type, 1);
+                    if (entity.type === 'townCenter' || entity.type === 'storage') {
+                        this.dropOffPoints.push(entity);
+                    }
+                }
+
+                if (entity.type === 'townCenter') {
+                    if (this.townCenterCounts[entity.team] !== undefined) {
+                        this.townCenterCounts[entity.team]++;
+                    }
+                }
+
+                // Mark grid
+                if (this.gridMap && entity.widthTiles && entity.heightTiles) {
+                    this.gridMap.occupyArea(entity.gridCol, entity.gridRow, entity.widthTiles, entity.heightTiles, entity);
+                }
+            }
+
+            // Optimization cache
+            this._cacheEntityTerrain(entity);
+
+            // Add to main lists
+            this.entities.push(entity);
+            list.push(entity);
+            if (grid) grid.add(entity);
+        };
+
+        if (state.units) {
+            for (const u of state.units) {
+                // Game.js puts player units in this.units
+                if (u.team === 'player') {
+                    restoreEntity(u, this.units, this.playerUnitGrid);
+                } else {
+                    // Fallback just in case mixed
+                    restoreEntity(u, this.enemies, this.enemyUnitGrid);
+                }
+            }
+        }
+
+        if (state.enemies) {
+            for (const e of state.enemies) {
+                 restoreEntity(e, this.enemies, this.enemyUnitGrid);
+            }
+        }
+
+        if (state.buildings) {
+            for (const b of state.buildings) {
+                 restoreEntity(b, this.buildings, this.buildingGrid);
+            }
+        }
+
+        // 5. Restore Techs
+        if (state.researchedTechs && this.techManager) {
+            this.techManager.researchedTechs = new Set(state.researchedTechs);
+            if (this.techManager.applyResearchedEffects) {
+                this.techManager.applyResearchedEffects();
+            }
+        }
+
+        // 6. Refresh UI
+        this._minimapDirty = true;
+        this._minimapFOWDirty = true;
+        this.updateUI();
+        this.showNotification('Partida cargada correctamente', 'success');
+    }
+
     generateMap() {
         // Usar el generador procedural de mapas (variable global temporal)
         if (typeof ProceduralMapGenerator !== 'undefined') {

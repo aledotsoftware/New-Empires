@@ -2407,3 +2407,47 @@ button:focus-visible,
     font-family: var(--font-ui);
     letter-spacing: 0.5px;
 }
+
+/* Palette: Range Stepper Controls */
+.range-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.btn-stepper {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+
+    font-family: var(--font-ui);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1;
+
+    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    border: 2px solid var(--stone-light);
+    border-radius: var(--radius-small);
+    color: var(--gold);
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+}
+
+.btn-stepper:hover {
+    border-color: var(--gold);
+    background: var(--stone-light);
+    color: var(--gold-light);
+    transform: translateY(-1px);
+}
+
+.btn-stepper:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}

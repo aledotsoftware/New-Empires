@@ -482,8 +482,12 @@
                                 </label>
                                 <span id="volumeValue" style="color: #48bb78;">50%</span>
                             </div>
-                            <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"
-                                style="width: 100%; accent-color: #d4af37;" oninput="updateSoundVolume(this.value)">
+                            <div class="range-container">
+                                <button class="btn-stepper" onclick="adjustRange('volumeSlider', -1)" aria-label="Bajar volumen">-</button>
+                                <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"
+                                    style="width: 100%; accent-color: #d4af37;" oninput="updateSoundVolume(this.value)">
+                                <button class="btn-stepper" onclick="adjustRange('volumeSlider', 1)" aria-label="Subir volumen">+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -520,8 +524,12 @@
                                     Cursor</label>
                                 <span id="cursorSizeValue" style="color: #48bb78;">32px</span>
                             </div>
-                            <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
-                                style="width: 100%; accent-color: #d4af37;" oninput="updateCursorSize(this.value)">
+                            <div class="range-container">
+                                <button class="btn-stepper" onclick="adjustRange('cursorSizeSlider', -1)" aria-label="Reducir cursor">-</button>
+                                <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
+                                    style="width: 100%; accent-color: #d4af37;" oninput="updateCursorSize(this.value)">
+                                <button class="btn-stepper" onclick="adjustRange('cursorSizeSlider', 1)" aria-label="Aumentar cursor">+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -534,8 +542,12 @@
                                     Desplazamiento</label>
                                 <span id="cameraSpeedValue" style="color: #48bb78;">1200 px/s</span>
                             </div>
-                            <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
-                                style="width: 100%; accent-color: #d4af37;" oninput="updateCameraSpeed(this.value)">
+                            <div class="range-container">
+                                <button class="btn-stepper" onclick="adjustRange('cameraSpeedSlider', -1)" aria-label="Reducir velocidad">-</button>
+                                <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
+                                    style="width: 100%; accent-color: #d4af37;" oninput="updateCameraSpeed(this.value)">
+                                <button class="btn-stepper" onclick="adjustRange('cameraSpeedSlider', 1)" aria-label="Aumentar velocidad">+</button>
+                            </div>
                         </div>
 
                         <div style="margin-bottom: 15px;">
@@ -544,8 +556,12 @@
                                     Activación</label>
                                 <span id="cameraMarginValue" style="color: #48bb78;">30 px</span>
                             </div>
-                            <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"
-                                style="width: 100%; accent-color: #d4af37;" oninput="updateCameraMargin(this.value)">
+                            <div class="range-container">
+                                <button class="btn-stepper" onclick="adjustRange('cameraMarginSlider', -1)" aria-label="Reducir margen">-</button>
+                                <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"
+                                    style="width: 100%; accent-color: #d4af37;" oninput="updateCameraMargin(this.value)">
+                                <button class="btn-stepper" onclick="adjustRange('cameraMarginSlider', 1)" aria-label="Aumentar margen">+</button>
+                            </div>
                         </div>
                     </div>
 

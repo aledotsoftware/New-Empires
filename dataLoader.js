@@ -27,6 +27,9 @@ class DataLoader {
             'mongols', 'sumeria', 'romans', 'vikings', 'argentinians',
             'babylon', 'byzantium', 'caliphate', 'egypt', 'greece', 'persia', 'spain'
         ];
+
+        // Cache para resultados de _applyOverrides
+        this._cache = new Map();
     }
 
     /**
@@ -152,7 +155,11 @@ class DataLoader {
      * Método genérico optimizado para aplicar overrides
      * Elimina la duplicación de código en getTechnologies, getBuildings, etc.
      */
-    _applyOverrides(baseList, overrides = {}, uniqueItems = []) {
+    _applyOverrides(baseList, overrides = {}, uniqueItems = [], cacheKey = null) {
+        if (cacheKey && this._cache.has(cacheKey)) {
+            return this._cache.get(cacheKey);
+        }
+
         if (!baseList) return [];
 
         // Usamos structuredClone para una copia profunda nativa y eficiente
@@ -182,6 +189,10 @@ class DataLoader {
             processedList.push(...structuredClone(uniqueItems));
         }
 
+        if (cacheKey) {
+            this._cache.set(cacheKey, processedList);
+        }
+
         return processedList;
     }
 
@@ -192,7 +203,8 @@ class DataLoader {
         return this._applyOverrides(
             this.baseData.technologies,
             civData.technologyOverrides,
-            civData.uniqueTechnologies
+            civData.uniqueTechnologies,
+            `tech_${civilizationId}`
         );
     }
 
@@ -202,7 +214,9 @@ class DataLoader {
 
         return this._applyOverrides(
             this.baseData.buildings,
-            civData.buildingOverrides
+            civData.buildingOverrides,
+            [],
+            `building_${civilizationId}`
         );
     }
 
@@ -210,10 +224,15 @@ class DataLoader {
         const civData = this.civilizations.get(civilizationId);
         if (!civData) return this.baseData.units;
 
-        const units = this._applyOverrides(
+        const cachedUnits = this._applyOverrides(
             this.baseData.units,
-            civData.unitOverrides
+            civData.unitOverrides,
+            [],
+            `unit_${civilizationId}`
         );
+
+        // Copiamos el array para no mutar la cache cuando añadimos la unidad única
+        const units = [...cachedUnits];
 
         // Manejo especial para unidad única que requiere lógica extra
         if (civData.uniqueUnit) {

@@ -2956,15 +2956,21 @@ export class Game {
 
         // Query Spatial Grid (Reuse cache array)
         if (!this._dragSelectCache) this._dragSelectCache = [];
-        // BOLT OPTIMIZATION: Query playerUnitGrid only for drag selection badge
-        this.playerUnitGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache);
+
+        // Pass 1: Player Units (Clear cache)
+        this.playerUnitGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache, true);
+
+        // Pass 2: Buildings (Append to cache)
+        if (this.buildingGrid) {
+            this.buildingGrid.queryRect(minX, minY, widthW, heightW, this._dragSelectCache, false);
+        }
 
         let count = 0;
         const len = this._dragSelectCache.length;
         for (let i = 0; i < len; i++) {
             const ent = this._dragSelectCache[i];
-            // BOLT OPTIMIZATION: Implicitly 'player' team from grid.
-            if (!ent.isDead) {
+            // Check team (Units are implicitly player, but Buildings are mixed)
+            if (!ent.isDead && ent.team === 'player') {
                 // Precise check
                 if (ent.x >= minX && ent.x <= maxX && ent.y >= minY && ent.y <= maxY) {
                     count++;

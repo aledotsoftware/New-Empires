@@ -397,16 +397,16 @@ window.updateSoundVolume = function (value) {
         const isEnabled = typeof soundManager !== 'undefined' ? soundManager.enabled : true;
 
         if (!isEnabled || volume === 0) {
-            icon.textContent = 'MUTE';
+            icon.textContent = '🔇';
             icon.setAttribute('aria-label', 'Silenciado');
         } else if (volume < 30) {
-            icon.textContent = 'LOW';
+            icon.textContent = '🔈';
             icon.setAttribute('aria-label', 'Volumen bajo');
         } else if (volume < 70) {
-            icon.textContent = 'MED';
+            icon.textContent = '🔉';
             icon.setAttribute('aria-label', 'Volumen medio');
         } else {
-            icon.textContent = 'HIGH';
+            icon.textContent = '🔊';
             icon.setAttribute('aria-label', 'Volumen alto');
         }
     }

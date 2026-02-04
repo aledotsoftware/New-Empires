@@ -65,3 +65,7 @@
 ## 2026-06-03 - Visual Rally Points
 **Learning:** Invisible game mechanics (like Rally Points) create uncertainty. Players right-click buildings expecting a response, but without visual feedback (a line or marker), they cannot confirm if the command was registered or where units will go.
 **Action:** Implemented a dashed line and flag marker connecting the selected building to its rally point. This visualizes the invisible "destination" state, providing immediate confirmation of the action and clarity on future unit movements.
+
+## 2026-06-04 - Emoji-based System State
+**Learning:** Using text labels for quantitative states (e.g., Volume "Low", "Med", "High") requires translation and cognitive reading effort. Universal symbols are processed faster but risk ambiguity if not standard.
+**Action:** Replaced text volume labels with a standard progression of emojis (🔇, 🔈, 🔉, 🔊). This creates a language-agnostic UI that is instantly recognizable, while maintaining accessibility via `aria-label` for screen readers.

@@ -305,7 +305,7 @@ class ParticleSystem {
         this.projectiles.length = writeIdx;
     }
 
-    render(ctx, camera) {
+    render(ctx, camera, viewWidth, viewHeight) {
         // BOLT OPTIMIZATION: Single save/restore for the entire system batch
         // Replaces hundreds of per-particle context saves
         ctx.save();
@@ -320,6 +320,18 @@ class ParticleSystem {
 
         // BOLT OPTIMIZATION: Standard loop avoids iterator allocation
         for (let i = 0; i < this.particles.length; i++) {
+            // BOLT OPTIMIZATION: Frustum culling
+            // Skip particles outside viewport (with 50px margin)
+            if (viewWidth && viewHeight) {
+                const p = this.particles[i];
+                // Coordinate relative to camera
+                const x = p.x - camera.x;
+                const y = p.y - camera.y;
+                // Check if outside viewport bounds (-50 to width+50)
+                if (x < -50 || x > viewWidth + 50 || y < -50 || y > viewHeight + 50) {
+                    continue;
+                }
+            }
             currentFont = this.particles[i].render(ctx, camera, currentFont);
         }
 
@@ -327,6 +339,16 @@ class ParticleSystem {
         ctx.globalAlpha = 1;
 
         for (let i = 0; i < this.projectiles.length; i++) {
+            // BOLT OPTIMIZATION: Frustum culling for projectiles
+            if (viewWidth && viewHeight) {
+                const p = this.projectiles[i];
+                const x = p.x - camera.x;
+                const y = p.y - camera.y;
+                if (x < -50 || x > viewWidth + 50 || y < -50 || y > viewHeight + 50) {
+                    continue;
+                }
+            }
+
             // Check if projectiles support font caching optimization (duck typing)
             // If they return undefined (legacy/different class), currentFont becomes undefined,
             // which correctly forces a reset on next particle that checks against it.

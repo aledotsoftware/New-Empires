@@ -107,3 +107,7 @@
 ## 2026-02-13 - Query vs Find in Spatial Search
 **Learning:** The `SpatialGrid.query` method populates a results array (even if cached), which then requires iteration. For "find first match" logic (like cursor hovering), `SpatialGrid.find` is ~4.8x faster because it avoids array writes and can stop checking buckets immediately after finding a match (leveraging the center-first optimization), whereas `query` must check all relevant buckets to populate the list before the caller can iterate it.
 **Action:** Use `SpatialGrid.find` with a static predicate for any "exists" or "first match" spatial queries in hot loops.
+
+## 2025-05-23 - Map Generation Coordinate Systems
+**Learning:** Procedural map generation often mixes grid coordinates and world coordinates. Variable names like `res.x` can be misleading if the context isn't fully understood. Reviewers might assume `x` is always world coordinate.
+**Action:** Always verify the source of data and be explicit in comments when storing grid coordinates that might look like world coordinates to avoid confusion.

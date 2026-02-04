@@ -12,3 +12,8 @@
 **Vulnerability:** The rate limiter extracted the client IP from the first element of the `X-Forwarded-For` header (`split(',')[0]`). This allowed attackers to bypass rate limits by injecting a fake IP at the start of the header (e.g., `X-Forwarded-For: fake, real`).
 **Learning:** Standard proxies (like AWS ALB, Heroku, Nginx) typically append the connecting IP to the end of the `X-Forwarded-For` list. Relying on the first IP assumes the header was empty before the request, which is not guaranteed and can be manipulated by the client.
 **Prevention:** When trusting a proxy, extract the IP added by that proxy (usually the last one in the list), or use a library that understands the trusted proxy chain depth (like `proxy-addr`). Default to the rightmost IP when the exact depth is unknown but `trustProxy` is enabled.
+
+## 2026-02-04 - Cross-Origin Isolation Headers
+**Vulnerability:** Without `Cross-Origin-Opener-Policy` (COOP) and `Cross-Origin-Resource-Policy` (CORP), the application is more susceptible to cross-origin attacks like Spectre and XS-Leaks, and resources can be embedded by malicious sites.
+**Learning:** Modern browsers provide powerful isolation primitives. `COOP: same-origin` isolates the browsing context, preventing cross-window interactions. `CORP: same-origin` prevents other origins from reading the resource.
+**Prevention:** Always set `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` for standalone applications that do not need cross-origin interactions.

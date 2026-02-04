@@ -116,6 +116,7 @@ const server = http.createServer((req, res) => {
     const isSensitive = [
         'server.js',
         'server.log',
+        'test_syntax.js',
         'package.json',
         'package-lock.json',
         'pnpm-lock.yaml',
@@ -216,7 +217,10 @@ const server = http.createServer((req, res) => {
             // Referrer: Only send origin when cross-origin
             'Referrer-Policy': 'strict-origin-when-cross-origin',
             // Permissions: Disable sensitive features
-            'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()'
+            'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()',
+            // Isolation: Protect against cross-origin attacks (Spectre, etc.)
+            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Resource-Policy': 'same-origin'
         };
 
         // Cache-Control: no-cache for index.html to ensure users get latest version

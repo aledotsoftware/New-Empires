@@ -3287,12 +3287,9 @@ export class Game {
         const unitsLen = this.units.length;
         for (let i = 0; i < unitsLen; i++) {
             const unit = this.units[i];
-            // Safety check: ensure we only draw player units as green
-            if (unit.team === 'player') {
-                const x = (unit.x * scale) | 0;
-                const y = (unit.y * scale) | 0;
-                this.minimapCtx.rect(x - 1, y - 1, 2, 2);
-            }
+            const x = (unit.x * scale) | 0;
+            const y = (unit.y * scale) | 0;
+            this.minimapCtx.rect(x - 1, y - 1, 2, 2);
         }
         this.minimapCtx.fill();
 

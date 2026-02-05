@@ -17,3 +17,8 @@
 **Vulnerability:** Without `Cross-Origin-Opener-Policy` (COOP) and `Cross-Origin-Resource-Policy` (CORP), the application is more susceptible to cross-origin attacks like Spectre and XS-Leaks, and resources can be embedded by malicious sites.
 **Learning:** Modern browsers provide powerful isolation primitives. `COOP: same-origin` isolates the browsing context, preventing cross-window interactions. `CORP: same-origin` prevents other origins from reading the resource.
 **Prevention:** Always set `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin` for standalone applications that do not need cross-origin interactions.
+
+## 2026-02-12 - Rate Limit Eviction Bypass
+**Vulnerability:** In-memory rate limiting with FIFO eviction allowed attackers to bypass blocking by flooding the server with random IPs, forcing the eviction of their blocked IP entry from the bounded Map.
+**Learning:** Simple `Map` eviction strategies (FIFO or random) are insufficient for security contexts where "heavy" users (attackers) must be retained. Attackers can exploit the eviction policy to reset their tracking counters.
+**Prevention:** Implement "Smart Eviction" or "Prioritized Retention": when the cache is full, prioritize keeping blocked/abusive IPs in memory. Use LRU updates for active access (`delete` + `set`) and scan candidates to evict non-blocked entries first.

@@ -273,6 +273,9 @@ export class Game {
         // Cache para queries de cursor
         this._cursorQueryCache = [];
 
+        // Cache para getEntityAt (Optimización Bolt)
+        this._getEntityAtCache = [];
+
         // Cache para selección de arrastre (Palette)
         this._dragSelectCache = [];
 
@@ -998,6 +1001,7 @@ export class Game {
 
     /**
      * Gets the closest player entity at the specified world coordinates.
+     * BOLT OPTIMIZATION: Uses SpatialGrid queries instead of iterating all entities.
      * @param {number} worldX - World X coordinate
      * @param {number} worldY - World Y coordinate
      * @returns {Entity|null} The closest entity or null
@@ -1006,10 +1010,37 @@ export class Game {
         let closest = null;
         let closestDistSq = Infinity;
 
-        for (let entity of this.entities) {
+        // Determine search radius large enough to cover the largest entity's center from its edge
+        // Largest building is 5x5 tiles (160px), radius ~115px.
+        const searchRadius = 150;
+        const width = searchRadius * 2;
+        const height = searchRadius * 2;
+        const minX = worldX - searchRadius;
+        const minY = worldY - searchRadius;
+
+        // Use cached array to avoid allocation
+        if (!this._getEntityAtCache) this._getEntityAtCache = [];
+        const candidates = this._getEntityAtCache;
+        // Reset length but keep allocated memory
+        // First query clears the result
+        this.playerUnitGrid.queryRect(minX, minY, width, height, candidates, true);
+        this.enemyUnitGrid.queryRect(minX, minY, width, height, candidates, false);
+        if (this.buildingGrid) {
+            this.buildingGrid.queryRect(minX, minY, width, height, candidates, false);
+        }
+
+        const len = candidates.length;
+        for (let i = 0; i < len; i++) {
+            const entity = candidates[i];
+
             // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
             if (entity.team !== 'player') {
-                if (!this.fow.isVisible((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+                // Use cached grid coords if available for FOW check (faster)
+                // Fallback to calculation
+                const col = entity._lastGridCol !== undefined ? entity._lastGridCol : (entity.x / TILE_SIZE) | 0;
+                const row = entity._lastGridRow !== undefined ? entity._lastGridRow : (entity.y / TILE_SIZE) | 0;
+
+                if (!this.fow.isVisible(col, row)) {
                     continue;
                 }
             }

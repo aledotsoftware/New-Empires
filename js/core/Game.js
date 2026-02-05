@@ -150,6 +150,7 @@ export class Game {
         // Modo de construcción
         this.buildMode = null;
         this.buildGhost = null;
+        this.hoveredEntity = null; // Palette: Track hovered entity for feedback
 
         this.setupEventListeners();
 
@@ -2310,7 +2311,8 @@ export class Game {
         // Acceso directo a length es O(1), eliminando el loop O(N) redundante.
         this.population = this.units.length;
 
-        // Palette: Update Contextual Cursor
+        // Palette: Update Contextual Cursor and Hover State
+        this.updateHoveredEntity();
         this.updateCursorState();
 
         // Actualizar UI (Throttled to 10 FPS)
@@ -2319,6 +2321,11 @@ export class Game {
             this.updateUI();
             this.lastUITime = now;
         }
+    }
+
+    updateHoveredEntity() {
+        // Palette: Find entity under cursor for visual feedback
+        this.hoveredEntity = this.getEntityAt(this.mouse.worldX, this.mouse.worldY);
     }
 
     updateCursorState() {
@@ -3003,6 +3010,7 @@ export class Game {
         if (hasProdFg) this.ctx.fill();
 
         // Dibujar selección
+        this.drawHoverHighlight();
         this.drawSelection();
 
         // Dibujar rectángulo de arrastre
@@ -3176,6 +3184,27 @@ export class Game {
                 this.ctx.fillRect(node._screenX - 10, node._screenY - 10, 20, 20);
             }
         }
+    }
+
+    drawHoverHighlight() {
+        if (!this.hoveredEntity) return;
+
+        // Skip if selected (Selection ring takes precedence)
+        if (this.selectedEntities.includes(this.hoveredEntity)) return;
+
+        const entity = this.hoveredEntity;
+        const screenX = (entity.x - this.camera.x) | 0;
+        const screenY = (entity.y - this.camera.y) | 0;
+        const radius = entity.size + 5;
+
+        this.ctx.save();
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        // Move to start to ensure clean circle
+        this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
+        this.ctx.stroke();
+        this.ctx.restore();
     }
 
     drawSelection() {

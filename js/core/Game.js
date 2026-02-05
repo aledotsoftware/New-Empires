@@ -33,30 +33,40 @@ export class Game {
     }
 
     // BOLT OPTIMIZATION: Static predicates for spatial find (avoids closure allocation)
-    static _cursorEnemyPredicate(entity, mouse) {
+    static _cursorEnemyPredicate(entity, game) {
         if (entity.isDead) return false;
+
+        // BOLT OPTIMIZATION: Check FOW visibility to prevent scouting exploit
+        if (game.fow && !game.fow.isVisible((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+            return false;
+        }
+
         // Optimized distance check
-        const dx = entity.x - mouse.worldX;
-        const dy = entity.y - mouse.worldY;
-        // 30 * 30 = 900 (cursor radius squared)
+        const dx = entity.x - game.mouse.worldX;
+        const dy = entity.y - game.mouse.worldY;
         // Check against entity size squared (hitbox)
-        // Logic matches original: distSq < other.size * other.size
         return (dx * dx + dy * dy) < (entity.size * entity.size);
     }
 
-    static _cursorBuildingPredicate(entity, mouse) {
+    static _cursorBuildingPredicate(entity, game) {
         if (entity.team !== 'player' || !entity.isUnderConstruction) return false;
         // Check approximate collision
         const checkRadius = entity.size / 2 + 20;
-        const dx = entity.x - mouse.worldX;
-        const dy = entity.y - mouse.worldY;
+        const dx = entity.x - game.mouse.worldX;
+        const dy = entity.y - game.mouse.worldY;
         return (dx * dx + dy * dy) < (checkRadius * checkRadius);
     }
 
-    static _cursorResourcePredicate(entity, mouse) {
+    static _cursorResourcePredicate(entity, game) {
         if (entity.amount <= 0) return false;
-        const dx = entity.x - mouse.worldX;
-        const dy = entity.y - mouse.worldY;
+
+        // BOLT OPTIMIZATION: Check FOW explored state (for right-click gather)
+        if (game.fow && !game.fow.isExplored((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+            return false;
+        }
+
+        const dx = entity.x - game.mouse.worldX;
+        const dy = entity.y - game.mouse.worldY;
         return (dx * dx + dy * dy) < (entity.radius * entity.radius);
     }
 
@@ -1006,10 +1016,26 @@ export class Game {
         let closest = null;
         let closestDistSq = Infinity;
 
-        for (let entity of this.entities) {
+        // BOLT OPTIMIZATION: Spatial Grid Query (replaces O(N) linear scan)
+        const radius = 100; // Search radius (covers max entity size)
+        const cache = this._cursorQueryCache;
+        // 1. Clear cache inside queryRect (pass true)
+        this.playerUnitGrid.queryRect(worldX - radius, worldY - radius, radius * 2, radius * 2, cache, true);
+        // 2. Append others (pass false)
+        this.enemyUnitGrid.queryRect(worldX - radius, worldY - radius, radius * 2, radius * 2, cache, false);
+        this.buildingGrid.queryRect(worldX - radius, worldY - radius, radius * 2, radius * 2, cache, false);
+
+        // Iterate candidates
+        const len = cache.length;
+        const fow = this.fow;
+        const invTile = fow ? fow.invTileSize : (1 / TILE_SIZE);
+
+        for (let i = 0; i < len; i++) {
+            const entity = cache[i];
+
             // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
-            if (entity.team !== 'player') {
-                if (!this.fow.isVisible((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+            if (entity.team !== 'player' && fow) {
+                if (!fow.isVisible((entity.x * invTile) | 0, (entity.y * invTile) | 0)) {
                     continue;
                 }
             }
@@ -1142,58 +1168,36 @@ export class Game {
     handleRightClick() {
         if (this.selectedEntities.length === 0) return;
 
+        // BOLT OPTIMIZATION: Use Spatial Grid find() instead of O(N) loops
+        // Predicates are static and check visibility/state/hitbox
+        // Context 'this' passes the Game instance (for FOW and mouse coords)
+
         // Verificar si clickeó en un enemigo
-        let targetEnemy = null;
-        for (let enemy of this.enemies) {
-            // Solo permitir atacar si el enemigo es visible
-            if (!this.fow.isVisible((enemy.x / TILE_SIZE) | 0, (enemy.y / TILE_SIZE) | 0)) {
-                continue;
-            }
-
-            const dx = enemy.x - this.mouse.worldX;
-            const dy = enemy.y - this.mouse.worldY;
-            const distSq = dx * dx + dy * dy;
-
-            if (distSq < enemy.size * enemy.size) {
-                targetEnemy = enemy;
-                break;
-            }
-        }
+        const targetEnemy = this.enemyUnitGrid.find(
+            this.mouse.worldX,
+            this.mouse.worldY,
+            100, // Search radius
+            Game._cursorEnemyPredicate,
+            this
+        );
 
         // Verificar si clickeó en un nodo de recursos
-        let targetResource = null;
-        for (let node of this.resourceNodes) {
-            // Solo permitir recolectar si el nodo está explorado
-            if (!this.fow.isExplored((node.x / TILE_SIZE) | 0, (node.y / TILE_SIZE) | 0)) {
-                continue;
-            }
-
-            const dx = node.x - this.mouse.worldX;
-            const dy = node.y - this.mouse.worldY;
-            const distSq = dx * dx + dy * dy;
-
-            if (distSq < node.radius * node.radius) {
-                targetResource = node;
-                break;
-            }
-        }
+        const targetResource = this.resourceGrid.find(
+            this.mouse.worldX,
+            this.mouse.worldY,
+            50, // Resources are smaller
+            Game._cursorResourcePredicate,
+            this
+        );
 
         // Verificar si clickeó en un edificio en construcción (propio)
-        let targetBuilding = null;
-        for (let building of this.buildings) {
-            if (building.team === 'player' && building.isUnderConstruction) {
-                const dx = building.x - this.mouse.worldX;
-                const dy = building.y - this.mouse.worldY;
-                const distSq = dx * dx + dy * dy;
-
-                // Usar un radio aproximado basado en el tamaño del edificio
-                const checkRadius = building.size / 2 + 20;
-                if (distSq < checkRadius * checkRadius) {
-                    targetBuilding = building;
-                    break;
-                }
-            }
-        }
+        const targetBuilding = this.buildingGrid.find(
+            this.mouse.worldX,
+            this.mouse.worldY,
+            100,
+            Game._cursorBuildingPredicate,
+            this
+        );
 
         // Comandar unidades
         let moveCommandTriggered = false;
@@ -2358,9 +2362,9 @@ export class Game {
                     const target = this.enemyUnitGrid.find(
                         this.mouse.worldX,
                         this.mouse.worldY,
-                        30,
+                        100, // Search radius increased to cover large entities
                         Game._cursorEnemyPredicate,
-                        this.mouse
+                        this
                     );
 
                     if (target) {
@@ -2374,9 +2378,9 @@ export class Game {
                     const target = this.buildingGrid.find(
                         this.mouse.worldX,
                         this.mouse.worldY,
-                        30,
+                        100,
                         Game._cursorBuildingPredicate,
-                        this.mouse
+                        this
                     );
 
                     if (target) {
@@ -2390,9 +2394,9 @@ export class Game {
                     const res = this.resourceGrid.find(
                         this.mouse.worldX,
                         this.mouse.worldY,
-                        30,
+                        50,
                         Game._cursorResourcePredicate,
-                        this.mouse
+                        this
                     );
 
                     if (res) {

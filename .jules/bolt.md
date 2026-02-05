@@ -115,3 +115,7 @@
 ## 2026-02-04 - Canvas State Batching (Rally Points)
 **Learning:** In `drawRallyPoints`, iterating entities and calling `ctx.save/restore` for each one (N times) generated thousands of unnecessary canvas operations per frame. Batching the rendering into 4 passes (Lines, Poles, Flags, Circles) reduced the operation count by ~87% and yielded a ~5.3x speedup in benchmarks.
 **Action:** Always hoist `ctx.save/restore` out of loops and batch similar drawing primitives (lines, rects) to minimize state changes.
+
+## 2026-02-14 - Interactive Spatial Queries (Clicking)
+**Learning:** Mouse interactions (click/hover) on large maps with thousands of entities are O(N) if iterating a flat list. Replacing `getEntityAt` and `handleRightClick` with `SpatialGrid` queries (O(1) average) yielded a ~7.3x speedup in benchmarks. Crucially, updating the selection predicates to check FOW visibility (via `game` context) fixed a latent exploit where invisible units revealed cursor state.
+**Action:** Use SpatialGrid for all mouse interactions (select, attack, gather), not just rendering/update loops. Ensure predicates account for visibility (FOW) to prevent information leaks.

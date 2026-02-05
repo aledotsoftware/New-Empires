@@ -2847,11 +2847,18 @@ export class Game {
         const cols = grid.cols;
         const rows = grid.rows;
 
+        // BOLT OPTIMIZATION: Hoist Camera & Viewport properties
+        const camX = this.camera.x;
+        const camY = this.camera.y;
+        const viewW = this.viewWidth;
+        const viewH = this.viewHeight;
+        const ctx = this.ctx;
+
         // Calculate grid bounds with margin
-        const startCol = Math.max(0, Math.floor((this.camera.x - margin) * invCellSize));
-        const endCol = Math.min(cols - 1, Math.floor((this.camera.x + this.viewWidth + margin) * invCellSize));
-        const startRow = Math.max(0, Math.floor((this.camera.y - margin) * invCellSize));
-        const endRow = Math.min(rows - 1, Math.floor((this.camera.y + this.viewHeight + margin) * invCellSize));
+        const startCol = Math.max(0, Math.floor((camX - margin) * invCellSize));
+        const endCol = Math.min(cols - 1, Math.floor((camX + viewW + margin) * invCellSize));
+        const startRow = Math.max(0, Math.floor((camY - margin) * invCellSize));
+        const endRow = Math.min(rows - 1, Math.floor((camY + viewH + margin) * invCellSize));
 
         // BOLT OPTIMIZATION: Hoist FOW constants for inline check
         const isVisionEnabled = CONFIG.VISION.ENABLED;
@@ -2904,8 +2911,8 @@ export class Game {
                 }
 
                 // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
-                ent._screenX = (ent.x - this.camera.x) | 0;
-                ent._screenY = (ent.y - this.camera.y) | 0;
+                ent._screenX = (ent.x - camX) | 0;
+                ent._screenY = (ent.y - camY) | 0;
 
                 this._renderCache[renderIdx++] = ent;
             }
@@ -2932,30 +2939,30 @@ export class Game {
             }
 
             // Batch Player
-            this.ctx.fillStyle = playerColor;
-            this.ctx.beginPath();
+            ctx.fillStyle = playerColor;
+            ctx.beginPath();
             let hasPlayer = false;
             for (let i = 0; i < renderLen; i++) {
                 const ent = this._renderCache[i];
                 if (ent.team === 'player') {
-                    ent.addBackgroundToPath(this.ctx, this.camera);
+                    ent.addBackgroundToPath(ctx, this.camera);
                     hasPlayer = true;
                 }
             }
-            if (hasPlayer) this.ctx.fill();
+            if (hasPlayer) ctx.fill();
 
             // Batch Enemy
-            this.ctx.fillStyle = enemyColor;
-            this.ctx.beginPath();
+            ctx.fillStyle = enemyColor;
+            ctx.beginPath();
             let hasEnemy = false;
             for (let i = 0; i < renderLen; i++) {
                 const ent = this._renderCache[i];
                 if (ent.team === 'enemy') {
-                    ent.addBackgroundToPath(this.ctx, this.camera);
+                    ent.addBackgroundToPath(ctx, this.camera);
                     hasEnemy = true;
                 }
             }
-            if (hasEnemy) this.ctx.fill();
+            if (hasEnemy) ctx.fill();
         }
 
         // Render entities (Pass 2: Sprites)
@@ -2965,13 +2972,13 @@ export class Game {
             // OPTIMIZATION: Pass viewport size to Entity.render for fine-grained culling
             // Pass false to skip HP bars (we batch them later)
             // Pass false to skip Backgrounds (we batched them above)
-            this._renderCache[i].render(this.ctx, this.camera, this.viewWidth, this.viewHeight, false, false);
+            this._renderCache[i].render(ctx, this.camera, viewW, viewH, false, false);
         }
 
         // BOLT OPTIMIZATION: Batch HP & Production Backgrounds (Pass 3)
         // Fused loop to reduce array iterations and draw calls. Both use the same semi-transparent black.
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.beginPath();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.beginPath();
         let hasBackgrounds = false;
 
         for (let i = 0; i < renderLen; i++) {
@@ -2979,46 +2986,46 @@ export class Game {
 
             // HP Bar Background
             if (entity.hp < entity.maxHp) {
-                entity.addHpBarBackgroundToPath(this.ctx, this.camera);
+                entity.addHpBarBackgroundToPath(ctx, this.camera);
                 hasBackgrounds = true;
             }
 
             // Production Bar Background
             if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
-                entity.addProductionBarBackgroundToPath(this.ctx, this.camera);
+                entity.addProductionBarBackgroundToPath(ctx, this.camera);
                 hasBackgrounds = true;
             }
         }
 
         if (hasBackgrounds) {
-            this.ctx.fill();
+            ctx.fill();
         }
 
         // Batch HP Foreground (Pass 4)
-        this.ctx.fillStyle = '#48bb78';
-        this.ctx.beginPath();
+        ctx.fillStyle = '#48bb78';
+        ctx.beginPath();
         let hasHpFg = false;
         for (let i = 0; i < renderLen; i++) {
             const entity = this._renderCache[i];
             if (entity.hp < entity.maxHp) {
-                entity.addHpBarForegroundToPath(this.ctx, this.camera);
+                entity.addHpBarForegroundToPath(ctx, this.camera);
                 hasHpFg = true;
             }
         }
-        if (hasHpFg) this.ctx.fill();
+        if (hasHpFg) ctx.fill();
 
         // Batch Production Foreground (Pass 5)
-        this.ctx.fillStyle = '#4299e1'; // Blue
-        this.ctx.beginPath();
+        ctx.fillStyle = '#4299e1'; // Blue
+        ctx.beginPath();
         let hasProdFg = false;
         for (let i = 0; i < renderLen; i++) {
             const entity = this._renderCache[i];
             if (entity.productionQueue && !entity.productionQueue.isEmpty()) {
-                entity.addProductionBarForegroundToPath(this.ctx, this.camera);
+                entity.addProductionBarForegroundToPath(ctx, this.camera);
                 hasProdFg = true;
             }
         }
-        if (hasProdFg) this.ctx.fill();
+        if (hasProdFg) ctx.fill();
 
         // Dibujar selección
         this.drawSelection();

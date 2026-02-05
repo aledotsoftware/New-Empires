@@ -2451,3 +2451,26 @@ button:focus-visible,
     transform: translateY(1px);
     box-shadow: none;
 }
+
+/* ==========================================
+   24. PALETTE INTERACTIVE CURSOR
+   ========================================== */
+
+/* Base transition for smooth feedback */
+#customCursor {
+    transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.1s ease-out;
+    transform-origin: top left; /* Pivot from the tip of the arrow */
+}
+
+/* Hover State: Scale up slightly and glow when hovering interactive elements */
+/* Using :has() to detect when the body contains a hovered interactive element */
+/* Note: The custom cursor has pointer-events: none, so hovering passes through to elements below */
+body:has(button:hover, a:hover, input:hover, [role="button"]:hover, .civ-option:hover, .map-size-option:hover, .build-option:hover, .resource-item:hover, .game-time:hover) #customCursor {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 4px var(--gold));
+}
+
+/* Active State: Shrink slightly on click for tactile feedback */
+body:has(button:active, a:active, input:active, [role="button"]:active, .civ-option:active, .map-size-option:active, .build-option:active) #customCursor {
+    transform: scale(0.9);
+}

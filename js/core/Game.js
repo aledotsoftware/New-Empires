@@ -235,7 +235,6 @@ export class Game {
         this.cursorElement.style.position = 'fixed';
         this.cursorElement.style.pointerEvents = 'none';
         this.cursorElement.style.zIndex = '9999';
-        this.cursorElement.style.transform = 'translate(0, 0)'; // El cursor.png tiene la punta arriba-izquierda
         this.cursorElement.style.width = '32px'; // Tamaño por defecto
         this.cursorElement.style.height = 'auto';
 
@@ -364,6 +363,9 @@ export class Game {
         if (this.cursorElement && this.cursorElement.parentNode) {
             this.cursorElement.parentNode.removeChild(this.cursorElement);
         }
+
+        // Restaurar cursor del sistema
+        document.body.style.cursor = '';
 
         // Limpiar referencias
         this.entities = [];

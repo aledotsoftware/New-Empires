@@ -93,9 +93,35 @@ const server = http.createServer((req, res) => {
 
     // Security: Prevent memory exhaustion by capping tracked IPs
     if (!clientData && ipCounts.size >= MAX_TRACKED_IPS) {
-        // FIFO eviction: Remove oldest entry to make space
-        const oldestIp = ipCounts.keys().next().value;
-        ipCounts.delete(oldestIp);
+        // Smart Eviction: Try to keep blocked IPs in memory by moving them to the end (LRU style)
+        // Scan up to 10 oldest entries to find a non-blocked victim
+        const iterator = ipCounts.keys();
+        let evicted = false;
+
+        for (let i = 0; i < 10; i++) {
+            const entry = iterator.next();
+            if (entry.done) break;
+
+            const candidateIp = entry.value;
+            const data = ipCounts.get(candidateIp);
+
+            if (data.count >= RATE_LIMIT_MAX_REQUESTS) {
+                // IP is blocked: Preserve it by moving to end (refresh)
+                ipCounts.delete(candidateIp);
+                ipCounts.set(candidateIp, data);
+            } else {
+                // IP is not blocked: Evict it
+                ipCounts.delete(candidateIp);
+                evicted = true;
+                break;
+            }
+        }
+
+        // Fallback: If all top 10 were blocked, just evict the oldest one (now at the start)
+        if (!evicted) {
+            const oldestIp = ipCounts.keys().next().value;
+            ipCounts.delete(oldestIp);
+        }
     }
 
     if (!clientData || now - clientData.startTime > RATE_LIMIT_WINDOW_MS) {
@@ -109,6 +135,9 @@ const server = http.createServer((req, res) => {
     }
 
     clientData.count++;
+    // Security Fix: LRU Strategy - Move active IP to the end of Map to prevent eviction
+    // This ensures active attackers (or users) are not evicted by a flood of new IPs.
+    ipCounts.delete(ip);
     ipCounts.set(ip, clientData);
 
     // Security: Decode URL to handle spaces and special characters

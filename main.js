@@ -1958,8 +1958,8 @@ const initApp = async () => {
     // Inicializar sonidos si soundManager está disponible
     if (typeof soundManager !== 'undefined') {
         debugLogger.info('Inicializando sistema de sonido...', 'sound');
-        if (typeof soundManager.init === 'function') {
-            soundManager.init();
+        if (typeof soundManager.loadAll === 'function') {
+            soundManager.loadAll();
         }
     }
 

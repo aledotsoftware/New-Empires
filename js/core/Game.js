@@ -277,6 +277,9 @@ export class Game {
         // Cache para selección de arrastre (Palette)
         this._dragSelectCache = [];
 
+        // Palette: Hover state for UI-to-World highlighting
+        this.hoveredType = null;
+
         // OPTIMIZACIÓN: Cache para actualizaciones de visión (FOW)
         this._visionEntitiesCache = [];
 
@@ -303,6 +306,8 @@ export class Game {
                 // Return focus to canvas for gameplay flow
                 setTimeout(() => this.canvas.focus(), 50);
             };
+            this.uiElements.idleVillagerBtn.onmouseenter = () => this.hoveredType = 'idle_villager';
+            this.uiElements.idleVillagerBtn.onmouseleave = () => this.hoveredType = null;
         }
 
         // Cache para renderizado (evita alocación de arrays en cada frame)
@@ -3016,6 +3021,9 @@ export class Game {
         // Dibujar selección
         this.drawSelection();
 
+        // Palette: Draw contextual highlights
+        this.drawHoverHighlight();
+
         // Dibujar rectángulo de arrastre
         if (this.isDragging) {
             this.drawDragSelection();
@@ -3187,6 +3195,63 @@ export class Game {
                 this.ctx.fillRect(node._screenX - 10, node._screenY - 10, 20, 20);
             }
         }
+    }
+
+    /**
+     * Palette: Contextual Highlight
+     * Draws a pulsating ring around units matching the UI hover state.
+     */
+    drawHoverHighlight() {
+        if (!this.hoveredType) return;
+
+        this.ctx.save();
+        this.ctx.strokeStyle = '#ffffff'; // White glow
+        this.ctx.lineWidth = 2;
+        // Pulse effect
+        const pulse = 0.6 + Math.sin(this.renderTime / 150) * 0.2;
+        this.ctx.globalAlpha = pulse;
+
+        this.ctx.beginPath();
+
+        if (this.hoveredType === 'idle_villager') {
+            // Highlight all idle villagers
+            // Iterate over all units is safe as this is only triggered on hover
+            const len = this.units.length;
+            for (let i = 0; i < len; i++) {
+                const unit = this.units[i];
+                if (unit.type === 'villager' && unit.state === 'IDLE' && unit.team === 'player') {
+                    // Check visibility before drawing
+                    if (unit.isDead) continue;
+
+                    // Simple culling
+                    const screenX = (unit.x - this.camera.x) | 0;
+                    const screenY = (unit.y - this.camera.y) | 0;
+                    if (screenX < -50 || screenX > this.viewWidth + 50 ||
+                        screenY < -50 || screenY > this.viewHeight + 50) continue;
+
+                    const radius = unit.size + 8;
+                    this.ctx.moveTo(screenX + radius, screenY);
+                    this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
+                }
+            }
+        } else {
+            // Highlight selected units of specific type
+            const len = this.selectedEntities.length;
+            for (let i = 0; i < len; i++) {
+                const entity = this.selectedEntities[i];
+                if (entity.type === this.hoveredType && !entity.isDead) {
+                    const screenX = (entity.x - this.camera.x) | 0;
+                    const screenY = (entity.y - this.camera.y) | 0;
+                    const radius = entity.size + 8; // Slightly larger than selection ring
+
+                    this.ctx.moveTo(screenX + radius, screenY);
+                    this.ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
+                }
+            }
+        }
+
+        this.ctx.stroke();
+        this.ctx.restore();
     }
 
     drawSelection() {
@@ -4464,6 +4529,10 @@ export class Game {
                     // Feedback
                     if (typeof soundManager !== 'undefined') soundManager.play('click');
                 };
+
+                // Palette: Contextual Highlight on Hover
+                btn.onmouseenter = () => this.hoveredType = type;
+                btn.onmouseleave = () => this.hoveredType = null;
 
                 groupContainer.appendChild(btn);
             }

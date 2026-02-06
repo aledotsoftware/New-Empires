@@ -283,6 +283,9 @@ export class Game {
         // Cache para queries de cursor
         this._cursorQueryCache = [];
 
+        // Cache para getEntityAt (Optimización Bolt)
+        this._getEntityAtCache = [];
+
         // Cache para selección de arrastre (Palette)
         this._dragSelectCache = [];
 
@@ -1008,6 +1011,7 @@ export class Game {
 
     /**
      * Gets the closest player entity at the specified world coordinates.
+     * BOLT OPTIMIZATION: Uses SpatialGrid queries instead of iterating all entities.
      * @param {number} worldX - World X coordinate
      * @param {number} worldY - World Y coordinate
      * @returns {Entity|null} The closest entity or null
@@ -1016,26 +1020,33 @@ export class Game {
         let closest = null;
         let closestDistSq = Infinity;
 
-        // BOLT OPTIMIZATION: Spatial Grid Query (replaces O(N) linear scan)
-        const radius = 100; // Search radius (covers max entity size)
+        // BOLT OPTIMIZATION: Use SpatialGrid queries instead of iterating all entities (O(1) vs O(N))
+        // Defensive init to prevent crash if constructor skipped/overridden
+        if (!this._cursorQueryCache) this._cursorQueryCache = [];
         const cache = this._cursorQueryCache;
-        // 1. Clear cache inside queryRect (pass true)
-        this.playerUnitGrid.queryRect(worldX - radius, worldY - radius, radius * 2, radius * 2, cache, true);
-        // 2. Append others (pass false)
-        this.enemyUnitGrid.queryRect(worldX - radius, worldY - radius, radius * 2, radius * 2, cache, false);
-        this.buildingGrid.queryRect(worldX - radius, worldY - radius, radius * 2, radius * 2, cache, false);
+        cache.length = 0;
 
-        // Iterate candidates
+        // Query units (small radius) - 50px covers standard units (size 32)
+        this.playerUnitGrid.query(worldX, worldY, 50, cache, false);
+        this.enemyUnitGrid.query(worldX, worldY, 50, cache, false);
+
+        // Query buildings (large radius) - 150px covers TownCenter (size ~160px)
+        if (this.buildingGrid) {
+            this.buildingGrid.query(worldX, worldY, 150, cache, false);
+        }
+
         const len = cache.length;
-        const fow = this.fow;
-        const invTile = fow ? fow.invTileSize : (1 / TILE_SIZE);
-
         for (let i = 0; i < len; i++) {
             const entity = cache[i];
 
             // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
-            if (entity.team !== 'player' && fow) {
-                if (!fow.isVisible((entity.x * invTile) | 0, (entity.y * invTile) | 0)) {
+            if (entity.team !== 'player') {
+                // Use cached grid coords if available for FOW check (faster)
+                // Fallback to calculation
+                const col = entity._lastGridCol !== undefined ? entity._lastGridCol : (entity.x / TILE_SIZE) | 0;
+                const row = entity._lastGridRow !== undefined ? entity._lastGridRow : (entity.y / TILE_SIZE) | 0;
+
+                if (!this.fow.isVisible(col, row)) {
                     continue;
                 }
             }

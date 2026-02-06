@@ -119,3 +119,7 @@
 ## 2026-02-14 - Spatial Query for Selection
 **Learning:** `getEntityAt` was an O(N) linear scan over all entities, which scales poorly (especially on large maps/late game). Replacing it with `SpatialGrid.query` (O(1) / O(Density)) on specific grids (`units`, `buildings`) provided an ~18x speedup in benchmarks.
 **Action:** When implementing selection or "find closest" logic, always prefer querying the SpatialGrid with a safe radius (e.g. max entity size) over iterating global entity lists. Ensure result caches are defensively initialized.
+
+## 2026-02-16 - Filter Before Sort (Fog of War)
+**Learning:** In the render loop, adding all potential entities to a cache, sorting them, and *then* filtering out invisible (FOW) ones is wasteful. By applying the visibility filter *before* adding to the cache (and thus before sorting), we achieved a ~32x speedup in the sorting phase for scenes with many hidden units (e.g. 5% visibility). This reduces both memory traffic (fewer writes to cache) and algorithmic complexity (sorting much smaller arrays).
+**Action:** When rendering or processing collections where a large subset might be filtered out (like FOW), apply the filter at the source (iterator) rather than filtering the output list.

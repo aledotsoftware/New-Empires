@@ -273,6 +273,9 @@ export class Game {
         // Cache para queries de cursor
         this._cursorQueryCache = [];
 
+        // Cache para getEntityAt (Optimización Bolt)
+        this._getEntityAtCache = [];
+
         // Cache para selección de arrastre (Palette)
         this._dragSelectCache = [];
 
@@ -998,6 +1001,7 @@ export class Game {
 
     /**
      * Gets the closest player entity at the specified world coordinates.
+     * BOLT OPTIMIZATION: Uses SpatialGrid queries instead of iterating all entities.
      * @param {number} worldX - World X coordinate
      * @param {number} worldY - World Y coordinate
      * @returns {Entity|null} The closest entity or null
@@ -1027,7 +1031,12 @@ export class Game {
 
             // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
             if (entity.team !== 'player') {
-                if (!this.fow.isVisible((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+                // Use cached grid coords if available for FOW check (faster)
+                // Fallback to calculation
+                const col = entity._lastGridCol !== undefined ? entity._lastGridCol : (entity.x / TILE_SIZE) | 0;
+                const row = entity._lastGridRow !== undefined ? entity._lastGridRow : (entity.y / TILE_SIZE) | 0;
+
+                if (!this.fow.isVisible(col, row)) {
                     continue;
                 }
             }

@@ -209,10 +209,18 @@ const server = http.createServer((req, res) => {
         'verification'
     ];
 
+    // Security: Whitelist allowed directories
+    // Only allow access to specific directories for assets and scripts
+    const ALLOWED_DIRS = ['assets', 'js'];
+    const isRootFile = normalizedPath === filename;
+
+    // If it's a subdirectory request, it MUST be in the whitelist
+    const isAllowedDir = isRootFile || ALLOWED_DIRS.includes(firstDir.toLowerCase());
+
     // Check for dotfiles in any part of the path (hidden files)
     const isHidden = safePath.split(path.sep).some(part => part.startsWith('.') && part !== '.' && part !== '..');
 
-    if (isSensitive || isHidden || BLOCKED_DIRS.some(d => d.toLowerCase() === firstDir.toLowerCase())) {
+    if (isSensitive || isHidden || !isAllowedDir || BLOCKED_DIRS.some(d => d.toLowerCase() === firstDir.toLowerCase())) {
         res.writeHead(403);
         res.end('Forbidden');
         return;
@@ -221,7 +229,6 @@ const server = http.createServer((req, res) => {
     // Security: Block root-level data/config files
     // Prevent exposure of config files (e.g. .json, .txt) that might be placed in root
     // Only allow specific file types in root (html, js, css, etc.)
-    const isRootFile = normalizedPath === filename;
     if (isRootFile) {
         const ext = path.extname(filename).toLowerCase();
         const allowedRootFiles = ['robots.txt', 'manifest.json'];

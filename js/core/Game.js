@@ -1006,7 +1006,25 @@ export class Game {
         let closest = null;
         let closestDistSq = Infinity;
 
-        for (let entity of this.entities) {
+        // BOLT OPTIMIZATION: Use SpatialGrid queries instead of iterating all entities (O(1) vs O(N))
+        // Defensive init to prevent crash if constructor skipped/overridden
+        if (!this._cursorQueryCache) this._cursorQueryCache = [];
+        const cache = this._cursorQueryCache;
+        cache.length = 0;
+
+        // Query units (small radius) - 50px covers standard units (size 32)
+        this.playerUnitGrid.query(worldX, worldY, 50, cache, false);
+        this.enemyUnitGrid.query(worldX, worldY, 50, cache, false);
+
+        // Query buildings (large radius) - 150px covers TownCenter (size ~160px)
+        if (this.buildingGrid) {
+            this.buildingGrid.query(worldX, worldY, 150, cache, false);
+        }
+
+        const len = cache.length;
+        for (let i = 0; i < len; i++) {
+            const entity = cache[i];
+
             // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
             if (entity.team !== 'player') {
                 if (!this.fow.isVisible((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {

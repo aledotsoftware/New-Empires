@@ -2474,3 +2474,21 @@ body:has(button:hover, a:hover, input:hover, [role="button"]:hover, .civ-option:
 body:has(button:active, a:active, input:active, [role="button"]:active, .civ-option:active, .map-size-option:active, .build-option:active) #customCursor {
     transform: scale(0.9);
 }
+
+/* Palette: Clickable Notifications */
+.notification.clickable {
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.notification.clickable:hover {
+    transform: translateX(5px);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.notification.clickable::after {
+    content: '🎯';
+    margin-left: auto;
+    font-size: 0.8em;
+    opacity: 0.7;
+}

@@ -278,6 +278,17 @@ export class Unit extends Entity {
 
             target.takeDamage(damage);
             this.attackCooldown = 1 / this.attackSpeed;
+
+            // Palette: Visual Feedback for Damage
+            if (game && game.particleSystem) {
+                // Floating Damage Text
+                game.particleSystem.createFloatingText(target.x, target.y - target.size / 2, `-${Math.floor(damage)}`, '#ff4444');
+
+                // Blood Splatter (only for organic units)
+                if (target.isUnit && !target.isBuilding) {
+                    game.particleSystem.createBloodSplatter(target.x, target.y, 5);
+                }
+            }
         }
     }
 

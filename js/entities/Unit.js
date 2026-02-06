@@ -44,7 +44,9 @@ export class Unit extends Entity {
             if (this.attackTarget.isDead) {
                 this.attackTarget = null;
             } else {
-                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game);
+                // BOLT OPTIMIZATION: Stop moving if already in attack range
+                // Reduces expensive collision checks and improves ranged unit behavior (kiting/spacing)
+                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRange * this.attackRange);
                 this.tryAttack(this.attackTarget, deltaTime, game);
             }
         }

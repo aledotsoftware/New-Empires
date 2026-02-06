@@ -2892,44 +2892,55 @@ export class Game {
             this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
             this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
 
-            // Sort only this row's entities
-            // BOLT OPTIMIZATION: Use static comparator to avoid closure allocation
-            this._rowCache.sort(Game._sortEntities);
-
-            // Manual append to avoid call stack limits or creation of intermediate arrays
-            // This loop is extremely fast in V8
+            // BOLT OPTIMIZATION: Early Pruning & In-Place Filtering (Filter-before-Sort)
+            // Perform FOW checks and Screen Culling BEFORE sorting to reduce NlogN cost.
+            let writeIdx = 0;
             const rowLen = this._rowCache.length;
-            let renderIdx = this._renderCache.length;
+
             for (let i = 0; i < rowLen; i++) {
                 const ent = this._rowCache[i];
 
-                // FILTRADO POR NIEBLA DE GUERRA
+                // 1. FOW Check
                 // BOLT OPTIMIZATION: Inline check with cached coords (~35% faster)
-                // Avoids function call overhead and redundant math.
                 if (isVisionEnabled && ent.team === 'enemy') {
-                    // Use cached coords if available, else calculate
-                    // Most entities have _lastGridCol updated in update() or initialization
                     let col = ent._lastGridCol !== undefined ? ent._lastGridCol : (ent.x * fowInvTileSize) | 0;
                     let row = ent._lastGridRow !== undefined ? ent._lastGridRow : (ent.y * fowInvTileSize) | 0;
 
-                    // Semi-safe bounds check (clamping both ends for full safety)
-                    if (col < 0) col = 0;
-                    else if (col >= fowCols) col = fowCols - 1;
+                    // Semi-safe bounds check
+                    if (col < 0) col = 0; else if (col >= fowCols) col = fowCols - 1;
+                    if (row < 0) row = 0; else if (row >= fowRows) row = fowRows - 1;
 
-                    if (row < 0) row = 0;
-                    else if (row >= fowRows) row = fowRows - 1;
-
-                    // Direct Uint8Array access
                     if (fowGrid[row * fowCols + col] !== fowVisibleState) {
                         continue;
                     }
                 }
 
-                // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
+                // 2. Calculate Screen Coords (needed for culling)
                 ent._screenX = (ent.x - camX) | 0;
                 ent._screenY = (ent.y - camY) | 0;
 
-                this._renderCache[renderIdx++] = ent;
+                // 3. Fine-Grained Screen Culling
+                // SpatialGrid is coarse; check exact bounds here to avoid rendering off-screen entities
+                // (margin logic in spatial grid query leaves some off-screen entities)
+                const size = ent.size || 20;
+                if (ent._screenX < -size || ent._screenX > viewW + size ||
+                    ent._screenY < -size || ent._screenY > viewH + size) {
+                    continue;
+                }
+
+                this._rowCache[writeIdx++] = ent;
+            }
+            this._rowCache.length = writeIdx;
+
+            // Sort filtered list (faster because N is smaller)
+            // BOLT OPTIMIZATION: Use static comparator to avoid closure allocation
+            this._rowCache.sort(Game._sortEntities);
+
+            // Manual append to render cache
+            const filteredLen = this._rowCache.length;
+            let renderIdx = this._renderCache.length;
+            for (let i = 0; i < filteredLen; i++) {
+                this._renderCache[renderIdx++] = this._rowCache[i];
             }
         }
 

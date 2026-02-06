@@ -22,3 +22,8 @@
 **Vulnerability:** In-memory rate limiting with FIFO eviction allowed attackers to bypass blocking by flooding the server with random IPs, forcing the eviction of their blocked IP entry from the bounded Map.
 **Learning:** Simple `Map` eviction strategies (FIFO or random) are insufficient for security contexts where "heavy" users (attackers) must be retained. Attackers can exploit the eviction policy to reset their tracking counters.
 **Prevention:** Implement "Smart Eviction" or "Prioritized Retention": when the cache is full, prioritize keeping blocked/abusive IPs in memory. Use LRU updates for active access (`delete` + `set`) and scan candidates to evict non-blocked entries first.
+
+## 2026-05-15 - Directory Whitelisting vs Blacklisting
+**Vulnerability:** Relying on a blacklist (`BLOCKED_DIRS`) to prevent access to sensitive directories (like `.git` or `docs`) is fragile. New directories created during development (e.g., `secrets/`, `config/`) are exposed by default unless manually added to the blocklist.
+**Learning:** Security controls should follow the "Fail Secure" or "Default Deny" principle. Blacklists fail open (allow everything except X), whereas whitelists fail closed (deny everything except Y).
+**Prevention:** Implement a strict Directory Whitelist for static file servers. Explicitly define which directories are public (e.g., `['assets', 'js']`) and deny all others by default.

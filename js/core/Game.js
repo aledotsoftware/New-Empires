@@ -2727,6 +2727,55 @@ export class Game {
         );
     }
 
+    /**
+     * BOLT OPTIMIZATION: Query entities from a specific row of buckets, strictly filtering by visibility.
+     * This filtering happens BEFORE sorting, significantly reducing the sorting load.
+     * @param {SpatialGrid} grid - The grid to query
+     * @param {number} row - The row index
+     * @param {number} startCol - Start column index
+     * @param {number} endCol - End column index
+     * @param {Array} result - The result array to append to
+     * @param {Uint32Array} fowGrid - FOW grid data
+     * @param {number} fowCols - FOW grid width
+     * @param {number} fowRows - FOW grid height
+     * @param {number} fowInvTileSize - Inverse tile size for FOW calc
+     * @param {number} fowVisibleState - The value representing VISIBLE state
+     */
+    _queryVisibleRow(grid, row, startCol, endCol, result, fowGrid, fowCols, fowRows, fowInvTileSize, fowVisibleState) {
+        const buckets = grid.buckets;
+        const rowBase = row * grid.cols;
+        let count = result.length;
+
+        for (let c = startCol; c <= endCol; c++) {
+            const bucket = buckets[rowBase + c];
+            const bLen = bucket.length;
+            if (bLen > 0) {
+                for (let i = 0; i < bLen; i++) {
+                    const ent = bucket[i];
+
+                    // Check visibility only for enemies (or potentially neutral/enemy buildings)
+                    // Player entities (team === 'player') are always assumed visible if passed to this check
+                    // but usually we won't call this for player grids.
+                    if (ent.team === 'enemy') {
+                        // Inline FOW check
+                        let entCol = ent._lastGridCol !== undefined ? ent._lastGridCol : (ent.x * fowInvTileSize) | 0;
+                        let entRow = ent._lastGridRow !== undefined ? ent._lastGridRow : (ent.y * fowInvTileSize) | 0;
+
+                        // Bounds check (clamping)
+                        if (entCol < 0) entCol = 0; else if (entCol >= fowCols) entCol = fowCols - 1;
+                        if (entRow < 0) entRow = 0; else if (entRow >= fowRows) entRow = fowRows - 1;
+
+                        if (fowGrid[entRow * fowCols + entCol] !== fowVisibleState) {
+                            continue; // Hidden
+                        }
+                    }
+
+                    result[count++] = ent;
+                }
+            }
+        }
+    }
+
     _renderTerrainToBuffer() {
         const viewW = this.viewWidth;
         const viewH = this.viewHeight;
@@ -2888,11 +2937,23 @@ export class Game {
             // This exploits the fact that rows are already mostly sorted by Y
             // and avoids the O(N log N) cost of sorting the entire visible set at once.
             this._rowCache.length = 0;
-            this.playerUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
-            this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
-            this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
 
-            // Sort only this row's entities
+            // BOLT OPTIMIZATION: Filter BEFORE Sort
+            // Player units are always visible
+            this.playerUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+
+            if (isVisionEnabled) {
+                // For enemies/buildings, use the filtered query to skip invisible entities immediately.
+                // This prevents sorting hundreds of hidden entities only to discard them later.
+                this._queryVisibleRow(this.enemyUnitGrid, r, startCol, endCol, this._rowCache, fowGrid, fowCols, fowRows, fowInvTileSize, fowVisibleState);
+                this._queryVisibleRow(this.buildingGrid, r, startCol, endCol, this._rowCache, fowGrid, fowCols, fowRows, fowInvTileSize, fowVisibleState);
+            } else {
+                // If vision disabled, fallback to dumping everything
+                this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+                this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            }
+
+            // Sort only this row's entities (now much smaller list if FOW is active)
             // BOLT OPTIMIZATION: Use static comparator to avoid closure allocation
             this._rowCache.sort(Game._sortEntities);
 
@@ -2903,27 +2964,7 @@ export class Game {
             for (let i = 0; i < rowLen; i++) {
                 const ent = this._rowCache[i];
 
-                // FILTRADO POR NIEBLA DE GUERRA
-                // BOLT OPTIMIZATION: Inline check with cached coords (~35% faster)
-                // Avoids function call overhead and redundant math.
-                if (isVisionEnabled && ent.team === 'enemy') {
-                    // Use cached coords if available, else calculate
-                    // Most entities have _lastGridCol updated in update() or initialization
-                    let col = ent._lastGridCol !== undefined ? ent._lastGridCol : (ent.x * fowInvTileSize) | 0;
-                    let row = ent._lastGridRow !== undefined ? ent._lastGridRow : (ent.y * fowInvTileSize) | 0;
-
-                    // Semi-safe bounds check (clamping both ends for full safety)
-                    if (col < 0) col = 0;
-                    else if (col >= fowCols) col = fowCols - 1;
-
-                    if (row < 0) row = 0;
-                    else if (row >= fowRows) row = fowRows - 1;
-
-                    // Direct Uint8Array access
-                    if (fowGrid[row * fowCols + col] !== fowVisibleState) {
-                        continue;
-                    }
-                }
+                // FOW check removed here as it was handled in _queryVisibleRow
 
                 // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
                 ent._screenX = (ent.x - camX) | 0;

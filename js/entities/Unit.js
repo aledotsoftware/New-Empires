@@ -277,6 +277,12 @@ export class Unit extends Entity {
             }
 
             target.takeDamage(damage);
+
+            // Palette: Notify if player is under attack
+            if (target.team === 'player' && game && game.notifyUnderAttack) {
+                game.notifyUnderAttack(target);
+            }
+
             this.attackCooldown = 1 / this.attackSpeed;
 
             // Palette: Visual Feedback for Damage

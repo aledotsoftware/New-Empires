@@ -98,6 +98,9 @@ export class Game {
         this._isPaused = false;
         this.isGameOver = false;
 
+        // Palette: Attack notification throttle
+        this.lastAttackNotification = { time: 0, x: 0, y: 0 };
+
         // Recursos
         this.resources = {
             wood: CONFIG.STARTING_WOOD,
@@ -1937,7 +1940,7 @@ export class Game {
                 villager.targetX = null;
             }
 
-            this.showNotification(`${building.name} (En construcción)`, 'info');
+            this.showNotification(`${building.name} (En construcción)`, 'info', { x: building.x, y: building.y });
         }
 
         this.buildMode = null;
@@ -2082,7 +2085,7 @@ export class Game {
                 soundManager.play(soundKey);
             }
 
-            this.showNotification(`${unit.name} entrenado`, 'success');
+            this.showNotification(`${unit.name} entrenado`, 'success', { x: unit.x, y: unit.y });
             this.updateUI();
 
             // Si hay rally point, mover la unidad hacia allá
@@ -5147,7 +5150,7 @@ export class Game {
         }
     }
 
-    showNotification(message, type = 'info') {
+    showNotification(message, type = 'info', location = null) {
         // OPTIMIZACIÓN: Usar elemento cacheado
         const container = this.uiElements.notifications || document.getElementById('notifications');
         if (!container) return; // Defensive check
@@ -5155,6 +5158,30 @@ export class Game {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.setAttribute('role', 'status');
+
+        // Palette: Interactive Notification
+        if (location) {
+            notification.classList.add('clickable');
+            notification.title = 'Click para ir al lugar';
+            notification.setAttribute('role', 'button');
+            notification.tabIndex = 0; // Make focusable
+
+            const jumpAction = (e) => {
+                // Don't trigger if clicking close button
+                if (e.target.closest('.notification-close-btn')) return;
+
+                this.focusCamera(location.x, location.y, true);
+                if (typeof soundManager !== 'undefined') soundManager.play('click');
+            };
+
+            notification.onclick = jumpAction;
+            notification.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    jumpAction(e);
+                }
+            };
+        }
 
         // Map types to asset filenames
         const iconFiles = {
@@ -5190,7 +5217,10 @@ export class Game {
         closeBtn.className = 'notification-close-btn';
         closeBtn.innerHTML = '×';
         closeBtn.setAttribute('aria-label', 'Cerrar notificación');
-        closeBtn.onclick = () => removeNotification();
+        closeBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevent triggering jump
+            removeNotification();
+        };
 
         // Progress bar
         const progressContainer = document.createElement('div');
@@ -5253,6 +5283,30 @@ export class Game {
 
         // Start initial timer
         startTimer();
+    }
+
+    /**
+     * Palette: Notify player when units are under attack
+     * Throttled to avoid spam
+     */
+    notifyUnderAttack(entity) {
+        const now = Date.now();
+        const COOLDOWN = 5000; // 5 seconds
+        const DIST_SQ = 500 * 500; // Notify again if far away
+
+        const dx = entity.x - this.lastAttackNotification.x;
+        const dy = entity.y - this.lastAttackNotification.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (now - this.lastAttackNotification.time > COOLDOWN || distSq > DIST_SQ) {
+            this.showNotification('⚠️ ¡Estamos bajo ataque!', 'error', { x: entity.x, y: entity.y });
+            this.lastAttackNotification = { time: now, x: entity.x, y: entity.y };
+
+            // Optional: visual flair or sound
+            if (this.particleSystem) {
+                // Could add a special ping here
+            }
+        }
     }
 
     /**

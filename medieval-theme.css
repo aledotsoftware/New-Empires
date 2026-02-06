@@ -1629,6 +1629,8 @@ body,
 .game-over-content {
     text-align: center;
     animation: fadeInUp 0.8s ease-out;
+    position: relative; /* Palette: Create stacking context */
+    z-index: 2; /* Palette: Ensure above confetti */
 }
 
 .game-over-title {
@@ -2215,9 +2217,27 @@ button:focus-visible,
     .shake,
     .resource-pop-up,
     .resource-pop-down,
-    .resource-flash-error {
+    .resource-flash-error,
+    .confetti {
         animation: none !important;
     }
+}
+
+/* Palette: Victory Confetti */
+.confetti {
+    position: absolute;
+    top: -10px;
+    width: 8px;
+    height: 8px;
+    opacity: 0;
+    animation: fall linear forwards;
+    pointer-events: none;
+    z-index: 1; /* Behind content */
+}
+
+@keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
 /* ==========================================

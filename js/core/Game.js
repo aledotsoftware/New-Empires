@@ -2521,6 +2521,7 @@ export class Game {
             title.style.webkitBackgroundClip = 'text';
             title.style.webkitTextFillColor = 'transparent';
             message.textContent = '¡Has derrotado a todos los enemigos!';
+            this.startVictoryConfetti(); // Palette: Trigger celebration
         } else {
             title.textContent = '💀 Derrota';
             title.style.background = 'linear-gradient(135deg, #c53030, #9b2c2c)';
@@ -2607,6 +2608,27 @@ export class Game {
                 // Focus view map button
                 viewMapBtn.focus();
             };
+        }
+    }
+
+    /**
+     * Palette: Creates a confetti celebration effect in the DOM
+     */
+    startVictoryConfetti() {
+        const container = document.getElementById('gameOverScreen');
+        if (!container) return;
+
+        const colors = ['#f56565', '#48bb78', '#ecc94b', '#4299e1', '#ed64a6'];
+
+        for (let i = 0; i < 50; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.setAttribute('aria-hidden', 'true');
+            c.style.left = Math.random() * 100 + '%';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            c.style.animationDelay = (Math.random() * 2) + 's';
+            container.appendChild(c);
         }
     }
 

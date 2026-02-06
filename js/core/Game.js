@@ -1010,28 +1010,24 @@ export class Game {
         let closest = null;
         let closestDistSq = Infinity;
 
-        // Determine search radius large enough to cover the largest entity's center from its edge
-        // Largest building is 5x5 tiles (160px), radius ~115px.
-        const searchRadius = 150;
-        const width = searchRadius * 2;
-        const height = searchRadius * 2;
-        const minX = worldX - searchRadius;
-        const minY = worldY - searchRadius;
+        // BOLT OPTIMIZATION: Use SpatialGrid queries instead of iterating all entities (O(1) vs O(N))
+        // Defensive init to prevent crash if constructor skipped/overridden
+        if (!this._cursorQueryCache) this._cursorQueryCache = [];
+        const cache = this._cursorQueryCache;
+        cache.length = 0;
 
-        // Use cached array to avoid allocation
-        if (!this._getEntityAtCache) this._getEntityAtCache = [];
-        const candidates = this._getEntityAtCache;
-        // Reset length but keep allocated memory
-        // First query clears the result
-        this.playerUnitGrid.queryRect(minX, minY, width, height, candidates, true);
-        this.enemyUnitGrid.queryRect(minX, minY, width, height, candidates, false);
+        // Query units (small radius) - 50px covers standard units (size 32)
+        this.playerUnitGrid.query(worldX, worldY, 50, cache, false);
+        this.enemyUnitGrid.query(worldX, worldY, 50, cache, false);
+
+        // Query buildings (large radius) - 150px covers TownCenter (size ~160px)
         if (this.buildingGrid) {
-            this.buildingGrid.queryRect(minX, minY, width, height, candidates, false);
+            this.buildingGrid.query(worldX, worldY, 150, cache, false);
         }
 
-        const len = candidates.length;
+        const len = cache.length;
         for (let i = 0; i < len; i++) {
-            const entity = candidates[i];
+            const entity = cache[i];
 
             // Solo permitir seleccionar entidades del jugador o enemigos VISIBLES
             if (entity.team !== 'player') {

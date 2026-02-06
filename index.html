@@ -80,7 +80,7 @@
                 </div>
             </div>
         </div>
-        <div class="particles-bg" id="particlesBg"></div>
+        <div class="particles-bg" id="particlesBg" aria-hidden="true"></div>
     </div>
 
     <!-- Modal del Árbol de Tecnologías -->
@@ -480,7 +480,7 @@
                                     <span id="volumeIcon" aria-hidden="true" style="font-size: 1.2rem;">🔊</span>
                                     Volumen Maestro
                                 </label>
-                                <span id="volumeValue" style="color: #48bb78;">50%</span>
+                                <span id="volumeValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">50%</span>
                             </div>
                             <div class="range-container">
                                 <button class="btn-stepper" onclick="adjustRange('volumeSlider', -1)" aria-label="Bajar volumen">-</button>
@@ -522,7 +522,7 @@
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <label for="cursorSizeSlider" style="font-weight: 600; color: #e2e8f0;">Tamaño del
                                     Cursor</label>
-                                <span id="cursorSizeValue" style="color: #48bb78;">32px</span>
+                                <span id="cursorSizeValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">32px</span>
                             </div>
                             <div class="range-container">
                                 <button class="btn-stepper" onclick="adjustRange('cursorSizeSlider', -1)" aria-label="Reducir cursor">-</button>
@@ -540,7 +540,7 @@
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <label for="cameraSpeedSlider" style="font-weight: 600; color: #e2e8f0;">Velocidad de
                                     Desplazamiento</label>
-                                <span id="cameraSpeedValue" style="color: #48bb78;">1200 px/s</span>
+                                <span id="cameraSpeedValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">1200 px/s</span>
                             </div>
                             <div class="range-container">
                                 <button class="btn-stepper" onclick="adjustRange('cameraSpeedSlider', -1)" aria-label="Reducir velocidad">-</button>
@@ -554,7 +554,7 @@
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <label for="cameraMarginSlider" style="font-weight: 600; color: #e2e8f0;">Margen de
                                     Activación</label>
-                                <span id="cameraMarginValue" style="color: #48bb78;">30 px</span>
+                                <span id="cameraMarginValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">30 px</span>
                             </div>
                             <div class="range-container">
                                 <button class="btn-stepper" onclick="adjustRange('cameraMarginSlider', -1)" aria-label="Reducir margen">-</button>
@@ -731,7 +731,7 @@
         </div>
 
         <!-- Canvas del Juego -->
-        <canvas id="gameCanvas"></canvas>
+        <canvas id="gameCanvas" role="application" aria-label="Game Board"></canvas>
 
         <!-- Palette: Pause Overlay (Replaces Canvas Text) -->
         <div id="pauseOverlay" class="pause-overlay hidden">

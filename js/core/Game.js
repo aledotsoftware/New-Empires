@@ -98,6 +98,9 @@ export class Game {
         this._isPaused = false;
         this.isGameOver = false;
 
+        // Palette: Attack notification throttle
+        this.lastAttackNotification = { time: 0, x: 0, y: 0 };
+
         // Recursos
         this.resources = {
             wood: CONFIG.STARTING_WOOD,
@@ -1977,7 +1980,7 @@ export class Game {
                 villager.targetX = null;
             }
 
-            this.showNotification(`${building.name} (En construcción)`, 'info');
+            this.showNotification(`${building.name} (En construcción)`, 'info', { x: building.x, y: building.y });
         }
 
         this.buildMode = null;
@@ -2122,7 +2125,7 @@ export class Game {
                 soundManager.play(soundKey);
             }
 
-            this.showNotification(`${unit.name} entrenado`, 'success');
+            this.showNotification(`${unit.name} entrenado`, 'success', { x: unit.x, y: unit.y });
             this.updateUI();
 
             // Si hay rally point, mover la unidad hacia allá
@@ -2561,6 +2564,7 @@ export class Game {
             title.style.webkitBackgroundClip = 'text';
             title.style.webkitTextFillColor = 'transparent';
             message.textContent = '¡Has derrotado a todos los enemigos!';
+            this.startVictoryConfetti(); // Palette: Trigger celebration
         } else {
             title.textContent = '💀 Derrota';
             title.style.background = 'linear-gradient(135deg, #c53030, #9b2c2c)';
@@ -2647,6 +2651,27 @@ export class Game {
                 // Focus view map button
                 viewMapBtn.focus();
             };
+        }
+    }
+
+    /**
+     * Palette: Creates a confetti celebration effect in the DOM
+     */
+    startVictoryConfetti() {
+        const container = document.getElementById('gameOverScreen');
+        if (!container) return;
+
+        const colors = ['#f56565', '#48bb78', '#ecc94b', '#4299e1', '#ed64a6'];
+
+        for (let i = 0; i < 50; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.setAttribute('aria-hidden', 'true');
+            c.style.left = Math.random() * 100 + '%';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            c.style.animationDelay = (Math.random() * 2) + 's';
+            container.appendChild(c);
         }
     }
 
@@ -2765,6 +2790,55 @@ export class Game {
             sx, sy, viewW, viewH,
             0, 0, viewW, viewH
         );
+    }
+
+    /**
+     * BOLT OPTIMIZATION: Query entities from a specific row of buckets, strictly filtering by visibility.
+     * This filtering happens BEFORE sorting, significantly reducing the sorting load.
+     * @param {SpatialGrid} grid - The grid to query
+     * @param {number} row - The row index
+     * @param {number} startCol - Start column index
+     * @param {number} endCol - End column index
+     * @param {Array} result - The result array to append to
+     * @param {Uint32Array} fowGrid - FOW grid data
+     * @param {number} fowCols - FOW grid width
+     * @param {number} fowRows - FOW grid height
+     * @param {number} fowInvTileSize - Inverse tile size for FOW calc
+     * @param {number} fowVisibleState - The value representing VISIBLE state
+     */
+    _queryVisibleRow(grid, row, startCol, endCol, result, fowGrid, fowCols, fowRows, fowInvTileSize, fowVisibleState) {
+        const buckets = grid.buckets;
+        const rowBase = row * grid.cols;
+        let count = result.length;
+
+        for (let c = startCol; c <= endCol; c++) {
+            const bucket = buckets[rowBase + c];
+            const bLen = bucket.length;
+            if (bLen > 0) {
+                for (let i = 0; i < bLen; i++) {
+                    const ent = bucket[i];
+
+                    // Check visibility only for enemies (or potentially neutral/enemy buildings)
+                    // Player entities (team === 'player') are always assumed visible if passed to this check
+                    // but usually we won't call this for player grids.
+                    if (ent.team === 'enemy') {
+                        // Inline FOW check
+                        let entCol = ent._lastGridCol !== undefined ? ent._lastGridCol : (ent.x * fowInvTileSize) | 0;
+                        let entRow = ent._lastGridRow !== undefined ? ent._lastGridRow : (ent.y * fowInvTileSize) | 0;
+
+                        // Bounds check (clamping)
+                        if (entCol < 0) entCol = 0; else if (entCol >= fowCols) entCol = fowCols - 1;
+                        if (entRow < 0) entRow = 0; else if (entRow >= fowRows) entRow = fowRows - 1;
+
+                        if (fowGrid[entRow * fowCols + entCol] !== fowVisibleState) {
+                            continue; // Hidden
+                        }
+                    }
+
+                    result[count++] = ent;
+                }
+            }
+        }
     }
 
     _renderTerrainToBuffer() {
@@ -2928,11 +3002,23 @@ export class Game {
             // This exploits the fact that rows are already mostly sorted by Y
             // and avoids the O(N log N) cost of sorting the entire visible set at once.
             this._rowCache.length = 0;
-            this.playerUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
-            this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
-            this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
 
-            // Sort only this row's entities
+            // BOLT OPTIMIZATION: Filter BEFORE Sort
+            // Player units are always visible
+            this.playerUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+
+            if (isVisionEnabled) {
+                // For enemies/buildings, use the filtered query to skip invisible entities immediately.
+                // This prevents sorting hundreds of hidden entities only to discard them later.
+                this._queryVisibleRow(this.enemyUnitGrid, r, startCol, endCol, this._rowCache, fowGrid, fowCols, fowRows, fowInvTileSize, fowVisibleState);
+                this._queryVisibleRow(this.buildingGrid, r, startCol, endCol, this._rowCache, fowGrid, fowCols, fowRows, fowInvTileSize, fowVisibleState);
+            } else {
+                // If vision disabled, fallback to dumping everything
+                this.enemyUnitGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+                this.buildingGrid.queryRowIndices(r, startCol, endCol, this._rowCache);
+            }
+
+            // Sort only this row's entities (now much smaller list if FOW is active)
             // BOLT OPTIMIZATION: Use static comparator to avoid closure allocation
             this._rowCache.sort(Game._sortEntities);
 
@@ -2943,27 +3029,7 @@ export class Game {
             for (let i = 0; i < rowLen; i++) {
                 const ent = this._rowCache[i];
 
-                // FILTRADO POR NIEBLA DE GUERRA
-                // BOLT OPTIMIZATION: Inline check with cached coords (~35% faster)
-                // Avoids function call overhead and redundant math.
-                if (isVisionEnabled && ent.team === 'enemy') {
-                    // Use cached coords if available, else calculate
-                    // Most entities have _lastGridCol updated in update() or initialization
-                    let col = ent._lastGridCol !== undefined ? ent._lastGridCol : (ent.x * fowInvTileSize) | 0;
-                    let row = ent._lastGridRow !== undefined ? ent._lastGridRow : (ent.y * fowInvTileSize) | 0;
-
-                    // Semi-safe bounds check (clamping both ends for full safety)
-                    if (col < 0) col = 0;
-                    else if (col >= fowCols) col = fowCols - 1;
-
-                    if (row < 0) row = 0;
-                    else if (row >= fowRows) row = fowRows - 1;
-
-                    // Direct Uint8Array access
-                    if (fowGrid[row * fowCols + col] !== fowVisibleState) {
-                        continue;
-                    }
-                }
+                // FOW check removed here as it was handled in _queryVisibleRow
 
                 // BOLT OPTIMIZATION: Calculate screen coordinates once per frame
                 ent._screenX = (ent.x - camX) | 0;
@@ -5126,7 +5192,7 @@ export class Game {
         }
     }
 
-    showNotification(message, type = 'info') {
+    showNotification(message, type = 'info', location = null) {
         // OPTIMIZACIÓN: Usar elemento cacheado
         const container = this.uiElements.notifications || document.getElementById('notifications');
         if (!container) return; // Defensive check
@@ -5134,6 +5200,30 @@ export class Game {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.setAttribute('role', 'status');
+
+        // Palette: Interactive Notification
+        if (location) {
+            notification.classList.add('clickable');
+            notification.title = 'Click para ir al lugar';
+            notification.setAttribute('role', 'button');
+            notification.tabIndex = 0; // Make focusable
+
+            const jumpAction = (e) => {
+                // Don't trigger if clicking close button
+                if (e.target.closest('.notification-close-btn')) return;
+
+                this.focusCamera(location.x, location.y, true);
+                if (typeof soundManager !== 'undefined') soundManager.play('click');
+            };
+
+            notification.onclick = jumpAction;
+            notification.onkeydown = (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    jumpAction(e);
+                }
+            };
+        }
 
         // Map types to asset filenames
         const iconFiles = {
@@ -5169,7 +5259,10 @@ export class Game {
         closeBtn.className = 'notification-close-btn';
         closeBtn.innerHTML = '×';
         closeBtn.setAttribute('aria-label', 'Cerrar notificación');
-        closeBtn.onclick = () => removeNotification();
+        closeBtn.onclick = (e) => {
+            e.stopPropagation(); // Prevent triggering jump
+            removeNotification();
+        };
 
         // Progress bar
         const progressContainer = document.createElement('div');
@@ -5232,6 +5325,30 @@ export class Game {
 
         // Start initial timer
         startTimer();
+    }
+
+    /**
+     * Palette: Notify player when units are under attack
+     * Throttled to avoid spam
+     */
+    notifyUnderAttack(entity) {
+        const now = Date.now();
+        const COOLDOWN = 5000; // 5 seconds
+        const DIST_SQ = 500 * 500; // Notify again if far away
+
+        const dx = entity.x - this.lastAttackNotification.x;
+        const dy = entity.y - this.lastAttackNotification.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (now - this.lastAttackNotification.time > COOLDOWN || distSq > DIST_SQ) {
+            this.showNotification('⚠️ ¡Estamos bajo ataque!', 'error', { x: entity.x, y: entity.y });
+            this.lastAttackNotification = { time: now, x: entity.x, y: entity.y };
+
+            // Optional: visual flair or sound
+            if (this.particleSystem) {
+                // Could add a special ping here
+            }
+        }
     }
 
     /**

@@ -120,7 +120,6 @@ export class Game {
         this.maxPopulation = CONFIG.STARTING_MAX_POPULATION;
 
         // Entidades del juego
-        this.entities = [];
         this.selectedEntities = [];
         this.buildings = [];
         this.units = [];
@@ -406,7 +405,6 @@ export class Game {
         document.body.style.cursor = '';
 
         // Limpiar referencias
-        this.entities = [];
         this.units = [];
         this.buildings = [];
         this.enemies = [];
@@ -471,7 +469,6 @@ export class Game {
         const townCenter = new TownCenter(400, 400, 'player');
         this._cacheEntityTerrain(townCenter); // OPTIMIZATION
         this.buildings.push(townCenter);
-        this.entities.push(townCenter);
         this.dropOffPoints.push(townCenter);
         this.townCenterCounts.player++;
         this._updateBuildingCount('townCenter', 1);
@@ -487,7 +484,6 @@ export class Game {
             const villager = new Villager(x, y, 'player');
             this._cacheEntityTerrain(villager); // OPTIMIZATION
             this.units.push(villager);
-            this.entities.push(villager);
         }
 
         // Crear enemigos básicos
@@ -534,7 +530,6 @@ export class Game {
         }
 
         // 2. Clear Entities & Grids
-        this.entities = [];
         this.units = [];
         this.buildings = [];
         this.enemies = [];
@@ -651,7 +646,6 @@ export class Game {
             this._cacheEntityTerrain(entity);
 
             // Add to main lists
-            this.entities.push(entity);
             list.push(entity);
             if (grid) grid.add(entity);
         };
@@ -860,14 +854,12 @@ export class Game {
             const enemy = new Warrior(x, y, 'enemy');
             this._cacheEntityTerrain(enemy); // OPTIMIZATION
             this.enemies.push(enemy);
-            this.entities.push(enemy);
         }
 
         // Enemy town center
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
         this._cacheEntityTerrain(enemyTC); // OPTIMIZATION
         this.buildings.push(enemyTC);
-        this.entities.push(enemyTC);
         this.buildingGrid.add(enemyTC);
         this.dropOffPoints.push(enemyTC);
         this.townCenterCounts.enemy++;
@@ -1961,7 +1953,6 @@ export class Game {
 
             this._cacheEntityTerrain(building); // OPTIMIZATION
             this.buildings.push(building);
-            this.entities.push(building);
             this.buildingGrid.add(building);
 
             this._minimapDirty = true;
@@ -2135,7 +2126,6 @@ export class Game {
 
             this._cacheEntityTerrain(unit); // OPTIMIZATION
             this.units.push(unit);
-            this.entities.push(unit);
             this.population++;
 
             if (typeof soundManager !== 'undefined') {
@@ -2228,35 +2218,11 @@ export class Game {
     }
 
     /**
-     * Reconstruye this.entities concatenando las listas de tipos.
-     * Más rápido que iterar y filtrar entities cuando ya hemos filtrado las sub-listas.
+     * Legacy getter for backward compatibility.
+     * WARNING: This creates a new array on every access. Do not use in hot paths.
      */
-    _rebuildEntities() {
-        let writeIdx = 0;
-        const entities = this.entities;
-
-        // Copy units
-        const units = this.units;
-        const uLen = units.length;
-        for (let i = 0; i < uLen; i++) {
-            entities[writeIdx++] = units[i];
-        }
-
-        // Copy buildings
-        const buildings = this.buildings;
-        const bLen = buildings.length;
-        for (let i = 0; i < bLen; i++) {
-            entities[writeIdx++] = buildings[i];
-        }
-
-        // Copy enemies
-        const enemies = this.enemies;
-        const eLen = enemies.length;
-        for (let i = 0; i < eLen; i++) {
-            entities[writeIdx++] = enemies[i];
-        }
-
-        entities.length = writeIdx;
+    get entities() {
+        return [...this.units, ...this.buildings, ...this.enemies];
     }
 
     update(deltaTime) {
@@ -2384,10 +2350,6 @@ export class Game {
             this._removeDeadInPlace(this.enemies);
             this._removeDeadInPlace(this.selectedEntities);
             this._removeDeadInPlace(this.dropOffPoints);
-
-            // Reconstruir this.entities desde los sub-arrays limpios
-            // Esto evita iterar entities para chequear isDead (ahorro de O(N) checks)
-            this._rebuildEntities();
 
             // Si murieron edificios, reconstruir el grid estático
             if (hasDeadBuildings) {

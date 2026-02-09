@@ -123,3 +123,7 @@
 ## 2026-02-16 - Filter Before Sort (Fog of War)
 **Learning:** In the render loop, adding all potential entities to a cache, sorting them, and *then* filtering out invisible (FOW) ones is wasteful. By applying the visibility filter *before* adding to the cache (and thus before sorting), we achieved a ~32x speedup in the sorting phase for scenes with many hidden units (e.g. 5% visibility). This reduces both memory traffic (fewer writes to cache) and algorithmic complexity (sorting much smaller arrays).
 **Action:** When rendering or processing collections where a large subset might be filtered out (like FOW), apply the filter at the source (iterator) rather than filtering the output list.
+
+## 2026-02-18 - Redundant Master List & Lazy Evaluation
+**Learning:** `Game.js` maintained a `this.entities` array that was rebuilt (O(N) copy) every time an entity died, solely to provide a unified list for saving/loading. However, the game loop itself never read from this list, using optimized `units` and `buildings` arrays instead. Removing this redundant state maintenance and replacing it with a lazy getter (`get entities()`) eliminated ~36% of the overhead in the entity cleanup phase during combat, while preserving API compatibility for legacy consumers.
+**Action:** Identify and remove "master lists" that are eagerly maintained but rarely read. Replace them with lazy getters that construct the list on-demand (concatenation) if backward compatibility is required.

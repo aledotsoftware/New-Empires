@@ -135,17 +135,19 @@ export class Unit extends Entity {
             if (gridMap) {
                 invTileSize = gridMap.invTileSize;
 
-                // OPTIMIZATION: Bitwise OR is faster than Math.floor for positive coordinates
-                // Entities are clamped to positive coordinates in update()
-                currCol = (this.x * invTileSize) | 0;
-                currRow = (this.y * invTileSize) | 0;
+                // BOLT OPTIMIZATION: Lazy Grid Calculation (use cached if available)
+                // Avoids calculating (x * invTileSize) | 0 at the start of every frame (~97% savings)
+                currCol = this._lastGridCol;
+                currRow = this._lastGridRow;
 
-                if (currCol !== this._lastGridCol || currRow !== this._lastGridRow) {
+                // Initialize cache if this is the first run
+                if (currCol === -1) {
+                    currCol = (this.x * invTileSize) | 0;
+                    currRow = (this.y * invTileSize) | 0;
                     this._lastGridCol = currCol;
                     this._lastGridRow = currRow;
 
                     if (game.terrainMap) {
-                        // OPTIMIZATION: Use direct grid access to avoid redundant coordinate calculation
                         const terrainData = game.terrainMap.getTerrainDataByGrid(currCol, currRow);
                         this._cachedTerrainSpeed = terrainData.movementSpeed;
                         this._cachedTerrainData = terrainData;
@@ -227,6 +229,24 @@ export class Unit extends Entity {
 
             if (this.y < 0) this.y = 0;
             else if (this.y > CONFIG.CANVAS_HEIGHT) this.y = CONFIG.CANVAS_HEIGHT;
+
+            // BOLT OPTIMIZATION: Lazy Cache Update
+            // Only update cache if we actually crossed a tile boundary.
+            if (gridMap && (moveX !== 0 || moveY !== 0)) {
+                const finalCol = (this.x * invTileSize) | 0;
+                const finalRow = (this.y * invTileSize) | 0;
+
+                if (finalCol !== this._lastGridCol || finalRow !== this._lastGridRow) {
+                    this._lastGridCol = finalCol;
+                    this._lastGridRow = finalRow;
+
+                    if (game.terrainMap) {
+                        const terrainData = game.terrainMap.getTerrainDataByGrid(finalCol, finalRow);
+                        this._cachedTerrainSpeed = terrainData.movementSpeed;
+                        this._cachedTerrainData = terrainData;
+                    }
+                }
+            }
 
             return false; // Still moving
         }

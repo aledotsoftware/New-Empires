@@ -3005,6 +3005,7 @@ export class Game {
             // Manual append to avoid call stack limits or creation of intermediate arrays
             // This loop is extremely fast in V8
             const rowLen = this._rowCache.length;
+            let writeIdx = 0;
 
             for (let i = 0; i < rowLen; i++) {
                 const ent = this._rowCache[i];
@@ -3027,10 +3028,6 @@ export class Game {
                 this._rowCache[writeIdx++] = ent;
             }
             this._rowCache.length = writeIdx;
-
-            // Sort filtered list (faster because N is smaller)
-            // BOLT OPTIMIZATION: Use static comparator to avoid closure allocation
-            this._rowCache.sort(Game._sortEntities);
 
             // Manual append to render cache
             const filteredLen = this._rowCache.length;

@@ -61,7 +61,11 @@ export class Game {
         if (entity.amount <= 0) return false;
 
         // BOLT OPTIMIZATION: Check FOW explored state (for right-click gather)
-        if (game.fow && !game.fow.isExplored((entity.x / TILE_SIZE) | 0, (entity.y / TILE_SIZE) | 0)) {
+        // Use cached grid coords (always available for static resources)
+        const col = entity._gridCol !== undefined ? entity._gridCol : (entity.x / TILE_SIZE) | 0;
+        const row = entity._gridRow !== undefined ? entity._gridRow : (entity.y / TILE_SIZE) | 0;
+
+        if (game.fow && !game.fow.isExplored(col, row)) {
             return false;
         }
 

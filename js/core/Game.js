@@ -298,9 +298,6 @@ export class Game {
         // Palette: Hover state for UI-to-World highlighting
         this.hoveredType = null;
 
-        // OPTIMIZACIÓN: Cache para actualizaciones de visión (FOW)
-        this._visionEntitiesCache = [];
-
         // OPTIMIZACIÓN: Cache de elementos DOM para UI
         this.uiElements = {
             woodCount: document.getElementById('woodCount'),
@@ -2251,22 +2248,29 @@ export class Game {
             if (this.visionTimer >= CONFIG.VISION.UPDATE_INTERVAL) {
                 this.visionTimer = 0;
 
-                // Recolectar entidades del jugador para actualizar visión
-                // BOLT OPTIMIZATION: Reuse cache array to avoid allocation (GC pressure)
-                this._visionEntitiesCache.length = 0;
+                // Actualizar visión (FOW)
+                // BOLT OPTIMIZATION: Use direct addEntity calls to avoid intermediate array allocation
+                this.fow.beginUpdate();
 
+                // 1. Unidades del jugador
                 const unitsLen = this.units.length;
                 for (let i = 0; i < unitsLen; i++) {
-                    if (this.units[i].team === 'player') this._visionEntitiesCache.push(this.units[i]);
+                    if (this.units[i].team === 'player') {
+                        this.fow.addEntity(this.units[i]);
+                    }
                 }
 
+                // 2. Edificios del jugador
                 const buildingsLen = this.buildings.length;
                 for (let i = 0; i < buildingsLen; i++) {
                     const b = this.buildings[i];
-                    if (b.team === 'player') this._visionEntitiesCache.push(b);
+                    if (b.team === 'player') {
+                        this.fow.addEntity(b);
+                    }
                 }
 
-                this.fow.update(this._visionEntitiesCache);
+                this.fow.endUpdate();
+
                 this._minimapDirty = true; // El minimapa debe reflejar la nueva visión
                 this._minimapFOWDirty = true; // Rebuild FOW Paths
 

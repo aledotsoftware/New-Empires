@@ -69,10 +69,10 @@ export class FogOfWar {
     }
 
     /**
-     * Updates visibility based on a list of player entities.
-     * @param {Array} entities - Entities that provide vision.
+     * Begins the update process by resetting visibility and clearing buffers.
+     * Use this before calling addEntity() and endUpdate().
      */
-    update(entities) {
+    beginUpdate() {
         this.resetVisible();
 
         // BOLT OPTIMIZATION: Clear row buffers (fast reset)
@@ -82,22 +82,44 @@ export class FogOfWar {
         for (let i = 0; i < rows; i++) {
             buffers[i].length = 0;
         }
+    }
 
+    /**
+     * Adds an entity to the visibility buffer.
+     * Must be called between beginUpdate() and endUpdate().
+     * @param {Object} ent - Entity to add
+     */
+    addEntity(ent) {
+        if (ent.isDead) return;
+
+        // BOLT OPTIMIZATION: Use cached ranges for static buildings
+        // Avoids re-calculating geometry every frame for non-moving entities (~20-30% faster FOW)
+        if (ent.isBuilding) {
+            this._bufferStaticEntity(ent);
+        } else {
+            this._bufferCircle(ent.x, ent.y, ent.visionRadius || 200);
+        }
+    }
+
+    /**
+     * Finalizes the update process by flushing buffers and updating the grid.
+     */
+    endUpdate() {
+        this._flushBuffer();
+    }
+
+    /**
+     * Updates visibility based on a list of player entities.
+     * Kept for backward compatibility.
+     * @param {Array} entities - Entities that provide vision.
+     */
+    update(entities) {
+        this.beginUpdate();
         const len = entities.length;
         for (let i = 0; i < len; i++) {
-            const ent = entities[i];
-            if (ent.isDead) continue;
-
-            // BOLT OPTIMIZATION: Use cached ranges for static buildings
-            // Avoids re-calculating geometry every frame for non-moving entities (~20-30% faster FOW)
-            if (ent.isBuilding) {
-                this._bufferStaticEntity(ent);
-            } else {
-                this._bufferCircle(ent.x, ent.y, ent.visionRadius || 200);
-            }
+            this.addEntity(entities[i]);
         }
-
-        this._flushBuffer();
+        this.endUpdate();
     }
 
     /**

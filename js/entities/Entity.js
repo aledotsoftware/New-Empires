@@ -76,13 +76,8 @@ export class Entity {
 
         // OPTIMIZATION: Removed redundant global CONFIG check and loose culling.
         // Game.js handles frustum culling via SpatialGrid before calling this.
-        // But if viewWidth/viewHeight are passed, we can do a cheap fine-grained check.
-        if (viewWidth && viewHeight) {
-            if (screenX < -this.size || screenX > viewWidth + this.size ||
-                screenY < -this.size || screenY > viewHeight + this.size) {
-                return;
-            }
-        }
+        // BOLT OPTIMIZATION: Removed redundant fine-grained check here as Game.js already filters
+        // entities via queryRowIndices and explicit bounds checking.
 
         if (drawBackground) {
             // Dibujar fondo cuadrado en lugar de redondo

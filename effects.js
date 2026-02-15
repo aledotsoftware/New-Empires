@@ -3,11 +3,31 @@
 // ==========================================
 
 class Particle {
+    // BOLT OPTIMIZATION: Object Pool to reduce GC pressure
+    static pool = [];
+
+    static get(x, y, config) {
+        if (this.pool.length > 0) {
+            const p = this.pool.pop();
+            p.reset(x, y, config);
+            return p;
+        }
+        return new Particle(x, y, config);
+    }
+
+    static release(p) {
+        this.pool.push(p);
+    }
+
     constructor(x, y, config = {}) {
+        this.reset(x, y, config);
+    }
+
+    reset(x, y, config = {}) {
         this.x = x;
         this.y = y;
-        this.vx = config.vx || (Math.random() - 0.5) * 100;
-        this.vy = config.vy || (Math.random() - 0.5) * 100;
+        this.vx = config.vx !== undefined ? config.vx : (Math.random() - 0.5) * 100;
+        this.vy = config.vy !== undefined ? config.vy : (Math.random() - 0.5) * 100;
         this.life = config.life || 1;
         this.maxLife = this.life;
         this.size = config.size || Math.random() * 5 + 2;
@@ -23,6 +43,8 @@ class Particle {
         if (this.emoji) {
             const fontSize = (this.size + 0.5) | 0;
             this._cachedFont = `bold ${fontSize}px Arial`;
+        } else {
+            this._cachedFont = null;
         }
     }
 
@@ -138,7 +160,8 @@ class ParticleSystem {
         for (let i = 0; i < count; i++) {
             const angle = (Math.PI * 2 / count) * i + Math.random() * 0.3;
             const speed = Math.random() * 150 + 50;
-            this.particles.push(new Particle(x, y, {
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 life: Math.random() * 0.5 + 0.5,
@@ -154,7 +177,8 @@ class ParticleSystem {
         for (let i = 0; i < count / 2; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 200 + 100;
-            this.particles.push(new Particle(x, y, {
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 life: Math.random() * 0.3 + 0.2,
@@ -171,7 +195,8 @@ class ParticleSystem {
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 100 + 30;
-            this.particles.push(new Particle(x, y, {
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 50,
                 life: Math.random() * 0.4 + 0.3,
@@ -188,7 +213,8 @@ class ParticleSystem {
         for (let i = 0; i < 20; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 50 + 20;
-            this.particles.push(new Particle(x, y, {
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 30,
                 life: Math.random() * 0.8 + 0.5,
@@ -211,7 +237,8 @@ class ParticleSystem {
         };
 
         for (let i = 0; i < 5; i++) {
-            this.particles.push(new Particle(x, y, {
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 50,
                 vy: -Math.random() * 100 - 50,
                 life: Math.random() * 0.6 + 0.4,
@@ -228,7 +255,8 @@ class ParticleSystem {
     createSelectionPing(x, y) {
         for (let i = 0; i < 8; i++) {
             const angle = (Math.PI * 2 / 8) * i;
-            this.particles.push(new Particle(x, y, {
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
                 vx: Math.cos(angle) * 100,
                 vy: Math.sin(angle) * 100,
                 life: 0.3,
@@ -272,7 +300,8 @@ class ParticleSystem {
 
     // Efecto de texto flotante (Palette)
     createFloatingText(x, y, text, color = '#fff') {
-        this.particles.push(new Particle(x, y, {
+        // BOLT OPTIMIZATION: Use Object Pool
+        this.particles.push(Particle.get(x, y, {
             vx: (Math.random() - 0.5) * 10, // Slight horizontal drift
             vy: -40, // Move up
             life: 1.5,
@@ -290,8 +319,12 @@ class ParticleSystem {
         // Reduces garbage collection by reusing the existing array
         let writeIdx = 0;
         for (let i = 0; i < this.particles.length; i++) {
-            if (this.particles[i].update(deltaTime)) {
-                this.particles[writeIdx++] = this.particles[i];
+            const p = this.particles[i];
+            if (p.update(deltaTime)) {
+                this.particles[writeIdx++] = p;
+            } else {
+                // BOLT OPTIMIZATION: Return to Object Pool
+                Particle.release(p);
             }
         }
         this.particles.length = writeIdx;

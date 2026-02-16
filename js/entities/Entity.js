@@ -88,7 +88,8 @@ export class Entity {
             ctx.fillRect(screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
         }
 
-        if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
+        // BOLT OPTIMIZATION: Removed .complete/.naturalWidth check. AssetLoader only assigns valid images.
+        if (this.image) {
             ctx.drawImage(this.image, screenX - this.size, screenY - this.size, this.size * 2, this.size * 2);
         } else {
             // BOLT OPTIMIZATION: Don't render file paths as text fallback

@@ -180,8 +180,8 @@ export class Villager extends Unit {
         }
     }
 
-    render(ctx, camera, viewWidth, viewHeight, drawHp) {
-        super.render(ctx, camera, viewWidth, viewHeight, drawHp);
+    render(ctx, camera, viewWidth, viewHeight, drawHp, drawBackground = true) {
+        super.render(ctx, camera, viewWidth, viewHeight, drawHp, drawBackground);
 
         // Palette: Draw Idle Indicator (Zzz)
         if (this.state === 'IDLE' && this.team === 'player') {

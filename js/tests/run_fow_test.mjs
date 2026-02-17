@@ -1,9 +1,9 @@
 
 import { FogOfWar } from '../map/FogOfWar.js';
-import { FOW_STATES } from '../core/constants.js';
+import { FOW_STATES, TILE_SIZE } from '../core/constants.js';
 
 function testFOW() {
-    console.log("Starting Fog of War Logic Test...");
+    console.log(`Starting Fog of War Logic Test (TILE_SIZE=${TILE_SIZE})...`);
 
     const cols = 100;
     const rows = 100;
@@ -15,11 +15,15 @@ function testFOW() {
 
     // Test reveal circle
     console.log("Revealing circle at (400, 400) with radius 200...");
-    fow.revealCircle(400, 400, 200); // 400/40 = 10 cols, rows
+    fow.revealCircle(400, 400, 200);
 
-    // Tiles around (10, 10) should be VISIBLE
-    if (!fow.isVisible(10, 10)) throw new Error("Tile (10,10) should be VISIBLE");
-    if (!fow.isVisible(11, 10)) throw new Error("Tile (11,10) should be VISIBLE");
+    // Calculate expected grid coordinates
+    const gridX = Math.floor(400 / TILE_SIZE);
+    const gridY = Math.floor(400 / TILE_SIZE);
+
+    // Tiles around center should be VISIBLE
+    if (!fow.isVisible(gridX, gridY)) throw new Error(`Tile (${gridX},${gridY}) should be VISIBLE`);
+    if (!fow.isVisible(gridX + 1, gridY)) throw new Error(`Tile (${gridX+1},${gridY}) should be VISIBLE`);
 
     // Tiles far away should be HIDDEN
     if (fow.isVisible(50, 50)) throw new Error("Tile (50,50) should be HIDDEN");
@@ -28,8 +32,8 @@ function testFOW() {
     console.log("Resetting visible to explored...");
     fow.resetVisible();
 
-    if (fow.isVisible(10, 10)) throw new Error("Tile (10,10) should NOT be VISIBLE after reset");
-    if (!fow.isExplored(10, 10)) throw new Error("Tile (10,10) should be EXPLORED after reset");
+    if (fow.isVisible(gridX, gridY)) throw new Error(`Tile (${gridX},${gridY}) should NOT be VISIBLE after reset`);
+    if (!fow.isExplored(gridX, gridY)) throw new Error(`Tile (${gridX},${gridY}) should be EXPLORED after reset`);
 
     // Test update with entities
     const mockEntities = [
@@ -38,11 +42,15 @@ function testFOW() {
     console.log("Updating visibility with mock entity at (2000, 2000)...");
     fow.update(mockEntities);
 
-    // 2000 / 40 = 50
-    if (!fow.isVisible(50, 50)) throw new Error("Tile (50,50) should be VISIBLE after update");
-    // (10, 10) was explored before, should still be explored (not hidden)
-    if (!fow.isExplored(10, 10)) throw new Error("Tile (10,10) should still be EXPLORED");
-    if (fow.isVisible(10, 10)) throw new Error("Tile (10,10) should NOT be VISIBLE");
+    // Calculate expected grid coordinates for new entity
+    const gridX2 = Math.floor(2000 / TILE_SIZE);
+    const gridY2 = Math.floor(2000 / TILE_SIZE);
+
+    if (!fow.isVisible(gridX2, gridY2)) throw new Error(`Tile (${gridX2},${gridY2}) should be VISIBLE after update`);
+
+    // Previous location check
+    if (!fow.isExplored(gridX, gridY)) throw new Error(`Tile (${gridX},${gridY}) should still be EXPLORED`);
+    if (fow.isVisible(gridX, gridY)) throw new Error(`Tile (${gridX},${gridY}) should NOT be VISIBLE`);
 
     console.log("✅ Fog of War Logic Test Passed!");
 }

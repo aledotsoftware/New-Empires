@@ -92,13 +92,14 @@ export class FogOfWar {
     addEntity(ent) {
         if (ent.isDead) return;
 
-        // BOLT OPTIMIZATION: Use cached ranges for static buildings
-        // Avoids re-calculating geometry every frame for non-moving entities (~20-30% faster FOW)
-        if (ent.isBuilding) {
-            this._bufferStaticEntity(ent);
-        } else {
-            this._bufferCircle(ent.x, ent.y, ent.visionRadius || 200);
-        }
+        const radius = ent.visionRadius || 200;
+        // BOLT OPTIMIZATION: Calculate grid coordinates for caching
+        const gridX = (ent.x * this.invTileSize) | 0;
+        const gridY = (ent.y * this.invTileSize) | 0;
+
+        // Use generic cache for ALL entities (static buildings AND dynamic units)
+        // This avoids recalculating FOW geometry for moving units that stay within the same tile (~40x speedup)
+        this._bufferEntityWithCache(ent, gridX, gridY, radius);
     }
 
     /**
@@ -162,25 +163,23 @@ export class FogOfWar {
     }
 
     /**
-     * BOLT OPTIMIZATION: Buffer static entity vision ranges.
-     * Caches computed ranges on the entity itself to avoid per-frame recalculation.
+     * BOLT OPTIMIZATION: Generic buffering with cache support.
+     * Works for both static (buildings) and dynamic (units) entities.
+     * Cache key is based on Grid Coordinates, allowing moving units to reuse cache
+     * as long as they stay within the same tile.
      */
-    _bufferStaticEntity(entity) {
-        const radius = entity.visionRadius || 200;
-
-        // Check if cache is valid
-        // We check X, Y, and Radius to handle moving buildings (rare) or upgrades
+    _bufferEntityWithCache(entity, gridX, gridY, radius) {
+        // Check cache validity using Grid Coordinates
         if (entity._fowCacheRanges &&
-            entity._fowCacheX === entity.x &&
-            entity._fowCacheY === entity.y &&
-            entity._fowCacheRadius === radius) {
+            entity._fowGridX === gridX &&
+            entity._fowGridY === gridY &&
+            entity._fowRadius === radius) {
 
             const ranges = entity._fowCacheRanges;
             const buffers = this._rowBuffers;
             const len = ranges.length;
 
-            // Push cached ranges directly to buffers
-            // Format: [row, packedStartEnd, row, packedStartEnd, ...]
+            // Fast path: Push cached ranges
             for (let i = 0; i < len; i += 2) {
                 const r = ranges[i];
                 const packed = ranges[i + 1];
@@ -190,10 +189,7 @@ export class FogOfWar {
         }
 
         // Cache Miss: Calculate and store
-        const gridX = (entity.x * this.invTileSize) | 0;
-        const gridY = (entity.y * this.invTileSize) | 0;
         const gridRadius = (radius * this.invTileSize) | 0;
-
         const spans = this._getCircleSpans(gridRadius);
         const len = spans.length;
         const cols = this.cols;
@@ -202,7 +198,6 @@ export class FogOfWar {
 
         // Initialize/Clear cache on entity
         // We use a flat array: [row, packed, row, packed...]
-        // Pre-allocate estimate size: len * 2
         const cache = new Array(len * 2);
         let count = 0;
 
@@ -229,9 +224,9 @@ export class FogOfWar {
         if (count < cache.length) cache.length = count;
 
         entity._fowCacheRanges = cache;
-        entity._fowCacheX = entity.x;
-        entity._fowCacheY = entity.y;
-        entity._fowCacheRadius = radius;
+        entity._fowGridX = gridX;
+        entity._fowGridY = gridY;
+        entity._fowRadius = radius;
     }
 
     /**

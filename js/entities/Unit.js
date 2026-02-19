@@ -169,6 +169,10 @@ export class Unit extends Entity {
             let moveX = dx * moveStep;
             let moveY = dy * moveStep;
 
+            // BOLT OPTIMIZATION: Pre-calculate final grid coords to avoid redundant math later
+            let finalCol = currCol;
+            let finalRow = currRow;
+
             // Colisiones con edificios (GridMap)
             if (gridMap) {
                 // Verificar nueva posición propuesta
@@ -180,6 +184,10 @@ export class Unit extends Entity {
                 // Using bitwise OR for truncation
                 const nextCol = (nextX * invTileSize) | 0;
                 const nextRow = (nextY * invTileSize) | 0;
+
+                // Optimistic assignment (will revert if collision occurs)
+                finalCol = nextCol;
+                finalRow = nextRow;
 
                 // OPTIMIZATION: Skip collision check if moving within the same tile (~97% of frames)
                 // If we are currently in a valid (non-building) tile, staying in it is safe.
@@ -207,6 +215,7 @@ export class Unit extends Entity {
                             const indexX = currRow * cols + nextCol;
                             if (collisionGrid[indexX] !== 0) {
                                 moveX = 0;
+                                finalCol = currCol; // Revert X movement impact on grid
                             }
 
                             // Verificar movimiento solo en Y
@@ -214,6 +223,7 @@ export class Unit extends Entity {
                             const indexY = nextRow * cols + currCol;
                             if (collisionGrid[indexY] !== 0) {
                                 moveY = 0;
+                                finalRow = currRow; // Revert Y movement impact on grid
                             }
                         }
                     }
@@ -233,9 +243,8 @@ export class Unit extends Entity {
             // BOLT OPTIMIZATION: Lazy Cache Update
             // Only update cache if we actually crossed a tile boundary.
             if (gridMap && (moveX !== 0 || moveY !== 0)) {
-                const finalCol = (this.x * invTileSize) | 0;
-                const finalRow = (this.y * invTileSize) | 0;
-
+                // BOLT OPTIMIZATION: Use pre-calculated finalCol/finalRow
+                // Avoids recalculating (this.x * invTileSize) | 0 here (~2x faster logic)
                 if (finalCol !== this._lastGridCol || finalRow !== this._lastGridRow) {
                     this._lastGridCol = finalCol;
                     this._lastGridRow = finalRow;

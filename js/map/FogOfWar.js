@@ -10,6 +10,11 @@ export class FogOfWar {
     // Changed from Map to Array for O(1) integer lookup (~3x faster access)
     static _circleSpans = [];
 
+    // BOLT OPTIMIZATION: Static comparator to avoid closure allocation
+    static _numericSort(a, b) {
+        return a - b;
+    }
+
     constructor(cols, rows) {
         this.cols = cols;
         this.rows = rows;
@@ -277,9 +282,6 @@ export class FogOfWar {
         // We write directly to visibleRanges
         let visibleCount = this.visibleRanges.length;
 
-        // Numeric sort comparator (faster than default string sort)
-        const numericSort = (a, b) => a - b;
-
         for (let r = 0; r < rows; r++) {
             const buffer = buffers[r];
             const len = buffer.length;
@@ -289,7 +291,7 @@ export class FogOfWar {
             // Sort packed ranges for this row
             // If len is small (e.g. 1-5 units overlapping), this is extremely fast
             if (len > 1) {
-                buffer.sort(numericSort);
+                buffer.sort(FogOfWar._numericSort);
             }
 
             // Merge & Fill

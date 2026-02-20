@@ -2690,24 +2690,27 @@ export class Game {
         // Update previous visible ranges (VISIBLE -> EXPLORED)
         if (prevRanges) {
             const prevLen = prevRanges.length;
+            // BOLT OPTIMIZATION: Hoist constant color
+            const exploredColor = lut[FOW_STATES.EXPLORED];
             for (let r = 0; r < prevLen; r += 2) {
                 const start = prevRanges[r];
                 const end = prevRanges[r + 1];
-                for (let i = start; i <= end; i++) {
-                    data32[i] = lut[grid[i]];
-                }
+                // BOLT OPTIMIZATION: Use native fill (memset) instead of loop
+                // Optimistically mark as EXPLORED; overlapping VISIBLE areas will be fixed by next pass
+                data32.fill(exploredColor, start, end + 1);
             }
         }
 
         // Update current visible ranges (-> VISIBLE)
         if (currRanges) {
             const currLen = currRanges.length;
+            // BOLT OPTIMIZATION: Hoist constant color
+            const visibleColor = lut[FOW_STATES.VISIBLE];
             for (let r = 0; r < currLen; r += 2) {
                 const start = currRanges[r];
                 const end = currRanges[r + 1];
-                for (let i = start; i <= end; i++) {
-                    data32[i] = lut[grid[i]];
-                }
+                // BOLT OPTIMIZATION: Use native fill (memset) instead of loop
+                data32.fill(visibleColor, start, end + 1);
             }
         }
 

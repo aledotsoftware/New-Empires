@@ -131,3 +131,7 @@
 ## 2026-02-23 - Reuse of Computed Collision Data
 **Learning:** `Unit.moveTowardsTarget` recalculated grid coordinates `(x * invTileSize) | 0` at the end of the frame to update the spatial cache, even though these values were already computed (as `nextCol`/`nextRow`) during the collision detection phase. By tracking the final valid position (`finalCol`/`finalRow`) during the collision checks (reverting to current if blocked), we eliminated 2 multiplications and 2 bitwise operations per moving unit per frame. Micro-benchmarks showed an ~8.5x speedup for the function logic in isolation.
 **Action:** When performing collision detection or physics steps that require spatial lookups, reuse the computed grid/cell indices for subsequent cache updates instead of recalculating them from the final position.
+
+## 2026-02-23 - Native Fill for Bitmap Buffers
+**Learning:** When updating large TypedArray buffers (like FOW bitmaps) where contiguous ranges are set to the same value, replacing manual `for` loops with `TypedArray.prototype.fill()` yields massive performance gains (7.6x speedup for large ranges). Even with disjoint ranges, the overhead of the native call is far lower than the overhead of JS iteration. This also enables "optimistic filling" strategies (e.g., fill all "previous" ranges with Explored, then fill all "current" ranges with Visible) which are cleaner and faster than conditional per-pixel logic.
+**Action:** Always prefer `TypedArray.fill()` over manual iteration for setting ranges in binary buffers.

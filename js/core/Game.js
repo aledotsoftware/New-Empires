@@ -3694,10 +3694,22 @@ export class Game {
         // Resources
         ctx.fillStyle = '#4a5568';
         ctx.beginPath();
-        for (let node of this.resourceNodes) {
+
+        // BOLT OPTIMIZATION: Use cached length loop and cached grid coords
+        const nodesLen = this.resourceNodes.length;
+        // Hoist FOW lookups
+        const fow = this.fow;
+        const invTileSize = fow.invTileSize;
+
+        for (let i = 0; i < nodesLen; i++) {
+            const node = this.resourceNodes[i];
             if (node.amount > 0) {
                 // Solo mostrar en el minimapa si la zona ha sido explorada
-                if (this.fow.isExplored((node.x / TILE_SIZE) | 0, (node.y / TILE_SIZE) | 0)) {
+                // BOLT OPTIMIZATION: Use cached _gridCol (set at generation)
+                const col = node._gridCol !== undefined ? node._gridCol : (node.x * invTileSize) | 0;
+                const row = node._gridRow !== undefined ? node._gridRow : (node.y * invTileSize) | 0;
+
+                if (fow.isExplored(col, row)) {
                     ctx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
                 }
             }
@@ -3705,11 +3717,18 @@ export class Game {
         ctx.fill();
 
         // Buildings
-        for (let building of this.buildings) {
+        // BOLT OPTIMIZATION: Use cached length loop and cached grid coords
+        const buildingsLen = this.buildings.length;
+        for (let i = 0; i < buildingsLen; i++) {
+            const building = this.buildings[i];
             if (building.isDead) continue;
 
             // Solo mostrar en el minimapa si la zona ha sido explorada
-            if (!this.fow.isExplored((building.x / TILE_SIZE) | 0, (building.y / TILE_SIZE) | 0)) {
+            // BOLT OPTIMIZATION: Use cached _lastGridCol (set at creation)
+            const col = (building._lastGridCol !== -1) ? building._lastGridCol : (building.x * invTileSize) | 0;
+            const row = (building._lastGridRow !== -1) ? building._lastGridRow : (building.y * invTileSize) | 0;
+
+            if (!fow.isExplored(col, row)) {
                 continue;
             }
 
@@ -3765,12 +3784,21 @@ export class Game {
         this.minimapCtx.fillStyle = '#c53030';
         this.minimapCtx.beginPath();
         const enemiesLen = this.enemies.length;
+
+        // BOLT OPTIMIZATION: Hoist FOW and inverse tile size
+        const fow = this.fow;
+        const invTileSize = fow.invTileSize;
+
         for (let i = 0; i < enemiesLen; i++) {
             const enemy = this.enemies[i];
 
             // FILTRADO POR NIEBLA DE GUERRA
             // Solo mostrar enemigos si están en zona visible
-            if (!this.fow.isVisible((enemy.x / TILE_SIZE) | 0, (enemy.y / TILE_SIZE) | 0)) {
+            // BOLT OPTIMIZATION: Use cached grid coordinates if available (avoids division)
+            const col = (enemy._lastGridCol !== -1) ? enemy._lastGridCol : (enemy.x * invTileSize) | 0;
+            const row = (enemy._lastGridRow !== -1) ? enemy._lastGridRow : (enemy.y * invTileSize) | 0;
+
+            if (!fow.isVisible(col, row)) {
                 continue;
             }
 

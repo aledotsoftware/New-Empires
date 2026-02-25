@@ -20,7 +20,8 @@ export class Unit extends Entity {
         this.gatherTarget = null;
         this.attackDamage = 5;
         this.attackSpeed = 1;
-        this.attackRange = 50;
+        // BOLT OPTIMIZATION: Cache attackRange squared to avoid multiplication in hot loop
+        this.attackRange = 50; // Triggers setter to calc attackRangeSq
         this.attackCooldown = 0;
         this.canAttack = false;
         this.canGather = false;
@@ -30,6 +31,16 @@ export class Unit extends Entity {
 
         this.aiTimer = Math.random() * 0.5;
         this.aiCheckInterval = 0.5;
+    }
+
+    // BOLT OPTIMIZATION: Accessor for attackRange that maintains cached squared value
+    get attackRange() {
+        return this._attackRange;
+    }
+
+    set attackRange(value) {
+        this._attackRange = value;
+        this.attackRangeSq = value * value;
     }
 
     update(deltaTime, game) {
@@ -46,7 +57,8 @@ export class Unit extends Entity {
             } else {
                 // BOLT OPTIMIZATION: Stop moving if already in attack range
                 // Reduces expensive collision checks and improves ranged unit behavior (kiting/spacing)
-                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRange * this.attackRange);
+                // BOLT OPTIMIZATION: Use cached squared range
+                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRangeSq);
                 this.tryAttack(this.attackTarget, deltaTime, game);
             }
         }
@@ -267,7 +279,8 @@ export class Unit extends Entity {
         const dx = this.x - target.x;
         const dy = this.y - target.y;
         const distSq = dx * dx + dy * dy;
-        const attackRangeSq = this.attackRange * this.attackRange;
+        // BOLT OPTIMIZATION: Use cached squared range
+        const attackRangeSq = this.attackRangeSq;
 
         if (distSq <= attackRangeSq && this.attackCooldown <= 0) {
             let damage = this.attackDamage;

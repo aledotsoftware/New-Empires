@@ -2,9 +2,46 @@
 // SOUND MANAGER - Sistema de gestión de sonidos
 // ==========================================
 
+// BOLT OPTIMIZATION: Object Pool for Audio elements
+// Reduces GC pressure and CPU usage by reusing Audio objects instead of cloning them every time.
+class SoundPool {
+    constructor(original, size = 5) {
+        this.original = original;
+        this.pool = [];
+        this.size = size;
+        this.idx = 0;
+
+        // Pre-allocate pool
+        for (let i = 0; i < size; i++) {
+            this.pool.push(original.cloneNode());
+        }
+    }
+
+    play(volume) {
+        // Round-robin strategy: Pick next, reset, play.
+        // This ensures O(1) access and naturally limits polyphony (preventing audio chaos).
+        const sound = this.pool[this.idx];
+        this.idx = (this.idx + 1) % this.size;
+
+        // Reset state
+        sound.currentTime = 0;
+        sound.volume = volume;
+
+        return sound.play();
+    }
+
+    setVolume(volume) {
+        // Update volume for all instances (including playing ones)
+        for (let i = 0; i < this.size; i++) {
+            this.pool[i].volume = volume;
+        }
+    }
+}
+
 class SoundManager {
     constructor() {
         this.sounds = {};
+        this.pools = new Map(); // BOLT OPTIMIZATION: Store pools here
         this.enabled = true;
         this.volume = 0.5; // Volumen por defecto (0.0 a 1.0)
     }
@@ -22,6 +59,9 @@ class SoundManager {
 
             audio.addEventListener('canplaythrough', () => {
                 this.sounds[key] = audio;
+                // BOLT OPTIMIZATION: Initialize pool immediately
+                this.pools.set(key, new SoundPool(audio, 5));
+
                 if (typeof debugLogger !== 'undefined') {
                     debugLogger.debug(`Sonido cargado: ${key}`, 'sound', { src, duration: audio.duration });
                 } else {
@@ -112,17 +152,22 @@ class SoundManager {
     play(key, volume = null) {
         if (!this.enabled) return;
 
-        const sound = this.sounds[key];
-        if (!sound) {
-            // No logueamos advertencia aquí para evitar spam si faltan archivos de sonido opcionales
-            return;
+        // BOLT OPTIMIZATION: Use Pool
+        let pool = this.pools.get(key);
+
+        if (!pool) {
+            // Lazy initialization if not loaded via loadSound (fallback)
+            const sound = this.sounds[key];
+            if (!sound) {
+                // No logueamos advertencia aquí para evitar spam si faltan archivos de sonido opcionales
+                return;
+            }
+            pool = new SoundPool(sound, 5);
+            this.pools.set(key, pool);
         }
 
-        // Clonar el audio para permitir múltiples reproducciones simultáneas
-        const clone = sound.cloneNode();
-        clone.volume = volume !== null ? Math.max(0, Math.min(1, volume)) : this.volume;
-
-        const promise = clone.play();
+        const finalVolume = volume !== null ? Math.max(0, Math.min(1, volume)) : this.volume;
+        const promise = pool.play(finalVolume);
 
         promise.catch(err => {
             if (typeof debugLogger !== 'undefined') {
@@ -130,7 +175,7 @@ class SoundManager {
                     key,
                     error: err.message,
                     enabled: this.enabled,
-                    volume: clone.volume
+                    volume: finalVolume
                 });
             } else {
                 console.warn(`[WARN] Error al reproducir sonido ${key}:`, err);
@@ -212,12 +257,19 @@ class SoundManager {
      */
     setVolume(volume) {
         this.volume = Math.max(0, Math.min(1, volume));
-        // Actualizar volumen de todos los sonidos cargados
+
+        // BOLT OPTIMIZATION: Update all pools
+        for (const pool of this.pools.values()) {
+            pool.setVolume(this.volume);
+        }
+
+        // Actualizar volumen de todos los sonidos cargados (originales) por consistencia
         for (let key in this.sounds) {
             if (this.sounds[key]) {
                 this.sounds[key].volume = this.volume;
             }
         }
+
         // Actualizar volumen de música si está sonando
         if (this.musicAudio) {
             this.musicAudio.volume = this.volume * 0.5;

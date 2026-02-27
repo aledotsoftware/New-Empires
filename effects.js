@@ -62,34 +62,52 @@ class Particle {
         return this.life > 0;
     }
 
-    render(ctx, camera, lastFont) {
+    render(ctx, camera, state) {
         // BOLT OPTIMIZATION: Truncate to integer
         const screenX = (this.x - camera.x) | 0;
         const screenY = (this.y - camera.y) | 0;
 
-        // BOLT OPTIMIZATION: Removed per-particle save/restore (handled by system)
-        ctx.globalAlpha = this.alpha;
+        // BOLT OPTIMIZATION: Cache Canvas State
+        // Only set alpha if it changed
+        if (state.alpha !== this.alpha) {
+            ctx.globalAlpha = this.alpha;
+            state.alpha = this.alpha;
+        }
 
         if (this.emoji) {
             // BOLT OPTIMIZATION: Only set font if changed
-            // Float string construction is ~14x slower in JS and hurts glyph caching
-            if (this._cachedFont !== lastFont) {
+            if (state.font !== this._cachedFont) {
                 ctx.font = this._cachedFont;
+                state.font = this._cachedFont;
             }
 
-            // textAlign/textBaseline hoisted to ParticleSystem.render
-
+            // Constant styles for emoji outline
             // Palette: Outline for visibility against any background
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            if (state.lineWidth !== 3) {
+                ctx.lineWidth = 3;
+                state.lineWidth = 3;
+            }
+
+            const strokeColor = 'rgba(0,0,0,0.8)';
+            if (state.strokeStyle !== strokeColor) {
+                ctx.strokeStyle = strokeColor;
+                state.strokeStyle = strokeColor;
+            }
+
             ctx.strokeText(this.emoji, screenX, screenY);
+
             // Palette: Fill with specific color
-            ctx.fillStyle = this.color;
+            if (state.fillStyle !== this.color) {
+                ctx.fillStyle = this.color;
+                state.fillStyle = this.color;
+            }
             ctx.fillText(this.emoji, screenX, screenY);
 
-            return this._cachedFont;
         } else {
-            ctx.fillStyle = this.color;
+            if (state.fillStyle !== this.color) {
+                ctx.fillStyle = this.color;
+                state.fillStyle = this.color;
+            }
 
             if (this.shape === 'circle') {
                 ctx.beginPath();
@@ -105,7 +123,6 @@ class Particle {
                 ctx.closePath();
                 ctx.fill();
             }
-            return lastFont;
         }
     }
 }
@@ -131,21 +148,31 @@ class Ripple {
         return this.life > 0;
     }
 
-    render(ctx, camera, lastFont) {
+    render(ctx, camera, state) {
         // BOLT OPTIMIZATION: Truncate to integer
         const screenX = (this.x - camera.x) | 0;
         const screenY = (this.y - camera.y) | 0;
 
-        // BOLT OPTIMIZATION: Removed per-particle save/restore (handled by system)
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.lineWidth;
-        ctx.globalAlpha = this.alpha;
+        // BOLT OPTIMIZATION: Cache Canvas State
+        if (state.strokeStyle !== this.color) {
+            ctx.strokeStyle = this.color;
+            state.strokeStyle = this.color;
+        }
+
+        if (state.lineWidth !== this.lineWidth) {
+            ctx.lineWidth = this.lineWidth;
+            state.lineWidth = this.lineWidth;
+        }
+
+        if (state.alpha !== this.alpha) {
+            ctx.globalAlpha = this.alpha;
+            state.alpha = this.alpha;
+        }
+
         ctx.beginPath();
         // Flatten y to give 3D perspective effect (ellipse)
         ctx.ellipse(screenX, screenY, this.size, this.size * 0.6, 0, 0, Math.PI * 2);
         ctx.stroke();
-
-        return lastFont;
     }
 }
 
@@ -349,7 +376,18 @@ class ParticleSystem {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        let currentFont = '';
+        // BOLT OPTIMIZATION: Canvas State Tracking
+        // We track the current state of critical context properties to avoid
+        // redundant setters (which are expensive in Chrome/V8).
+        // Since we just called ctx.save(), we don't know the exact previous values,
+        // so we initialize with null to force the first set.
+        const state = {
+            font: null,
+            fillStyle: null,
+            strokeStyle: null,
+            alpha: null,
+            lineWidth: null
+        };
 
         // BOLT OPTIMIZATION: Standard loop avoids iterator allocation
         for (let i = 0; i < this.particles.length; i++) {
@@ -365,11 +403,13 @@ class ParticleSystem {
                     continue;
                 }
             }
-            currentFont = this.particles[i].render(ctx, camera, currentFont);
+            this.particles[i].render(ctx, camera, state);
         }
 
         // Reset critical state before next batch (future-proofing)
+        // Not strictly needed with save/restore but good for safety
         ctx.globalAlpha = 1;
+        state.alpha = 1; // Sync state tracker
 
         for (let i = 0; i < this.projectiles.length; i++) {
             // BOLT OPTIMIZATION: Frustum culling for projectiles
@@ -382,11 +422,15 @@ class ParticleSystem {
                 }
             }
 
-            // Check if projectiles support font caching optimization (duck typing)
-            // If they return undefined (legacy/different class), currentFont becomes undefined,
-            // which correctly forces a reset on next particle that checks against it.
-            const result = this.projectiles[i].render(ctx, camera, currentFont);
-            if (result !== undefined) currentFont = result;
+            // Check if projectiles support optimized render (duck typing)
+            if (this.projectiles[i].render) {
+                // If it accepts state, pass it. If it expects old signature (lastFont),
+                // passing an object might break it if it tries to compare string === object.
+                // However, grep showed no projectiles currently. Assuming any future projectiles
+                // will follow the new pattern or ignore extra args.
+                // For safety, we can check arity or just pass state.
+                this.projectiles[i].render(ctx, camera, state);
+            }
         }
 
         ctx.restore();

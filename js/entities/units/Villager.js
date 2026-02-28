@@ -170,7 +170,9 @@ export class Villager extends Unit {
                         this.attackTarget = null;
                         this.state = 'IDLE';
                     } else {
-                        this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game);
+                        // BOLT OPTIMIZATION: Stop moving if already in attack range
+                        // Avoids unnecessary collision checks and pushing against target
+                        this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRangeSq);
                         this.tryAttack(this.attackTarget, deltaTime, game);
                     }
                 } else {

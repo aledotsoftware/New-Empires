@@ -1038,9 +1038,34 @@ export class Game {
 
     /**
      * Helper para obtener unidades militares del jugador
+     * BOLT OPTIMIZATION: Removed Array.prototype.filter in favor of a manual loop to reduce allocations
      */
     getMilitaryUnits() {
-        return this.units.filter(u => u.type !== 'villager' && u.team === 'player' && !u.isDead);
+        const army = [];
+        const len = this.units.length;
+        for (let i = 0; i < len; i++) {
+            const u = this.units[i];
+            if (u.type !== 'villager' && u.team === 'player' && !u.isDead) {
+                army.push(u);
+            }
+        }
+        return army;
+    }
+
+    /**
+     * Helper para contar unidades militares sin crear arrays
+     * BOLT OPTIMIZATION: Used for UI to avoid intermediate array allocation
+     */
+    getMilitaryCount() {
+        let count = 0;
+        const len = this.units.length;
+        for (let i = 0; i < len; i++) {
+            const u = this.units[i];
+            if (u.type !== 'villager' && u.team === 'player' && !u.isDead) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -4132,7 +4157,7 @@ export class Game {
         let idKey = ''; // Tracks structural identity (e.g. "single:123" or "multi:5")
 
         if (this.selectedEntities.length === 0) {
-            const armyCount = this.getMilitaryUnits().length;
+            const armyCount = this.getMilitaryCount();
             idKey = 'empty';
             stateKey = `empty:${armyCount}`;
         } else if (this.selectedEntities.length === 1) {
@@ -4354,7 +4379,7 @@ export class Game {
 
             // Action 2: Select All Army (Palette)
             // Count military units (not villagers, alive, player team)
-            const armyCount = this.getMilitaryUnits().length;
+            const armyCount = this.getMilitaryCount();
 
             if (armyCount > 0) {
                 actionsDiv.appendChild(createActionBtn('swords', `Seleccionar Ejército (${armyCount})`, ',',

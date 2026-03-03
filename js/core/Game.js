@@ -371,6 +371,7 @@ export class Game {
         this._resourceRenderCache = [];
         this._rowCache = []; // BOLT OPTIMIZATION: Cache for row-wise sorting
         this._gridPath = null; // BOLT OPTIMIZATION: Cache for grid path
+        this._rallyCache = []; // BOLT OPTIMIZATION: Cache for rally points
         this.lastViewWidth = -1;
         this.lastViewHeight = -1;
 
@@ -3469,17 +3470,21 @@ export class Game {
     }
 
     drawRallyPoints() {
-        // BOLT OPTIMIZATION: Filter entities first to batch draw calls
-        const entitiesWithRally = [];
+        // BOLT OPTIMIZATION: Filter entities first to batch draw calls using pre-allocated cache
+        // Avoids allocating `[]` per frame when units with rally points are selected
+        const cache = this._rallyCache || [];
+        cache.length = 0;
+
         const len = this.selectedEntities.length;
+        let count = 0;
         for (let i = 0; i < len; i++) {
             const entity = this.selectedEntities[i];
             if (entity.team === 'player' && entity.rallyPoint) {
-                entitiesWithRally.push(entity);
+                cache[count++] = entity;
             }
         }
 
-        if (entitiesWithRally.length === 0) return;
+        if (count === 0) return;
 
         // Save context once for all rally points
         this.ctx.save();
@@ -3490,12 +3495,11 @@ export class Game {
         this.ctx.setLineDash([5, 5]);
         this.ctx.beginPath();
 
-        const rallyLen = entitiesWithRally.length;
         const camX = this.camera.x;
         const camY = this.camera.y;
 
-        for (let i = 0; i < rallyLen; i++) {
-            const entity = entitiesWithRally[i];
+        for (let i = 0; i < count; i++) {
+            const entity = cache[i];
             const startX = (entity.x - camX) | 0;
             const startY = (entity.y - camY) | 0;
             const endX = (entity.rallyPoint.x - camX) | 0;
@@ -3514,8 +3518,8 @@ export class Game {
 
         // Batch 2: Flag Poles
         this.ctx.beginPath();
-        for (let i = 0; i < rallyLen; i++) {
-            const entity = entitiesWithRally[i];
+        for (let i = 0; i < count; i++) {
+            const entity = cache[i];
             const endX = (entity.rallyPoint.x - camX) | 0;
             const endY = (entity.rallyPoint.y - camY) | 0;
             this.ctx.rect(endX, endY - 20, 2, 20);
@@ -3524,8 +3528,8 @@ export class Game {
 
         // Batch 3: Flag Triangles
         this.ctx.beginPath();
-        for (let i = 0; i < rallyLen; i++) {
-            const entity = entitiesWithRally[i];
+        for (let i = 0; i < count; i++) {
+            const entity = cache[i];
             const endX = (entity.rallyPoint.x - camX) | 0;
             const endY = (entity.rallyPoint.y - camY) | 0;
             this.ctx.moveTo(endX + 2, endY - 20);
@@ -3538,8 +3542,8 @@ export class Game {
 
         // Batch 4: Base Circles
         this.ctx.beginPath();
-        for (let i = 0; i < rallyLen; i++) {
-            const entity = entitiesWithRally[i];
+        for (let i = 0; i < count; i++) {
+            const entity = cache[i];
             const endX = (entity.rallyPoint.x - camX) | 0;
             const endY = (entity.rallyPoint.y - camY) | 0;
             this.ctx.moveTo(endX + 1 + 3, endY); // Move to start of arc

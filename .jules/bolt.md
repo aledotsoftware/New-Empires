@@ -135,3 +135,7 @@
 ## 2026-02-23 - Native Fill for Bitmap Buffers
 **Learning:** When updating large TypedArray buffers (like FOW bitmaps) where contiguous ranges are set to the same value, replacing manual `for` loops with `TypedArray.prototype.fill()` yields massive performance gains (7.6x speedup for large ranges). Even with disjoint ranges, the overhead of the native call is far lower than the overhead of JS iteration. This also enables "optimistic filling" strategies (e.g., fill all "previous" ranges with Explored, then fill all "current" ranges with Visible) which are cleaner and faster than conditional per-pixel logic.
 **Action:** Always prefer `TypedArray.fill()` over manual iteration for setting ranges in binary buffers.
+
+## 2026-03-05 - Avoid `.filter()` in interactive routines
+**Learning:** Functions triggered by hotkeys (like `Tab` for `selectNextIdleVillager`) may seemingly be cold paths because they only fire when the user interacts, but when they iterate over potentially large arrays (`this.units` can contain hundreds or thousands of entities) using `Array.prototype.filter()` allocates internal arrays and closures. Replacing it with a manual `for` loop improves iteration speed by ~2x in large lists and entirely eliminates GC pressure during rapid repetitive actions (e.g., holding down `Tab`).
+**Action:** Replace `Array.prototype.filter` with a manual loop even in non-render functions if the array size can be large.

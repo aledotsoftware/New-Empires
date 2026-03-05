@@ -1264,11 +1264,15 @@ export class Game {
 
     selectNextIdleVillager() {
         // Obtener todos los aldeanos inactivos del jugador
-        const idleVillagers = this.units.filter(unit =>
-            unit.type === 'villager' &&
-            unit.team === 'player' &&
-            unit.state === 'IDLE'
-        );
+        // BOLT OPTIMIZATION: Removed Array.prototype.filter to avoid implicit closure allocation and reduce GC overhead
+        const idleVillagers = [];
+        const len = this.units.length;
+        for (let i = 0; i < len; i++) {
+            const unit = this.units[i];
+            if (unit.type === 'villager' && unit.team === 'player' && unit.state === 'IDLE') {
+                idleVillagers.push(unit);
+            }
+        }
 
         if (idleVillagers.length === 0) {
             this.showNotification('No hay aldeanos inactivos', 'info');

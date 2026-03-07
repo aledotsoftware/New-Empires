@@ -192,15 +192,17 @@ export class Villager extends Unit {
         let nearest = null;
         let minDistSq = Infinity;
 
-        // OPTIMIZATION: Avoid Array.filter allocation and use manual loop with squared distance
-        // Reduces garbage collection pressure and cpu cycles by avoiding array creation and sqrt
-        const buildings = game.buildings;
-        const len = buildings.length;
+        // BOLT OPTIMIZATION: Use cached dropOffBuildings list instead of iterating all buildings
+        // This avoids checking non-dropoff buildings (houses, walls, etc.) which is O(N) where N grows large.
+        // Fallback to game.buildings if cache is missing (safety net).
+        const targets = game.dropOffBuildings || game.buildings;
+        const len = targets.length;
 
         for (let i = 0; i < len; i++) {
-            const b = buildings[i];
-            // Filter inline
-            if ((b.type === 'townCenter' || b.type === 'storage') && b.team === this.team) {
+            const b = targets[i];
+            // Filter inline (redundant check for type if using cache, but safe)
+            // We still need to check team.
+            if (b.team === this.team && (game.dropOffBuildings ? true : (b.type === 'townCenter' || b.type === 'storage'))) {
                 const dx = this.x - b.x;
                 const dy = this.y - b.y;
                 const distSq = dx * dx + dy * dy;
@@ -216,7 +218,7 @@ export class Villager extends Unit {
             this.state = 'CARRYING';
             this.dropOffTarget = nearest;
         } else {
-            console.warn("No hay depósito disponible");
+            // console.warn("No hay depósito disponible");
         }
     }
 }

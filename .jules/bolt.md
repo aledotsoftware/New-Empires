@@ -23,3 +23,7 @@
 ## 2025-01-28 - Micro-optimization vs Readability
 **Learning:** While replacing `Math.min` might yield nanosecond gains in tight loops, applying it broadly (e.g. in 1Hz timers) is counter-productive. Code reviews favor readability unless the bottleneck is proven. However, removing `typeof CONFIG` and global lookups remains a solid win (verified ~7.9x speedup in isolated benchmark for `Villager.update`).
 **Action:** Distinguish between "Hot Path" (per frame per entity) and "Warm Path" (timers). Keep math readable unless profiling demands otherwise.
+
+## 2025-05-24 - Entity Subset Caching
+**Learning:** Filtering a large array of entities (like `game.buildings`) for a specific subset (like "drop-off points") inside a frequent unit action (like `Villager.findDropOffAndGo`) becomes an O(N) bottleneck as the game scales. Maintaining a pre-filtered list at the game level (`dropOffBuildings`) reduced search time by ~16x in a 1000-building scenario.
+**Action:** Use centralized lists for specific entity subsets if they are queried frequently by many agents, rather than filtering the main list on the fly. Keep the caching logic tightly coupled with creation/destruction to avoid state drift.

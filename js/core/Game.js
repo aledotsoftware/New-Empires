@@ -75,6 +75,7 @@ export class Game {
         this.entities = [];
         this.selectedEntities = [];
         this.buildings = [];
+        this.dropOffBuildings = []; // BOLT OPTIMIZATION: Cache for drop-off points
         this.units = [];
         this.enemies = [];
         this.resourceNodes = [];
@@ -243,6 +244,7 @@ export class Game {
         this.entities = [];
         this.units = [];
         this.buildings = [];
+        this.dropOffBuildings = [];
         this.enemies = [];
         this.selectedEntities = [];
         this.resourceNodes = [];
@@ -273,6 +275,7 @@ export class Game {
         // Crear Centro Urbano inicial (jugador)
         const townCenter = new TownCenter(400, 400, 'player');
         this.buildings.push(townCenter);
+        this.dropOffBuildings.push(townCenter); // BOLT OPTIMIZATION
         this.entities.push(townCenter);
         this.townCenterCounts.player++;
 
@@ -455,6 +458,7 @@ export class Game {
         // Enemy town center
         const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
         this.buildings.push(enemyTC);
+        this.dropOffBuildings.push(enemyTC); // BOLT OPTIMIZATION
         this.entities.push(enemyTC);
         this.buildingGrid.add(enemyTC);
         this.townCenterCounts.enemy++;
@@ -1211,6 +1215,10 @@ export class Game {
             civilizationManager.applyBuildingBonuses(building, this.civilizationId);
 
             this.buildings.push(building);
+            // BOLT OPTIMIZATION: Track drop-off points
+            if (building.type === 'townCenter' || building.type === 'storage') {
+                this.dropOffBuildings.push(building);
+            }
             this.entities.push(building);
             this.buildingGrid.add(building);
 
@@ -1547,6 +1555,7 @@ export class Game {
 
             // Si murieron edificios, reconstruir el grid estático
             if (hasDeadBuildings) {
+                this._removeDeadInPlace(this.dropOffBuildings); // BOLT OPTIMIZATION
                 this.updateBuildingGrid();
             }
 

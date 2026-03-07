@@ -1431,7 +1431,15 @@ export class Game {
         }
 
         // Filtrar entidades muertas
-        const aliveEntities = group.filter(e => !e.isDead);
+        // BOLT OPTIMIZATION: Removed Array.prototype.filter in favor of a manual loop to reduce allocations
+        const aliveEntities = [];
+        const len = group.length;
+        for (let i = 0; i < len; i++) {
+            const e = group[i];
+            if (!e.isDead) {
+                aliveEntities.push(e);
+            }
+        }
 
         if (aliveEntities.length === 0) {
             this.controlGroups[groupNum] = [];
@@ -1478,11 +1486,23 @@ export class Game {
      * Palette: UX Enhancement for destructive actions
      */
     deleteSelectedEntities() {
-        const toDelete = this.selectedEntities.filter(e => e.team === 'player' && !e.isDead);
+        // BOLT OPTIMIZATION: Removed Array.prototype.filter and .some in favor of manual loops
+        const toDelete = [];
+        const selLen = this.selectedEntities.length;
+        let hasEnemy = false;
+
+        for (let i = 0; i < selLen; i++) {
+            const e = this.selectedEntities[i];
+            if (e.team === 'player' && !e.isDead) {
+                toDelete.push(e);
+            } else if (e.team !== 'player') {
+                hasEnemy = true;
+            }
+        }
 
         if (toDelete.length === 0) {
             // Si hay selección pero no es propia
-            if (this.selectedEntities.length > 0 && this.selectedEntities.some(e => e.team !== 'player')) {
+            if (selLen > 0 && hasEnemy) {
                 this.showNotification('No puedes destruir unidades enemigas', 'error');
             }
             return;
@@ -1567,17 +1587,28 @@ export class Game {
 
         // B - Build menu
         if (e.key === 'b' || e.key === 'B') {
-            if (this.selectedEntities.length === 1 &&
+            const selLen = this.selectedEntities.length;
+            if (selLen === 1 &&
                 this.selectedEntities[0].type === 'villager') {
                 this.openBuildMenu();
             } else {
                 // Palette: Feedback for invalid action
-                if (this.selectedEntities.length === 0) {
+                if (selLen === 0) {
                     this.showNotification('Selecciona un aldeano para construir', 'error');
-                } else if (this.selectedEntities.some(e => e.type !== 'villager')) {
-                    this.showNotification('Solo los aldeanos pueden construir', 'error');
                 } else {
-                    this.showNotification('Selecciona un solo aldeano para construir', 'error');
+                    // BOLT OPTIMIZATION: Replace .some with loop
+                    let hasNonVillager = false;
+                    for (let i = 0; i < selLen; i++) {
+                        if (this.selectedEntities[i].type !== 'villager') {
+                            hasNonVillager = true;
+                            break;
+                        }
+                    }
+                    if (hasNonVillager) {
+                        this.showNotification('Solo los aldeanos pueden construir', 'error');
+                    } else {
+                        this.showNotification('Selecciona un solo aldeano para construir', 'error');
+                    }
                 }
                 if (typeof soundManager !== 'undefined') soundManager.play('error');
             }
@@ -1681,7 +1712,14 @@ export class Game {
 
         // F - Ciclar formaciones (solo con unidades seleccionadas)
         if (e.key === 'f' || e.key === 'F') {
-            const selectedUnits = this.selectedEntities.filter(e => e.isUnit);
+            // BOLT OPTIMIZATION: Replace .filter with loop
+            const selectedUnits = [];
+            const selLen = this.selectedEntities.length;
+            for (let i = 0; i < selLen; i++) {
+                const e = this.selectedEntities[i];
+                if (e.isUnit) selectedUnits.push(e);
+            }
+
             if (selectedUnits.length > 1 && typeof formationManager !== 'undefined') {
                 const formation = formationManager.cycleFormation();
 
@@ -4746,7 +4784,14 @@ export class Game {
                 btn.onclick = (e) => {
                     e.stopPropagation();
                     // Filter selection
-                    this.selectedEntities = this.selectedEntities.filter(ent => ent.type === type);
+                    // BOLT OPTIMIZATION: Replace .filter with loop
+                    const newSelection = [];
+                    const selLen = this.selectedEntities.length;
+                    for (let i = 0; i < selLen; i++) {
+                        const ent = this.selectedEntities[i];
+                        if (ent.type === type) newSelection.push(ent);
+                    }
+                    this.selectedEntities = newSelection;
                     // Refresh
                     this.updateSelectionPanel();
                     this.updateActionsPanel();

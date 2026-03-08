@@ -997,9 +997,13 @@ function startGame(civId, mapConfig, loadedState = null) {
         gameLoopId = null;
     }
 
-    // Iniciar música
+    // Iniciar música y ambiente
     if (typeof soundManager !== 'undefined') {
         soundManager.startMusic();
+        if (typeof soundManager.startAmbient === 'function') {
+            const biome = mapConfig && mapConfig.biome ? mapConfig.biome : 'grassland';
+            soundManager.startAmbient(biome);
+        }
     }
 
     // Crear instancia del juego

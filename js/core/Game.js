@@ -118,6 +118,11 @@ export class Game {
     constructor(civId = 'romans', mapConfig = null) {
         this.civilizationId = civId;
         this.civilization = civilizationManager.getCivilization(civId);
+
+        // Aplicar tema visual de civilización al body
+        if (this.civilizationId) {
+            document.body.className = `theme-${this.civilizationId}`;
+        }
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.minimap = document.getElementById('minimapCanvas');
@@ -2501,6 +2506,23 @@ export class Game {
             this.updateUI();
             this.lastUITime = now;
         }
+
+        // Sonidos Ambientales (cada 5 segundos aprox)
+        if (typeof soundManager !== 'undefined') {
+            if (!this._ambientTimer) this._ambientTimer = 0;
+            this._ambientTimer += deltaTime;
+            if (this._ambientTimer > 5) {
+                this._ambientTimer = 0;
+                if (this.terrainMap) {
+                    const centerX = this.camera.x + this.viewWidth / 2;
+                    const centerY = this.camera.y + this.viewHeight / 2;
+                    const centerTerrain = this.terrainMap.getTerrainDataAt(centerX, centerY);
+                    if (centerTerrain && centerTerrain.name) {
+                        soundManager.playBiomeAmbient(centerTerrain.name);
+                    }
+                }
+            }
+        }
     }
 
     updateCursorState() {
@@ -2573,12 +2595,20 @@ export class Game {
             }
         }
 
+        const cursorImg = this.cursorElement.querySelector('img:not(.cursor-badge)');
+
         if (showBadge) {
-            if (this.cursorBadge.src !== badgeIcon && !this.cursorBadge.src.endsWith(badgeIcon)) {
-                this.cursorBadge.src = badgeIcon;
+            // Reemplazamos el cursor principal en lugar del badge para mejor feedback
+            if (cursorImg && cursorImg.src !== badgeIcon && !cursorImg.src.endsWith(badgeIcon)) {
+                cursorImg.src = badgeIcon;
             }
-            this.cursorBadge.style.display = 'block';
+            this.cursorBadge.style.display = 'none'; // Ocultar badge
         } else {
+            // Restaurar cursor original
+            const defaultCursor = 'assets/icons/cursor.png';
+            if (cursorImg && cursorImg.src !== defaultCursor && !cursorImg.src.endsWith(defaultCursor)) {
+                cursorImg.src = defaultCursor;
+            }
             this.cursorBadge.style.display = 'none';
         }
     }

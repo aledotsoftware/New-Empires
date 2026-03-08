@@ -322,6 +322,12 @@ export class Unit extends Entity {
 
             target.takeDamage(damage);
 
+            if (typeof soundManager !== 'undefined') {
+                soundManager.playAttack();
+                // Play hit sound with slight delay
+                setTimeout(() => soundManager.playHit(), 100);
+            }
+
             // Palette: Notify if player is under attack
             if (target.team === 'player' && game && game.notifyUnderAttack) {
                 game.notifyUnderAttack(target);
@@ -357,6 +363,11 @@ export class Unit extends Entity {
 
             node.amount -= actualGather;
             game.resources[node.type] += actualGather;
+
+            // Sonido de recolección ocasional para feedback
+            if (Math.random() < 0.1 && typeof soundManager !== 'undefined') {
+                soundManager.playGather();
+            }
 
             // BOLT OPTIMIZATION: Notify game if resource depleted to update minimap cache
             if (node.amount <= 0 && game.notifyResourceDepleted) {

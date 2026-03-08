@@ -44,6 +44,147 @@ class SoundManager {
         this.pools = new Map(); // BOLT OPTIMIZATION: Store pools here
         this.enabled = true;
         this.volume = 0.5; // Volumen por defecto (0.0 a 1.0)
+
+        this.audioContext = null;
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.warn('Web Audio API no soportada');
+        }
+    }
+
+    // --- Paisajismo Sonoro ---
+    playBiomeAmbient(biomeName) {
+        if (!this.enabled || !this.audioContext) return;
+
+        const now = this.audioContext.currentTime;
+
+        // Evita superposición excesiva si se llama muy seguido
+        if (this._lastAmbientTime && now - this._lastAmbientTime < 5) return;
+        this._lastAmbientTime = now;
+
+        const gainNode = this.audioContext.createGain();
+        gainNode.connect(this.audioContext.destination);
+
+        if (biomeName === 'Bosque') {
+            // Sintetizar cantos de pájaros (alta frecuencia, corta duración)
+            const oscillator = this.audioContext.createOscillator();
+            oscillator.connect(gainNode);
+            oscillator.type = 'sine';
+
+            // Variación de tono para imitar un pájaro
+            oscillator.frequency.setValueAtTime(4000, now);
+            oscillator.frequency.exponentialRampToValueAtTime(6000, now + 0.1);
+            oscillator.frequency.exponentialRampToValueAtTime(4000, now + 0.2);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.1, now + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+
+            oscillator.start(now);
+            oscillator.stop(now + 0.2);
+
+        } else if (biomeName === 'Desierto') {
+            // Sintetizar viento (ruido blanco + filtro paso bajo)
+            const bufferSize = this.audioContext.sampleRate * 2; // 2 segundos
+            const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseSource = this.audioContext.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            // Variar la frecuencia del filtro para simular ráfagas de viento
+            filter.frequency.setValueAtTime(100, now);
+            filter.frequency.linearRampToValueAtTime(400, now + 1);
+            filter.frequency.linearRampToValueAtTime(100, now + 2);
+
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.05, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+
+            noiseSource.start(now);
+        } else if (biomeName === 'Agua') {
+            // Sonido de olas suaves
+            const oscillator = this.audioContext.createOscillator();
+            oscillator.connect(gainNode);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(150, now);
+            oscillator.frequency.linearRampToValueAtTime(100, now + 1.5);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.05, now + 0.7);
+            gainNode.gain.linearRampToValueAtTime(0, now + 1.5);
+
+            oscillator.start(now);
+            oscillator.stop(now + 1.5);
+        }
+    }
+
+    // --- Sonidos Sintetizados (Acciones Rápidas) ---
+    playAttack() {
+        if (!this.enabled) return;
+        this.playTone(150, 0.08, 'sawtooth', 0.2);
+    }
+
+    playHit() {
+        if (!this.enabled) return;
+        this.playTone(100, 0.06, 'triangle', 0.15);
+    }
+
+    playExplosion() {
+        if (!this.enabled) return;
+        if (!this.audioContext) return;
+        const now = this.audioContext.currentTime;
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(200, now);
+        oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.3);
+
+        const startVol = Math.max(0.01, this.volume * 0.3);
+        gainNode.gain.setValueAtTime(startVol, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+        oscillator.start(now);
+        oscillator.stop(now + 0.3);
+    }
+
+    playGather() {
+        if (!this.enabled) return;
+        this.playTone(600, 0.05, 'sine', 0.08);
+    }
+
+    playTone(frequency, duration, type = 'sine', vol = 0.1) {
+        if (!this.audioContext) return;
+
+        const now = this.audioContext.currentTime;
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
+
+        const startVol = Math.max(0.01, this.volume * vol);
+        gainNode.gain.setValueAtTime(startVol, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+        oscillator.start(now);
+        oscillator.stop(now + duration);
     }
 
     /**

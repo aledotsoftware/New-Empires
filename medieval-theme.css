@@ -82,6 +82,12 @@
     --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
     --shadow-gold: 0 0 20px rgba(201, 162, 39, 0.3);
 
+    /* === THEME DYNAMICS === */
+    --civ-theme-primary: var(--gold);
+    --civ-theme-primary-dark: var(--gold-dark);
+    --civ-theme-primary-light: var(--gold-light);
+    --civ-theme-accent: rgba(201, 162, 39, 0.3);
+
     /* === Z-INDEX === */
     --z-base: 1;
     --z-hud: 100;
@@ -181,11 +187,40 @@ body,
 
 /* Marco dorado decorativo */
 .frame-gold {
-    border: var(--border-medium) solid var(--gold);
+    border: var(--border-medium) solid var(--civ-theme-primary);
     box-shadow:
-        0 0 0 1px var(--gold-dark),
-        var(--shadow-gold),
+        0 0 0 1px var(--civ-theme-primary-dark),
+        0 0 20px var(--civ-theme-accent),
         var(--shadow-medium);
+}
+
+/* === TEMAS POR CIVILIZACIÓN === */
+body.theme-romans {
+    --civ-theme-primary: #8b1a1a;
+    --civ-theme-primary-dark: #5c1111;
+    --civ-theme-primary-light: #b32d2d;
+    --civ-theme-accent: rgba(139, 26, 26, 0.3);
+}
+
+body.theme-vikings {
+    --civ-theme-primary: #1a3a5c;
+    --civ-theme-primary-dark: #11263d;
+    --civ-theme-primary-light: #2a5a8c;
+    --civ-theme-accent: rgba(26, 58, 92, 0.3);
+}
+
+body.theme-mongols {
+    --civ-theme-primary: #2d4a2d;
+    --civ-theme-primary-dark: #1e311e;
+    --civ-theme-primary-light: #3d6a3d;
+    --civ-theme-accent: rgba(45, 74, 45, 0.3);
+}
+
+body.theme-sumeria {
+    --civ-theme-primary: #cd7f32;
+    --civ-theme-primary-dark: #8b5622;
+    --civ-theme-primary-light: #df9e5c;
+    --civ-theme-accent: rgba(205, 127, 50, 0.3);
 }
 
 /* Esquinas decorativas */
@@ -332,13 +367,13 @@ body,
     text-transform: uppercase;
     letter-spacing: 0.1em;
 
-    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    background: linear-gradient(180deg, var(--civ-theme-primary-light) 0%, var(--civ-theme-primary) 50%, var(--civ-theme-primary-dark) 100%);
     border: none;
     border-radius: var(--radius-medium);
     cursor: pointer;
 
     box-shadow:
-        0 4px 0 var(--gold-dark),
+        0 4px 0 var(--civ-theme-primary-dark),
         0 6px 20px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 
@@ -349,15 +384,15 @@ body,
 .btn-start:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 6px 0 var(--gold-dark),
-        0 10px 30px rgba(201, 162, 39, 0.4),
+        0 6px 0 var(--civ-theme-primary-dark),
+        0 10px 30px var(--civ-theme-accent),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-start:active {
     transform: translateY(2px);
     box-shadow:
-        0 2px 0 var(--gold-dark),
+        0 2px 0 var(--civ-theme-primary-dark),
         0 4px 10px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
@@ -390,12 +425,12 @@ body,
     font-family: var(--font-title);
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--gold);
+    color: var(--civ-theme-primary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 
     background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
-    border: 2px solid var(--gold-dark);
+    border: 2px solid var(--civ-theme-primary-dark);
     border-radius: var(--radius-small);
     cursor: pointer;
 
@@ -408,10 +443,10 @@ body,
 
 .btn-secondary:hover {
     background: linear-gradient(180deg, var(--stone-light) 0%, var(--stone-medium) 100%);
-    border-color: var(--gold);
-    color: var(--gold-light);
+    border-color: var(--civ-theme-primary);
+    color: var(--civ-theme-primary-light);
     box-shadow:
-        0 4px 12px rgba(201, 162, 39, 0.2),
+        0 4px 12px var(--civ-theme-accent),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 

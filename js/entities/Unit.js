@@ -344,7 +344,13 @@ export class Unit extends Entity {
                 if (target.isUnit && !target.isBuilding) {
                     game.particleSystem.createBloodSplatter(target.x, target.y, 5);
                 } else if (target.isBuilding) {
-                    game.particleSystem.createConstructionEffect(target.x, target.y);
+                    const severity = 1 - (target.hp / target.maxHp);
+                    game.particleSystem.createBuildingDamageEffect(target.x, target.y, severity);
+                }
+
+                // Projectile Trail for ranged units
+                if (this.type === 'archer') {
+                    game.particleSystem.createProjectileTrail(this.x, this.y, target.x, target.y, '#ffffff');
                 }
             }
         }
@@ -364,9 +370,14 @@ export class Unit extends Entity {
             node.amount -= actualGather;
             game.resources[node.type] += actualGather;
 
-            // Sonido de recolección ocasional para feedback
-            if (Math.random() < 0.1 && typeof soundManager !== 'undefined') {
-                soundManager.playGather();
+            // Feedback ocasional de recolección (sonido y partículas especiales)
+            if (Math.random() < 0.1) {
+                if (typeof soundManager !== 'undefined') {
+                    soundManager.playGather();
+                }
+                if (node.type === 'gold' && game && game.particleSystem) {
+                    game.particleSystem.createGoldSparkle(node.x, node.y);
+                }
             }
 
             // BOLT OPTIMIZATION: Notify game if resource depleted to update minimap cache

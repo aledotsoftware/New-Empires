@@ -264,17 +264,52 @@ class ParticleSystem {
     }
 
     // Estelas de proyectiles dinámicas
-    createProjectileTrail(x, y, color = '#ffffff') {
+    createProjectileTrail(x, y, targetX, targetY, color = '#ffffff') {
+        const dx = targetX - x;
+        const dy = targetY - y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Calcular la velocidad hacia el objetivo
+        let vx = (Math.random() - 0.5) * 10;
+        let vy = (Math.random() - 0.5) * 10;
+
+        if (dist > 0) {
+            // Un proyectil rápido (ej. 400px/s)
+            const speed = 400;
+            vx = (dx / dist) * speed + (Math.random() - 0.5) * 20;
+            vy = (dy / dist) * speed + (Math.random() - 0.5) * 20;
+        }
+
         this.particles.push(Particle.get(x, y, {
-            vx: (Math.random() - 0.5) * 10,
-            vy: (Math.random() - 0.5) * 10,
-            life: Math.random() * 0.3 + 0.1, // Vida muy corta
-            size: Math.random() * 2 + 1, // Partículas pequeñas
+            vx: vx,
+            vy: vy,
+            life: 0.2 + Math.random() * 0.1, // Vida muy corta, ajustada a la distancia
+            size: Math.random() * 3 + 2, // Partículas un poco más grandes para que se vean
             color: color,
             gravity: 0,
-            friction: 0.9,
+            friction: 1.0, // Sin fricción para mantener la velocidad
             fadeRate: 2.0 // Desaparecen rápido
         }));
+    }
+
+    // Efecto de destello de mina de oro
+    createGoldSparkle(x, y) {
+        for (let i = 0; i < 3; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 20 + 10;
+            // BOLT OPTIMIZATION: Use Object Pool
+            this.particles.push(Particle.get(x, y, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 10,
+                life: Math.random() * 0.4 + 0.2,
+                size: Math.random() * 4 + 2,
+                color: '#fffacd', // LemonChiffon (amarillo/blanco brillante)
+                gravity: 0,
+                friction: 0.95,
+                shape: Math.random() > 0.5 ? 'circle' : 'square',
+                fadeRate: 1.5
+            }));
+        }
     }
 
     // Efecto de sangre/impacto

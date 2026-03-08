@@ -217,6 +217,66 @@ class ParticleSystem {
         }
     }
 
+    // Efecto de daño en edificios (humo y fuego)
+    createBuildingDamageEffect(x, y, severity) {
+        // severity: 0 a 1 (0 es apenas dañado, 1 es destruido)
+        const count = Math.floor(severity * 5) + 1; // Más daño = más partículas
+
+        for (let i = 0; i < count; i++) {
+            const isFire = Math.random() < severity * 0.7; // Más daño = más fuego vs humo
+            const angle = (Math.random() - 0.5) * Math.PI; // Mayormente hacia arriba
+            const speed = Math.random() * 40 + 10;
+
+            // Variación de colores
+            const smokeColors = ['#555555', '#777777', '#333333'];
+            const fireColors = ['#ff6b6b', '#ff9f43', '#feca57'];
+            const color = isFire ? fireColors[Math.floor(Math.random() * fireColors.length)] : smokeColors[Math.floor(Math.random() * smokeColors.length)];
+            const size = isFire ? Math.random() * 4 + 2 : Math.random() * 8 + 4;
+
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 20, // Tendencia a subir
+                life: Math.random() * 1.5 + 0.5,
+                size: size,
+                color: color,
+                gravity: -10, // Sube como humo
+                friction: 0.95,
+                fadeRate: 1.2,
+                shape: isFire ? 'circle' : 'square' // Humo cuadrado, fuego redondo
+            }));
+        }
+
+        // Escombros si el daño es muy severo (cayendo)
+        if (severity > 0.8 && Math.random() < 0.3) {
+            for (let i = 0; i < 3; i++) {
+                this.particles.push(Particle.get(x, y, {
+                    vx: (Math.random() - 0.5) * 100,
+                    vy: (Math.random() - 0.5) * 50 - 50,
+                    life: Math.random() * 0.8 + 0.2,
+                    size: Math.random() * 6 + 3,
+                    color: '#8b6914', // Color piedra/madera oscuro
+                    gravity: 150, // Caen rápido
+                    friction: 0.98,
+                    shape: 'square'
+                }));
+            }
+        }
+    }
+
+    // Estelas de proyectiles dinámicas
+    createProjectileTrail(x, y, color = '#ffffff') {
+        this.particles.push(Particle.get(x, y, {
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            life: Math.random() * 0.3 + 0.1, // Vida muy corta
+            size: Math.random() * 2 + 1, // Partículas pequeñas
+            color: color,
+            gravity: 0,
+            friction: 0.9,
+            fadeRate: 2.0 // Desaparecen rápido
+        }));
+    }
+
     // Efecto de sangre/impacto
     createBloodSplatter(x, y, count = 15) {
         for (let i = 0; i < count; i++) {

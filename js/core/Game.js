@@ -1402,6 +1402,10 @@ export class Game {
                 this.particleSystem.createMoveRipple(this.mouse.worldX, this.mouse.worldY);
             }
         }
+
+        if ((moveCommandTriggered || attackCommandTriggered || gatherCommandTriggered || buildCommandTriggered || rallyPointTriggered) && typeof soundManager !== 'undefined') {
+            soundManager.play('click');
+        }
     }
 
     /**
@@ -4381,11 +4385,11 @@ export class Game {
             // Text
             const textDiv = document.createElement('div');
             textDiv.className = 'selection-empty-title';
-            textDiv.textContent = 'Listo para órdenes';
+            textDiv.textContent = 'Aguardando tus designios';
 
             const subTextDiv = document.createElement('div');
             subTextDiv.className = 'selection-empty-subtitle';
-            subTextDiv.textContent = 'Selecciona una unidad o edificio';
+            subTextDiv.textContent = 'Selecciona tus súbditos o estructuras';
 
             // Gameplay Tip (Palette enhancement)
             const tipDiv = document.createElement('div');

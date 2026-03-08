@@ -76,6 +76,9 @@ export class Villager extends Unit {
                         const amount = Math.min(rate, this.currentResourceNode.amount, this.maxCarry - this.carryAmount);
 
                         this.currentResourceNode.amount -= amount;
+                        if (game && game.particleSystem) {
+                            game.particleSystem.createResourceEffect(this.currentResourceNode.x, this.currentResourceNode.y, this.currentResourceNode.type);
+                        }
                         this.carryAmount += amount;
                         this.carryType = this.currentResourceNode.type;
                         if (this.carryAmount >= this.maxCarry) this.findDropOffAndGo(game);
@@ -111,7 +114,7 @@ export class Villager extends Unit {
                         game.particleSystem.createFloatingText(this.x, this.y - 20, `+${amount} ${icon}`, color);
                     }
 
-                    console.log(`💰 Depositado: ${Math.floor(this.carryAmount)} ${this.carryType}`);
+                    console.log(`💰 Entregado a las arcas: ${Math.floor(this.carryAmount)} ${this.carryType}`);
                     this.carryAmount = 0;
                     this.carryType = null;
                     if (this.currentResourceNode && this.currentResourceNode.amount > 0) {

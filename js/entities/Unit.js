@@ -337,6 +337,8 @@ export class Unit extends Entity {
                 // Blood Splatter (only for organic units)
                 if (target.isUnit && !target.isBuilding) {
                     game.particleSystem.createBloodSplatter(target.x, target.y, 5);
+                } else if (target.isBuilding) {
+                    game.particleSystem.createConstructionEffect(target.x, target.y);
                 }
             }
         }

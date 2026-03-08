@@ -192,3 +192,50 @@ Este proyecto está bajo la Licencia MIT - ver [LICENSE](LICENSE) para más deta
 [📖 Documentación](docs/INDEX.md) · [🐛 Reportar Bug](https://github.com/tu-usuario/New-Empires/issues) · [✨ Solicitar Feature](https://github.com/tu-usuario/New-Empires/issues)
 
 </div>
+
+
+
+🏰 Reporte de Estado Técnico: New Empires
+1. Resumen Ejecutivo
+New Empires es un motor de juego de estrategia en tiempo real (RTS) inspirado en clásicos como Age of Empires. Está desarrollado íntegramente con tecnologías web modernas utilizando un enfoque "Vanilla" (sin dependencias externas), lo que garantiza un rendimiento ligero y una alta compatibilidad.
+
+Versión Actual: v1.1+.
+Estado: Funcional y jugable, con sistemas de núcleo (core) maduros y optimizados.
+Tecnologías: HTML5 Canvas (Renderizado 2D), JavaScript ES6 (Módulos), CSS3 (Modern UI).
+2. Arquitectura del Sistema
+El proyecto sigue un diseño modular y orientado a objetos, organizado para facilitar el escalado y la mantenibilidad.
+
+🧱 Componentes Core (/js/core)
+Game.js: Es la orquesta principal. Gestiona el bucle de juego, la cámara RTS, la selección de unidades y la integración de todos los subsistemas (Rendering, Input, Física).
+Optimización "Bolt": Se han implementado optimizaciones críticas como el uso de Uint32Array para la manipulación de píxeles en la Niebla de Guerra (FOW) y buffers de canvas fuera de pantalla para terrenos y minimapas.
+🗺️ Sistema de Mapas (/js/map)
+Generación Procedural: Utiliza un sistema basado en semillas (seed) para crear mapas únicos con diversos biomas (pastizales, desiertos, bosques).
+Grillas Espaciales (SpatialGrid): Implementa particionamiento espacial para optimizar la búsqueda de colisiones y selección, evitando iterar sobre miles de entidades cada frame.
+👥 Entidades y Unidades (/js/entities)
+Gestión de IA: Las unidades poseen estados definidos (recolección, combate, patrulla) con lógica de búsqueda de caminos (pathfinding).
+Civilizaciones: 12 civilizaciones con bonificaciones específicas (ej. Sumeria: mejor economía; Mongoles: caballería veloz).
+3. Funcionalidades Implementadas
+Sistema	Estado	Detalles Técnicos
+Economía	✅ Completo	4 recursos (Madera, Comida, Oro, Piedra), recolección y entrega en depósitos.
+Combate	✅ Completo	IA automática de ataque, tipos de daño y alcances diferenciados (Warriors vs Archers).
+Tecnología	✅ Completo	Árbol de 30 edades con 7 categorías de investigación.
+Persistencia	✅ Completo	Sistema de Guardado/Carga (LocalStorage y descarga de archivos JSON).
+UX/UI	✅ Avanzado	Formaciones de unidades (7 tipos), grupos de control (Ctrl+1-9) y cursor contextual.
+4. Análisis de Rendimiento (Optimización)
+Se observa un esfuerzo significativo en mantener el juego fluido incluso en mapas de tamaño "Ludicrous" (255x255 tiles):
+
+Culling: El motor solo renderiza lo que está dentro del radio de visión de la cámara.
+FOW Buffering: El cálculo de la visión se realiza en una grilla de baja resolución y se escala, ahorrando ciclos de CPU.
+Static Resource Grid: Los recursos (árboles, minas) se almacenan en una grilla estática separada de las unidades móviles para búsquedas ultra rápidas.
+5. Roadmap y Próximos Pasos
+Basado en los archivos README.md y el estado del código:
+
+En Desarrollo (v1.2): Mejora de la IA del enemigo (actualmente básica), más civilizaciones y un tutorial interactivo.
+Futuro (v2.0): Integración de Multijugador mediante WebSockets y un editor de mapas integrado.
+6. Conclusión Técnica
+El código está altamente optimizado y bien documentado. La transición a módulos ES6 está completa en su mayoría, aunque persisten algunas variables globales para compatibilidad con scripts antiguos (como el cargador de datos). Estructuralmente, es un proyecto sólido preparado para recibir contenido adicional o incluso una capa multijugador.
+
+TIP
+
+Recomendación: Para el próximo sprint, se sugiere terminar de extraer los últimos scripts globales (technologies.js, mapGenerator.js) a módulos ES6 puros para asegurar una arquitectura 100% moderna.
+

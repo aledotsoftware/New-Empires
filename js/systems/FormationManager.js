@@ -159,6 +159,29 @@ export const FORMATIONS = {
     },
 
     /**
+     * Formación en escala/echelon (ataque/defensa en diagonal)
+     * @param {Array} units - Unidades a posicionar
+     * @param {Object} center - Centro de la formación {x, y}
+     * @param {number} spacing - Espacio entre unidades (px)
+     * @returns {Array} Posiciones [{x, y}, ...]
+     */
+    echelon: (units, center, spacing = 40) => {
+        const positions = [];
+        const count = units.length;
+
+        // Centrar la diagonal (que tiene tamaño de count * spacing)
+        const offset = ((count - 1) * spacing) / 2;
+
+        for (let i = 0; i < count; i++) {
+            positions.push({
+                x: center.x - offset + i * spacing,
+                y: center.y - offset + i * spacing
+            });
+        }
+        return positions;
+    },
+
+    /**
      * Formación dispersa/irregular (para evitar ataques de área)
      * @param {Array} units - Unidades a posicionar
      * @param {Object} center - Centro de la formación {x, y}

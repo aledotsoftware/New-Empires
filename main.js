@@ -1,3 +1,10 @@
+import { saveManager } from './js/managers/SaveManager.js';
+import { dataLoader } from './js/managers/DataLoader.js';
+import { civilizationManager } from './js/managers/CivilizationManager.js';
+import { TechManager, TECHNOLOGIES } from './js/systems/TechManager.js';
+import { ProceduralMapGenerator } from './js/map/ProceduralMapGenerator.js';
+import { soundManager } from './js/managers/SoundManager.js';
+import { ParticleSystem } from './js/systems/EffectsManager.js';
 /**
  * main.js - Punto de entrada principal del juego
  * Este archivo coordina la carga de todos los módulos ES6 y expone
@@ -1759,82 +1766,9 @@ const initApp = async () => {
 
     // Inicializar dataLoader y cargar civilizaciones
     try {
-        if (typeof dataLoader !== 'undefined') {
-            debugLogger.info('Inicializando dataLoader...', 'data');
-            await dataLoader.initialize();
-
-            // Crear civilizationManager compatibility layer
-            window.civilizationManager = {
-                getCivilization: (civilizationId) => dataLoader.getCivilizationData(civilizationId),
-                getStartingResources: (civilizationId) => {
-                    const civ = dataLoader.getCivilizationData(civilizationId);
-                    return civ?.startingResources || {};
-                },
-                applyBuildingBonuses: (building, civilizationId) => {
-                    // Por ahora no hace nada, se implementará más adelante
-                    return building;
-                },
-                applyUnitBonuses: (unit, civilizationId) => {
-                    const civ = dataLoader.getCivilizationData(civilizationId);
-                    if (civ && civ.bonuses) {
-                        // Aplicar bonificaciones si existen
-                        if (civ.bonuses.unitSpeed) {
-                            unit.speed = (unit.speed || 100) * civ.bonuses.unitSpeed;
-                        }
-                    }
-                    return unit;
-                },
-                getTeamColor: (civilizationId, team) => {
-                    const civ = dataLoader.getCivilizationData(civilizationId);
-                    return civ?.color || '#4169E1';
-                },
-                getBuildSpeed: (civilizationId) => {
-                    const civ = dataLoader.getCivilizationData(civilizationId);
-                    return civ?.bonuses?.buildSpeed || 1;
-                }
-            };
-
-            populateCivilizations();
-        } else {
-            debugLogger.warn('dataLoader no disponible, reintentando...', 'data');
-            // Fallback: Si dataLoader aún no está cargado, esperar un poco
-            setTimeout(async () => {
-                if (typeof dataLoader !== 'undefined') {
-                    await dataLoader.initialize();
-
-                    // Crear civilizationManager compatibility layer
-                    window.civilizationManager = {
-                        getCivilization: (civilizationId) => dataLoader.getCivilizationData(civilizationId),
-                        getStartingResources: (civilizationId) => {
-                            const civ = dataLoader.getCivilizationData(civilizationId);
-                            return civ?.startingResources || {};
-                        },
-                        applyBuildingBonuses: (building, civilizationId) => building,
-                        applyUnitBonuses: (unit, civilizationId) => {
-                            const civ = dataLoader.getCivilizationData(civilizationId);
-                            if (civ && civ.bonuses) {
-                                if (civ.bonuses.unitSpeed) {
-                                    unit.speed = (unit.speed || 100) * civ.bonuses.unitSpeed;
-                                }
-                            }
-                            return unit;
-                        },
-                        getTeamColor: (civilizationId) => {
-                            const civ = dataLoader.getCivilizationData(civilizationId);
-                            return civ?.color || '#4169E1';
-                        },
-                        getBuildSpeed: (civilizationId) => {
-                            const civ = dataLoader.getCivilizationData(civilizationId);
-                            return civ?.bonuses?.buildSpeed || 1;
-                        }
-                    };
-
-                    populateCivilizations();
-                } else {
-                    debugLogger.error('dataLoader no se pudo cargar', 'data');
-                }
-            }, 200);
-        }
+        debugLogger.info('Inicializando dataLoader...', 'data');
+        await dataLoader.initialize();
+        populateCivilizations();
     } catch (error) {
         debugLogger.error('Error inicializando dataLoader', 'data', error);
     }

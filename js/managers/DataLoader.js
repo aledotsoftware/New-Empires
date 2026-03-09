@@ -1,8 +1,9 @@
+import { debugLogger } from "../utils/DebugLogger.js";
 // ==========================================
 // DATA LOADER - Sistema de Carga de JSON Optimizado
 // ==========================================
 
-class DataLoader {
+export class DataLoader {
     constructor() {
         this.baseData = {
             technologies: null,
@@ -323,4 +324,4 @@ class DataLoader {
 }
 
 // Instancia global del loader
-const dataLoader = new DataLoader();
+export const dataLoader = new DataLoader();

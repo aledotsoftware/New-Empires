@@ -1,10 +1,11 @@
+import { debugLogger } from "../utils/DebugLogger.js";
 // ==========================================
 // SOUND MANAGER - Sistema de gestión de sonidos
 // ==========================================
 
 // BOLT OPTIMIZATION: Object Pool for Audio elements
 // Reduces GC pressure and CPU usage by reusing Audio objects instead of cloning them every time.
-class SoundPool {
+export class SoundPool {
     constructor(original, size = 5) {
         this.original = original;
         this.pool = [];
@@ -38,7 +39,7 @@ class SoundPool {
     }
 }
 
-class SoundManager {
+export class SoundManager {
     constructor() {
         this.sounds = {};
         this.pools = new Map(); // BOLT OPTIMIZATION: Store pools here
@@ -419,4 +420,4 @@ class SoundManager {
 }
 
 // Instancia global del SoundManager
-window.soundManager = new SoundManager();
+export const soundManager = new SoundManager();

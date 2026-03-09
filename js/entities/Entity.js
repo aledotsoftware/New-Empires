@@ -1,3 +1,4 @@
+import { civilizationManager } from '../managers/CivilizationManager.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 
 /**

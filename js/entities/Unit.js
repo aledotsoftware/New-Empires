@@ -1,3 +1,4 @@
+import { soundManager } from '../managers/SoundManager.js';
 import { Entity } from './Entity.js';
 import { CONFIG } from '../core/constants.js';
 

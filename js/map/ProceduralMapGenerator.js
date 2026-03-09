@@ -7,7 +7,7 @@
  * Generador de números pseudoaleatorios basado en semilla (Mulberry32)
  * Garantiza reproducibilidad con la misma semilla
  */
-class SeededRandom {
+export class SeededRandom {
     constructor(seed) {
         this.seed = seed;
         this.state = seed;
@@ -36,7 +36,7 @@ class SeededRandom {
 /**
  * Generador de ruido Perlin simplificado para terrenos naturales
  */
-class PerlinNoise {
+export class PerlinNoise {
     constructor(seed) {
         this.rng = new SeededRandom(seed);
         this.permutation = [];
@@ -111,7 +111,7 @@ class PerlinNoise {
 /**
  * Generador de Mapas Procedural tipo Age of Empires
  */
-class ProceduralMapGenerator {
+export class ProceduralMapGenerator {
     constructor(config) {
         this.seed = config.seed || Date.now();
         this.width = config.width || 200;

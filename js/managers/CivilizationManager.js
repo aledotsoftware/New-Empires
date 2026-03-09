@@ -1,9 +1,10 @@
+import { dataLoader } from './DataLoader.js';
 /**
  * CivilizationManager - Gestor de civilizaciones
  * Proporciona acceso a datos de civilización y aplica bonificaciones
  */
 
-class CivilizationManager {
+export class CivilizationManager {
     getAllCivilizations() {
         if (typeof dataLoader !== 'undefined') {
             return dataLoader.getAllCivilizations();
@@ -76,4 +77,4 @@ class CivilizationManager {
 }
 
 // Instancia global para compatibilidad con código existente
-const civilizationManager = new CivilizationManager();
+export const civilizationManager = new CivilizationManager();

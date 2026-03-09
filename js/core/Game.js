@@ -1,3 +1,10 @@
+import { formationManager } from '../systems/FormationManager.js';
+import { debugLogger } from '../utils/DebugLogger.js';
+import { civilizationManager } from '../managers/CivilizationManager.js';
+import { TechManager } from '../systems/TechManager.js';
+import { ProceduralMapGenerator } from '../map/ProceduralMapGenerator.js';
+import { soundManager } from '../managers/SoundManager.js';
+import { ParticleSystem } from '../systems/EffectsManager.js';
 // Imports de módulos creados
 import { CONFIG, TILE_SIZE, TERRAIN_TYPES, GAMEPLAY_TIPS, FOW_STATES } from './constants.js';
 import { FogOfWar } from '../map/FogOfWar.js';

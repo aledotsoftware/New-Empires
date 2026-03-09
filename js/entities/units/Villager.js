@@ -1,3 +1,5 @@
+import { civilizationManager } from '../../managers/CivilizationManager.js';
+import { soundManager } from '../../managers/SoundManager.js';
 import { Unit } from '../Unit.js';
 import { CONFIG } from '../../core/constants.js';
 import { assetLoader } from '../../managers/AssetLoader.js';

@@ -2,7 +2,7 @@
 // SISTEMA DE PARTÍCULAS Y EFECTOS VISUALES
 // ==========================================
 
-class Particle {
+export class Particle {
     // BOLT OPTIMIZATION: Object Pool to reduce GC pressure
     static pool = [];
 
@@ -127,7 +127,7 @@ class Particle {
     }
 }
 
-class Ripple {
+export class Ripple {
     constructor(x, y, color = '#48bb78') {
         this.x = x;
         this.y = y;
@@ -176,7 +176,7 @@ class Ripple {
     }
 }
 
-class ParticleSystem {
+export class ParticleSystem {
     constructor() {
         this.particles = [];
         this.projectiles = [];
@@ -535,7 +535,7 @@ class ParticleSystem {
 // ==========================================
 // SISTEMA DE SONIDO
 // ==========================================
-class SoundSystem {
+export class SoundSystem {
     constructor() {
         this.enabled = true;
         this.volume = 0.3;

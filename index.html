@@ -775,31 +775,6 @@
 
     <!-- Scripts globales que aún no están modularizados -->
     <script>
-        (function () {
-            var v = Date.now();
-            var scripts = [
-                'debugLogger.js',    // Sistema de debug (debe cargarse primero)
-                'effects.js',
-                'dataLoader.js',
-                'civilizationManager.js', // Gestor de civilizaciones (depende de dataLoader)
-                'technologies.js',
-                'mapGenerator.js',
-                'soundManager.js',
-                'js/systems/FormationManager.js',  // Sistema de formaciones
-                'js/managers/SaveManager.js'       // Sistema de guardado
-            ];
-
-            // Cargar scripts secuencialmente para mantener el orden
-            var fragment = document.createDocumentFragment();
-            scripts.forEach(function (src) {
-                var script = document.createElement('script');
-                var separator = src.indexOf('?') > -1 ? '&' : '?';
-                script.src = src + separator + 'v=' + v;
-                script.async = false; // Importante para mantener orden de ejecución
-                fragment.appendChild(script);
-            });
-            document.body.appendChild(fragment);
-        })();
     </script>
 
 

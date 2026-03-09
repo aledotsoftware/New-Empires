@@ -5,6 +5,7 @@ import { FocusManager } from '../utils/FocusManager.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
+import { TerrainDecorManager } from '../map/TerrainDecor.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';
 import { Villager } from '../entities/units/Villager.js';
 import { Warrior } from '../entities/units/Warrior.js';
@@ -233,6 +234,9 @@ export class Game {
 
         // SISTEMA DE TERRENOS
         this.terrainMap = new TerrainMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
+
+        // DECORACIONES DE TERRENO
+        this.terrainDecorManager = new TerrainDecorManager(this);
 
         // SISTEMA DE TECNOLOGÍAS (variable global temporal)
         this.techManager = new TechManager(this);
@@ -757,6 +761,9 @@ export class Game {
 
             // Guardar decoraciones para renderizado futuro
             this.proceduralDecorations = generatedMap.decorations;
+
+            // Generar decoraciones de terreno adicionales (flores, rocas, etc.)
+            this.terrainDecorManager.generateDecorations(generatedMap);
 
             console.log(`✅ Mapa procedural aplicado (Semilla: ${generatedMap.metadata.seed})`);
         } else {
@@ -3076,6 +3083,11 @@ export class Game {
 
         // Dibujar terreno
         this.drawTerrain();
+
+        // Dibujar decoraciones de terreno
+        if (this.terrainDecorManager) {
+            this.terrainDecorManager.draw(this.ctx, this.camera);
+        }
 
         // Dibujar niebla de guerra (Pass 1: Terreno)
         this.drawFOW();

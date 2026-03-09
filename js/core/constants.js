@@ -100,6 +100,38 @@ export const TERRAIN_TYPES = {
         combatBonus: {},
         resources: ['gold'],
         constructionSpeed: 0.9
+    },
+    volcanic: {
+        name: 'Volcánico',
+        color: '#5c1d1d',
+        buildable: true,
+        movementSpeed: 0.75, // -25% velocidad (terreno hostil)
+        combatBonus: {
+            defense: 0.8 // -20% defensa general
+        },
+        resources: ['stone', 'gold'],
+        constructionSpeed: 0.6
+    },
+    swamp: {
+        name: 'Pantano Venenoso',
+        color: '#2e4a2e',
+        buildable: false,
+        movementSpeed: 0.5, // -50% velocidad
+        combatBonus: {
+            defense: 0.5 // -50% defensa
+        },
+        resources: ['wood'],
+        constructionSpeed: 0.4
+    },
+    archipelago: {
+        name: 'Archipiélago',
+        color: '#4fc3f7',
+        buildable: false,
+        movementSpeed: 0,
+        combatBonus: {},
+        resources: ['food'],
+        constructionSpeed: 0,
+        requiresBoat: true
     }
 };
 

@@ -43,16 +43,10 @@ export class DataLoader {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             const data = await response.json();
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.debug(`Archivo cargado: ${url}`, 'data', { size: JSON.stringify(data).length });
-            }
+            debugLogger.debug(`Archivo cargado: ${url}`, 'data', { size: JSON.stringify(data).length });
             return data;
         } catch (error) {
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.error(`Error cargando archivo JSON`, 'data', error, { url, timestamp: Date.now() });
-            } else {
-                console.error(`❌ Error cargando ${url}:`, error);
-            }
+            debugLogger.error(`Error cargando archivo JSON`, 'data', error, { url, timestamp: Date.now() });
             throw error;
         }
     }
@@ -61,12 +55,8 @@ export class DataLoader {
      * Carga todos los datos base del juego en paralelo
      */
     async loadBaseData() {
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.start('Cargando datos base del juego', 'data');
-            debugLogger.time('Carga de datos base', 'data');
-        } else {
-            console.log('🔄 Cargando datos base...');
-        }
+        debugLogger.start('Cargando datos base del juego', 'data');
+        debugLogger.time('Carga de datos base', 'data');
 
         try {
             const [techData, buildingsData, unitsData] = await Promise.all([
@@ -88,23 +78,15 @@ export class DataLoader {
                 ages: Object.keys(this.baseData.ages || {}).length
             };
 
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.timeEnd('Carga de datos base', 'data');
-                debugLogger.success('Datos base cargados correctamente', 'data', stats);
-            } else {
-                console.log('✅ Datos base cargados:', stats);
-            }
+            debugLogger.timeEnd('Carga de datos base', 'data');
+            debugLogger.success('Datos base cargados correctamente', 'data', stats);
 
             return true;
         } catch (error) {
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.error('Fallo crítico en carga de datos base', 'data', error, {
-                    paths: this.PATHS,
-                    timestamp: Date.now()
-                });
-            } else {
-                console.error('❌ Fallo crítico en carga de datos base', error);
-            }
+            debugLogger.error('Fallo crítico en carga de datos base', 'data', error, {
+                paths: this.PATHS,
+                timestamp: Date.now()
+            });
             return false;
         }
     }
@@ -117,16 +99,10 @@ export class DataLoader {
             const civData = await this._fetchJson(this.PATHS.CIVILIZATION(civilizationId));
             this.civilizations.set(civilizationId, civData);
 
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.success(`Civilización cargada: ${civData.name}`, 'data', { id: civilizationId });
-            } else {
-                console.log(`✅ Civilización cargada: ${civData.name}`);
-            }
+            debugLogger.success(`Civilización cargada: ${civData.name}`, 'data', { id: civilizationId });
             return civData;
         } catch (error) {
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.warn(`No se pudo cargar civilización: ${civilizationId}`, 'data', { error: error.message });
-            }
+            debugLogger.warn(`No se pudo cargar civilización: ${civilizationId}`, 'data', { error: error.message });
             return null;
         }
     }
@@ -135,21 +111,15 @@ export class DataLoader {
      * Carga todas las civilizaciones disponibles en paralelo
      */
     async loadAllCivilizations() {
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.time('Carga de civilizaciones', 'data');
-        }
+        debugLogger.time('Carga de civilizaciones', 'data');
 
         const promises = this.AVAILABLE_CIVS.map(civId => this.loadCivilization(civId));
         await Promise.all(promises);
 
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.timeEnd('Carga de civilizaciones', 'data');
-            debugLogger.success(`${this.civilizations.size} civilizaciones cargadas`, 'data', {
-                civilizaciones: Array.from(this.civilizations.keys())
-            });
-        } else {
-            console.log(`✅ ${this.civilizations.size} civilizaciones cargadas`);
-        }
+        debugLogger.timeEnd('Carga de civilizaciones', 'data');
+        debugLogger.success(`${this.civilizations.size} civilizaciones cargadas`, 'data', {
+            civilizaciones: Array.from(this.civilizations.keys())
+        });
     }
 
     /**
@@ -247,15 +217,11 @@ export class DataLoader {
     createUniqueUnit(uniqueUnitData) {
         const baseUnit = this.baseData.units.find(u => u.id === uniqueUnitData.baseUnit);
         if (!baseUnit) {
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.error('Unidad base no encontrada para unidad única', 'data', null, {
-                    baseUnit: uniqueUnitData.baseUnit,
-                    uniqueUnitId: uniqueUnitData.id,
-                    availableUnits: this.baseData.units.map(u => u.id)
-                });
-            } else {
-                console.error(`Unidad base ${uniqueUnitData.baseUnit} no encontrada`);
-            }
+            debugLogger.error('Unidad base no encontrada para unidad única', 'data', null, {
+                baseUnit: uniqueUnitData.baseUnit,
+                uniqueUnitId: uniqueUnitData.id,
+                availableUnits: this.baseData.units.map(u => u.id)
+            });
             return null;
         }
 
@@ -291,34 +257,24 @@ export class DataLoader {
     isLoaded() { return this.loaded; }
 
     async initialize() {
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.start('Inicializando DataLoader', 'data');
-            debugLogger.time('Inicialización completa de DataLoader', 'data');
-        } else {
-            console.log('🚀 Inicializando DataLoader...');
-        }
+        debugLogger.start('Inicializando DataLoader', 'data');
+        debugLogger.time('Inicialización completa de DataLoader', 'data');
 
         const baseLoaded = await this.loadBaseData();
         if (!baseLoaded) {
             const error = new Error('No se pudieron cargar los datos base');
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.error('Fallo en inicialización de DataLoader', 'data', error);
-            }
+            debugLogger.error('Fallo en inicialización de DataLoader', 'data', error);
             throw error;
         }
 
         await this.loadAllCivilizations();
         this.loaded = true;
 
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.timeEnd('Inicialización completa de DataLoader', 'data');
-            debugLogger.success('DataLoader inicializado correctamente', 'data', {
-                civilizaciones: this.civilizations.size,
-                tecnologías: this.baseData.technologies?.length || 0
-            });
-        } else {
-            console.log('✅ DataLoader inicializado correctamente');
-        }
+        debugLogger.timeEnd('Inicialización completa de DataLoader', 'data');
+        debugLogger.success('DataLoader inicializado correctamente', 'data', {
+            civilizaciones: this.civilizations.size,
+            tecnologías: this.baseData.technologies?.length || 0
+        });
         return true;
     }
 }

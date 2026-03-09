@@ -3325,10 +3325,41 @@ export class Game {
             this.particleSystem.render(this.ctx, this.camera, this.viewWidth, this.viewHeight);
         }
 
+        // Palette: Day/Night Cycle
+        this.drawDayNightCycle();
+
         // Renderizar minimapa
         this.renderMinimap();
 
         // Palette: Canvas Pause Overlay removed in favor of DOM overlay for accessibility
+    }
+
+    drawDayNightCycle() {
+        if (!this.gameStartTime) return;
+
+        const cycleDuration = 300; // 5 minutes per cycle
+        const elapsedSeconds = (Date.now() - this.gameStartTime) / 1000;
+        const currentCycleTime = elapsedSeconds % cycleDuration;
+        const progress = currentCycleTime / cycleDuration; // 0 to 1
+
+        // Use sine wave to create smooth transition:
+        // 0 -> day, 0.5 -> night, 1 -> day
+        // -Math.cos(progress * Math.PI * 2) goes from -1 (day) to 1 (night) to -1 (day)
+        const nightFactor = ( -Math.cos(progress * Math.PI * 2) + 1 ) / 2;
+
+        // Only draw if night is visible
+        if (nightFactor > 0.05) {
+            this.ctx.save();
+            this.ctx.globalCompositeOperation = 'multiply';
+
+            // Base color for night: deep blue
+            // We adjust alpha based on nightFactor. Max darkness around 0.6 alpha
+            const alpha = nightFactor * 0.6;
+            this.ctx.fillStyle = `rgba(10, 10, 40, ${alpha})`;
+            this.ctx.fillRect(0, 0, this.viewWidth, this.viewHeight);
+
+            this.ctx.restore();
+        }
     }
 
     drawGrid() {
@@ -4958,8 +4989,8 @@ export class Game {
             buttons.push({
                 iconKey: 'workshop',
                 iconFallback: '🏗️',
-                label: 'Construir',
-                description: 'Construir edificios y estructuras',
+                label: 'Erigir Estructura',
+                description: 'Diseñar los cimientos de la civilización',
                 hotkey: 'Q',
                 action: () => this.openBuildMenu(),
                 enabled: true
@@ -4975,8 +5006,8 @@ export class Game {
             buttons.push({
                 iconKey: 'villager',
                 iconFallback: '👨‍🌾',
-                label: 'Aldeano',
-                description: 'Recoge recursos y construye edificios',
+                label: 'Reclutar Siervo',
+                description: 'La columna vertebral de la economía. Recolecta y erige.',
                 hotkey: 'Q',
                 cost: cost,
                 action: () => this.trainUnit('villager', this.selectedEntities[0]),
@@ -5000,8 +5031,8 @@ export class Game {
             buttons.push({
                 iconKey: 'warrior',
                 iconFallback: '⚔️',
-                label: 'Guerrero',
-                description: 'Infantería eficaz en combate cuerpo a cuerpo',
+                label: 'Forjar Infantería',
+                description: 'Soldados leales para la línea de frente.',
                 hotkey: 'Q',
                 cost: warriorCost,
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
@@ -5012,8 +5043,8 @@ export class Game {
             buttons.push({
                 iconKey: 'archer',
                 iconFallback: '🏹',
-                label: 'Arquero',
-                description: 'Unidad a distancia, débil cuerpo a cuerpo',
+                label: 'Armar Arquero',
+                description: 'Maestros del arco, letales a la distancia.',
                 hotkey: 'W',
                 cost: archerCost,
                 action: () => this.trainUnit('archer', this.selectedEntities[0]),

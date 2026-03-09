@@ -876,6 +876,7 @@ body.theme-sumeria {
     border-radius: var(--radius-medium);
     padding: 8px;
     overflow: hidden;
+    transition: all 0.3s ease-in-out;
 }
 
 #selectionContent {
@@ -883,6 +884,7 @@ body.theme-sumeria {
     display: flex;
     align-items: center;
     gap: 12px;
+    transition: all 0.3s ease-in-out;
 }
 
 .selection-icon {
@@ -975,6 +977,7 @@ body.theme-sumeria {
     border: 2px solid var(--stone-light);
     border-radius: var(--radius-medium);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
 }
 
 /* Botones de acción */
@@ -1165,6 +1168,7 @@ body.theme-sumeria {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    transition: all 0.3s ease-in-out;
 }
 
 .minimap-container {

@@ -214,14 +214,15 @@ static _numericSort(a, b) {
         const rows = this.rows;
         const buffers = this._rowBuffers;
 
-        // BOLT OPTIMIZATION: Array Reuse
+        // BOLT OPTIMIZATION: Array Reuse with TypedArray
         // Reuse existing cache array if capacity is sufficient to avoid GC pressure (~330 allocs/sec -> 0)
-        // We do NOT shrink the array length to preserve capacity for future moves.
+        // We use Int32Array for maximum memory efficiency, especially important since units
+        // are now cached and there can be hundreds of them.
         let cache = entity._fowCacheRanges;
         const requiredSize = len * 2;
 
         if (!cache || cache.length < requiredSize) {
-            cache = new Array(requiredSize);
+            cache = new Int32Array(requiredSize);
         }
 
         let count = 0;

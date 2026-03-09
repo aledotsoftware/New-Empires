@@ -45,10 +45,10 @@ try {
     }
 
     if (unit._fowCacheRanges) {
-        console.error("FAILURE: Cache created for unit (should not happen)");
-        process.exit(1);
+        console.log("SUCCESS: Cache created for unit");
     } else {
-        console.log("SUCCESS: No cache for unit");
+        console.error("FAILURE: Cache NOT created for unit");
+        process.exit(1);
     }
 
     console.log("Running update 2 (cache hit)...");

@@ -107,13 +107,11 @@ export class SpatialGrid {
         const cols = this.cols;
         const rows = this.rows;
 
-        // Optimización: usar multiplicación
-        const cellRadius = Math.ceil(radius * this.invCellSize);
-
         // OPTIMIZATION: Bitwise truncation is faster than Math.floor (~15% speedup)
         // Safe here because coordinates are clamped to positive values in Unit.update()
-        const centerCol = (x * this.invCellSize) | 0;
-        const centerRow = (y * this.invCellSize) | 0;
+        const invCellSize = this.invCellSize;
+        const centerCol = (x * invCellSize) | 0;
+        const centerRow = (y * invCellSize) | 0;
 
         // BOLT OPTIMIZATION: Check center bucket first (highest probability of finding target in melee/close range)
         // This avoids checking potentially dozens of empty or irrelevant buckets in the spiral.
@@ -131,10 +129,12 @@ export class SpatialGrid {
         }
 
         // Clamping para no salir de los bordes al iterar
-        const startRow = Math.max(0, centerRow - cellRadius);
-        const endRow = Math.min(rows - 1, centerRow + cellRadius);
-        const startCol = Math.max(0, centerCol - cellRadius);
-        const endCol = Math.min(cols - 1, centerCol + cellRadius);
+        // BOLT OPTIMIZATION: Calculate bounds directly from world coordinates instead of cell radius
+        // This calculates the exact bounding box and avoids Math.ceil(radius * invCellSize) + additions
+        const startCol = Math.max(0, ((x - radius) * invCellSize) | 0);
+        const endCol = Math.min(cols - 1, ((x + radius) * invCellSize) | 0);
+        const startRow = Math.max(0, ((y - radius) * invCellSize) | 0);
+        const endRow = Math.min(rows - 1, ((y + radius) * invCellSize) | 0);
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
@@ -184,18 +184,17 @@ export class SpatialGrid {
         // OPTIMIZATION: Manual indexing
         let count = result.length;
 
-        // Optimización: usar multiplicación
-        const cellRadius = Math.ceil(radius * this.invCellSize);
         // OPTIMIZATION: Bitwise truncation is faster than Math.floor (~15% speedup)
         // Safe here because coordinates are clamped to positive values in Unit.update()
-        const centerCol = (x * this.invCellSize) | 0;
-        const centerRow = (y * this.invCellSize) | 0;
+        const invCellSize = this.invCellSize;
 
         // Clamping para no salir de los bordes al iterar
-        const startRow = Math.max(0, centerRow - cellRadius);
-        const endRow = Math.min(rows - 1, centerRow + cellRadius);
-        const startCol = Math.max(0, centerCol - cellRadius);
-        const endCol = Math.min(cols - 1, centerCol + cellRadius);
+        // BOLT OPTIMIZATION: Calculate bounds directly from world coordinates instead of cell radius
+        // This calculates the exact bounding box and avoids Math.ceil(radius * invCellSize) + additions
+        const startCol = Math.max(0, ((x - radius) * invCellSize) | 0);
+        const endCol = Math.min(cols - 1, ((x + radius) * invCellSize) | 0);
+        const startRow = Math.max(0, ((y - radius) * invCellSize) | 0);
+        const endRow = Math.min(rows - 1, ((y + radius) * invCellSize) | 0);
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila

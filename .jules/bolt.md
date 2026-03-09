@@ -147,3 +147,7 @@
 ## 2026-03-08 - Array Allocation in Hotkeys
 **Learning:** Functions bound to highly spammable hotkeys (like TAB for "select next idle villager") can create significant GC pressure and execution spikes if they allocate full arrays `[]` on every press just to find a single entity. By replacing an `O(N)` loop that pushes matches into a new array with an in-place `O(M)` (where M is the distance to the next valid entity) iteration using modular arithmetic to wrap around, we avoid memory allocation entirely and achieved an ~20x speedup.
 **Action:** For "find next" or cyclical selection logic, maintain an index and iterate the source array directly with wrap-around, avoiding intermediate array allocations.
+
+## 2026-03-09 - Precise Spatial Bounds Calculation
+**Learning:** In spatial partitioning grids (like `SpatialGrid.js`), calculating a grid-aligned bounding box by computing a `cellRadius` (`Math.ceil(radius * invCellSize)`) and adding/subtracting it from the center cell (`centerCol \u00b1 cellRadius`) overestimates the search area. This results in querying unnecessary outer grid cells. Calculating the bounding box directly from world coordinates (`((x - radius) * invCellSize) | 0`) and converting those min/max boundaries into grid coordinates shrinks the checked area to the tightest possible bounds, reducing loop iterations.
+**Action:** When calculating grid bounds for spatial queries, always compute the world-space bounding box first, then convert the min and max world coordinates to grid coordinates.

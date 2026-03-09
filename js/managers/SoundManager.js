@@ -309,8 +309,14 @@ export class SoundManager {
             // Lazy initialization if not loaded via loadSound (fallback)
             const sound = this.sounds[key];
             if (!sound) {
+                // Fallback tone synthesis for error sound if it wasn't loaded from a file
+                if (key === 'error') {
+                    this.playTone(150, 0.2, 'sawtooth', 0.2);
+                    return Promise.resolve();
+                }
+
                 // No logueamos advertencia aquí para evitar spam si faltan archivos de sonido opcionales
-                return;
+                return Promise.resolve();
             }
             pool = new SoundPool(sound, 5);
             this.pools.set(key, pool);

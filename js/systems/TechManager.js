@@ -1,15 +1,16 @@
+import { dataLoader } from "../managers/DataLoader.js";
 // ============= EDADES HISTÓRICAS Y TECNOLOGÍAS =============
 // Este archivo ahora usa DataLoader para cargar datos desde JSON
 // Mantiene variables globales para compatibilidad con código existente
 
 // Variables globales que se llenarán desde DataLoader
 // Variables globales que se llenarán desde DataLoader
-var AGES = {};
-var TECH_CATEGORIES = {};
-var TECHNOLOGIES = {};
+export var AGES = {};
+export var TECH_CATEGORIES = {};
+export var TECHNOLOGIES = {};
 
 // Función para inicializar datos desde DataLoader
-async function initializeTechData() {
+export async function initializeTechData() {
     if (!dataLoader || !dataLoader.isLoaded()) {
         console.warn('⚠️ DataLoader no disponible, usando datos por defecto');
         // Fallback a datos hardcoded si DataLoader no está disponible
@@ -64,7 +65,7 @@ function initializeFallbackData() {
 // Estas se sobrescriben cuando DataLoader carga los JSON
 // Aseguramos que TECHNOLOGIES esté definido
 if (typeof TECHNOLOGIES === 'undefined') {
-    var TECHNOLOGIES = {};
+    TECHNOLOGIES = {};
 }
 
 Object.assign(TECHNOLOGIES, {
@@ -910,7 +911,7 @@ Object.assign(TECHNOLOGIES, {
     }
 });
 
-class TechManager {
+export class TechManager {
     constructor(game) {
         this.game = game;
         this.researchedTechs = new Set();

@@ -113,7 +113,10 @@ export class DataLoader {
     async loadAllCivilizations() {
         debugLogger.time('Carga de civilizaciones', 'data');
 
-        const promises = this.AVAILABLE_CIVS.map(civId => this.loadCivilization(civId));
+        const promises = [];
+        for (let i = 0; i < this.AVAILABLE_CIVS.length; i++) {
+            promises.push(this.loadCivilization(this.AVAILABLE_CIVS[i]));
+        }
         await Promise.all(promises);
 
         debugLogger.timeEnd('Carga de civilizaciones', 'data');
@@ -135,7 +138,9 @@ export class DataLoader {
 
         // Usamos structuredClone para una copia profunda nativa y eficiente
         // Mapeamos directamente para transformar los datos
-        const processedList = baseList.map(item => {
+        const processedList = [];
+        for (let i = 0; i < baseList.length; i++) {
+            const item = baseList[i];
             const override = overrides[item.id];
 
             // Creamos el nuevo objeto item base
@@ -152,8 +157,8 @@ export class DataLoader {
                 Object.assign(newItem, override);
             }
 
-            return newItem;
-        });
+            processedList.push(newItem);
+        }
 
         // Añadir items únicos si existen
         if (uniqueItems && uniqueItems.length > 0) {
@@ -217,10 +222,14 @@ export class DataLoader {
     createUniqueUnit(uniqueUnitData) {
         const baseUnit = this.baseData.units.find(u => u.id === uniqueUnitData.baseUnit);
         if (!baseUnit) {
+            const availableUnitsIds = [];
+            for (let i = 0; i < this.baseData.units.length; i++) {
+                availableUnitsIds.push(this.baseData.units[i].id);
+            }
             debugLogger.error('Unidad base no encontrada para unidad única', 'data', null, {
                 baseUnit: uniqueUnitData.baseUnit,
                 uniqueUnitId: uniqueUnitData.id,
-                availableUnits: this.baseData.units.map(u => u.id)
+                availableUnits: availableUnitsIds
             });
             return null;
         }

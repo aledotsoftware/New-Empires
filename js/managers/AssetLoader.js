@@ -63,7 +63,11 @@ export class AssetLoader {
         debugLogger.start('Cargando assets gráficos', 'assets');
         debugLogger.time('Carga de assets', 'assets');
 
-        const promises = assetsToLoad.map(asset => this.loadImage(asset.key, asset.src));
+        const promises = [];
+        for (let i = 0; i < assetsToLoad.length; i++) {
+            const asset = assetsToLoad[i];
+            promises.push(this.loadImage(asset.key, asset.src));
+        }
         await Promise.all(promises);
 
         const loadedCount = Object.keys(this.assets).length;

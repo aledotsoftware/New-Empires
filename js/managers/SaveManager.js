@@ -208,6 +208,32 @@ export class SaveManager {
      * @returns {Object} Estado serializado
      */
     _serializeGameState(game) {
+        const serializedUnits = [];
+        for (let i = 0; i < game.units.length; i++) {
+            serializedUnits.push(this._serializeEntity(game.units[i]));
+        }
+
+        const serializedBuildings = [];
+        for (let i = 0; i < game.buildings.length; i++) {
+            serializedBuildings.push(this._serializeEntity(game.buildings[i]));
+        }
+
+        const serializedEnemies = [];
+        for (let i = 0; i < game.enemies.length; i++) {
+            serializedEnemies.push(this._serializeEntity(game.enemies[i]));
+        }
+
+        const serializedResourceNodes = [];
+        for (let i = 0; i < game.resourceNodes.length; i++) {
+            const r = game.resourceNodes[i];
+            serializedResourceNodes.push({
+                x: r.x,
+                y: r.y,
+                type: r.type,
+                amount: r.amount
+            });
+        }
+
         return {
             version: this.VERSION,
             timestamp: Date.now(),
@@ -227,17 +253,12 @@ export class SaveManager {
             seed: game.mapConfig?.seed,
 
             // Entidades
-            units: game.units.map(u => this._serializeEntity(u)),
-            buildings: game.buildings.map(b => this._serializeEntity(b)),
-            enemies: game.enemies.map(e => this._serializeEntity(e)),
+            units: serializedUnits,
+            buildings: serializedBuildings,
+            enemies: serializedEnemies,
 
             // Recursos del mapa
-            resourceNodes: game.resourceNodes.map(r => ({
-                x: r.x,
-                y: r.y,
-                type: r.type,
-                amount: r.amount
-            })),
+            resourceNodes: serializedResourceNodes,
 
             // Tecnologías
             researchedTechs: game.techManager?.researchedTechs || []

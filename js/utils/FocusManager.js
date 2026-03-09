@@ -60,9 +60,17 @@ export const FocusManager = {
      */
     getFocusableElements(container) {
         if (!container) return [];
-        return Array.from(container.querySelectorAll(
+        const elements = container.querySelectorAll(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        )).filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+        );
+        const focusable = [];
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[i];
+            if (!el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')) {
+                focusable.push(el);
+            }
+        }
+        return focusable;
     },
 
     /**

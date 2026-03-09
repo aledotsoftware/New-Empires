@@ -703,7 +703,3 @@ export class ProceduralMapGenerator {
     }
 }
 
-// Exportar para uso en el juego
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { ProceduralMapGenerator, SeededRandom, PerlinNoise };
-}

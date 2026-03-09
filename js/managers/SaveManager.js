@@ -363,9 +363,3 @@ export class SaveManager {
 
 // Instancia global
 export const saveManager = new SaveManager();
-
-// Compatibilidad con scripts tradicionales
-if (typeof window !== 'undefined') {
-    window.SaveManager = SaveManager;
-    window.saveManager = saveManager;
-}

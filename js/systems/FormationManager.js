@@ -267,10 +267,3 @@ export class FormationManager {
 
 // Instancia global para compatibilidad
 export const formationManager = new FormationManager();
-
-// Compatibilidad con scripts tradicionales
-if (typeof window !== 'undefined') {
-    window.FORMATIONS = FORMATIONS;
-    window.FormationManager = FormationManager;
-    window.formationManager = formationManager;
-}

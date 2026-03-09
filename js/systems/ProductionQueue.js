@@ -181,7 +181,3 @@ export class ProductionQueue {
     }
 }
 
-// Exportación para uso como script tradicional también
-if (typeof window !== 'undefined') {
-    window.ProductionQueue = ProductionQueue;
-}

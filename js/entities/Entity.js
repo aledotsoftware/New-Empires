@@ -160,11 +160,9 @@ export class Entity {
     }
 
     getTeamColor() {
-        // game y civilizationManager son variables globales disponibles
-        if (this.team === 'player' && typeof game !== 'undefined' && game && game.civilizationId) {
-            if (typeof civilizationManager !== 'undefined') {
-                return civilizationManager.getTeamColor(game.civilizationId, this.team);
-            }
+        // game is global for now
+        if (this.team === 'player' && window.game && window.game.civilizationId) {
+            return civilizationManager.getTeamColor(window.game.civilizationId, this.team);
         }
 
         switch (this.team) {

@@ -29,12 +29,8 @@ import { Workshop } from '../entities/buildings/Workshop.js';
 /**
  * Game - Clase principal del juego
  * Orquesta todos los sistemas: rendering, input, lógica, UI
- * Requiere variables globales: civilizationManager, TechManager, ProceduralMapGenerator, soundManager, assetLoader
  */
 export class Game {
-    // NOTA: Este archivo usa temporalmente variables globales (civilizationManager, TechManager, etc.)
-    // para mantener compatibilidad durante la migración. Serán importadas cuando esos módulos se extraigan.
-
     // BOLT OPTIMIZATION: Static comparator to avoid closure allocation in hot loops
     static _sortEntities(a, b) {
         return a.y - b.y;
@@ -296,7 +292,7 @@ export class Game {
         this._fowColorLUT[FOW_STATES.VISIBLE] = getInt32Color(0, 0, 0, 0);
 
         // SISTEMA DE PARTÍCULAS (Palette: Visual Feedback)
-        if (typeof ParticleSystem !== 'undefined') {
+        if (ParticleSystem) {
             this.particleSystem = new ParticleSystem();
         }
 
@@ -443,7 +439,7 @@ export class Game {
 
     // BOLT OPTIMIZATION: Update cached team colors
     _updateTeamColors() {
-        if (typeof civilizationManager !== 'undefined') {
+        if (civilizationManager) {
             this._playerColor = civilizationManager.getTeamColor(this.civilizationId, 'player');
             this._enemyColor = civilizationManager.getTeamColor(this.civilizationId, 'enemy');
         } else {
@@ -561,7 +557,7 @@ export class Game {
         this.camera.y = 400 - this.viewHeight / 2;
 
         // Palette: Game Start Feedback
-        if (typeof soundManager !== 'undefined') {
+        if (soundManager) {
             soundManager.play('startGame');
         }
 
@@ -759,7 +755,7 @@ export class Game {
 
     generateMap() {
         // Usar el generador procedural de mapas (variable global temporal)
-        if (typeof ProceduralMapGenerator !== 'undefined') {
+        if (ProceduralMapGenerator) {
             console.log('Usando generador procedural de mapas');
 
             const mapGen = new ProceduralMapGenerator(this.mapConfig);
@@ -1112,7 +1108,7 @@ export class Game {
         this.updateActionsPanel();
         this.showNotification(`${army.length} unidades militares seleccionadas`, 'info');
 
-        if (typeof soundManager !== 'undefined') {
+        if (soundManager) {
             soundManager.play('click');
         }
     }
@@ -1190,7 +1186,7 @@ export class Game {
                 this.selectedEntities = [closest];
 
                 // Reproducir sonido de selección (variable global temporal)
-                if (typeof soundManager !== 'undefined') {
+                if (soundManager) {
                     soundManager.playEntitySelection(closest.type);
                 }
             }
@@ -1282,7 +1278,7 @@ export class Game {
                 const name = target.name || type;
                 this.showNotification(`Seleccionados todos los visibles: ${name}`, 'info');
 
-                if (typeof soundManager !== 'undefined') {
+                if (soundManager) {
                     soundManager.play('click');
                 }
             }
@@ -1430,7 +1426,7 @@ export class Game {
             }
         }
 
-        if ((moveCommandTriggered || attackCommandTriggered || gatherCommandTriggered || buildCommandTriggered || rallyPointTriggered) && typeof soundManager !== 'undefined') {
+        if ((moveCommandTriggered || attackCommandTriggered || gatherCommandTriggered || buildCommandTriggered || rallyPointTriggered) && soundManager) {
             soundManager.play('click');
         }
     }
@@ -1565,7 +1561,7 @@ export class Game {
                     if (destroyedCount > 0) {
                         this.showNotification(`${type} destruido(s)`, 'info');
                         // Feedback auditivo (usamos error como sonido de destrucción por ahora)
-                        if (typeof soundManager !== 'undefined') {
+                        if (soundManager) {
                             soundManager.play('error');
                         }
                         this.selectedEntities = [];
@@ -1646,7 +1642,7 @@ export class Game {
                         this.showNotification('Selecciona un solo aldeano para construir', 'error');
                     }
                 }
-                if (typeof soundManager !== 'undefined') soundManager.play('error');
+                if (soundManager) soundManager.play('error');
             }
         }
 
@@ -1756,7 +1752,7 @@ export class Game {
                 if (e.isUnit) selectedUnits.push(e);
             }
 
-            if (selectedUnits.length > 1 && typeof formationManager !== 'undefined') {
+            if (selectedUnits.length > 1 && formationManager) {
                 const formation = formationManager.cycleFormation();
 
                 // Calcular centro del grupo
@@ -1778,7 +1774,7 @@ export class Game {
                 if (selectedUnits.length <= 1) {
                     this.showNotification('Formaciones requieren múltiples unidades', 'error');
                 }
-                if (typeof soundManager !== 'undefined') soundManager.play('error');
+                if (soundManager) soundManager.play('error');
             }
         }
 
@@ -1959,7 +1955,7 @@ export class Game {
                     option.classList.add('shake');
 
                     // Auditory feedback (if soundManager exists)
-                    if (typeof soundManager !== 'undefined') {
+                    if (soundManager) {
                         soundManager.play('error');
                     }
 
@@ -2118,7 +2114,7 @@ export class Game {
             }
 
             // Reproducir sonido de inicio de construcción (variable global temporal)
-            if (typeof soundManager !== 'undefined') {
+            if (soundManager) {
                 soundManager.play('buildStart');
             }
 
@@ -2274,7 +2270,7 @@ export class Game {
             this.units.push(unit);
             this.population++;
 
-            if (typeof soundManager !== 'undefined') {
+            if (soundManager) {
                 const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
                 soundManager.play(soundKey);
             }
@@ -2530,7 +2526,7 @@ export class Game {
         }
 
         // Sonidos Ambientales (cada 5 segundos aprox)
-        if (typeof soundManager !== 'undefined') {
+        if (soundManager) {
             if (!this._ambientTimer) this._ambientTimer = 0;
             this._ambientTimer += deltaTime;
             if (this._ambientTimer > 5) {
@@ -3529,7 +3525,7 @@ export class Game {
 
         // Pass 2: Draw icons (using compacted list)
         // BOLT OPTIMIZATION: Hoist assetLoader check
-        const hasAssetLoader = typeof assetLoader !== 'undefined';
+        const hasAssetLoader = assetLoader;
 
         for (let i = 0; i < visibleCount; i++) {
             const node = this._resourceRenderCache[i];
@@ -3826,7 +3822,7 @@ export class Game {
 
         // Dibujar icono centrado
         let drawn = false;
-        if (typeof assetLoader !== 'undefined') {
+        if (assetLoader) {
             const img = assetLoader.getImage(this.buildMode);
             if (img && img.complete) {
                 // Dibujar imagen con opacidad
@@ -4539,7 +4535,7 @@ export class Game {
                 span.textContent = kbd;
                 btn.appendChild(span);
 
-                btn.onclick = (e) => { e.stopPropagation(); onClick(); if (typeof soundManager !== 'undefined') soundManager.play('click'); };
+                btn.onclick = (e) => { e.stopPropagation(); onClick(); if (soundManager) soundManager.play('click'); };
                 return btn;
             };
 
@@ -4587,7 +4583,7 @@ export class Game {
             iconDiv.className = 'selection-icon';
 
             let iconSrc = null;
-            if (typeof assetLoader !== 'undefined') {
+            if (assetLoader) {
                 iconSrc = assetLoader.getSrc(entity.type);
             }
 
@@ -4761,7 +4757,7 @@ export class Game {
                             qItem.title = `Cancelar ${item.unitType} (Click para reembolsar)`;
 
                             // Icon
-                            if (typeof assetLoader !== 'undefined') {
+                            if (assetLoader) {
                                 const src = assetLoader.getSrc(item.unitType);
                                 if (src) {
                                     const img = document.createElement('img');
@@ -4798,7 +4794,7 @@ export class Game {
 
                                     // Feedback
                                     this.showNotification(`${item.unitType} cancelado`, 'info');
-                                    if (typeof soundManager !== 'undefined') soundManager.play('click');
+                                    if (soundManager) soundManager.play('click');
 
                                     // Force UI Refresh
                                     this.updateSelectionPanel();
@@ -4849,7 +4845,7 @@ export class Game {
             iconDiv.className = 'selection-icon';
 
             let iconSrc = null;
-            if (typeof assetLoader !== 'undefined') {
+            if (assetLoader) {
                 iconSrc = assetLoader.getSrc('population');
             }
 
@@ -4890,7 +4886,7 @@ export class Game {
                 btn.setAttribute('aria-label', `Seleccionar solo ${count} ${type}`);
 
                 // Icon
-                if (typeof assetLoader !== 'undefined') {
+                if (assetLoader) {
                     const iconSrc = assetLoader.getSrc(type);
                     if (iconSrc) {
                         const img = document.createElement('img');
@@ -4923,7 +4919,7 @@ export class Game {
                     this.updateSelectionPanel();
                     this.updateActionsPanel();
                     // Feedback
-                    if (typeof soundManager !== 'undefined') soundManager.play('click');
+                    if (soundManager) soundManager.play('click');
                 };
 
                 // Palette: Contextual Highlight on Hover
@@ -4983,7 +4979,7 @@ export class Game {
 
         // Helper para crear elementos
         const createIconElement = (key, fallback) => {
-            if (typeof assetLoader !== 'undefined') {
+            if (assetLoader) {
                 const src = assetLoader.getSrc(key);
                 if (src) {
                     const img = document.createElement('img');
@@ -5106,7 +5102,7 @@ export class Game {
                 let techFallback = '🔬';
 
                 let hasSpecificIcon = false;
-                if (typeof assetLoader !== 'undefined') {
+                if (assetLoader) {
                     if (assetLoader.getSrc(tech.id)) {
                         hasSpecificIcon = true;
                     }
@@ -5202,7 +5198,7 @@ export class Game {
                             void btn.offsetWidth; // Force reflow
                             btn.classList.add('shake');
 
-                            if (typeof soundManager !== 'undefined') {
+                            if (soundManager) {
                                 soundManager.play('error');
                             }
 
@@ -5303,7 +5299,7 @@ export class Game {
                             resSpan.className = 'cost-item';
 
                             // Palette: Use secure icon generation
-                            if (typeof assetLoader !== 'undefined' && assetLoader.getSrc) {
+                            if (assetLoader && assetLoader.getSrc) {
                                 const iconSrc = assetLoader.getSrc(res);
                                 if (iconSrc) {
                                     const img = document.createElement('img');
@@ -5490,7 +5486,7 @@ export class Game {
                 if (e.target.closest('.notification-close-btn')) return;
 
                 this.focusCamera(location.x, location.y, true);
-                if (typeof soundManager !== 'undefined') soundManager.play('click');
+                if (soundManager) soundManager.play('click');
             };
 
             notification.onclick = jumpAction;

@@ -61,8 +61,17 @@ export class Villager extends Unit {
 
             case 'GATHERING':
                 if (!this.currentResourceNode || this.currentResourceNode.amount <= 0) {
-                    this.state = 'IDLE';
+                    // Try to find a nearby resource of the same type
+                    const lastType = this.currentResourceNode ? this.currentResourceNode.type : this.carryType;
                     this.currentResourceNode = null;
+
+                    if (lastType) {
+                        this.findNearbyResource(game, lastType);
+                    }
+
+                    if (!this.currentResourceNode) {
+                        this.state = 'IDLE';
+                    }
                     break;
                 }
                 // BOLT OPTIMIZATION: Pass threshold (30^2 = 900) to moveTowardsTarget directly.
@@ -117,12 +126,24 @@ export class Villager extends Unit {
                     }
 
                     console.log(`💰 Entregado a las arcas: ${Math.floor(this.carryAmount)} ${this.carryType}`);
+                    const lastCarryType = this.carryType;
                     this.carryAmount = 0;
                     this.carryType = null;
+
                     if (this.currentResourceNode && this.currentResourceNode.amount > 0) {
                         this.state = 'GATHERING';
                     } else {
-                        this.state = 'IDLE';
+                        // Find a nearby resource of the same type
+                        const lastType = lastCarryType || (this.currentResourceNode ? this.currentResourceNode.type : null);
+                        this.currentResourceNode = null;
+
+                        if (lastType) {
+                            this.findNearbyResource(game, lastType);
+                        }
+
+                        if (!this.currentResourceNode) {
+                            this.state = 'IDLE';
+                        }
                     }
                 }
                 break;
@@ -261,6 +282,30 @@ export class Villager extends Unit {
                 ctx.arc(screenX, iconY + iconSize / 2, iconSize / 2 - 1, 0, Math.PI * 2);
                 ctx.fill();
             }
+        }
+    }
+
+    // BOLT OPTIMIZATION: Static predicate for resource search
+    static _resourcePredicate(entity, context) {
+        return entity.type === context.searchType && entity.amount > 0;
+    }
+
+    findNearbyResource(game, searchType) {
+        if (!game || !game.resourceGrid || !searchType) return;
+
+        const searchRadius = 400; // Radio de busqueda razonable (aprox 12 tiles)
+
+        // Context object to avoid closure allocation
+        const context = {
+            searchType: searchType
+        };
+
+        const target = game.resourceGrid.find(this.x, this.y, searchRadius, Villager._resourcePredicate, context);
+
+        if (target) {
+            this.currentResourceNode = target;
+            this.state = 'GATHERING';
+            this.targetX = null;
         }
     }
 

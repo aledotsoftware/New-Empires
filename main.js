@@ -1,3 +1,4 @@
+import { debugLogger } from "./js/utils/DebugLogger.js";
 import { saveManager } from './js/managers/SaveManager.js';
 import { dataLoader } from './js/managers/DataLoader.js';
 import { civilizationManager } from './js/managers/CivilizationManager.js';

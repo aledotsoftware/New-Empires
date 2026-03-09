@@ -1,3 +1,4 @@
+import { debugLogger } from "../utils/DebugLogger.js";
 /**
  * AssetLoader - Gestor de carga de assets gráficos
  * Carga y gestiona las imágenes del juego de forma asíncrona
@@ -16,23 +17,15 @@ export class AssetLoader {
             img.onload = () => {
                 this.assets[key] = img;
                 this.loadedCount++;
-                if (typeof debugLogger !== 'undefined') {
-                    debugLogger.debug(`Asset cargado: ${key}`, 'assets', {
-                        width: img.width,
-                        height: img.height,
-                        progress: `${this.loadedCount}/${this.totalAssets}`
-                    });
-                } else {
-                    console.log(`✅ Asset cargado: ${key}`);
-                }
+                debugLogger.debug(`Asset cargado: ${key}`, 'assets', {
+                    width: img.width,
+                    height: img.height,
+                    progress: `${this.loadedCount}/${this.totalAssets}`
+                });
                 resolve(img);
             };
             img.onerror = () => {
-                if (typeof debugLogger !== 'undefined') {
-                    debugLogger.warn(`No se pudo cargar asset`, 'assets', { key, src });
-                } else {
-                    console.warn(`⚠️ No se pudo cargar asset: ${key} (${src})`);
-                }
+                debugLogger.warn(`No se pudo cargar asset`, 'assets', { key, src });
                 // Resolvemos igual para no bloquear el juego, pero sin imagen
                 resolve(null);
             };
@@ -67,25 +60,17 @@ export class AssetLoader {
 
         this.totalAssets = assetsToLoad.length;
 
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.start('Cargando assets gráficos', 'assets');
-            debugLogger.time('Carga de assets', 'assets');
-        } else {
-            console.log('🔄 Iniciando carga de assets...');
-        }
+        debugLogger.start('Cargando assets gráficos', 'assets');
+        debugLogger.time('Carga de assets', 'assets');
 
         const promises = assetsToLoad.map(asset => this.loadImage(asset.key, asset.src));
         await Promise.all(promises);
 
         const loadedCount = Object.keys(this.assets).length;
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.timeEnd('Carga de assets', 'assets');
-            debugLogger.success(`${loadedCount}/${this.totalAssets} assets cargados`, 'assets', {
-                cargados: Object.keys(this.assets)
-            });
-        } else {
-            console.log('✨ Todos los assets procesados.');
-        }
+        debugLogger.timeEnd('Carga de assets', 'assets');
+        debugLogger.success(`${loadedCount}/${this.totalAssets} assets cargados`, 'assets', {
+            cargados: Object.keys(this.assets)
+        });
     }
 
     getImage(key) {

@@ -1,3 +1,4 @@
+import { debugLogger } from "../utils/DebugLogger.js";
 /**
  * SaveManager - Sistema de guardado y carga del juego
  * Maneja persistencia del estado del juego en localStorage
@@ -18,12 +19,10 @@ export class SaveManager {
             const state = this._serializeGameState(game);
             localStorage.setItem(this.SAVE_KEY, JSON.stringify(state));
 
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.success('Juego guardado', 'save', {
-                    entities: state.units.length + state.buildings.length,
-                    timestamp: new Date(state.timestamp).toLocaleTimeString()
-                });
-            }
+            debugLogger.success('Juego guardado', 'save', {
+                entities: state.units.length + state.buildings.length,
+                timestamp: new Date(state.timestamp).toLocaleTimeString()
+            });
 
             return true;
         } catch (error) {
@@ -61,20 +60,14 @@ export class SaveManager {
 
             // Sentinel: Validate state structure before returning
             if (!this._validateState(state)) {
-                if (typeof debugLogger !== 'undefined') {
-                    debugLogger.error('Archivo de guardado corrupto o inválido', 'save');
-                } else {
-                    console.error('❌ Archivo de guardado corrupto o inválido');
-                }
+                debugLogger.error('Archivo de guardado corrupto o inválido', 'save');
                 return null;
             }
 
-            if (typeof debugLogger !== 'undefined') {
-                debugLogger.info('Partida cargada', 'save', {
-                    civilizationId: state.civilizationId,
-                    timestamp: new Date(state.timestamp).toLocaleString()
-                });
-            }
+            debugLogger.info('Partida cargada', 'save', {
+                civilizationId: state.civilizationId,
+                timestamp: new Date(state.timestamp).toLocaleString()
+            });
 
             return state;
         } catch (error) {
@@ -89,9 +82,7 @@ export class SaveManager {
     deleteSave() {
         localStorage.removeItem(this.SAVE_KEY);
 
-        if (typeof debugLogger !== 'undefined') {
-            debugLogger.info('Partida guardada eliminada', 'save');
-        }
+        debugLogger.info('Partida guardada eliminada', 'save');
     }
 
     /**

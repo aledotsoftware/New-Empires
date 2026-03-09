@@ -14,22 +14,31 @@ window.onload = function() {
             const canvas = document.createElement('canvas');
             canvas.id = 'gameCanvas';
             document.body.appendChild(canvas);
+
+            const minimap = document.createElement('canvas');
+            minimap.id = 'minimapCanvas';
+            document.body.appendChild(minimap);
+
             const uiLayer = document.createElement('div');
             uiLayer.id = 'uiLayer';
             document.body.appendChild(uiLayer);
 
-            window.game = new window.Game();
-            game.init();
+            window.game = new window.Game('romans', {
+                size: 50,
+                baseRadius: 10,
+                tileSize: 32,
+                seed: '123'
+            });
 
             // Let's create a building and simulate damage
-            const b = new window.Building(100, 100, 'house', 1);
-            game.addEntity(b);
+            const b = new window.Building(100, 100, 'house', 'player');
+            game.buildings.push(b);
             b.hp = 10; // low HP
 
             // update it
             b.update(1/60);
 
-            console.log("Building update completed without crash. particleSystem particles:", game.particleSystem.particles.length);
+            console.log("Building update completed without crash. particleSystem particles:", game.particleSystem ? game.particleSystem.particles.length : 0);
             document.title = "SUCCESS";
         } catch(e) {
             console.error(e);

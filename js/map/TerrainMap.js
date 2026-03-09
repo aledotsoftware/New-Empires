@@ -13,11 +13,11 @@ export class TerrainMap {
         this.rows = Math.floor(height / tileSize);
 
         // Optimización: Usar Uint8Array en lugar de Array de strings para reducir uso de memoria y GC
-        // ID mapping: 0:grassland, 1:forest, 2:water, 3:mountain, 4:hill, 5:desert
+        // ID mapping: 0:grassland, 1:forest, 2:water, 3:mountain, 4:hill, 5:desert, 6:volcanic, 7:swamp, 8:archipelago
         this.grid = new Uint8Array(this.cols * this.rows).fill(0);
 
         // Cache para mapeo inverso rápido (ID -> String)
-        this._idToName = ['grassland', 'forest', 'water', 'mountain', 'hill', 'desert'];
+        this._idToName = ['grassland', 'forest', 'water', 'mountain', 'hill', 'desert', 'volcanic', 'swamp', 'archipelago'];
 
         // Cache para acceso rápido a datos (ID -> Data Object)
         this._dataCache = [
@@ -26,7 +26,10 @@ export class TerrainMap {
             TERRAIN_TYPES['water'],
             TERRAIN_TYPES['mountain'],
             TERRAIN_TYPES['hill'],
-            TERRAIN_TYPES['desert']
+            TERRAIN_TYPES['desert'],
+            TERRAIN_TYPES['volcanic'],
+            TERRAIN_TYPES['swamp'],
+            TERRAIN_TYPES['archipelago']
         ];
 
         // Mapeo String -> ID para generación
@@ -36,7 +39,10 @@ export class TerrainMap {
             'water': 2,
             'mountain': 3,
             'hill': 4,
-            'desert': 5
+            'desert': 5,
+            'volcanic': 6,
+            'swamp': 7,
+            'archipelago': 8
         };
 
         // Optimización: Cache inverso para usar multiplicación en lugar de división

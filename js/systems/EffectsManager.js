@@ -220,43 +220,44 @@ export class ParticleSystem {
     // Efecto de daño en edificios (humo y fuego)
     createBuildingDamageEffect(x, y, severity) {
         // severity: 0 a 1 (0 es apenas dañado, 1 es destruido)
-        const count = Math.floor(severity * 5) + 1; // Más daño = más partículas
+        const count = Math.floor(severity * 8) + 2; // Más partículas para mejor efecto visual
 
         for (let i = 0; i < count; i++) {
-            const isFire = Math.random() < severity * 0.7; // Más daño = más fuego vs humo
+            const isFire = Math.random() < severity * 0.8; // Mayor probabilidad de fuego a más daño
             const angle = (Math.random() - 0.5) * Math.PI; // Mayormente hacia arriba
-            const speed = Math.random() * 40 + 10;
+            const speed = Math.random() * 50 + 15;
 
-            // Variación de colores
-            const smokeColors = ['#555555', '#777777', '#333333'];
-            const fireColors = ['#ff6b6b', '#ff9f43', '#feca57'];
+            // Variación de colores más realista y vibrante (Medieval Glassmorphism)
+            const smokeColors = ['rgba(85, 85, 85, 0.8)', 'rgba(119, 119, 119, 0.7)', 'rgba(51, 51, 51, 0.9)', 'rgba(20, 20, 20, 0.8)'];
+            const fireColors = ['rgba(255, 107, 107, 0.9)', 'rgba(255, 159, 67, 0.9)', 'rgba(254, 202, 87, 0.8)', 'rgba(255, 69, 0, 0.9)'];
             const color = isFire ? fireColors[Math.floor(Math.random() * fireColors.length)] : smokeColors[Math.floor(Math.random() * smokeColors.length)];
-            const size = isFire ? Math.random() * 4 + 2 : Math.random() * 8 + 4;
+            const size = isFire ? Math.random() * 6 + 3 : Math.random() * 12 + 6;
 
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 20, // Tendencia a subir
-                life: Math.random() * 1.5 + 0.5,
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 50, y + (Math.random() - 0.5) * 50, {
+                vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 10, // Algo de turbulencia
+                vy: Math.sin(angle) * speed - 30, // Tendencia a subir más rápida
+                life: isFire ? Math.random() * 0.8 + 0.2 : Math.random() * 2.0 + 1.0, // El humo dura más
                 size: size,
                 color: color,
-                gravity: -10, // Sube como humo
-                friction: 0.95,
-                fadeRate: 1.2,
-                shape: isFire ? 'circle' : 'square' // Humo cuadrado, fuego redondo
+                gravity: isFire ? -15 : -5, // El fuego sube más rápido que el humo
+                friction: 0.92,
+                fadeRate: isFire ? 1.5 : 0.8, // El fuego se apaga más rápido
+                shape: isFire ? 'circle' : 'circle' // Ambos circulares para difuminar mejor
             }));
         }
 
-        // Escombros si el daño es muy severo (cayendo)
-        if (severity > 0.8 && Math.random() < 0.3) {
-            for (let i = 0; i < 3; i++) {
-                this.particles.push(Particle.get(x, y, {
-                    vx: (Math.random() - 0.5) * 100,
-                    vy: (Math.random() - 0.5) * 50 - 50,
-                    life: Math.random() * 0.8 + 0.2,
-                    size: Math.random() * 6 + 3,
-                    color: '#8b6914', // Color piedra/madera oscuro
-                    gravity: 150, // Caen rápido
-                    friction: 0.98,
+        // Escombros y chispas cayendo
+        if (severity > 0.6) {
+            const debrisCount = Math.floor(severity * 4) + 1;
+            for (let i = 0; i < debrisCount; i++) {
+                this.particles.push(Particle.get(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
+                    vx: (Math.random() - 0.5) * 120,
+                    vy: (Math.random() - 0.5) * 80 - 60,
+                    life: Math.random() * 1.2 + 0.4,
+                    size: Math.random() * 5 + 2,
+                    color: Math.random() > 0.7 ? '#ffd700' : '#4a3f35', // Chispas o piedra
+                    gravity: 200, // Caen muy rápido
+                    friction: 0.95,
                     shape: 'square'
                 }));
             }
@@ -264,32 +265,31 @@ export class ParticleSystem {
     }
 
     // Estelas de proyectiles dinámicas
-    createProjectileTrail(x, y, targetX, targetY, color = '#ffffff') {
+    createProjectileTrail(x, y, targetX, targetY, color = 'rgba(255, 255, 255, 0.6)') {
         const dx = targetX - x;
         const dy = targetY - y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Calcular la velocidad hacia el objetivo
-        let vx = (Math.random() - 0.5) * 10;
-        let vy = (Math.random() - 0.5) * 10;
+        // La estela no debería moverse hacia el objetivo independientemente,
+        // debería quedarse estática o moverse muy poco donde se genera.
+        // Simulamos una estela que se desvanece en su lugar.
+        let vx = (Math.random() - 0.5) * 5;
+        let vy = (Math.random() - 0.5) * 5;
 
-        if (dist > 0) {
-            // Un proyectil rápido (ej. 400px/s)
-            const speed = 400;
-            vx = (dx / dist) * speed + (Math.random() - 0.5) * 20;
-            vy = (dy / dist) * speed + (Math.random() - 0.5) * 20;
+        // Añadimos múltiples partículas pequeñas para formar la estela
+        for (let i = 0; i < 3; i++) {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 4, y + (Math.random() - 0.5) * 4, {
+                vx: vx,
+                vy: vy,
+                life: 0.15 + Math.random() * 0.1, // Vida muy corta
+                size: Math.random() * 2 + 1, // Partículas más sutiles
+                color: color,
+                gravity: 10, // Caen un poquito
+                friction: 0.9,
+                fadeRate: 3.0, // Desaparecen súper rápido
+                shape: 'circle'
+            }));
         }
-
-        this.particles.push(Particle.get(x, y, {
-            vx: vx,
-            vy: vy,
-            life: 0.2 + Math.random() * 0.1, // Vida muy corta, ajustada a la distancia
-            size: Math.random() * 3 + 2, // Partículas un poco más grandes para que se vean
-            color: color,
-            gravity: 0,
-            friction: 1.0, // Sin fricción para mantener la velocidad
-            fadeRate: 2.0 // Desaparecen rápido
-        }));
     }
 
     // Efecto de destello de mina de oro

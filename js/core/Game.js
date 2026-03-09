@@ -302,6 +302,11 @@ export class Game {
         this.cursorImage = new Image();
         this.cursorImage.src = 'assets/icons/cursor.png';
 
+        // Palette: Cursor Badge for Contextual Actions
+        this.cursorBadge = document.createElement('img');
+        this.cursorBadge.className = 'cursor-badge';
+        this.cursorBadge.alt = '';
+
         // Crear elemento DOM para el cursor
         this.cursorElement = document.createElement('div');
         this.cursorElement.id = 'customCursor';
@@ -2540,71 +2545,77 @@ export class Game {
     }
 
     updateCursorState() {
-        if (!this.cursorBadge) return;
+        if (!this.cursorElement) return;
 
         let showBadge = false;
         let badgeIcon = '';
 
-        if (this.selectedEntities.length === 1) {
-            const entity = this.selectedEntities[0];
-            if (entity.team === 'player' && entity.isUnit) {
-                // BOLT OPTIMIZATION: Use SpatialGrid.find() with static predicates
-                // This replaces the previous query() + manual loop approach.
-                // It avoids array allocation (writing to cache) and leverages early exit optimization.
-                // The 'this.mouse' object is passed as context to avoid creating new objects per frame.
+        if (this.selectedEntities.length >= 1) { // Palette: Support multiple selection for attack cursor
+            // Comprobamos si al menos una entidad puede realizar la acción
+            let canAttack = false;
+            let canGather = false;
+            let canBuild = false;
 
-                // Attack Cursor Logic
-                if (entity.canAttack) {
-                    const target = this.enemyUnitGrid.find(
-                        this.mouse.worldX,
-                        this.mouse.worldY,
-                        100, // Search radius increased to cover large entities
-                        Game._cursorEnemyPredicate,
-                        this
-                    );
-
-                    if (target) {
-                        badgeIcon = 'assets/icons/swords.png';
-                        showBadge = true;
-                    }
+            for (let i = 0; i < this.selectedEntities.length; i++) {
+                const entity = this.selectedEntities[i];
+                if (entity.team === 'player' && entity.isUnit) {
+                    if (entity.canAttack) canAttack = true;
+                    if (entity.canGather && entity.type === 'villager') canGather = true;
+                    if (entity.type === 'villager') canBuild = true;
                 }
+            }
 
-                // Build/Repair Cursor Logic (Villager only) - Before Gather
-                if (!showBadge && entity.type === 'villager' && this.buildingGrid) {
-                    const target = this.buildingGrid.find(
-                        this.mouse.worldX,
-                        this.mouse.worldY,
-                        100,
-                        Game._cursorBuildingPredicate,
-                        this
-                    );
+            // Attack Cursor Logic
+            if (canAttack) {
+                const target = this.enemyUnitGrid.find(
+                    this.mouse.worldX,
+                    this.mouse.worldY,
+                    100, // Search radius increased to cover large entities
+                    Game._cursorEnemyPredicate,
+                    this
+                );
 
-                    if (target) {
-                        badgeIcon = 'assets/icons/build.png';
-                        showBadge = true;
-                    }
+                if (target) {
+                    badgeIcon = 'assets/icons/swords.png';
+                    showBadge = true;
                 }
+            }
 
-                // Gather Cursor Logic (Villager only) - Lower priority than attack
-                if (!showBadge && entity.canGather && entity.type === 'villager' && this.resourceGrid) {
-                    const res = this.resourceGrid.find(
-                        this.mouse.worldX,
-                        this.mouse.worldY,
-                        50,
-                        Game._cursorResourcePredicate,
-                        this
-                    );
+            // Build/Repair Cursor Logic (Villager only) - Before Gather
+            if (!showBadge && canBuild && this.buildingGrid) {
+                const target = this.buildingGrid.find(
+                    this.mouse.worldX,
+                    this.mouse.worldY,
+                    100,
+                    Game._cursorBuildingPredicate,
+                    this
+                );
 
-                    if (res) {
-                        // Map resource type to icon
-                        if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
-                        else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
-                        else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
-                        else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
-                        else badgeIcon = 'assets/icons/gold.png';
+                if (target) {
+                    badgeIcon = 'assets/icons/build.png';
+                    showBadge = true;
+                }
+            }
 
-                        showBadge = true;
-                    }
+            // Gather Cursor Logic (Villager only) - Lower priority than attack
+            if (!showBadge && canGather && this.resourceGrid) {
+                const res = this.resourceGrid.find(
+                    this.mouse.worldX,
+                    this.mouse.worldY,
+                    50,
+                    Game._cursorResourcePredicate,
+                    this
+                );
+
+                if (res) {
+                    // Map resource type to icon
+                    if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
+                    else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
+                    else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
+                    else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
+                    else badgeIcon = 'assets/icons/gold.png';
+
+                    showBadge = true;
                 }
             }
         }
@@ -2615,15 +2626,21 @@ export class Game {
             // Reemplazamos el cursor principal en lugar del badge para mejor feedback
             if (cursorImg && cursorImg.src !== badgeIcon && !cursorImg.src.endsWith(badgeIcon)) {
                 cursorImg.src = badgeIcon;
+                // Add a subtle pop animation to the cursor element
+                this.cursorElement.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    if (this.cursorElement) this.cursorElement.style.transform = 'scale(1)';
+                }, 100);
             }
-            this.cursorBadge.style.display = 'none'; // Ocultar badge
+            if (this.cursorBadge) this.cursorBadge.style.display = 'none'; // Ocultar badge
         } else {
             // Restaurar cursor original
             const defaultCursor = 'assets/icons/cursor.png';
             if (cursorImg && cursorImg.src !== defaultCursor && !cursorImg.src.endsWith(defaultCursor)) {
                 cursorImg.src = defaultCursor;
+                this.cursorElement.style.transform = 'scale(1)';
             }
-            this.cursorBadge.style.display = 'none';
+            if (this.cursorBadge) this.cursorBadge.style.display = 'none';
         }
     }
 
@@ -4664,7 +4681,7 @@ export class Game {
                 prodTitle.style.fontSize = '0.75rem';
                 prodTitle.style.opacity = '0.7';
                 prodTitle.style.marginBottom = '4px';
-                prodTitle.textContent = '🔨 En producción:';
+                prodTitle.textContent = '🔨 Forjando destino:';
                 prodContainer.appendChild(prodTitle);
 
                 const current = entity.productionQueue.getCurrentItem();
@@ -5025,7 +5042,7 @@ export class Game {
             buttons.push({
                 iconKey: 'villager',
                 iconFallback: '👨‍🌾',
-                label: 'Reclutar Siervo',
+                label: 'Convocar Aldeano',
                 description: 'La columna vertebral de la economía. Recolecta y erige.',
                 hotkey: 'Q',
                 cost: cost,
@@ -5040,18 +5057,18 @@ export class Game {
             const canAffordArcher = this.canAfford(archerCost);
 
             let warriorError = null;
-            if (!canAffordWarrior) warriorError = 'Recursos insuficientes';
-            else if (popFull) warriorError = 'Límite de población alcanzado';
+            if (!canAffordWarrior) warriorError = 'Las arcas del reino están vacías';
+            else if (popFull) warriorError = 'Necesitas construir más moradas';
 
             let archerError = null;
-            if (!canAffordArcher) archerError = 'Recursos insuficientes';
-            else if (popFull) archerError = 'Límite de población alcanzado';
+            if (!canAffordArcher) archerError = 'Las arcas del reino están vacías';
+            else if (popFull) archerError = 'Necesitas construir más moradas';
 
             buttons.push({
                 iconKey: 'warrior',
                 iconFallback: '⚔️',
-                label: 'Forjar Infantería',
-                description: 'Soldados leales para la línea de frente.',
+                label: 'Reclutar Espadachín',
+                description: 'La guardia leal para la línea de frente.',
                 hotkey: 'Q',
                 cost: warriorCost,
                 action: () => this.trainUnit('warrior', this.selectedEntities[0]),
@@ -5062,7 +5079,7 @@ export class Game {
             buttons.push({
                 iconKey: 'archer',
                 iconFallback: '🏹',
-                label: 'Armar Arquero',
+                label: 'Instruir Arquero',
                 description: 'Maestros del arco, letales a la distancia.',
                 hotkey: 'W',
                 cost: archerCost,

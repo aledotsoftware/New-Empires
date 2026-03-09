@@ -228,11 +228,15 @@ export class ProceduralMapGenerator {
         let cy = y1;
 
         while (true) {
+            // Añadir un offset "wobble" para que el camino parezca más natural (sinuoso)
+            const wobbleX = this.rng.int(-1, 1);
+            const wobbleY = this.rng.int(-1, 1);
+
             // Carve a small radius to make a wider path
             for(let py = -2; py <= 2; py++) {
                 for(let px = -2; px <= 2; px++) {
-                    let nx = cx + px;
-                    let ny = cy + py;
+                    let nx = cx + px + wobbleX;
+                    let ny = cy + py + wobbleY;
                     if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
                         let t = this.terrainTypes[ny][nx];
                         if (t === 'water' || t === 'mountain') {
@@ -297,17 +301,17 @@ export class ProceduralMapGenerator {
         // Lógica de transición suave basada en ruido Perlin (elevación y variación)
 
         // 1. Manejo de agua (siempre en elevaciones bajas)
-        if (elevation < 0.25 && this.style !== 'arena') {
+        if (elevation < 0.25 + (variation * 0.05) && this.style !== 'arena') {
             return 'water';
         }
 
         // 2. Manejo de montañas (siempre en elevaciones altas)
-        if (elevation > 0.75) {
+        if (elevation > 0.75 - (variation * 0.05)) {
             return 'mountain';
         }
 
         // 3. Manejo de colinas (transición hacia montañas)
-        if (elevation > 0.6) {
+        if (elevation > 0.6 - (variation * 0.05)) {
             return 'hill';
         }
 
@@ -547,9 +551,18 @@ export class ProceduralMapGenerator {
         ];
 
         for (let config of resourceConfig) {
-            for (let i = 0; i < config.count; i++) {
+            let placed = 0;
+            let attempts = 0;
+            const maxAttempts = config.count * 20; // 20 intentos por recurso
+
+            while (placed < config.count && attempts < maxAttempts) {
+                attempts++;
                 const angle = this.rng.next() * Math.PI * 2;
-                const dist = this.rng.range(config.minDist, config.maxDist);
+
+                // Si estamos fallando mucho, permitimos colocar más lejos de forma gradual
+                const extraDist = attempts > (maxAttempts / 2) ? (attempts / maxAttempts) * 10 : 0;
+                const dist = this.rng.range(config.minDist, config.maxDist + extraDist);
+
                 const x = Math.floor(start.x + Math.cos(angle) * dist);
                 const y = Math.floor(start.y + Math.sin(angle) * dist);
 
@@ -560,6 +573,7 @@ export class ProceduralMapGenerator {
                         amount: config.amount,
                         playerId: start.playerId
                     });
+                    placed++;
                 }
             }
         }

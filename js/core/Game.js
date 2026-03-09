@@ -5208,16 +5208,23 @@ export class Game {
 
                             // Show why it's disabled
                             let msg = buttonData.error || 'Acción no disponible';
-                            // If missing resources were calculated in the loop below (from previous render or just now if we could access them early)
-                            // Since we populate _missingResources in the tooltip generation below, we might miss it on FIRST render if we click instantly?
-                            // No, closures capture the object reference. If _missingResources is added to buttonData later in this same function execution,
-                            // the click handler (executed later) will see it.
-                            if (buttonData._missingResources && buttonData._missingResources.length > 0) {
+
+                            // Dynamically calculate missing resources based on current game state
+                            const currentMissingResources = [];
+                            if (buttonData.cost) {
+                                for (const [res, amount] of Object.entries(buttonData.cost)) {
+                                    if (this.resources[res] < amount) {
+                                        currentMissingResources.push(`${res} (${Math.ceil(amount - this.resources[res])})`);
+                                    }
+                                }
+                            }
+
+                            if (currentMissingResources.length > 0) {
                                 // Translate for display if raw strings
                                 const translated = [];
-                                const len = buttonData._missingResources.length;
+                                const len = currentMissingResources.length;
                                 for (let i = 0; i < len; i++) {
-                                    const mr = buttonData._missingResources[i];
+                                    const mr = currentMissingResources[i];
                                     // Extract resource name to flash it
                                     const resName = mr.split(' ')[0].trim();
                                     this.flashResource(resName); // Palette: Flash resource

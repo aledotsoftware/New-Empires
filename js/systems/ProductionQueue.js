@@ -145,14 +145,20 @@ export class ProductionQueue {
      * @returns {Object}
      */
     serialize() {
-        return {
-            buildingId: this.building?.id || null,
-            maxSize: this.maxSize,
-            queue: this.queue.map(item => ({
+        const serializedQueue = [];
+        for (let i = 0; i < this.queue.length; i++) {
+            const item = this.queue[i];
+            serializedQueue.push({
                 unitType: item.unitType,
                 remaining: item.remaining,
                 total: item.total
-            }))
+            });
+        }
+
+        return {
+            buildingId: this.building?.id || null,
+            maxSize: this.maxSize,
+            queue: serializedQueue
         };
     }
 

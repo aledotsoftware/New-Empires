@@ -970,7 +970,9 @@ export class TechManager {
         if (tech.age > this.currentAge) return false;
 
         // Verificar si ya se está investigando
-        if (this.researchQueue.some(item => item.techId === techId)) return false;
+        for (let i = 0; i < this.researchQueue.length; i++) {
+            if (this.researchQueue[i].techId === techId) return false;
+        }
 
         // Verificar prerequisitos
         if (tech.prerequisites && tech.prerequisites.length > 0) {
@@ -1005,12 +1007,26 @@ export class TechManager {
 
     // Obtener tecnologías por categoría
     getTechsByCategory(category) {
-        return Object.values(TECHNOLOGIES).filter(tech => tech.category === category);
+        const techs = Object.values(TECHNOLOGIES);
+        const result = [];
+        for (let i = 0; i < techs.length; i++) {
+            if (techs[i].category === category) {
+                result.push(techs[i]);
+            }
+        }
+        return result;
     }
 
     // Obtener tecnologías por edad
     getTechsByAge(age) {
-        return Object.values(TECHNOLOGIES).filter(tech => tech.age === age);
+        const techs = Object.values(TECHNOLOGIES);
+        const result = [];
+        for (let i = 0; i < techs.length; i++) {
+            if (techs[i].age === age) {
+                result.push(techs[i]);
+            }
+        }
+        return result;
     }
 
     // Avanzar a la siguiente edad
@@ -1168,16 +1184,25 @@ export class TechManager {
     }
 
     isResearching(techId) {
-        return this.researchQueue.some(item => item.techId === techId);
+        for (let i = 0; i < this.researchQueue.length; i++) {
+            if (this.researchQueue[i].techId === techId) return true;
+        }
+        return false;
     }
 
     getAvailableTechsForBuilding(buildingType) {
-        return Object.values(TECHNOLOGIES).filter(tech =>
-            tech.building === buildingType &&
-            !this.researchedTechs.has(tech.id) &&
-            !this.isResearching(tech.id) &&
-            tech.age <= this.currentAge // Solo mostrar tecnologías de la edad actual o anterior
-        );
+        const techs = Object.values(TECHNOLOGIES);
+        const result = [];
+        for (let i = 0; i < techs.length; i++) {
+            const tech = techs[i];
+            if (tech.building === buildingType &&
+                !this.researchedTechs.has(tech.id) &&
+                !this.isResearching(tech.id) &&
+                tech.age <= this.currentAge) { // Solo mostrar tecnologías de la edad actual o anterior
+                result.push(tech);
+            }
+        }
+        return result;
     }
 
     getCurrentAge() {

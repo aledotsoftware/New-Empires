@@ -283,7 +283,11 @@ export class SoundManager {
         debugLogger.start('Cargando sonidos del juego', 'sound');
         debugLogger.time('Carga de sonidos', 'sound');
 
-        const promises = soundsToLoad.map(sound => this.loadSound(sound.key, sound.src));
+        const promises = [];
+        for (let i = 0; i < soundsToLoad.length; i++) {
+            const sound = soundsToLoad[i];
+            promises.push(this.loadSound(sound.key, sound.src));
+        }
         await Promise.all(promises);
 
         const loadedCount = Object.keys(this.sounds).length;

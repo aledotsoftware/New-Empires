@@ -206,7 +206,10 @@ export class Game {
         this.idleVillagerIndex = 0; // Índice para el ciclo de aldeanos inactivos
 
         // Grupos de control (Ctrl+1-9 para guardar, 1-9 para seleccionar)
-        this.controlGroups = new Array(10).fill(null).map(() => []);
+        this.controlGroups = [];
+        for (let i = 0; i < 10; i++) {
+            this.controlGroups.push([]);
+        }
 
         // Pointer Lock para múltiples monitores
         this.isPointerLocked = false;
@@ -5211,17 +5214,20 @@ export class Game {
                             // the click handler (executed later) will see it.
                             if (buttonData._missingResources && buttonData._missingResources.length > 0) {
                                 // Translate for display if raw strings
-                                const translated = buttonData._missingResources.map(mr => {
+                                const translated = [];
+                                const len = buttonData._missingResources.length;
+                                for (let i = 0; i < len; i++) {
+                                    const mr = buttonData._missingResources[i];
                                     // Extract resource name to flash it
                                     const resName = mr.split(' ')[0].trim();
                                     this.flashResource(resName); // Palette: Flash resource
 
-                                    if (mr.includes('food')) return mr.replace('food', 'Comida');
-                                    if (mr.includes('wood')) return mr.replace('wood', 'Madera');
-                                    if (mr.includes('gold')) return mr.replace('gold', 'Oro');
-                                    if (mr.includes('stone')) return mr.replace('stone', 'Piedra');
-                                    return mr;
-                                });
+                                    if (mr.includes('food')) translated.push(mr.replace('food', 'Comida'));
+                                    else if (mr.includes('wood')) translated.push(mr.replace('wood', 'Madera'));
+                                    else if (mr.includes('gold')) translated.push(mr.replace('gold', 'Oro'));
+                                    else if (mr.includes('stone')) translated.push(mr.replace('stone', 'Piedra'));
+                                    else translated.push(mr);
+                                }
                                 msg = `Falta: ${translated.join(', ')}`;
                             }
 
@@ -5352,15 +5358,18 @@ export class Game {
                         // Palette: Show specific missing resources
                         if (buttonData._missingResources && buttonData._missingResources.length > 0) {
                             // Translate resource names for better UX
-                            const translatedMissing = buttonData._missingResources.map(mr => {
+                            const translatedMissing = [];
+                            const len = buttonData._missingResources.length;
+                            for (let i = 0; i < len; i++) {
+                                const mr = buttonData._missingResources[i];
                                 let [name, amt] = mr.split(' (');
                                 amt = '(' + amt;
                                 if (name === 'food') name = 'comida';
                                 else if (name === 'wood') name = 'madera';
                                 else if (name === 'gold') name = 'oro';
                                 else if (name === 'stone') name = 'piedra';
-                                return `${name} ${amt}`;
-                            });
+                                translatedMissing.push(`${name} ${amt}`);
+                            }
                             errorDiv.textContent = `❌ Falta: ${translatedMissing.join(', ')}`;
                         } else {
                             errorDiv.textContent = '❌ Recursos insuficientes';

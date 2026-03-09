@@ -60,26 +60,26 @@ export class SoundManager {
 
         const now = this.audioContext.currentTime;
 
-        // Evita superposición excesiva si se llama muy seguido
-        if (this._lastAmbientTime && now - this._lastAmbientTime < 5) return;
+        // Evita superposición excesiva si se llama muy seguido (Aumentado de 5s a 10s para reducir fatiga auditiva)
+        if (this._lastAmbientTime && now - this._lastAmbientTime < 10) return;
         this._lastAmbientTime = now;
 
         const gainNode = this.audioContext.createGain();
         gainNode.connect(this.audioContext.destination);
 
         if (biomeName === 'Bosque') {
-            // Sintetizar cantos de pájaros (alta frecuencia, corta duración)
+            // Sintetizar cantos de pájaros (suavizado para no ser irritante)
             const oscillator = this.audioContext.createOscillator();
             oscillator.connect(gainNode);
             oscillator.type = 'sine';
 
-            // Variación de tono para imitar un pájaro
-            oscillator.frequency.setValueAtTime(4000, now);
-            oscillator.frequency.exponentialRampToValueAtTime(6000, now + 0.1);
-            oscillator.frequency.exponentialRampToValueAtTime(4000, now + 0.2);
+            // Variación de tono para imitar un pájaro (Frecuencias más bajas para evitar pitidos agudos)
+            oscillator.frequency.setValueAtTime(2000, now);
+            oscillator.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
+            oscillator.frequency.exponentialRampToValueAtTime(2000, now + 0.2);
 
             gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.1, now + 0.05);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.05, now + 0.05); // Volumen más bajo
             gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
 
             oscillator.start(now);
@@ -87,7 +87,7 @@ export class SoundManager {
 
         } else if (biomeName === 'Desierto') {
             // Sintetizar viento (ruido blanco + filtro paso bajo)
-            const bufferSize = this.audioContext.sampleRate * 2; // 2 segundos
+            const bufferSize = this.audioContext.sampleRate * 3; // 3 segundos para fade out más suave
             const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
             const data = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
@@ -100,32 +100,56 @@ export class SoundManager {
             const filter = this.audioContext.createBiquadFilter();
             filter.type = 'lowpass';
             // Variar la frecuencia del filtro para simular ráfagas de viento
-            filter.frequency.setValueAtTime(100, now);
-            filter.frequency.linearRampToValueAtTime(400, now + 1);
-            filter.frequency.linearRampToValueAtTime(100, now + 2);
+            filter.frequency.setValueAtTime(80, now);
+            filter.frequency.linearRampToValueAtTime(300, now + 1.5);
+            filter.frequency.linearRampToValueAtTime(80, now + 3);
 
             noiseSource.connect(filter);
             filter.connect(gainNode);
 
             gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.05, now + 0.5);
-            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.03, now + 1); // Volumen sutil
+            gainNode.gain.linearRampToValueAtTime(0, now + 3);
 
             noiseSource.start(now);
         } else if (biomeName === 'Agua') {
             // Sonido de olas suaves
             const oscillator = this.audioContext.createOscillator();
-            oscillator.connect(gainNode);
+
+            // Usar un filtro paso bajo para hacer el sonido del agua más profundo y realista
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400;
+
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+
+            // Mezcla de ondas de baja frecuencia
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(150, now);
-            oscillator.frequency.linearRampToValueAtTime(100, now + 1.5);
+            oscillator.frequency.setValueAtTime(100, now);
+            oscillator.frequency.linearRampToValueAtTime(50, now + 2.0);
 
             gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.05, now + 0.7);
-            gainNode.gain.linearRampToValueAtTime(0, now + 1.5);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.04, now + 1.0);
+            gainNode.gain.linearRampToValueAtTime(0, now + 2.0);
 
             oscillator.start(now);
-            oscillator.stop(now + 1.5);
+            oscillator.stop(now + 2.0);
+        } else if (biomeName === 'Pastizal') {
+            // Viento muy suave y sutil
+            const oscillator = this.audioContext.createOscillator();
+            oscillator.connect(gainNode);
+            oscillator.type = 'sine';
+
+            oscillator.frequency.setValueAtTime(200, now);
+            oscillator.frequency.linearRampToValueAtTime(150, now + 1);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0, now + 1);
+
+            oscillator.start(now);
+            oscillator.stop(now + 1);
         }
     }
 

@@ -163,30 +163,37 @@ body,
    4. COMPONENTES DE MARCO MEDIEVAL
    ========================================== */
 
-/* Marco estilo piedra tallada */
+/* Marco estilo piedra tallada - Medieval Glassmorphism */
 .frame-stone {
-    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--stone-medium) 80%, transparent), color-mix(in srgb, var(--stone-dark) 90%, transparent));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: var(--border-thick) solid var(--stone-light);
     border-radius: var(--radius-medium);
     box-shadow:
         var(--shadow-medium),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
 }
 
-/* Marco estilo madera */
+/* Marco estilo madera - Medieval Glassmorphism */
 .frame-wood {
-    background: linear-gradient(180deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--wood-medium) 80%, transparent), color-mix(in srgb, var(--wood-dark) 90%, transparent));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: var(--border-thick) solid var(--wood-light);
     border-radius: var(--radius-medium);
     box-shadow:
         var(--shadow-medium),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* Marco dorado decorativo */
+/* Marco dorado decorativo - Medieval Glassmorphism */
 .frame-gold {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--stone-dark) 70%, transparent), color-mix(in srgb, var(--stone-darkest) 80%, transparent));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: var(--border-medium) solid var(--civ-theme-primary);
     box-shadow:
         0 0 0 1px var(--civ-theme-primary-dark),
@@ -871,12 +878,14 @@ body.theme-sumeria {
 
 /* Panel de información (izquierda) */
 #infoPanel {
-    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--stone-medium) 80%, transparent), color-mix(in srgb, var(--stone-dark) 90%, transparent));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 2px solid var(--stone-light);
     border-radius: var(--radius-medium);
     padding: 8px;
     overflow: hidden;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 #selectionContent {
@@ -973,11 +982,13 @@ body.theme-sumeria {
     max-width: 350px;
     margin: 0 auto;
 
-    background: linear-gradient(180deg, var(--stone-dark) 0%, var(--stone-darkest) 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--stone-dark) 80%, transparent), color-mix(in srgb, var(--stone-darkest) 90%, transparent));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 2px solid var(--stone-light);
     border-radius: var(--radius-medium);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease-in-out;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 /* Botones de acción */
@@ -989,15 +1000,15 @@ body.theme-sumeria {
     justify-content: center;
     padding: 4px 3px 3px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
     min-height: 44px;
 
-    background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
+    background: linear-gradient(180deg, rgba(61, 53, 42, 0.9) 0%, rgba(42, 35, 24, 0.95) 100%);
     border: 2px solid var(--stone-light);
     border-radius: var(--radius-small);
     box-shadow:
-        0 2px 0 rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        0 2px 0 rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .action-btn:hover:not(.disabled) {

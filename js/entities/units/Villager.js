@@ -159,8 +159,8 @@ export class Villager extends Unit {
 
                 if (this.moveTowardsTarget(this.buildTarget.x, this.buildTarget.y, deltaTime, game, minBuildDist * minBuildDist)) {
                     let buildSpeed = 50;
-                    // civilizationManager es una variable global
-                    if (game && game.civilizationId && typeof civilizationManager !== 'undefined') {
+
+                    if (game && game.civilizationId) {
                         buildSpeed *= civilizationManager.getBuildSpeed(game.civilizationId);
                     }
                     this.buildTarget.hp += buildSpeed * deltaTime;
@@ -169,9 +169,7 @@ export class Villager extends Unit {
                     this.workTimer += deltaTime;
                     if (this.workTimer >= 1.5) { // Cada 1.5 segundos
                         this.workTimer = 0;
-                        if (typeof soundManager !== 'undefined') {
-                            soundManager.play('buildWork');
-                        }
+                        soundManager.play('buildWork');
                     }
 
                     if (this.buildTarget.hp >= this.buildTarget.constructionMaxHp) {
@@ -181,9 +179,7 @@ export class Villager extends Unit {
                         this.buildTarget = null;
 
                         // Sonido de finalización
-                        if (typeof soundManager !== 'undefined') {
-                            soundManager.play('buildComplete');
-                        }
+                        soundManager.play('buildComplete');
 
                         if (game) game.showNotification("Edificio completado", "success");
                     }
@@ -220,7 +216,7 @@ export class Villager extends Unit {
 
             // BOLT OPTIMIZATION: Use cached game.renderTime instead of Date.now()
             // Eliminates 1 system call per idle villager per frame
-            const time = (typeof game !== 'undefined' && game && game.renderTime) ? game.renderTime : Date.now();
+            const time = (game && game.renderTime) ? game.renderTime : Date.now();
             const offsetY = Math.sin(time / 200) * 3; // +/- 3px
 
             // Position above head (adjust if carrying resource)

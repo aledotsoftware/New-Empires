@@ -371,11 +371,9 @@ export class Unit extends Entity {
 
             target.takeDamage(damage, this);
 
-            if (typeof soundManager !== 'undefined') {
-                soundManager.playAttack();
-                // Play hit sound with slight delay
-                setTimeout(() => soundManager.playHit(), 100);
-            }
+            soundManager.playAttack();
+            // Play hit sound with slight delay
+            setTimeout(() => soundManager.playHit(), 100);
 
             // Palette: Notify if player is under attack
             if (target.team === 'player' && game && game.notifyUnderAttack) {
@@ -421,9 +419,8 @@ export class Unit extends Entity {
 
             // Feedback ocasional de recolección (sonido y partículas especiales)
             if (Math.random() < 0.1) {
-                if (typeof soundManager !== 'undefined') {
-                    soundManager.playGather();
-                }
+                soundManager.playGather();
+
                 if (node.type === 'gold' && game && game.particleSystem) {
                     game.particleSystem.createGoldSparkle(node.x, node.y);
                 }

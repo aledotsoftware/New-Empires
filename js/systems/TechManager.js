@@ -11,7 +11,7 @@ export var TECHNOLOGIES = {};
 
 // Función para inicializar datos desde DataLoader
 export async function initializeTechData() {
-    if (!dataLoader || !dataLoader.isLoaded()) {
+    if (!dataLoader.isLoaded()) {
         console.warn('⚠️ DataLoader no disponible, usando datos por defecto');
         // Fallback a datos hardcoded si DataLoader no está disponible
         initializeFallbackData();
@@ -63,10 +63,6 @@ function initializeFallbackData() {
 
 // ========== TECNOLOGÍAS HARDCODED (FALLBACK) ==========
 // Estas se sobrescriben cuando DataLoader carga los JSON
-// Aseguramos que TECHNOLOGIES esté definido
-if (typeof TECHNOLOGIES === 'undefined') {
-    TECHNOLOGIES = {};
-}
 
 Object.assign(TECHNOLOGIES, {
     // ========== PALEOLÍTICO SUPERIOR (13.000-12.000 a.C.) - EDADES 1-2 ==========
@@ -926,7 +922,7 @@ export class TechManager {
      * Carga las tecnologías personalizadas para la civilización del jugador
      */
     loadCivilizationTechnologies() {
-        if (!dataLoader || !dataLoader.isLoaded()) {
+        if (!dataLoader.isLoaded()) {
             console.warn('⚠️ DataLoader no disponible, usando tecnologías por defecto');
             return;
         }
@@ -1106,7 +1102,7 @@ export class TechManager {
                 // Gather rate multipliers
                 if (eff.gatherRates) {
                     for (let [res, mul] of Object.entries(eff.gatherRates)) {
-                        if (this.game && typeof CONFIG !== 'undefined' && CONFIG.GATHER_RATES[res] != null) {
+                        if (this.game && CONFIG.GATHER_RATES[res] != null) {
                             CONFIG.GATHER_RATES[res] *= mul;
                         }
                     }
@@ -1169,9 +1165,7 @@ export class TechManager {
 
                 // Other misc effects
                 if (eff.maxStorage) {
-                    if (typeof CONFIG !== 'undefined') {
-                        CONFIG.MAX_STORAGE = CONFIG.MAX_STORAGE ? Math.floor(CONFIG.MAX_STORAGE * eff.maxStorage) : Math.floor(1000 * eff.maxStorage);
-                    }
+                    CONFIG.MAX_STORAGE = CONFIG.MAX_STORAGE ? Math.floor(CONFIG.MAX_STORAGE * eff.maxStorage) : Math.floor(1000 * eff.maxStorage);
                 }
             }
         } catch (e) {

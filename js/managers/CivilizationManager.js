@@ -6,17 +6,11 @@ import { dataLoader } from './DataLoader.js';
 
 export class CivilizationManager {
     getAllCivilizations() {
-        if (typeof dataLoader !== 'undefined') {
-            return dataLoader.getAllCivilizations();
-        }
-        return [];
+        return dataLoader.getAllCivilizations();
     }
 
     getCivilization(id) {
-        if (typeof dataLoader !== 'undefined') {
-            return dataLoader.getCivilizationData(id);
-        }
-        return null;
+        return dataLoader.getCivilizationData(id);
     }
 
     getStartingResources(id) {

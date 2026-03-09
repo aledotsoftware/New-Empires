@@ -48,7 +48,7 @@ export class Unit extends Entity {
         this.aiTimer -= deltaTime;
 
         if (!this.attackTarget && this.canAttack && this.aiTimer <= 0) {
-            this.findNearbyEnemy(game);
+            this.scanForEnemies(game);
             this.aiTimer = this.aiCheckInterval;
         }
 
@@ -98,11 +98,10 @@ export class Unit extends Entity {
         return false;
     }
 
-    findNearbyEnemy(game) {
+    scanForEnemies(game) {
         const searchRadius = 200;
 
         // BOLT OPTIMIZATION: Select target grid based on team to reduce search space (O(N/2))
-        // If I am player, I only search enemy grid. If I am enemy, I search player grid.
         let targetGrid;
         if (this.team === 'player') {
             targetGrid = game.enemyUnitGrid;
@@ -114,13 +113,50 @@ export class Unit extends Entity {
 
         if (!targetGrid) return; // Safety check
 
-        // OPTIMIZACIÓN: Usar find() para salir temprano si se encuentra un objetivo
-        // Evita poblar un array intermedio y lo recorre solo hasta encontrar coincidencia.
-        // OPTIMIZATION: Use static predicate and context to avoid closure allocation
-        const target = targetGrid.find(this.x, this.y, searchRadius, Unit._enemyPredicate, this);
+        // REFACTOR: Usar query() para obtener todos los enemigos en rango y priorizar
+        const enemies = [];
+        targetGrid.query(this.x, this.y, searchRadius, enemies, true);
 
-        if (target) {
-            this.attackTarget = target;
+        if (enemies.length === 0) return;
+
+        let bestTarget = null;
+        let bestScore = -Infinity;
+
+        // Evaluamos cada enemigo para encontrar el objetivo prioritario
+        for (let i = 0; i < enemies.length; i++) {
+            const enemy = enemies[i];
+
+            // Reutilizamos el predicado para comprobar validez y rango estricto (AGGRO_RADIUS_SQ)
+            if (!Unit._enemyPredicate(enemy, this)) continue;
+
+            // Puntuación base
+            let score = 0;
+
+            // Priorizar arqueros sobre aldeanos, sobre guerreros, sobre edificios
+            if (enemy.type === 'archer') {
+                score += 1000;
+            } else if (enemy.type === 'villager') {
+                score += 800;
+            } else if (enemy.type === 'warrior') {
+                score += 500;
+            } else if (enemy.isBuilding) {
+                score += 100;
+            }
+
+            // Desempatar por distancia (más cerca es mejor)
+            const dx = this.x - enemy.x;
+            const dy = this.y - enemy.y;
+            const distSq = dx * dx + dy * dy;
+            score -= distSq / 1000; // Penalización ligera por distancia
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestTarget = enemy;
+            }
+        }
+
+        if (bestTarget) {
+            this.attackTarget = bestTarget;
         }
     }
 
@@ -276,6 +312,18 @@ export class Unit extends Entity {
         return true; // Arrived
     }
 
+    takeDamage(amount, attacker = null) {
+        super.takeDamage(amount, attacker);
+
+        // Detección de amenazas: Si estamos siendo atacados por una entidad y no estamos ocupados atacando
+        if (attacker && !this.attackTarget && attacker !== this) {
+            // Si la unidad está ociosa, patrullando o recolectando, responde al ataque
+            if (this.canAttack) {
+                this.attackTarget = attacker;
+            }
+        }
+    }
+
     tryAttack(target, deltaTime, game) {
         const dx = this.x - target.x;
         const dy = this.y - target.y;
@@ -321,7 +369,7 @@ export class Unit extends Entity {
                 }
             }
 
-            target.takeDamage(damage);
+            target.takeDamage(damage, this);
 
             if (typeof soundManager !== 'undefined') {
                 soundManager.playAttack();

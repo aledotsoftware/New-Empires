@@ -61,7 +61,7 @@ export class Entity {
         }
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, attacker = null) {
         this.hp -= amount;
         if (this.hp <= 0) {
             this.hp = 0;

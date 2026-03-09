@@ -43,7 +43,7 @@ export class Villager extends Unit {
             case 'IDLE':
                 if (this.carryAmount > 0) this.findDropOffAndGo(game);
                 if (this.aiTimer <= 0) {
-                    this.findNearbyEnemy(game);
+                    this.scanForEnemies(game);
                     this.aiTimer = this.aiCheckInterval;
                 }
                 break;

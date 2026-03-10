@@ -234,8 +234,26 @@ export class FormationManager {
      * @param {Object} center - Centro donde formar
      * @param {number} spacing - Espaciado
      */
-    applyFormation(formationType, units, center, spacing = this.spacing) {
-        const positions = this.getPositions(formationType, units, center, spacing);
+    applyFormation(formationType, units, center, spacing = this.spacing, angle = 0) {
+        let positions = this.getPositions(formationType, units, center, spacing);
+
+        // Rotar las posiciones calculadas alrededor del centro según el ángulo
+        if (angle !== 0) {
+            // El ángulo natural en el que se construyen las formaciones (e.g. cuña apunta al norte por defecto, que es -PI/2)
+            // Asumiremos que las formaciones base apuntan a -PI/2 (arriba), así que la rotación extra es angle - (-PI/2)
+            const rotation = angle + Math.PI / 2;
+            const cos = Math.cos(rotation);
+            const sin = Math.sin(rotation);
+
+            positions = positions.map(pos => {
+                const dx = pos.x - center.x;
+                const dy = pos.y - center.y;
+                return {
+                    x: center.x + (dx * cos - dy * sin),
+                    y: center.y + (dx * sin + dy * cos)
+                };
+            });
+        }
 
         units.forEach((unit, index) => {
             if (positions[index]) {

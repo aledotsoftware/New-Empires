@@ -129,25 +129,28 @@ export class Unit extends Entity {
             // Reutilizamos el predicado para comprobar validez y rango estricto (AGGRO_RADIUS_SQ)
             if (!Unit._enemyPredicate(enemy, this)) continue;
 
+            // Detección de Amenazas: no "ignoren" ser atacadas mientras recolectan o patrullan
+            // Solo ignoramos enemigos no agresivos si estamos recolectando o construyendo.
+            // Las unidades militares patrullando o moviéndose DEBEN atacar a los enemigos en rango.
+            const isBusy = this.gatherTarget !== null || (this.type === 'villager' && this.state !== 'IDLE' && this.state !== 'ATTACKING');
+            if (isBusy && enemy.attackTarget !== this) {
+                continue;
+            }
+
             // Puntuación base
             let score = 0;
 
-            // Priorizar arqueros sobre aldeanos, sobre guerreros, sobre edificios
-            if (enemy.type === 'archer') {
-                score += 1000;
-            } else if (enemy.type === 'villager') {
-                score += 800;
-            } else if (enemy.type === 'warrior') {
-                score += 500;
-            } else if (enemy.isBuilding) {
-                score += 100;
+            // Prioridad absoluta a quien nos ataca
+            if (enemy.attackTarget === this) {
+                score += 5000;
             }
 
-            // Desempatar por distancia (más cerca es mejor)
             const dx = this.x - enemy.x;
             const dy = this.y - enemy.y;
             const distSq = dx * dx + dy * dy;
-            score -= distSq / 1000; // Penalización ligera por distancia
+
+            // Delegar la evaluación táctica a las subclases
+            score = this.evaluateTargetScore(enemy, score, distSq);
 
             if (score > bestScore) {
                 bestScore = score;
@@ -401,6 +404,24 @@ export class Unit extends Entity {
                 }
             }
         }
+    }
+
+    evaluateTargetScore(enemy, baseScore, distSq) {
+        let score = baseScore;
+        // Priorizar arqueros sobre aldeanos, sobre guerreros, sobre edificios
+        if (enemy.type === 'archer') {
+            score += 1000;
+        } else if (enemy.type === 'villager') {
+            score += 800;
+        } else if (enemy.type === 'warrior') {
+            score += 500;
+        } else if (enemy.isBuilding) {
+            score += 100;
+        }
+
+        // Penalización por distancia
+        score -= distSq / 1000;
+        return score;
     }
 
     tryGather(node, deltaTime, game) {

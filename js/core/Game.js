@@ -1413,6 +1413,21 @@ export class Game {
             }
         }
 
+        // Aplicar formación si se está moviendo un grupo de unidades militares
+        if (moveCommandTriggered && formationManager) {
+            const militaryUnits = this.selectedEntities.filter(e => e.isUnit && e.type !== 'villager');
+            if (militaryUnits.length > 1) {
+                // Calcular centro actual para sacar el ángulo de movimiento
+                let cx = 0, cy = 0;
+                for (let u of militaryUnits) { cx += u.x; cy += u.y; }
+                cx /= militaryUnits.length;
+                cy /= militaryUnits.length;
+
+                const angle = Math.atan2(this.mouse.worldY - cy, this.mouse.worldX - cx);
+                formationManager.applyFormation(formationManager.currentFormation, militaryUnits, { x: this.mouse.worldX, y: this.mouse.worldY }, formationManager.spacing, angle);
+            }
+        }
+
         // Palette: Visual feedback for commands
         if (this.particleSystem) {
             if (attackCommandTriggered) {

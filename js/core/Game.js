@@ -1066,11 +1066,12 @@ export class Game {
      */
     getMilitaryUnits() {
         const army = [];
+        let armyCount = 0;
         const len = this.units.length;
         for (let i = 0; i < len; i++) {
             const u = this.units[i];
             if (u.type !== 'villager' && u.team === 'player' && !u.isDead) {
-                army.push(u);
+                army[armyCount++] = u;
             }
         }
         return army;
@@ -1253,6 +1254,7 @@ export class Game {
             }
 
             const visibleSameType = [];
+            let visibleCount = 0;
             const len = cache.length;
             const camX = this.camera.x;
             const camY = this.camera.y;
@@ -1264,7 +1266,7 @@ export class Game {
                 if (u.team === 'player' && u.type === type && !u.isDead) {
                     if (u.x >= camX && u.x <= camX + viewW &&
                         u.y >= camY && u.y <= camY + viewH) {
-                        visibleSameType.push(u);
+                        visibleSameType[visibleCount++] = u;
                     }
                 }
             }
@@ -1465,11 +1467,12 @@ export class Game {
         // Filtrar entidades muertas
         // BOLT OPTIMIZATION: Removed Array.prototype.filter in favor of a manual loop to reduce allocations
         const aliveEntities = [];
+        let aliveCount = 0;
         const len = group.length;
         for (let i = 0; i < len; i++) {
             const e = group[i];
             if (!e.isDead) {
-                aliveEntities.push(e);
+                aliveEntities[aliveCount++] = e;
             }
         }
 
@@ -1520,13 +1523,14 @@ export class Game {
     deleteSelectedEntities() {
         // BOLT OPTIMIZATION: Removed Array.prototype.filter and .some in favor of manual loops
         const toDelete = [];
+        let toDeleteCount = 0;
         const selLen = this.selectedEntities.length;
         let hasEnemy = false;
 
         for (let i = 0; i < selLen; i++) {
             const e = this.selectedEntities[i];
             if (e.team === 'player' && !e.isDead) {
-                toDelete.push(e);
+                toDelete[toDeleteCount++] = e;
             } else if (e.team !== 'player') {
                 hasEnemy = true;
             }
@@ -1746,10 +1750,11 @@ export class Game {
         if (e.key === 'f' || e.key === 'F') {
             // BOLT OPTIMIZATION: Replace .filter with loop
             const selectedUnits = [];
+            let selectedCount = 0;
             const selLen = this.selectedEntities.length;
             for (let i = 0; i < selLen; i++) {
                 const e = this.selectedEntities[i];
-                if (e.isUnit) selectedUnits.push(e);
+                if (e.isUnit) selectedUnits[selectedCount++] = e;
             }
 
             if (selectedUnits.length > 1 && formationManager) {
@@ -4909,10 +4914,11 @@ export class Game {
                     // Filter selection
                     // BOLT OPTIMIZATION: Replace .filter with loop
                     const newSelection = [];
+                    let newSelectionCount = 0;
                     const selLen = this.selectedEntities.length;
                     for (let i = 0; i < selLen; i++) {
                         const ent = this.selectedEntities[i];
-                        if (ent.type === type) newSelection.push(ent);
+                        if (ent.type === type) newSelection[newSelectionCount++] = ent;
                     }
                     this.selectedEntities = newSelection;
                     // Refresh

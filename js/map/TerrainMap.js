@@ -162,16 +162,15 @@ export class TerrainMap {
     }
 
     canBuildAt(x, y, widthTiles, heightTiles) {
+        // BOLT OPTIMIZATION: Convert world coords to grid once
+        const invTileSize = this.invTileSize || (1 / this.tileSize);
+        const startCol = (x * invTileSize) | 0;
+        const startRow = (y * invTileSize) | 0;
+
+        // Iterate over tiles directly
         for (let i = 0; i < widthTiles; i++) {
             for (let j = 0; j < heightTiles; j++) {
-                // Optimización: Usar getTerrainDataAt directamente
-                // No necesitamos coordenadas exactas de pixeles para cada tile,
-                // pero getTerrainDataAt espera pixeles.
-                // Como iteramos por tiles, convertimos tile->pixel
-                const checkX = x + (i * this.tileSize);
-                const checkY = y + (j * this.tileSize);
-
-                const terrainData = this.getTerrainDataAt(checkX, checkY);
+                const terrainData = this.getTerrainDataByGrid(startCol + i, startRow + j);
                 if (!terrainData.buildable) {
                     return false;
                 }

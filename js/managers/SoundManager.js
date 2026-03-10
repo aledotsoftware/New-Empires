@@ -135,7 +135,7 @@ export class SoundManager {
 
             oscillator.start(now);
             oscillator.stop(now + 2.0);
-        } else if (biomeName === 'Pastizal') {
+                } else if (biomeName === 'Pastizal') {
             // Viento muy suave y sutil
             const oscillator = this.audioContext.createOscillator();
             oscillator.connect(gainNode);
@@ -150,6 +150,51 @@ export class SoundManager {
 
             oscillator.start(now);
             oscillator.stop(now + 1);
+        } else if (biomeName === 'Montañas' || biomeName === 'Colinas') {
+            // Eco sutil / viento de altura
+            const bufferSize = this.audioContext.sampleRate * 2; // 2 segundos
+            const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.5; // Ruido blanco reducido
+            }
+
+            const noiseSource = this.audioContext.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(400, now); // Frecuencia media para simular eco
+            filter.Q.value = 5.0; // Resonancia alta para el efecto de viento hueco
+
+            noiseSource.connect(filter);
+            filter.connect(gainNode);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.03, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+
+            noiseSource.start(now);
+        } else if (biomeName === 'Nieve') {
+            // Viento helado
+            const oscillator = this.audioContext.createOscillator();
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(300, now);
+            oscillator.frequency.linearRampToValueAtTime(200, now + 2);
+
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 800;
+
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 1);
+            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+
+            oscillator.start(now);
+            oscillator.stop(now + 2);
         }
     }
 

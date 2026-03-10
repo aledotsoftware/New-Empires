@@ -270,23 +270,28 @@ export class ParticleSystem {
         const dy = targetY - y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        // La estela no debería moverse hacia el objetivo independientemente,
-        // debería quedarse estática o moverse muy poco donde se genera.
-        // Simulamos una estela que se desvanece en su lugar.
-        let vx = (Math.random() - 0.5) * 5;
-        let vy = (Math.random() - 0.5) * 5;
+        // Calcular partículas a lo largo de la trayectoria
+        const numParticles = Math.min(Math.floor(dist / 10), 15);
 
-        // Añadimos múltiples partículas pequeñas para formar la estela
-        for (let i = 0; i < 3; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 4, y + (Math.random() - 0.5) * 4, {
-                vx: vx,
-                vy: vy,
-                life: 0.15 + Math.random() * 0.1, // Vida muy corta
-                size: Math.random() * 2 + 1, // Partículas más sutiles
+        for (let i = 0; i < numParticles; i++) {
+            const fraction = i / numParticles;
+            // Interpolar posición
+            const px = x + dx * fraction;
+            const py = y + dy * fraction;
+
+            // Variar ligeramente el tiempo de vida para dar efecto de "disparo" continuo
+            const baseLife = 0.2;
+            const lifeOffset = fraction * 0.15; // Las partículas más cercanas al objetivo duran más
+
+            this.particles.push(Particle.get(px + (Math.random() - 0.5) * 2, py + (Math.random() - 0.5) * 2, {
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                life: baseLife + lifeOffset,
+                size: Math.random() * 2 + 1,
                 color: color,
-                gravity: 10, // Caen un poquito
-                friction: 0.9,
-                fadeRate: 3.0, // Desaparecen súper rápido
+                gravity: 0,
+                friction: 1.0,
+                fadeRate: 2.0,
                 shape: 'circle'
             }));
         }

@@ -187,7 +187,7 @@ export class Villager extends Unit {
                         // Sonido de finalización
                         soundManager.play('buildComplete');
 
-                        if (game) game.showNotification("Edificio completado", "success");
+                        if (game) game.showNotification("Estructura erigida y lista", "success");
                     }
                 }
                 break;

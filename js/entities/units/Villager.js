@@ -289,7 +289,7 @@ export class Villager extends Unit {
     findNearbyResource(game, searchType) {
         if (!game || !game.resourceGrid || !searchType) return;
 
-        const searchRadius = 400; // Radio de busqueda razonable (aprox 12 tiles)
+        const searchRadius = 800; // Radio de busqueda razonable (aprox 25 tiles)
 
         // Context object to avoid closure allocation
         const context = {
@@ -325,7 +325,16 @@ export class Villager extends Unit {
         for (let i = 0; i < len; i++) {
             const b = targets[i];
             // Filter inline
-            if (b.team === this.team) {
+            let isValid = false;
+            if (b.type === 'townCenter') {
+                isValid = true;
+            } else if (this.carryType === 'wood' && b.type === 'storageWood') {
+                isValid = true;
+            } else if (this.carryType !== 'wood' && b.type === 'storage') {
+                isValid = true;
+            }
+
+            if (b.team === this.team && isValid) {
                 const dx = this.x - b.x;
                 const dy = this.y - b.y;
                 const distSq = dx * dx + dy * dy;

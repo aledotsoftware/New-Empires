@@ -688,7 +688,7 @@ export class Game {
                 // Update counts
                 if (entity.team === 'player') {
                     this._updateBuildingCount(entity.type, 1);
-                    if (entity.type === 'townCenter' || entity.type === 'storage') {
+                    if (entity.type === 'townCenter' || entity.type === 'storage' || entity.type === 'storageWood') {
                         this.dropOffPoints.push(entity);
                     }
                 }
@@ -2114,7 +2114,7 @@ export class Game {
             this._updateBuildingCount(building.type, 1);
 
             // BOLT OPTIMIZATION: Add to drop-off cache
-            if (building.type === 'townCenter' || building.type === 'storage') {
+            if (building.type === 'townCenter' || building.type === 'storage' || building.type === 'storageWood') {
                 this.dropOffPoints.push(building);
             }
 

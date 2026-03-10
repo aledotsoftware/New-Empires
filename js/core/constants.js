@@ -132,6 +132,26 @@ export const TERRAIN_TYPES = {
         resources: ['food'],
         constructionSpeed: 0,
         requiresBoat: true
+    },
+    snow: {
+        name: 'Nieve',
+        color: '#ffffff',
+        buildable: true,
+        movementSpeed: 0.8, // -20% velocidad
+        combatBonus: {
+            defense: 1.1 // +10% defensa
+        },
+        resources: ['gold', 'stone'],
+        constructionSpeed: 0.8
+    },
+    tundra: {
+        name: 'Tundra',
+        color: '#a0b0a0',
+        buildable: true,
+        movementSpeed: 0.9, // -10% velocidad
+        combatBonus: {},
+        resources: ['wood', 'food'],
+        constructionSpeed: 0.9
     }
 };
 

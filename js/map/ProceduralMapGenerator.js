@@ -155,9 +155,67 @@ export class ProceduralMapGenerator {
         // Etapa 6: Connectivity Check
         this.ensureConnectivity();
 
+        // Etapa 7: Resource Accessibility
+        this.ensureResourceAccessibility();
+
         console.log('✅ Mapa generado exitosamente');
 
         return this.exportMap();
+    }
+
+    ensureResourceAccessibility() {
+        if (this.playerStarts.length === 0 || this.resources.length === 0) return;
+
+        // Flood fill global desde el primer jugador para encontrar toda el área conectada
+        const start = this.playerStarts[0];
+        const visited = new Uint8Array(this.width * this.height);
+        const queue = new Int32Array(this.width * this.height * 2);
+
+        let head = 0;
+        let tail = 0;
+
+        // Push inicial
+        queue[tail++] = start.x;
+        queue[tail++] = start.y;
+        visited[start.y * this.width + start.x] = 1;
+
+        while (head < tail) {
+            const cx = queue[head++];
+            const cy = queue[head++];
+
+            // Check neighbors (4-way)
+            const neighbors = [
+                {x: cx+1, y: cy}, {x: cx-1, y: cy},
+                {x: cx, y: cy+1}, {x: cx, y: cy-1}
+            ];
+
+            for (let n of neighbors) {
+                if (n.x >= 0 && n.x < this.width && n.y >= 0 && n.y < this.height) {
+                    const idx = n.y * this.width + n.x;
+                    if (visited[idx] === 0) {
+                        const terrain = this.terrainTypes[n.y][n.x];
+                        if (terrain !== 'water' && terrain !== 'mountain') {
+                            visited[idx] = 1;
+                            queue[tail++] = n.x;
+                            queue[tail++] = n.y;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Ahora comprobamos cada recurso en O(1) mirando el array visited
+        for (let i = 0; i < this.resources.length; i++) {
+            const res = this.resources[i];
+            const idx = res.y * this.width + res.x;
+
+            if (visited[idx] === 0) {
+                // El recurso es inaccesible, hacemos un túnel hasta el inicio
+                // En una implementación más avanzada se conectaría al nodo visitado más cercano,
+                // pero carvePath hacia el inicio maestro es robusto y simple.
+                this.carvePath(start.x, start.y, res.x, res.y);
+            }
+        }
     }
 
     ensureConnectivity() {
@@ -262,8 +320,9 @@ export class ProceduralMapGenerator {
         this.heightmap = [];
         this.terrainTypes = [];
 
-        // Generar un segundo mapa de ruido para temperatura/humedad
+        // Generar mapas de ruido adicionales para temperatura y humedad
         const tempNoise = new PerlinNoise(this.seed + 12345);
+        const moistNoise = new PerlinNoise(this.seed + 54321);
 
         for (let y = 0; y < this.height; y++) {
             this.terrainTypes[y] = [];
@@ -276,14 +335,18 @@ export class ProceduralMapGenerator {
                 let elevation = this.perlin.octaveNoise(nx * 4, ny * 4, 4, 0.5);
                 elevation = (elevation + 1) / 2;
 
-                // Generar temperatura/variación para biomas
-                let variation = tempNoise.octaveNoise(nx * 5, ny * 5, 3, 0.5);
-                variation = (variation + 1) / 2;
+                // Generar temperatura (0.0 a 1.0)
+                let temperature = tempNoise.octaveNoise(nx * 3, ny * 3, 3, 0.5);
+                temperature = (temperature + 1) / 2;
+
+                // Generar humedad (0.0 a 1.0)
+                let moisture = moistNoise.octaveNoise(nx * 3.5, ny * 3.5, 3, 0.5);
+                moisture = (moisture + 1) / 2;
 
                 this.heightmap[y][x] = elevation;
 
-                // Determinar terreno base basado en el bioma principal y el ruido
-                let baseTerrain = this.getTerrainFromNoise(elevation, variation, this.biome);
+                // Determinar terreno base basado en la elevación, temperatura, humedad y el bioma principal
+                let baseTerrain = this.getTerrainFromNoise(elevation, temperature, moisture, this.biome);
                 this.terrainTypes[y][x] = baseTerrain;
 
                 // Aplicar modificadores de estilo de mapa (arena, islas, etc)
@@ -297,63 +360,72 @@ export class ProceduralMapGenerator {
         }
     }
 
-    getTerrainFromNoise(elevation, variation, mainBiome) {
-        // Lógica de transición suave basada en ruido Perlin (elevación y variación)
+    getTerrainFromNoise(elevation, temperature, moisture, mainBiome) {
+        // Lógica de transición suave basada en ruido Perlin usando diagrama de biomas
+
+        // Offset de bioma: Alteramos la temperatura y humedad base según el bioma principal del mapa
+        let t = temperature;
+        let m = moisture;
+
+        switch (mainBiome) {
+            case 'desert': t += 0.3; m -= 0.3; break;
+            case 'forest': m += 0.3; break;
+            case 'tundra': t -= 0.3; break;
+            case 'swamp': m += 0.4; break;
+            case 'volcanic': t += 0.4; m -= 0.2; break;
+        }
+
+        // Clamp
+        t = Math.max(0, Math.min(1, t));
+        m = Math.max(0, Math.min(1, m));
 
         // 1. Manejo de agua (siempre en elevaciones bajas)
-        if (elevation < 0.25 + (variation * 0.05) && this.style !== 'arena') {
+        if (elevation < 0.25 + (m * 0.05) && this.style !== 'arena') {
+            if (t < 0.2) return 'water'; // Agua helada (o hielo si existiese)
+            if (m > 0.8 && t > 0.6 && mainBiome === 'swamp') return 'swamp';
             return 'water';
         }
 
         // 2. Manejo de montañas (siempre en elevaciones altas)
-        if (elevation > 0.75 - (variation * 0.05)) {
+        if (elevation > 0.75 - (t * 0.05)) {
+            if (t < 0.3) return 'snow'; // Montañas nevadas
+            if (t > 0.8 && mainBiome === 'volcanic') return 'volcanic';
             return 'mountain';
         }
 
         // 3. Manejo de colinas (transición hacia montañas)
-        if (elevation > 0.6 - (variation * 0.05)) {
+        if (elevation > 0.6 - (t * 0.05)) {
+            if (t < 0.2) return 'snow';
+            if (t < 0.4) return 'tundra';
             return 'hill';
         }
 
         // 4. Biomas específicos de la llanura (0.25 - 0.6)
-        switch (mainBiome) {
-            case 'grassland':
-                if (variation > 0.7) return 'forest';
-                if (variation < 0.2) return 'desert';
-                return 'grassland';
+        // Usamos t (temperatura) y m (humedad) para definir la región
 
-            case 'forest':
-                if (variation < 0.3) return 'grassland';
-                if (variation > 0.8 && elevation < 0.4) return 'water';
-                return 'forest';
-
-            case 'desert':
-                if (variation > 0.8) return 'grassland';
-                return 'desert';
-
-            case 'volcanic':
-                if (variation > 0.6) return 'volcanic';
-                if (variation < 0.2) return 'desert';
-                return 'mountain'; // Más montañas por defecto
-
-            case 'swamp':
-                if (variation > 0.5) return 'swamp';
-                if (variation < 0.2) return 'water';
-                return 'forest';
-
-            case 'archipelago':
-                if (elevation < 0.6) return 'water';
-                if (variation > 0.7) return 'forest';
-                return 'grassland';
-
-            case 'tundra':
-                if (variation > 0.7) return 'mountain';
-                return 'grassland'; // O nieve si se añade
-
-            case 'coastal':
-            default:
-                if (variation > 0.7) return 'forest';
-                return 'grassland';
+        if (t < 0.25) {
+            // Muy frío
+            if (m > 0.5) return 'snow';
+            return 'tundra';
+        } else if (t < 0.5) {
+            // Templado/Frío
+            if (m > 0.6) return 'forest'; // Bosque de pinos (representado como bosque normal)
+            if (m < 0.3) return 'tundra';
+            return 'grassland';
+        } else if (t < 0.75) {
+            // Templado/Cálido
+            if (m > 0.6) return 'forest';
+            if (m < 0.2) return 'desert';
+            return 'grassland';
+        } else {
+            // Muy cálido
+            if (m > 0.7) {
+                if (mainBiome === 'swamp') return 'swamp';
+                return 'forest'; // Selva/Jungla
+            }
+            if (m < 0.4) return 'desert';
+            if (mainBiome === 'volcanic' && m < 0.6) return 'volcanic';
+            return 'grassland'; // Sabana
         }
     }
 
@@ -574,6 +646,61 @@ export class ProceduralMapGenerator {
                         playerId: start.playerId
                     });
                     placed++;
+                }
+            }
+
+            // Garantizar que se colocó la cantidad requerida (especialmente madera y oro inicial)
+            // Si falló en encontrar un espacio, forzamos un claro cambiando el terreno a grassland
+            if (placed < config.count) {
+                console.warn(`Generación forzada de recursos iniciales para ${config.type} (faltaron ${config.count - placed})`);
+
+                // Empezar a buscar cerca y expandir hasta que se coloquen todos
+                let forceDist = config.minDist;
+                let angleStep = Math.PI / 4; // 8 direcciones fijas
+                let currentAngle = 0;
+
+                // Límite de seguridad para evitar loops infinitos
+                let forceAttempts = 0;
+                const maxForceAttempts = 200;
+
+                while (placed < config.count && forceAttempts < maxForceAttempts) {
+                    forceAttempts++;
+                    const fx = Math.floor(start.x + Math.cos(currentAngle) * forceDist);
+                    const fy = Math.floor(start.y + Math.sin(currentAngle) * forceDist);
+
+                    // Verificar bordes del mapa
+                    if (fx >= 0 && fx < this.width && fy >= 0 && fy < this.height) {
+                        // Modificamos el terreno para que sea un espacio válido ('grassland' y nivel normal)
+                        this.terrainTypes[fy][fx] = 'grassland';
+                        this.heightmap[fy][fx] = 0.5;
+
+                        // Añadir el recurso, ya sabemos que el espacio es construible y está dentro de los límites
+                        // Comprobación mínima de que no hay ya un recurso forzado encima
+                        let isOccupied = false;
+                        for (let res of this.resources) {
+                            if (res.x === fx && res.y === fy) {
+                                isOccupied = true;
+                                break;
+                            }
+                        }
+
+                        if (!isOccupied) {
+                            this.resources.push({
+                                x: fx, y: fy,
+                                type: config.type,
+                                amount: config.amount,
+                                playerId: start.playerId
+                            });
+                            placed++;
+                        }
+                    }
+
+                    currentAngle += angleStep;
+                    // Si dimos una vuelta completa, aumentamos el radio
+                    if (currentAngle >= Math.PI * 2) {
+                        currentAngle = 0;
+                        forceDist += 2;
+                    }
                 }
             }
         }

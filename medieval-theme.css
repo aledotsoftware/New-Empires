@@ -2562,3 +2562,22 @@ body:has(button:active, a:active, input:active, [role="button"]:active, .civ-opt
     font-size: 0.8em;
     opacity: 0.7;
 }
+
+
+/* Motion Design: Transiciones suaves para todos los paneles y elementos clave */
+#infoPanel, #commandPanel, #minimapPanel, .top-panel, .resources-panel {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Transiciones para modales y menús */
+#buildMenu, #techTree, #settingsMenu, #selectionPanel, #actionsPanel {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Para animar cuando se muestran/ocultan si están controlados por clases como 'hidden' */
+.hidden {
+    opacity: 0 !important;
+    pointer-events: none;
+    transform: translateY(10px) scale(0.98);
+}
+/* Al remover .hidden, vuelven a opacidad 1 suavemente */

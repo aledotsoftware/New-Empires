@@ -2027,7 +2027,7 @@ export class Game {
 
     startBuildMode(buildingType) {
         this.buildMode = buildingType;
-        this.showNotification(`Selecciona ubicación para ${buildingType}`, 'info');
+        this.showNotification(`Designando terrenos para ${buildingType}`, 'info');
     }
 
     placeBuilding() {
@@ -2151,7 +2151,7 @@ export class Game {
                 villager.targetX = null;
             }
 
-            this.showNotification(`${building.name} (En construcción)`, 'info', { x: building.x, y: building.y });
+            this.showNotification(`Colocando los cimientos de ${building.name}`, 'info', { x: building.x, y: building.y });
         }
 
         this.buildMode = null;
@@ -2221,7 +2221,13 @@ export class Game {
         building.queueUnit(unitType, cost, trainingTime);
 
         const queueLength = building.productionQueue.length;
-        this.showNotification(`${unitType} encolado (${queueLength}/5)`, 'info');
+
+        let narrativeText = `Reclutando ${unitType}`;
+        if (unitType === 'villager') narrativeText = `Convocando colonos`;
+        if (unitType === 'warrior') narrativeText = `Forjando guerreros`;
+        if (unitType === 'archer') narrativeText = `Reclutando arqueros`;
+        this.showNotification(`${narrativeText} (${queueLength}/5)`, 'info');
+
         this.updateUI();
     }
 
@@ -2295,7 +2301,13 @@ export class Game {
                 soundManager.play(soundKey);
             }
 
-            this.showNotification(`${unit.name} entrenado`, 'success', { x: unit.x, y: unit.y });
+
+            let narrativeDone = `${unit.name} listo para servir`;
+            if (unit.type === 'villager') narrativeDone = `Colonos listos para trabajar`;
+            if (unit.type === 'warrior') narrativeDone = `Guerreros forjados en batalla`;
+            if (unit.type === 'archer') narrativeDone = `Arqueros listos para el asedio`;
+            this.showNotification(narrativeDone, 'success', { x: unit.x, y: unit.y });
+
             this.updateUI();
 
             // Si hay rally point, mover la unidad hacia allá
@@ -2566,8 +2578,10 @@ export class Game {
     updateCursorState() {
         if (!this.cursorElement) return;
 
+
         let showBadge = false;
         let badgeIcon = '';
+        let cursorClass = '';
 
         if (this.selectedEntities.length >= 1) { // Palette: Support multiple selection for attack cursor
             // Comprobamos si al menos una entidad puede realizar la acción
@@ -2596,6 +2610,7 @@ export class Game {
 
                 if (target) {
                     badgeIcon = 'assets/icons/swords.png';
+                    cursorClass = 'cursor-attack';
                     showBadge = true;
                 }
             }
@@ -2612,6 +2627,7 @@ export class Game {
 
                 if (target) {
                     badgeIcon = 'assets/icons/build.png';
+                    cursorClass = 'cursor-build';
                     showBadge = true;
                 }
             }
@@ -2628,20 +2644,30 @@ export class Game {
 
                 if (res) {
                     // Map resource type to icon
-                    if (res.type === 'wood') badgeIcon = 'assets/icons/wood.png';
-                    else if (res.type === 'food') badgeIcon = 'assets/icons/food.png';
-                    else if (res.type === 'gold') badgeIcon = 'assets/icons/gold.png';
-                    else if (res.type === 'stone') badgeIcon = 'assets/icons/stone.png';
-                    else badgeIcon = 'assets/icons/gold.png';
+                    if (res.type === 'wood') { badgeIcon = 'assets/icons/wood.png'; cursorClass = 'cursor-chop'; }
+                    else if (res.type === 'food') { badgeIcon = 'assets/icons/food.png'; cursorClass = 'cursor-farm'; }
+                    else if (res.type === 'gold') { badgeIcon = 'assets/icons/gold.png'; cursorClass = 'cursor-mine'; }
+                    else if (res.type === 'stone') { badgeIcon = 'assets/icons/stone.png'; cursorClass = 'cursor-mine'; }
+                    else { badgeIcon = 'assets/icons/gold.png'; cursorClass = 'cursor-mine'; }
 
                     showBadge = true;
                 }
             }
         }
 
-        const cursorImg = this.cursorElement.querySelector('img:not(.cursor-badge)');
+        // Apply CSS classes to body
+        document.body.classList.remove('cursor-attack', 'cursor-build', 'cursor-chop', 'cursor-farm', 'cursor-mine');
+        if (cursorClass) {
+            document.body.classList.add(cursorClass);
+            if (this.cursorElement) this.cursorElement.style.display = 'none'; // Hide custom DOM cursor
+        } else {
+            if (this.cursorElement) this.cursorElement.style.display = 'block';
+        }
 
-        if (showBadge) {
+        const cursorImg = this.cursorElement ? this.cursorElement.querySelector('img:not(.cursor-badge)') : null;
+
+        if (showBadge && cursorImg) {
+
             // Reemplazamos el cursor principal en lugar del badge para mejor feedback
             if (cursorImg && cursorImg.src !== badgeIcon && !cursorImg.src.endsWith(badgeIcon)) {
                 cursorImg.src = badgeIcon;
@@ -4408,7 +4434,7 @@ export class Game {
 
                 if (hpText) {
                     if (ent.isUnderConstruction) {
-                        hpText.textContent = `🚧 Construyendo: ${Math.floor(hpPercent)}%`;
+                        hpText.textContent = `🚧 Alzando estructura: ${Math.floor(hpPercent)}%`;
                     } else {
                         hpText.textContent = `HP: ${Math.floor(ent.hp)}/${ent.maxHp}`;
                     }
@@ -4642,7 +4668,7 @@ export class Game {
                 statusText.style.color = '#ecc94b'; // Yellow/Gold
                 statusText.style.marginBottom = '2px';
                 statusText.style.fontWeight = 'bold';
-                statusText.textContent = `🚧 Construyendo: ${Math.floor(hpPercent)}%`;
+                statusText.textContent = `🚧 Alzando estructura: ${Math.floor(hpPercent)}%`;
                 hpContainer.appendChild(statusText);
             } else {
                 const hpText = document.createElement('div');

@@ -48,11 +48,11 @@
             </button>
 
             <div class="start-buttons">
-                <button id="techTreeButton" class="btn-secondary" onclick="showTechTree()">
+                <button id="techTreeButton" class="btn-secondary">
                     <img src="assets/icons/tech.png" onerror="this.style.display='none'"
                         style="width:20px;vertical-align:middle" alt=""> Árbol de Tecnologías
                 </button>
-                <button id="settingsButtonStart" class="btn-secondary" onclick="showSettings()">
+                <button id="settingsButtonStart" class="btn-secondary">
                     <img src="assets/icons/settings.png" onerror="this.style.display='none'"
                         style="width:20px;vertical-align:middle" alt=""> Configuración
                 </button>
@@ -90,7 +90,7 @@
             <div class="modal-header">
                 <h2 id="techTreeTitle"><img src="assets/icons/tech.png" onerror="this.style.display='none'"
                         style="width:24px;vertical-align:middle" alt=""> Árbol de Tecnologías</h2>
-                <button class="btn-close" onclick="hideTechTree()" aria-label="Cerrar">✕</button>
+                <button id="closeTechTreeBtn" class="btn-close" aria-label="Cerrar">✕</button>
             </div>
             <div class="tech-tree-content" id="techTreeContent">
                 <!-- Se llena dinámicamente con JavaScript -->
@@ -264,7 +264,7 @@
                 <div class="modal-header">
                     <h2 id="buildMenuTitle"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
-                    <button class="btn-close" onclick="closeBuildMenu()" aria-label="Cerrar">✕</button>
+                    <button id="closeBuildMenuBtn" class="btn-close" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="build-grid">
                     <div class="build-option" data-building="house" role="button" tabindex="0" aria-keyshortcuts="Q"
@@ -455,7 +455,7 @@
                 <div class="modal-header">
                     <h2 id="settingsTitle"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
-                    <button class="btn-close" onclick="hideSettings()" aria-label="Cerrar">✕</button>
+                    <button id="closeSettingsBtn" class="btn-close" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
                     <div style="margin-bottom: 30px;">
@@ -670,7 +670,7 @@
             <div class="modal-content" style="max-width: 800px;">
                 <div class="modal-header">
                     <h2 id="shortcutsTitle">⌨️ Atajos de Teclado</h2>
-                    <button class="btn-close" onclick="hideShortcuts()" aria-label="Cerrar">✕</button>
+                    <button id="closeShortcutsBtn" class="btn-close" aria-label="Cerrar">✕</button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
                     <div class="controls-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
@@ -772,11 +772,6 @@
         <!-- Mensajes de Notificación -->
         <div class="notifications" id="notifications" aria-live="polite" aria-atomic="false"></div>
     </div>
-
-    <!-- Scripts globales que aún no están modularizados -->
-    <script>
-    </script>
-
 
     <!-- Main.js (ES6 Module) - Debe cargarse al final -->
     <script type="module" src="main.js"></script>

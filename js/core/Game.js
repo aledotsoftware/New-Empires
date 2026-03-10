@@ -1415,13 +1415,25 @@ export class Game {
 
         // Aplicar formación si se está moviendo un grupo de unidades militares
         if (moveCommandTriggered && formationManager) {
-            const militaryUnits = this.selectedEntities.filter(e => e.isUnit && e.type !== 'villager');
-            if (militaryUnits.length > 1) {
+            // BOLT OPTIMIZATION: Removed Array.prototype.filter in favor of manual loop to avoid allocations
+            const militaryUnits = [];
+            let militaryCount = 0;
+            const len = this.selectedEntities.length;
+            for (let i = 0; i < len; i++) {
+                const e = this.selectedEntities[i];
+                if (e.isUnit && e.type !== 'villager') {
+                    militaryUnits[militaryCount++] = e;
+                }
+            }
+            if (militaryCount > 1) {
                 // Calcular centro actual para sacar el ángulo de movimiento
                 let cx = 0, cy = 0;
-                for (let u of militaryUnits) { cx += u.x; cy += u.y; }
-                cx /= militaryUnits.length;
-                cy /= militaryUnits.length;
+                for (let i = 0; i < militaryCount; i++) {
+                    const u = militaryUnits[i];
+                    cx += u.x; cy += u.y;
+                }
+                cx /= militaryCount;
+                cy /= militaryCount;
 
                 const angle = Math.atan2(this.mouse.worldY - cy, this.mouse.worldX - cx);
                 formationManager.applyFormation(formationManager.currentFormation, militaryUnits, { x: this.mouse.worldX, y: this.mouse.worldY }, formationManager.spacing, angle);

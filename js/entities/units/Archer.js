@@ -5,6 +5,28 @@ import { Unit } from '../Unit.js';
  * Unidad de combate a distancia
  */
 export class Archer extends Unit {
+    evaluateTargetScore(enemy, baseScore, distSq) {
+        let score = baseScore;
+
+        // IA de Unidades: Mejora de decisiones para Arquero
+        // Los arqueros deben priorizar a otros arqueros (counter-fire)
+        // o a unidades frágiles. Nunca edificios si hay tropas cerca.
+        if (enemy.type === 'archer') {
+            score += 1200;
+        } else if (enemy.type === 'villager') {
+            score += 800;
+        } else if (enemy.type === 'warrior') {
+            score += 500;
+        } else if (enemy.isBuilding) {
+            score += 100;
+        }
+
+        // Penalización ligera por distancia (pueden disparar de lejos)
+        score -= distSq / 1000;
+
+        return score;
+    }
+
     constructor(x, y, team) {
         super(x, y, team);
         this.icon = 'assets/icons/archer.png';

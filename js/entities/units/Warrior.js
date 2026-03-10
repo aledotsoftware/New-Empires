@@ -5,6 +5,28 @@ import { Unit } from '../Unit.js';
  * Unidad de combate cuerpo a cuerpo
  */
 export class Warrior extends Unit {
+    evaluateTargetScore(enemy, baseScore, distSq) {
+        let score = baseScore;
+
+        // IA de Unidades: Mejora de decisiones para Guerrero (Cuerpo a cuerpo)
+        // Priorizar enemigos vulnerables o de asedio
+        if (enemy.type === 'archer') {
+            score += 800;
+        } else if (enemy.type === 'villager') {
+            score += 600;
+        } else if (enemy.type === 'warrior') {
+            score += 500;
+        } else if (enemy.isBuilding) {
+            score += 100;
+        }
+
+        // Penalización HEAVY por distancia para evitar perseguir infinitamente a arqueros que kittean
+        // Si la distancia es muy grande, ignorarlo a menos que no haya otra opción
+        score -= distSq / 100;
+
+        return score;
+    }
+
     constructor(x, y, team) {
         super(x, y, team);
         this.icon = 'assets/icons/warrior.png';

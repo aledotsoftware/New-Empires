@@ -39,6 +39,12 @@ export class Villager extends Unit {
     update(deltaTime, game) {
         this.aiTimer -= deltaTime;
 
+        // Detección de Amenazas: no "ignoren" ser atacadas mientras recolectan o patrullan
+        // Si recibimos daño, takeDamage establece attackTarget. Debemos defendernos.
+        if (this.attackTarget && this.state !== 'ATTACKING') {
+            this.state = 'ATTACKING';
+        }
+
         switch (this.state) {
             case 'IDLE':
                 if (this.carryAmount > 0) this.findDropOffAndGo(game);

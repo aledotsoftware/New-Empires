@@ -2671,10 +2671,9 @@ export class Game {
         document.body.classList.remove('cursor-attack', 'cursor-build', 'cursor-chop', 'cursor-farm', 'cursor-mine');
         if (cursorClass) {
             document.body.classList.add(cursorClass);
-            if (this.cursorElement) this.cursorElement.style.display = 'none'; // Hide custom DOM cursor
-        } else {
-            if (this.cursorElement) this.cursorElement.style.display = 'block';
         }
+
+        if (this.cursorElement) this.cursorElement.style.display = 'block';
 
         const cursorImg = this.cursorElement ? this.cursorElement.querySelector('img:not(.cursor-badge)') : null;
 

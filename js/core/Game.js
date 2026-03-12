@@ -1584,6 +1584,39 @@ export class Game {
                     let destroyedCount = 0;
                     for (const entity of toDelete) {
                         if (!entity.isDead) {
+                            // Reembolsar costo si es un edificio en construcción
+                            if (entity.isBuilding && entity.isUnderConstruction) {
+                                const cost = CONFIG.COSTS[entity.type];
+                                if (cost) {
+                                    for (const [res, amount] of Object.entries(cost)) {
+                                        this.resources[res] = (this.resources[res] || 0) + amount;
+                                        this.flashResource(res);
+                                    }
+                                }
+                            }
+
+                            // Reembolsar items en cola de producción
+                            if (entity.productionQueue) {
+                                let cancelledItems = [];
+                                if (typeof entity.productionQueue.clear === 'function') {
+                                    const result = entity.productionQueue.clear();
+                                    if (Array.isArray(result)) cancelledItems = result;
+                                } else if (entity.productionQueue.queue && Array.isArray(entity.productionQueue.queue)) {
+                                    cancelledItems = entity.productionQueue.queue.splice(0, entity.productionQueue.queue.length);
+                                }
+
+                                if (Array.isArray(cancelledItems)) {
+                                    for (const item of cancelledItems) {
+                                        if (item && item.cost) {
+                                            for (const [res, amount] of Object.entries(item.cost)) {
+                                                this.resources[res] = (this.resources[res] || 0) + amount;
+                                                this.flashResource(res);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             entity.hp = 0;
                             entity.isDead = true;
                             destroyedCount++;

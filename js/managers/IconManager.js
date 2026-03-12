@@ -148,5 +148,4 @@ export class IconManager {
     }
 }
 
-// Instancia global (se importará en main.js)
 export const iconManager = new IconManager();

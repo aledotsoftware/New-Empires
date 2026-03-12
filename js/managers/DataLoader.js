@@ -288,5 +288,4 @@ export class DataLoader {
     }
 }
 
-// Instancia global del loader
 export const dataLoader = new DataLoader();

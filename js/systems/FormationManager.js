@@ -288,5 +288,4 @@ export class FormationManager {
     }
 }
 
-// Instancia global para compatibilidad
 export const formationManager = new FormationManager();

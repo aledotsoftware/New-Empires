@@ -361,5 +361,4 @@ export class SaveManager {
     }
 }
 
-// Instancia global
 export const saveManager = new SaveManager();

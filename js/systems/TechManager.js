@@ -1,10 +1,10 @@
 import { dataLoader } from "../managers/DataLoader.js";
 // ============= EDADES HISTÓRICAS Y TECNOLOGÍAS =============
 // Este archivo ahora usa DataLoader para cargar datos desde JSON
-// Mantiene variables globales para compatibilidad con código existente
 
-// Variables globales que se llenarán desde DataLoader
-// Variables globales que se llenarán desde DataLoader
+
+
+
 export var AGES = {};
 export var TECH_CATEGORIES = {};
 export var TECHNOLOGIES = {};
@@ -948,7 +948,7 @@ export class TechManager {
                     };
                 });
 
-                // Actualizar TECHNOLOGIES global solo con las de esta civilización
+                // Actualizar TECHNOLOGIES solo con las de esta civilización
                 TECHNOLOGIES = techsObject;
                 console.log(`✅ Cargadas ${civTechs.length} tecnologías para ${civId}`);
             }

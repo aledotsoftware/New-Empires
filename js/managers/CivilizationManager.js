@@ -70,5 +70,4 @@ export class CivilizationManager {
     }
 }
 
-// Instancia global para compatibilidad con código existente
 export const civilizationManager = new CivilizationManager();

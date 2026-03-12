@@ -60,8 +60,8 @@ export class SoundManager {
 
         const now = this.audioContext.currentTime;
 
-        // Evita superposición excesiva si se llama muy seguido (Aumentado de 5s a 10s para reducir fatiga auditiva)
-        if (this._lastAmbientTime && now - this._lastAmbientTime < 10) return;
+        // Evita superposición excesiva si se llama muy seguido (Aumentado de 10s a 15s para reducir fatiga auditiva)
+        if (this._lastAmbientTime && now - this._lastAmbientTime < 15) return;
         this._lastAmbientTime = now;
 
         const gainNode = this.audioContext.createGain();
@@ -78,9 +78,9 @@ export class SoundManager {
             oscillator.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
             oscillator.frequency.exponentialRampToValueAtTime(2000, now + 0.2);
 
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.05, now + 0.05); // Volumen más bajo
-            gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 0.05); // Volumen más bajo
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2);
 
             oscillator.start(now);
             oscillator.stop(now + 0.2);
@@ -107,9 +107,9 @@ export class SoundManager {
             noiseSource.connect(filter);
             filter.connect(gainNode);
 
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.03, now + 1); // Volumen sutil
-            gainNode.gain.linearRampToValueAtTime(0, now + 3);
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.015, now + 1); // Volumen sutil
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 3);
 
             noiseSource.start(now);
         } else if (biomeName === 'Agua') {
@@ -129,13 +129,13 @@ export class SoundManager {
             oscillator.frequency.setValueAtTime(100, now);
             oscillator.frequency.linearRampToValueAtTime(50, now + 2.0);
 
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.04, now + 1.0);
-            gainNode.gain.linearRampToValueAtTime(0, now + 2.0);
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 1.0);
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 2.0);
 
             oscillator.start(now);
             oscillator.stop(now + 2.0);
-                } else if (biomeName === 'Pastizal') {
+        } else if (biomeName === 'Pastizal') {
             // Viento muy suave y sutil
             const oscillator = this.audioContext.createOscillator();
             oscillator.connect(gainNode);
@@ -144,9 +144,9 @@ export class SoundManager {
             oscillator.frequency.setValueAtTime(200, now);
             oscillator.frequency.linearRampToValueAtTime(150, now + 1);
 
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 0.5);
-            gainNode.gain.linearRampToValueAtTime(0, now + 1);
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 1);
 
             oscillator.start(now);
             oscillator.stop(now + 1);
@@ -170,9 +170,9 @@ export class SoundManager {
             noiseSource.connect(filter);
             filter.connect(gainNode);
 
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.03, now + 0.5);
-            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.015, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 2);
 
             noiseSource.start(now);
         } else if (biomeName === 'Nieve') {
@@ -189,9 +189,9 @@ export class SoundManager {
             oscillator.connect(filter);
             filter.connect(gainNode);
 
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 1);
-            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 1);
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 2);
 
             oscillator.start(now);
             oscillator.stop(now + 2);

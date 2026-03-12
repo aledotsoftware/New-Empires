@@ -247,16 +247,16 @@ export class ParticleSystem {
         }
 
         // Escombros y chispas cayendo
-        if (severity > 0.6) {
-            const debrisCount = Math.floor(severity * 4) + 1;
+        if (severity > 0.3) {
+            const debrisCount = Math.floor(severity * 5) + 1;
             for (let i = 0; i < debrisCount; i++) {
                 this.particles.push(Particle.get(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
-                    vx: (Math.random() - 0.5) * 120,
-                    vy: (Math.random() - 0.5) * 80 - 60,
-                    life: Math.random() * 1.2 + 0.4,
-                    size: Math.random() * 5 + 2,
-                    color: Math.random() > 0.7 ? '#ffd700' : '#4a3f35', // Chispas o piedra
-                    gravity: 200, // Caen muy rápido
+                    vx: (Math.random() - 0.5) * 150,
+                    vy: (Math.random() - 0.5) * 100 - 80,
+                    life: Math.random() * 1.5 + 0.5,
+                    size: Math.random() * 6 + 2,
+                    color: Math.random() > 0.7 ? '#ffd700' : '#6e5c4f', // Chispas o piedra
+                    gravity: 300, // Caen muy rápido
                     friction: 0.95,
                     shape: 'square'
                 }));
@@ -275,23 +275,28 @@ export class ParticleSystem {
 
         for (let i = 0; i < numParticles; i++) {
             const fraction = i / numParticles;
-            // Interpolar posición
+            // Interpolar posición con ligera parábola para simular caída
+            const parabolaY = Math.sin(fraction * Math.PI) * -15; // Elevación máxima en el medio
             const px = x + dx * fraction;
-            const py = y + dy * fraction;
+            const py = y + dy * fraction + parabolaY;
 
             // Variar ligeramente el tiempo de vida para dar efecto de "disparo" continuo
-            const baseLife = 0.2;
-            const lifeOffset = fraction * 0.15; // Las partículas más cercanas al objetivo duran más
+            const baseLife = 0.15;
+            const lifeOffset = fraction * 0.1; // Las partículas más cercanas al objetivo duran más
 
-            this.particles.push(Particle.get(px + (Math.random() - 0.5) * 2, py + (Math.random() - 0.5) * 2, {
-                vx: (Math.random() - 0.5) * 2,
-                vy: (Math.random() - 0.5) * 2,
+            // Mezclar el color base con tonos de estela dorada (Medieval aesthetics)
+            const isGold = Math.random() > 0.8;
+            const trailColor = isGold ? 'rgba(255, 215, 0, 0.8)' : color;
+
+            this.particles.push(Particle.get(px + (Math.random() - 0.5) * 3, py + (Math.random() - 0.5) * 3, {
+                vx: dx * 0.05 + (Math.random() - 0.5) * 5, // Ligeramente en la dirección del proyectil
+                vy: dy * 0.05 + (Math.random() - 0.5) * 5,
                 life: baseLife + lifeOffset,
-                size: Math.random() * 2 + 1,
-                color: color,
-                gravity: 0,
-                friction: 1.0,
-                fadeRate: 2.0,
+                size: Math.random() * 2 + 1.5,
+                color: trailColor,
+                gravity: 5, // Ligera caída de la estela
+                friction: 0.98,
+                fadeRate: 2.5,
                 shape: 'circle'
             }));
         }

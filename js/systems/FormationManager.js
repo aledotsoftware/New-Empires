@@ -15,15 +15,15 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     line: (units, center, spacing = 40) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
         const startX = center.x - ((count - 1) * spacing) / 2;
 
         for (let i = 0; i < count; i++) {
-            positions.push({
+            positions[i] = {
                 x: startX + i * spacing,
                 y: center.y
-            });
+            };
         }
         return positions;
     },
@@ -36,15 +36,15 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     column: (units, center, spacing = 40) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
         const startY = center.y - ((count - 1) * spacing) / 2;
 
         for (let i = 0; i < count; i++) {
-            positions.push({
+            positions[i] = {
                 x: center.x,
                 y: startY + i * spacing
-            });
+            };
         }
         return positions;
     },
@@ -57,17 +57,17 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     box: (units, center, spacing = 40) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
         const side = Math.ceil(Math.sqrt(count));
 
         for (let i = 0; i < count; i++) {
             const row = Math.floor(i / side);
             const col = i % side;
-            positions.push({
+            positions[i] = {
                 x: center.x + (col - (side - 1) / 2) * spacing,
                 y: center.y + (row - (side - 1) / 2) * spacing
-            });
+            };
         }
         return positions;
     },
@@ -80,11 +80,13 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     wedge: (units, center, spacing = 40) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
+
+        if (count === 0) return positions;
 
         // La punta de la flecha al frente
-        positions.push({ x: center.x, y: center.y });
+        positions[0] = { x: center.x, y: center.y };
 
         let row = 1;
         let placed = 1;
@@ -94,10 +96,10 @@ export const FORMATIONS = {
 
             for (let i = 0; i < unitsInRow; i++) {
                 if (placed >= count) break;
-                positions.push({
+                positions[placed] = {
                     x: startX + i * spacing,
                     y: center.y + row * spacing
-                });
+                };
                 placed++;
             }
             row++;
@@ -113,24 +115,24 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     vee: (units, center, spacing = 40) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
         const halfCount = Math.ceil(count / 2);
 
         // Lado izquierdo
         for (let i = 0; i < halfCount; i++) {
-            positions.push({
+            positions[i] = {
                 x: center.x - i * spacing * 0.7,
                 y: center.y + i * spacing
-            });
+            };
         }
 
         // Lado derecho
         for (let i = 0; i < count - halfCount; i++) {
-            positions.push({
+            positions[halfCount + i] = {
                 x: center.x + (i + 1) * spacing * 0.7,
                 y: center.y + (i + 1) * spacing
-            });
+            };
         }
 
         return positions;
@@ -144,16 +146,16 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     circle: (units, center, radius = 60) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
         const angleStep = (Math.PI * 2) / count;
 
         for (let i = 0; i < count; i++) {
             const angle = i * angleStep - Math.PI / 2; // Empezar desde arriba
-            positions.push({
+            positions[i] = {
                 x: center.x + Math.cos(angle) * radius,
                 y: center.y + Math.sin(angle) * radius
-            });
+            };
         }
         return positions;
     },
@@ -166,17 +168,17 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     echelon: (units, center, spacing = 40) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
 
         // Centrar la diagonal (que tiene tamaño de count * spacing)
         const offset = ((count - 1) * spacing) / 2;
 
         for (let i = 0; i < count; i++) {
-            positions.push({
+            positions[i] = {
                 x: center.x - offset + i * spacing,
                 y: center.y - offset + i * spacing
-            });
+            };
         }
         return positions;
     },
@@ -189,17 +191,17 @@ export const FORMATIONS = {
      * @returns {Array} Posiciones [{x, y}, ...]
      */
     spread: (units, center, spread = 80) => {
-        const positions = [];
         const count = units.length;
+        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
 
         for (let i = 0; i < count; i++) {
             // Usar una distribución más uniforme basada en índice
             const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
             const distance = (spread * 0.5) + (Math.random() * spread * 0.5);
-            positions.push({
+            positions[i] = {
                 x: center.x + Math.cos(angle) * distance,
                 y: center.y + Math.sin(angle) * distance
-            });
+            };
         }
         return positions;
     }

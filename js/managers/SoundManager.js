@@ -478,5 +478,4 @@ export class SoundManager {
     }
 }
 
-// Instancia global del SoundManager
 export const soundManager = new SoundManager();

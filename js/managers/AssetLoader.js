@@ -150,5 +150,4 @@ AssetLoader.ASSET_MAP = {
     'build': 'assets/icons/build.png'
 };
 
-// Instancia global del loader
 export const assetLoader = new AssetLoader();

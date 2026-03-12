@@ -244,7 +244,7 @@ export class Game {
         // DECORACIONES DE TERRENO
         this.terrainDecorManager = new TerrainDecorManager(this);
 
-        // SISTEMA DE TECNOLOGÍAS (variable global temporal)
+        // SISTEMA DE TECNOLOGÍAS
         this.techManager = new TechManager(this);
 
         // SISTEMA DE FOG OF WAR (Niebla de Guerra)
@@ -755,7 +755,7 @@ export class Game {
     }
 
     generateMap() {
-        // Usar el generador procedural de mapas (variable global temporal)
+        // Usar el generador procedural de mapas
         if (ProceduralMapGenerator) {
             console.log('Usando generador procedural de mapas');
 
@@ -1187,7 +1187,7 @@ export class Game {
             if (closest) {
                 this.selectedEntities = [closest];
 
-                // Reproducir sonido de selección (variable global temporal)
+                // Reproducir sonido de selección
                 if (soundManager) {
                     soundManager.playEntitySelection(closest.type);
                 }
@@ -2123,7 +2123,7 @@ export class Game {
             // Ocupar grid
             this.gridMap.occupyArea(snap.col, snap.row, size.width, size.height, building);
 
-            // Aplicar bonificaciones de civilización (variable global temporal)
+            // Aplicar bonificaciones de civilización
             civilizationManager.applyBuildingBonuses(building, this.civilizationId);
 
             this._cacheEntityTerrain(building); // OPTIMIZATION
@@ -2146,7 +2146,7 @@ export class Game {
                 this.dropOffPoints.push(building);
             }
 
-            // Reproducir sonido de inicio de construcción (variable global temporal)
+            // Reproducir sonido de inicio de construcción
             if (soundManager) {
                 soundManager.play('buildStart');
             }

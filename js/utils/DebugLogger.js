@@ -281,11 +281,10 @@ class DebugLogger {
     }
 }
 
-// Instancia global del logger
 const debugLogger = new DebugLogger();
 
-// Exponer en window para acceso desde consola
-window.debugLogger = debugLogger;
+
+
 
 // Comandos de consola útiles
 console.log(`

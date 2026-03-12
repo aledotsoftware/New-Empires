@@ -134,7 +134,7 @@
         <!-- Contenedor Principal del Juego -->
 
         <!-- Top HUD: recursos, población, tiempo y settings -->
-        <div class="top-panel">
+        <div class="top-panel premium-panel">
             <div class="resources-panel" role="region" aria-label="Recursos">
                 <div class="resource-item" role="group" aria-labelledby="woodLabel woodCount"
                     aria-describedby="woodTooltip" tabindex="0">
@@ -155,7 +155,7 @@
                         <div id="foodLabel" class="resource-label">Comida</div>
                         <div id="foodCount" class="resource-value">0</div>
                     </div>
-                    <div id="foodTooltip" class="card-tooltip">Vital para entrenar aldeanos y unidades militares.</div>
+                    <div id="foodTooltip" class="card-tooltip">Vital para reclutar aldeanos y unidades militares.</div>
                 </div>
                 <div class="resource-item" role="group" aria-labelledby="goldLabel goldCount"
                     aria-describedby="goldTooltip" tabindex="0">
@@ -260,7 +260,7 @@
         <!-- Menú de Construcción (Modal) -->
         <div id="buildMenu" class="modal-overlay hidden" role="dialog" aria-modal="true"
             aria-labelledby="buildMenuTitle" tabindex="-1">
-            <div class="modal-content build-menu">
+            <div class="modal-content premium-panel large" role="document">
                 <div class="modal-header">
                     <h2 id="buildMenuTitle"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
@@ -279,7 +279,7 @@
                         <div class="build-info">+5 población</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Casa</div>
-                            <div class="tooltip-desc">Aumenta el límite de población en +5. Necesaria para entrenar más
+                            <div class="tooltip-desc">Aumenta el límite de población en +5. Necesaria para albergar más
                                 unidades.</div>
                             <div class="tooltip-stats" style="color: #48bb78; font-size: 0.75rem; margin-top: 4px;">
                                 Bonus: +5 Pob</div>
@@ -294,10 +294,10 @@
                         <div class="build-cost">
                             <span><img src="assets/icons/wood.png" class="icon-tiny" alt="Madera"> 175</span>
                         </div>
-                        <div class="build-info">Entrena unidades</div>
+                        <div class="build-info">Forja unidades</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Cuartel</div>
-                            <div class="tooltip-desc">Edificio militar básico. Entrena Guerreros (cuerpo a cuerpo) y
+                            <div class="tooltip-desc">Edificio militar básico. Forja Guerreros (cuerpo a cuerpo) y
                                 Arqueros (distancia).</div>
                         </div>
                     </div>
@@ -313,10 +313,10 @@
                             <span><img src="assets/icons/wood.png" class="icon-tiny" alt="Madera"> 275</span>
                             <span><img src="assets/icons/stone.png" class="icon-tiny" alt="Piedra"> 100</span>
                         </div>
-                        <div class="build-info">Entrena aldeanos</div>
+                        <div class="build-info">Recluta aldeanos</div>
                         <div class="card-tooltip">
                             <div class="tooltip-header">Centro Urbano</div>
-                            <div class="tooltip-desc">Corazón de tu civilización. Entrena Aldeanos y sirve como punto de
+                            <div class="tooltip-desc">Corazón de tu civilización. Recluta Siervos y sirve como punto de
                                 entrega de recursos.</div>
                             <div class="tooltip-stats" style="color: #48bb78; font-size: 0.75rem; margin-top: 4px;">
                                 Bonus: +5 Pob</div>
@@ -748,7 +748,7 @@
         <!-- HUD Inferior (Nuevo) -->
         <div id="gameHUD">
             <!-- 1. Panel de Información (Izquierda) -->
-            <div id="infoPanel">
+            <div id="infoPanel" class="premium-panel">
                 <div id="selectionContent">
                     <!-- Se llena dinámicamente con info de la unidad -->
                     <div style="display:flex;align-items:center;height:100%;color:#888;">Nada seleccionado</div>
@@ -756,12 +756,12 @@
             </div>
 
             <!-- 2. Panel de Comandos (Centro) - Grilla 3x5 -->
-            <div id="commandPanel" tabindex="-1" style="outline: none;">
+            <div id="commandPanel" class="premium-panel" tabindex="-1" style="outline: none;">
                 <!-- Se llena dinámicamente con 15 botones -->
             </div>
 
             <!-- 3. Minimapa (Derecha) -->
-            <div id="minimapPanel">
+            <div id="minimapPanel" class="premium-panel">
                 <div class="minimap-container">
                     <canvas id="minimapCanvas" role="img"
                         aria-label="Minimapa: Muestra la posición de unidades y edificios"></canvas>

@@ -1691,7 +1691,7 @@ export class Game {
             } else {
                 // Palette: Feedback for invalid action
                 if (selLen === 0) {
-                    this.showNotification('Selecciona un aldeano para construir', 'error');
+                    this.showNotification('Convoca a un siervo para erigir estructuras', 'error');
                 } else {
                     // BOLT OPTIMIZATION: Replace .some with loop
                     let hasNonVillager = false;
@@ -2220,7 +2220,7 @@ export class Game {
      */
     trainUnit(unitType, building) {
         if (building.isUnderConstruction) {
-            this.showNotification('El edificio está en construcción', 'error');
+            this.showNotification('El bastión se encuentra en fase de cimentación', 'error');
             return;
         }
 
@@ -2543,6 +2543,15 @@ export class Game {
             const building = this.buildings[i];
 
             if (building.isDead) {
+                // Palette: Disparar efecto de destrucción de edificio solo una vez
+                if (!building._collapseProcessed) {
+                    if (this.particleSystem && typeof this.particleSystem.createBuildingCollapseEffect === 'function') {
+                        // El tamaño del efecto se basa en el tamaño del edificio
+                        this.particleSystem.createBuildingCollapseEffect(building.x, building.y, building.size * 2);
+                    }
+                    building._collapseProcessed = true;
+                }
+
                 hasDeadEntities = true;
                 hasDeadBuildings = true;
                 this._minimapDirty = true;
@@ -2701,19 +2710,25 @@ export class Game {
             }
         }
 
-        // Apply CSS classes to body
-        document.body.classList.remove('cursor-attack', 'cursor-build', 'cursor-chop', 'cursor-farm', 'cursor-mine');
-        if (cursorClass) {
-            document.body.classList.add(cursorClass);
-        }
+        // Apply contextual cursor directly via img src, avoiding CSS classes
+        const cursorImg = this.cursorElement ? this.cursorElement.querySelector('img:not(.cursor-badge)') : null;
 
-        // Hide DOM custom cursor if we have a contextual one applied via CSS, else show it
-        if (cursorClass) {
-            if (this.cursorElement) this.cursorElement.style.display = 'none';
+        if (cursorClass && cursorImg) {
+            this.cursorElement.style.display = 'block';
+            const iconMap = {
+                'cursor-attack': 'assets/icons/swords.png',
+                'cursor-build': 'assets/icons/workshop.png',
+                'cursor-chop': 'assets/icons/wood.png',
+                'cursor-farm': 'assets/icons/food.png',
+                'cursor-mine': 'assets/icons/stone.png'
+            };
+            const newSrc = iconMap[cursorClass] || 'assets/icons/cursor.png';
+            if (cursorImg.src !== newSrc && !cursorImg.src.endsWith(newSrc)) {
+                cursorImg.src = newSrc;
+            }
+            if (this.cursorBadge) this.cursorBadge.style.display = 'none';
         } else {
             if (this.cursorElement) this.cursorElement.style.display = 'block';
-
-            const cursorImg = this.cursorElement ? this.cursorElement.querySelector('img:not(.cursor-badge)') : null;
             if (cursorImg) {
                 const defaultCursor = 'assets/icons/cursor.png';
                 if (cursorImg.src !== defaultCursor && !cursorImg.src.endsWith(defaultCursor)) {
@@ -4723,7 +4738,7 @@ export class Game {
             hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
             hpBar.setAttribute('aria-valuemin', '0');
             hpBar.setAttribute('aria-valuemax', entity.maxHp);
-            hpBar.setAttribute('aria-label', entity.isUnderConstruction ? `Progreso de construcción de ${entity.name}` : `Salud de ${entity.name}`);
+            hpBar.setAttribute('aria-label', entity.isUnderConstruction ? `Erigiendo ${entity.name}` : `Salud de ${entity.name}`);
 
             const hpFill = document.createElement('div');
             hpFill.className = 'health-fill';

@@ -794,6 +794,59 @@ body.theme-spain {
 }
 
 /* ==========================================
+   21. MEDIEVAL GLASSMORPHISM & PREMIUM PANELS
+   ========================================== */
+
+/* Efecto de cristal medieval para interfaces flotantes */
+.medieval-glass {
+    background: rgba(26, 22, 18, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(232, 212, 139, 0.1);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Panel Premium con temática de civilización */
+.premium-panel {
+    background: linear-gradient(135deg,
+        rgba(44, 36, 28, 0.95) 0%,
+        rgba(26, 22, 18, 0.95) 100%);
+    border: 2px solid var(--civ-theme-primary-dark);
+    box-shadow:
+        var(--shadow-strong),
+        inset 0 0 20px var(--civ-theme-accent);
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--civ-theme-primary-light) 50%,
+        transparent 100%);
+    opacity: 0.5;
+}
+
+.premium-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        circle at top right,
+        var(--civ-theme-accent) 0%,
+        transparent 50%
+    );
+    opacity: 0.3;
+}
+
+/* ==========================================
    8. PANEL SUPERIOR DE RECURSOS
    ========================================== */
 .top-panel {
@@ -948,13 +1001,18 @@ body.theme-spain {
     gap: 8px;
     padding: 8px;
 
+    /* Theme dynamics applied via medieval-glass and custom styling overrides here if needed */
     background: linear-gradient(180deg, var(--wood-dark) 0%, var(--stone-darkest) 100%);
-    border-top: 3px solid var(--gold-dark);
+    border-top: 3px solid var(--civ-theme-primary-dark, var(--gold-dark));
     box-shadow:
         0 -4px 20px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
     z-index: var(--z-hud);
+}
+
+#gameHUD.medieval-glass {
+    background: rgba(44, 36, 28, 0.85); /* Slightly transparent wood */
 }
 
 /* Panel de información (izquierda) */
@@ -1320,12 +1378,12 @@ body.theme-spain {
     overflow-y: auto;
 
     background: linear-gradient(180deg, var(--stone-medium) 0%, var(--stone-dark) 100%);
-    border: 3px solid var(--gold-dark);
+    border: 3px solid var(--civ-theme-primary-dark, var(--gold-dark));
     border-radius: var(--radius-large);
     box-shadow:
         0 0 0 1px rgba(0, 0, 0, 0.5),
         0 20px 60px rgba(0, 0, 0, 0.7),
-        var(--shadow-gold);
+        0 0 20px var(--civ-theme-accent, rgba(201, 162, 39, 0.3));
 
     animation: modalSlideIn 0.3s ease-out;
 }

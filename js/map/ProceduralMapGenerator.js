@@ -614,89 +614,106 @@ export class ProceduralMapGenerator {
         console.log(`🌍 Recursos generados: ${this.resources.length} nodos totales`);
     }
 
+    placeCluster(centerX, centerY, config, playerId) {
+        let placed = 0;
+        let forceAttempts = 0;
+        const maxForceAttempts = config.count * 10;
+
+        // Intentar colocar recursos agrupados en espiral o aleatorio cercano
+        while (placed < config.count && forceAttempts < maxForceAttempts) {
+            forceAttempts++;
+
+            // Distancia y ángulo para clúster (muy juntos)
+            const angle = this.rng.next() * Math.PI * 2;
+            const dist = this.rng.range(0, 3 + (placed / 2)); // Se expanden a medida que crece el clúster
+
+            const fx = Math.floor(centerX + Math.cos(angle) * dist);
+            const fy = Math.floor(centerY + Math.sin(angle) * dist);
+
+            // Verificar bordes del mapa
+            if (fx >= 0 && fx < this.width && fy >= 0 && fy < this.height) {
+                const terrain = this.terrainTypes[fy][fx];
+                if (terrain !== 'water' && terrain !== 'mountain') {
+                    // Comprobación de que no hay ya un recurso forzado encima
+                    let isOccupied = false;
+                    for (let res of this.resources) {
+                        if (res.x === fx && res.y === fy) {
+                            isOccupied = true;
+                            break;
+                        }
+                    }
+
+                    if (!isOccupied) {
+                        this.resources.push({
+                            x: fx, y: fy,
+                            type: config.type,
+                            amount: config.amount,
+                            playerId: playerId
+                        });
+                        placed++;
+                    }
+                }
+            }
+        }
+        return placed;
+    }
+
     placeStartingResources(start) {
         const resourceConfig = [
-            { type: 'wood', count: 12, minDist: 6, maxDist: 16, amount: 800 },   // Garantizado más madera cerca
-            { type: 'food', count: 8, minDist: 6, maxDist: 15, amount: 500 },
-            { type: 'gold', count: 6, minDist: 8, maxDist: 20, amount: 1200 }, // Garantizado más oro cerca
-            { type: 'stone', count: 4, minDist: 10, maxDist: 25, amount: 800 }
+            { type: 'wood', count: 12, minDist: 8, maxDist: 14, amount: 800 },
+            { type: 'food', count: 8, minDist: 7, maxDist: 12, amount: 500 },
+            { type: 'gold', count: 6, minDist: 9, maxDist: 15, amount: 1200 },
+            { type: 'stone', count: 4, minDist: 10, maxDist: 18, amount: 800 }
         ];
 
         for (let config of resourceConfig) {
             let placed = 0;
             let attempts = 0;
-            const maxAttempts = config.count * 20; // 20 intentos por recurso
+            const maxAttempts = 50;
 
+            // Intentar encontrar un buen centro para el clúster
             while (placed < config.count && attempts < maxAttempts) {
                 attempts++;
                 const angle = this.rng.next() * Math.PI * 2;
-
-                // Si estamos fallando mucho, permitimos colocar más lejos de forma gradual
-                const extraDist = attempts > (maxAttempts / 2) ? (attempts / maxAttempts) * 10 : 0;
+                const extraDist = attempts > (maxAttempts / 2) ? (attempts / maxAttempts) * 5 : 0;
                 const dist = this.rng.range(config.minDist, config.maxDist + extraDist);
 
-                const x = Math.floor(start.x + Math.cos(angle) * dist);
-                const y = Math.floor(start.y + Math.sin(angle) * dist);
+                const cx = Math.floor(start.x + Math.cos(angle) * dist);
+                const cy = Math.floor(start.y + Math.sin(angle) * dist);
 
-                if (this.isValidResourcePosition(x, y)) {
-                    this.resources.push({
-                        x, y,
-                        type: config.type,
-                        amount: config.amount,
-                        playerId: start.playerId
-                    });
-                    placed++;
+                if (this.isValidResourceCenter(cx, cy)) {
+                    // Solo intentar colocar los que faltan
+                    const remaining = config.count - placed;
+                    const batchConfig = { ...config, count: remaining };
+                    placed += this.placeCluster(cx, cy, batchConfig, start.playerId);
                 }
             }
 
-            // Garantizar que se colocó la cantidad requerida (especialmente madera y oro inicial)
-            // Si falló en encontrar un espacio, forzamos un claro cambiando el terreno a grassland
+            // Fallback: forzar ubicación cerca del inicio si no se encontró centro o no se colocaron todos
             if (placed < config.count) {
-                console.warn(`Generación forzada de recursos iniciales para ${config.type} (faltaron ${config.count - placed})`);
+                console.warn(`Generación forzada de recursos iniciales en clúster para ${config.type}`);
 
-                // Empezar a buscar cerca y expandir hasta que se coloquen todos
                 let forceDist = config.minDist;
-                let angleStep = Math.PI / 4; // 8 direcciones fijas
+                let angleStep = Math.PI / 4;
                 let currentAngle = 0;
+                let forceCenterAttempts = 0;
 
-                // Límite de seguridad para evitar loops infinitos
-                let forceAttempts = 0;
-                const maxForceAttempts = 200;
+                while (placed < config.count && forceCenterAttempts < 50) {
+                    forceCenterAttempts++;
+                    const cx = Math.floor(start.x + Math.cos(currentAngle) * forceDist);
+                    const cy = Math.floor(start.y + Math.sin(currentAngle) * forceDist);
 
-                while (placed < config.count && forceAttempts < maxForceAttempts) {
-                    forceAttempts++;
-                    const fx = Math.floor(start.x + Math.cos(currentAngle) * forceDist);
-                    const fy = Math.floor(start.y + Math.sin(currentAngle) * forceDist);
+                    if (cx >= 0 && cx < this.width && cy >= 0 && cy < this.height) {
+                        // Modificar el centro para asegurar que se puede construir el clúster
+                        this.terrainTypes[cy][cx] = 'grassland';
+                        this.heightmap[cy][cx] = 0.5;
 
-                    // Verificar bordes del mapa
-                    if (fx >= 0 && fx < this.width && fy >= 0 && fy < this.height) {
-                        // Modificamos el terreno para que sea un espacio válido ('grassland' y nivel normal)
-                        this.terrainTypes[fy][fx] = 'grassland';
-                        this.heightmap[fy][fx] = 0.5;
-
-                        // Añadir el recurso, ya sabemos que el espacio es construible y está dentro de los límites
-                        // Comprobación mínima de que no hay ya un recurso forzado encima
-                        let isOccupied = false;
-                        for (let res of this.resources) {
-                            if (res.x === fx && res.y === fy) {
-                                isOccupied = true;
-                                break;
-                            }
-                        }
-
-                        if (!isOccupied) {
-                            this.resources.push({
-                                x: fx, y: fy,
-                                type: config.type,
-                                amount: config.amount,
-                                playerId: start.playerId
-                            });
-                            placed++;
-                        }
+                        const remaining = config.count - placed;
+                        const batchConfig = { ...config, count: remaining };
+                        placed += this.placeCluster(cx, cy, batchConfig, start.playerId);
                     }
 
                     currentAngle += angleStep;
-                    // Si dimos una vuelta completa, aumentamos el radio
                     if (currentAngle >= Math.PI * 2) {
                         currentAngle = 0;
                         forceDist += 2;
@@ -707,20 +724,24 @@ export class ProceduralMapGenerator {
     }
 
     placeNeutralResources(type, count) {
-        let placed = 0;  // Cambiado de const a let para poder incrementar
-        const maxAttempts = count * 10;
+        // En lugar de colocar 1 a 1, colocamos clústers de un tamaño base
+        const clusterSize = type === 'wood' ? 6 : type === 'food' ? 4 : type === 'gold' ? 4 : 3;
+        const amount = type === 'gold' ? 1500 : type === 'stone' ? 1200 : type === 'wood' ? 800 : 700;
+
+        const numClusters = Math.ceil(count / clusterSize);
+        let clustersPlaced = 0;
+        const maxAttempts = numClusters * 20;
         let attempts = 0;
 
-        while (placed < count && attempts < maxAttempts) {
+        while (clustersPlaced < numClusters && attempts < maxAttempts) {
             attempts++;
-            const x = this.rng.int(10, this.width - 10);
-            const y = this.rng.int(10, this.height - 10);
+            const cx = this.rng.int(10, this.width - 10);
+            const cy = this.rng.int(10, this.height - 10);
 
-            if (this.isValidResourcePosition(x, y)) {
-                // Evitar colocar muy cerca de posiciones iniciales
+            if (this.isValidResourceCenter(cx, cy)) {
                 let tooClose = false;
                 for (let start of this.playerStarts) {
-                    const dist = Math.sqrt((x - start.x) ** 2 + (y - start.y) ** 2);
+                    const dist = Math.sqrt((cx - start.x) ** 2 + (cy - start.y) ** 2);
                     if (dist < 25) {
                         tooClose = true;
                         break;
@@ -728,32 +749,30 @@ export class ProceduralMapGenerator {
                 }
 
                 if (!tooClose) {
-                    // Cantidades mejoradas para recursos neutrales
-                    const amount = type === 'gold' ? 1500 :    // Oro: 1200 → 1500
-                        type === 'stone' ? 1200 :   // Piedra: 1000 → 1200
-                            type === 'wood' ? 800 : 700; // Madera: 800, Comida: 700
-                    this.resources.push({
-                        x, y,
-                        type,
-                        amount,
-                        playerId: null
-                    });
-                    placed++;  // IMPORTANTE: Incrementar contador
+                    const placedInCluster = this.placeCluster(cx, cy, {
+                        type: type,
+                        count: clusterSize,
+                        amount: amount
+                    }, null);
+
+                    if (placedInCluster > 0) {
+                        clustersPlaced++;
+                    }
                 }
             }
         }
     }
 
-    isValidResourcePosition(x, y) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) return false;
+    isValidResourceCenter(cx, cy) {
+        if (cx < 0 || cx >= this.width || cy < 0 || cy >= this.height) return false;
 
-        const terrain = this.terrainTypes[y][x];
+        const terrain = this.terrainTypes[cy][cx];
         if (terrain === 'water' || terrain === 'mountain') return false;
 
-        // Verificar que no haya otro recurso muy cerca
+        // Verificar que el centro no esté muy cerca de otros recursos
         for (let res of this.resources) {
-            const dist = Math.sqrt((x - res.x) ** 2 + (y - res.y) ** 2);
-            if (dist < 3) return false;
+            const dist = Math.sqrt((cx - res.x) ** 2 + (cy - res.y) ** 2);
+            if (dist < 5) return false; // Distancia mínima entre clústers
         }
 
         return true;

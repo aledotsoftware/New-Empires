@@ -21,16 +21,26 @@ export class TerrainDecorManager {
                 // Add probability for decorations based on terrain using deterministic RNG
                 if (rng.next() < 0.05) {
                     if (terrain === 'grassland') {
-                        if (rng.next() > 0.5) {
+                        const roll = rng.next();
+                        if (roll > 0.7) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'flower', variant: rng.int(0, 2) });
+                        } else if (roll > 0.4) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'bush', variant: rng.int(0, 1) });
                         } else {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'tall_grass', variant: rng.int(0, 1) });
                         }
                     } else if (terrain === 'forest') {
-                        this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'mushroom', variant: rng.int(0, 1) });
+                        if (rng.next() > 0.7) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'fallen_log', variant: rng.int(0, 1) });
+                        } else {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'mushroom', variant: rng.int(0, 1) });
+                        }
                     } else if (terrain === 'desert') {
-                        if (rng.next() > 0.5) {
+                        const roll = rng.next();
+                        if (roll > 0.7) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'cactus', variant: rng.int(0, 1) });
+                        } else if (roll > 0.4) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'animal_bones', variant: rng.int(0, 1) });
                         } else {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'dry_brush', variant: rng.int(0, 1) });
                         }
@@ -38,8 +48,18 @@ export class TerrainDecorManager {
                         this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'rock', variant: rng.int(0, 2) });
                     } else if (terrain === 'snow' || terrain === 'tundra') {
                         this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'snow_drift', variant: rng.int(0, 2) });
-                    } else if (terrain === 'swamp' || terrain === 'water') {
-                        if (rng.next() > 0.8) {
+                    } else if (terrain === 'swamp') {
+                        if (rng.next() > 0.5) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'dead_tree', variant: rng.int(0, 1) });
+                        } else {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'lily_pad', variant: rng.int(0, 1) });
+                        }
+                    } else if (terrain === 'water') {
+                        // Comprobar si está cerca de la costa (usamos la heurística de los bordes o ruido)
+                        // Para simplificar, si es un tile de agua pero no muy profundo
+                        if (rng.next() > 0.6) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'reeds', variant: rng.int(0, 1) });
+                        } else if (rng.next() > 0.8) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'lily_pad', variant: rng.int(0, 1) });
                         }
                     }
@@ -74,13 +94,43 @@ export class TerrainDecorManager {
                 ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, TILE_SIZE / 3, 0.2, Math.PI * 2 - 0.2);
                 ctx.lineTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2);
                 ctx.fill();
-            } else if (decor.type === 'tall_grass' || decor.type === 'dry_brush') {
+            } else if (decor.type === 'tall_grass' || decor.type === 'dry_brush' || decor.type === 'reeds') {
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = this.getColorForDecor(decor);
                 for (let i = 0; i < 3; i++) {
                     ctx.moveTo(screenX + TILE_SIZE/3 + i * 4, screenY + TILE_SIZE/1.5);
                     ctx.lineTo(screenX + TILE_SIZE/3 + i * 4 + (i - 1) * 2, screenY + TILE_SIZE/3 + Math.random() * 4);
                 }
+                ctx.stroke();
+            } else if (decor.type === 'bush') {
+                ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, TILE_SIZE / 3, 0, Math.PI * 2);
+                ctx.arc(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 2, TILE_SIZE / 4, 0, Math.PI * 2);
+                ctx.arc(screenX + (TILE_SIZE * 2) / 3, screenY + TILE_SIZE / 2, TILE_SIZE / 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (decor.type === 'fallen_log') {
+                ctx.lineWidth = Math.floor(TILE_SIZE / 4);
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = this.getColorForDecor(decor);
+                ctx.moveTo(screenX + TILE_SIZE / 4, screenY + TILE_SIZE / 3);
+                ctx.lineTo(screenX + (TILE_SIZE * 3) / 4, screenY + (TILE_SIZE * 2) / 3);
+                ctx.stroke();
+            } else if (decor.type === 'animal_bones') {
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.moveTo(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 2);
+                ctx.lineTo(screenX + (TILE_SIZE * 2) / 3, screenY + TILE_SIZE / 2);
+                ctx.moveTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 3);
+                ctx.lineTo(screenX + TILE_SIZE / 2, screenY + (TILE_SIZE * 2) / 3);
+                ctx.stroke();
+            } else if (decor.type === 'dead_tree') {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#3e2723';
+                ctx.moveTo(screenX + TILE_SIZE / 2, screenY + (TILE_SIZE * 3) / 4);
+                ctx.lineTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 4);
+                ctx.moveTo(screenX + TILE_SIZE / 2, screenY + Math.floor(TILE_SIZE * 0.4));
+                ctx.lineTo(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 5);
+                ctx.moveTo(screenX + TILE_SIZE / 2, screenY + Math.floor(TILE_SIZE * 0.5));
+                ctx.lineTo(screenX + (TILE_SIZE * 2) / 3, screenY + Math.floor(TILE_SIZE * 0.3));
                 ctx.stroke();
             } else {
                 // Default simple arc
@@ -99,7 +149,12 @@ export class TerrainDecorManager {
             case 'cactus': return '#388e3c';
             case 'rock': return '#9e9e9e';
             case 'tall_grass': return decor.variant === 0 ? '#4caf50' : '#8bc34a';
+            case 'bush': return decor.variant === 0 ? '#388e3c' : '#2e7d32';
+            case 'fallen_log': return decor.variant === 0 ? '#5d4037' : '#4e342e';
             case 'dry_brush': return decor.variant === 0 ? '#a1887f' : '#bcaaa4';
+            case 'animal_bones': return '#e0e0e0';
+            case 'dead_tree': return '#3e2723';
+            case 'reeds': return decor.variant === 0 ? '#827717' : '#9e9d24';
             case 'snow_drift': return decor.variant === 0 ? '#e0f7fa' : '#ffffff';
             case 'lily_pad': return '#2e7d32';
             default: return '#000000';

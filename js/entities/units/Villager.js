@@ -89,7 +89,9 @@ export class Villager extends Unit {
 
                         // BOLT OPTIMIZATION: Use local CONFIG (imported) instead of global check.
                         // Kept Math.min for readability as V8 optimizes it well.
-                        const rate = CONFIG.GATHER_RATES[this.currentResourceNode.type];
+                        const baseRate = CONFIG.GATHER_RATES[this.currentResourceNode.type] || 1;
+                        const multiplier = this.gatherMultiplier || 1.0;
+                        const rate = baseRate * multiplier;
                         const amount = Math.min(rate, this.currentResourceNode.amount, this.maxCarry - this.carryAmount);
 
                         this.currentResourceNode.amount -= amount;

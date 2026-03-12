@@ -1,0 +1,97 @@
+{
+    "civilizationId": "incas",
+    "name": "Imperio Inca",
+    "description": "Nación de las montañas con fortalezas de piedra y guerreros adaptados a la altura.",
+    "icon": "assets/icons/civs/argentinians.png",
+    "color": "#e6a100",
+    "primaryColor": "#d4af37",
+    "secondaryColor": "#8b4513",
+    "bonuses": {
+        "buildSpeed": 1.1,
+        "buildingHp": 1.1,
+        "infantryAttack": 1.0,
+        "gatherSpeed": 1.1,
+        "startingResources": {
+            "wood": 0,
+            "food": 0,
+            "gold": 0,
+            "stone": 100
+        }
+    },
+    "unitOverrides": {
+        "villager": {
+            "name": "Puric",
+            "icon": "assets/icons/villager.png",
+            "gatherBonus": 1.1
+        },
+        "warrior": {
+            "name": "Guerrero con Macana",
+            "icon": "assets/icons/warrior.png",
+            "attack": 11,
+            "hp": 100,
+            "speed": 50
+        },
+        "archer": {
+            "name": "Hondero",
+            "icon": "assets/icons/archer.png",
+            "attack": 9,
+            "hp": 55,
+            "speed": 55
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Ushnu",
+            "icon": "assets/icons/townCenter.png",
+            "description": "Centro ceremonial y administrativo inca"
+        },
+        "house": {
+            "name": "Kancha",
+            "icon": "assets/icons/house.png",
+            "description": "Vivienda andina"
+        },
+        "barracks": {
+            "name": "Kallanka",
+            "icon": "assets/icons/barracks.png",
+            "description": "Estructura militar y de alojamiento"
+        }
+    },
+    "uniqueUnit": {
+        "id": "kamayuk",
+        "name": "Kamayuk",
+        "icon": "assets/icons/warrior.png",
+        "baseUnit": "spearman",
+        "age": 19,
+        "bonuses": {
+            "attackDamage": 1.25,
+            "maxHp": 1.2,
+            "speed": 1.1
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "incaRoads",
+            "name": "Qhapaq Ñan",
+            "icon": "assets/icons/tech_economy.png",
+            "category": "ECONOMY",
+            "age": 18,
+            "description": "Red de caminos que incrementa la velocidad de las unidades y eficiencia económica.",
+            "cost": {
+                "stone": 200,
+                "food": 200
+            },
+            "researchTime": 45,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "unitSpeed": 1.15,
+                "gatherRates": {
+                    "food": 1.1,
+                    "wood": 1.1,
+                    "gold": 1.1,
+                    "stone": 1.1
+                }
+            }
+        }
+    ]
+}

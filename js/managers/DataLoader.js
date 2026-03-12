@@ -26,7 +26,7 @@ export class DataLoader {
         // Lista de civilizaciones (cargadas dinámicamente desde assets/civilization/)
         this.AVAILABLE_CIVS = [
             'mongols', 'sumeria', 'romans', 'vikings', 'argentinians',
-            'babylon', 'byzantium', 'caliphate', 'egypt', 'greece', 'persia', 'spain'
+            'babylon', 'byzantium', 'caliphate', 'egypt', 'greece', 'persia', 'spain', 'incas'
         ];
 
         // Cache para resultados de _applyOverrides

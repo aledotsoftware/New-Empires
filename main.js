@@ -45,7 +45,7 @@ let lastFocusedElement = null;
 /**
  * Muestra el árbol de tecnologías
  */
-window.showTechTree = function () {
+function showTechTree() {
     debugLogger.info('Abriendo árbol de tecnologías', 'ui');
 
     // Palette: Auto-pause game
@@ -85,7 +85,7 @@ window.showTechTree = function () {
 /**
  * Oculta el árbol de tecnologías
  */
-window.hideTechTree = function () {
+function hideTechTree() {
     debugLogger.info('Cerrando árbol de tecnologías', 'ui');
 
     FocusManager.releaseTrap();
@@ -103,7 +103,7 @@ window.hideTechTree = function () {
 /**
  * Muestra la pantalla de atajos de teclado
  */
-window.showShortcuts = function () {
+function showShortcuts() {
     debugLogger.info('Abriendo atajos', 'ui');
 
     // Palette: Auto-pause game
@@ -124,7 +124,7 @@ window.showShortcuts = function () {
 /**
  * Oculta la pantalla de atajos de teclado
  */
-window.hideShortcuts = function () {
+function hideShortcuts() {
     debugLogger.info('Cerrando atajos', 'ui');
 
     FocusManager.releaseTrap();
@@ -142,7 +142,7 @@ window.hideShortcuts = function () {
 /**
  * Muestra la pantalla de configuración
  */
-window.showSettings = function () {
+function showSettings() {
     debugLogger.info('Abriendo configuración', 'ui');
 
     // Palette: Auto-pause game
@@ -195,7 +195,7 @@ window.showSettings = function () {
 };
 
 // Palette: Generic confirmation modal helper
-window.showConfirmation = function (message, onConfirm, onCancel) {
+function showConfirmation(message, onConfirm, onCancel) {
     const modal = document.getElementById('confirmationModal');
     const msgEl = document.getElementById('confirmMessage');
     const yesBtn = document.getElementById('confirmYesBtn');
@@ -234,7 +234,7 @@ window.showConfirmation = function (message, onConfirm, onCancel) {
 };
 
 // Palette: Handle quit game action with custom modal
-window.confirmQuitGame = function () {
+function confirmQuitGame() {
     showConfirmation(
         '¿Estás seguro de que quieres abandonar? El progreso no guardado se perderá.',
         () => {
@@ -245,7 +245,7 @@ window.confirmQuitGame = function () {
 };
 
 // Palette: Handle restart game action with custom modal
-window.confirmRestartGame = function () {
+function confirmRestartGame() {
     showConfirmation(
         '¿Estás seguro de que quieres reiniciar? El progreso actual se perderá y se generará un nuevo mapa.',
         () => {
@@ -258,7 +258,7 @@ window.confirmRestartGame = function () {
 /**
  * Oculta la pantalla de configuración
  */
-window.hideSettings = function () {
+function hideSettings() {
     debugLogger.info('Cerrando configuración', 'ui');
 
     FocusManager.releaseTrap();
@@ -276,7 +276,7 @@ window.hideSettings = function () {
 /**
  * Actualiza la configuración de grid
  */
-window.updateGridSetting = function (enabled) {
+function updateGridSetting(enabled) {
     debugLogger.info(`Grid ${enabled ? 'activado' : 'desactivado'}`, 'ui');
     if (game) {
         game.showGrid = enabled;
@@ -284,11 +284,11 @@ window.updateGridSetting = function (enabled) {
 };
 
 // Compatibilidad: función global legacy usada en HTML
-window.toggleGrid = function () {
+function toggleGrid() {
     let newState = false;
-    if (window.game) {
-        window.game.showGrid = !window.game.showGrid;
-        newState = window.game.showGrid;
+    if (game) {
+        game.showGrid = !game.showGrid;
+        newState = game.showGrid;
     } else {
         const toggleElement = document.getElementById('gridToggleValue');
         if (toggleElement) {
@@ -309,11 +309,11 @@ window.toggleGrid = function () {
 };
 
 // Toggle para ciclo de aldeanos inactivos (sincronizado con game.js)
-window.toggleIdleVillagerCycle = function () {
+function toggleIdleVillagerCycle() {
     let newState = false;
-    if (window.game) {
-        window.game.enableIdleVillagerCycle = !window.game.enableIdleVillagerCycle;
-        newState = window.game.enableIdleVillagerCycle;
+    if (game) {
+        game.enableIdleVillagerCycle = !game.enableIdleVillagerCycle;
+        newState = game.enableIdleVillagerCycle;
     } else {
         const toggleElement = document.getElementById('idleVillagerToggleValue');
         if (toggleElement) {
@@ -341,13 +341,13 @@ window.toggleIdleVillagerCycle = function () {
  * Toggle pause state via UI button
  * Palette: Pause/Resume functionality
  */
-window.togglePauseGame = function () {
-    if (window.game) {
-        window.game.togglePause();
+function togglePauseGame() {
+    if (game) {
+        game.togglePause();
     }
 };
 
-window.toggleSound = function () {
+function toggleSound() {
     let newState = false;
     if (typeof soundManager !== 'undefined') {
         soundManager.setEnabled(!soundManager.enabled);
@@ -378,7 +378,7 @@ window.toggleSound = function () {
     const volSlider = document.getElementById('volumeSlider');
     if (volSlider) {
         // Force update of volume icon
-        window.updateSoundVolume(volSlider.value);
+        updateSoundVolume(volSlider.value);
     }
 };
 
@@ -386,7 +386,7 @@ window.toggleSound = function () {
  * Helper to adjust range input values with buttons
  * Palette: Stepper control logic
  */
-window.adjustRange = function (id, direction) {
+function adjustRange(id, direction) {
     const input = document.getElementById(id);
     if (!input) return;
 
@@ -416,7 +416,7 @@ window.adjustRange = function (id, direction) {
  * Update sound volume
  * Palette: Added dynamic icon feedback
  */
-window.updateSoundVolume = function (value) {
+function updateSoundVolume(value) {
     const volume = parseInt(value);
 
     // 1. Update backend
@@ -453,7 +453,7 @@ window.updateSoundVolume = function (value) {
 /**
  * Actualiza el tamaño del cursor
  */
-window.updateCursorSize = function (value) {
+function updateCursorSize(value) {
     // debugLogger.debug(`Tamaño de cursor: ${value}px`, 'ui');
     if (game && game.cursorElement) {
         game.cursorElement.style.width = value + 'px';
@@ -471,7 +471,7 @@ window.updateCursorSize = function (value) {
 /**
  * Actualiza el margen de la cámara
  */
-window.updateCameraMargin = function (value) {
+function updateCameraMargin(value) {
     debugLogger.debug(`Margen de cámara: ${value}px`, 'ui');
     if (game && game.cameraConfig) {
         game.cameraConfig.edgeThreshold = parseInt(value);
@@ -483,7 +483,7 @@ window.updateCameraMargin = function (value) {
 /**
  * Actualiza la velocidad de la cámara
  */
-window.updateCameraSpeed = function (value) {
+function updateCameraSpeed(value) {
     debugLogger.debug(`Velocidad de cámara: ${value}px/s`, 'ui');
     if (game && game.cameraConfig) {
         game.cameraConfig.baseSpeed = parseInt(value);
@@ -495,7 +495,7 @@ window.updateCameraSpeed = function (value) {
 /**
  * Reinicia la partida con la misma configuración
  */
-window.playAgain = function () {
+function playAgain() {
     if (!game) return;
 
     debugLogger.info('Reiniciando partida (Play Again)...', 'game');
@@ -521,7 +521,7 @@ window.playAgain = function () {
 /**
  * Regresa al menú principal
  */
-window.loadMainMenu = function () {
+function loadMainMenu() {
     debugLogger.info('Volviendo al menú principal', 'ui');
 
     // Ocultar todas las pantallas
@@ -549,7 +549,7 @@ window.loadMainMenu = function () {
 /**
  * Guarda la partida actual
  */
-window.saveGame = function () {
+function saveGame() {
     if (!game) {
         updateSaveStatus('No hay partida activa para guardar', 'error');
         return;
@@ -573,7 +573,7 @@ window.saveGame = function () {
 /**
  * Carga la última partida guardada
  */
-window.loadGame = function () {
+function loadGame() {
     if (typeof saveManager === 'undefined') {
         updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
         return;
@@ -599,7 +599,7 @@ window.loadGame = function () {
 /**
  * Exporta la partida a un archivo JSON
  */
-window.exportGameToFile = function () {
+function exportGameToFile() {
     if (!game) {
         updateSaveStatus('No hay partida activa para exportar', 'error');
         return;
@@ -984,9 +984,9 @@ function renderTechTree() {
 /**
  * Cierra el menú de construcción
  */
-window.closeBuildMenu = function () {
-    if (window.game) {
-        window.game.closeBuildMenu();
+function closeBuildMenu() {
+    if (game) {
+        game.closeBuildMenu();
     }
 };
 
@@ -1022,9 +1022,8 @@ function startGame(civId, mapConfig, loadedState = null) {
 
     // Crear instancia del juego ahora que el contenedor es visible
     game = new Game(civId, mapConfig);
+    game.showConfirmation = showConfirmation;
 
-    // Exponer game globalmente para compatibilidad con HTML (onclick handlers)
-    window.game = game;
 
     // Load state if provided
     if (loadedState) {
@@ -1112,10 +1111,10 @@ function initStartScreenParticles() {
  */
 function initModalBackdropHandlers() {
     const modalMap = {
-        'techTreeScreen': window.hideTechTree,
-        'settingsScreen': window.hideSettings,
-        'shortcutsScreen': window.hideShortcuts,
-        'buildMenu': window.closeBuildMenu,
+        'techTreeScreen': hideTechTree,
+        'settingsScreen': hideSettings,
+        'shortcutsScreen': hideShortcuts,
+        'buildMenu': closeBuildMenu,
         'confirmationModal': () => {
             // Para confirmación, click en fondo actúa como "Cancelar"
             const noBtn = document.getElementById('confirmNoBtn');
@@ -1683,7 +1682,7 @@ function populateCivilizations() {
 /**
  * Palette: Copy Map Seed to Clipboard
  */
-window.copyMapSeed = function () {
+function copyMapSeed() {
     const seedEl = document.getElementById('mapSeedValue');
     if (!seedEl || seedEl.textContent === '-') return;
 
@@ -1741,8 +1740,8 @@ function fallbackCopy(text, onSuccess) {
         if (successful) {
             onSuccess();
         } else {
-            if (window.game && window.game.showNotification) {
-                window.game.showNotification('Error al copiar semilla', 'error');
+            if (game && game.showNotification) {
+                game.showNotification('Error al copiar semilla', 'error');
             }
         }
     } catch (err) {
@@ -1760,39 +1759,39 @@ function setupEventListeners() {
         if (el) el.addEventListener(event, handler);
     };
 
-    attach('techTreeButton', 'click', window.showTechTree);
-    attach('settingsButtonStart', 'click', window.showSettings);
-    attach('settingsButton', 'click', window.showSettings);
-    attach('closeTechTreeBtn', 'click', window.hideTechTree);
-    attach('pauseButton', 'click', window.togglePauseGame);
-    attach('helpButton', 'click', window.showShortcuts);
-    attach('closeBuildMenuBtn', 'click', window.closeBuildMenu);
-    attach('closeSettingsBtn', 'click', window.hideSettings);
-    attach('soundToggleBtn', 'click', window.toggleSound);
-    attach('volumeDecBtn', 'click', () => window.adjustRange('volumeSlider', -1));
-    attach('volumeIncBtn', 'click', () => window.adjustRange('volumeSlider', 1));
-    attach('volumeSlider', 'input', (e) => window.updateSoundVolume(e.target.value));
-    attach('gridToggleBtn', 'click', window.toggleGrid);
-    attach('idleVillagerToggleBtn', 'click', window.toggleIdleVillagerCycle);
-    attach('cursorDecBtn', 'click', () => window.adjustRange('cursorSizeSlider', -1));
-    attach('cursorIncBtn', 'click', () => window.adjustRange('cursorSizeSlider', 1));
-    attach('cursorSizeSlider', 'input', (e) => window.updateCursorSize(e.target.value));
-    attach('cameraSpeedDecBtn', 'click', () => window.adjustRange('cameraSpeedSlider', -1));
-    attach('cameraSpeedIncBtn', 'click', () => window.adjustRange('cameraSpeedSlider', 1));
-    attach('cameraSpeedSlider', 'input', (e) => window.updateCameraSpeed(e.target.value));
-    attach('cameraMarginDecBtn', 'click', () => window.adjustRange('cameraMarginSlider', -1));
-    attach('cameraMarginIncBtn', 'click', () => window.adjustRange('cameraMarginSlider', 1));
-    attach('cameraMarginSlider', 'input', (e) => window.updateCameraMargin(e.target.value));
-    attach('copySeedBtn', 'click', window.copyMapSeed);
-    attach('saveGameBtn', 'click', window.saveGame);
-    attach('loadGameBtn', 'click', window.loadGame);
-    attach('exportGameBtn', 'click', window.exportGameToFile);
-    attach('quitGameBtn', 'click', window.confirmQuitGame);
-    attach('restartGameBtn', 'click', window.confirmRestartGame);
-    attach('resumeSettingsBtn', 'click', window.hideSettings);
-    attach('closeShortcutsBtn', 'click', window.hideShortcuts);
-    attach('resumeShortcutsBtn', 'click', window.hideShortcuts);
-    attach('resumeOverlayBtn', 'click', window.togglePauseGame);
+    attach('techTreeButton', 'click', showTechTree);
+    attach('settingsButtonStart', 'click', showSettings);
+    attach('settingsButton', 'click', showSettings);
+    attach('closeTechTreeBtn', 'click', hideTechTree);
+    attach('pauseButton', 'click', togglePauseGame);
+    attach('helpButton', 'click', showShortcuts);
+    attach('closeBuildMenuBtn', 'click', closeBuildMenu);
+    attach('closeSettingsBtn', 'click', hideSettings);
+    attach('soundToggleBtn', 'click', toggleSound);
+    attach('volumeDecBtn', 'click', () => adjustRange('volumeSlider', -1));
+    attach('volumeIncBtn', 'click', () => adjustRange('volumeSlider', 1));
+    attach('volumeSlider', 'input', (e) => updateSoundVolume(e.target.value));
+    attach('gridToggleBtn', 'click', toggleGrid);
+    attach('idleVillagerToggleBtn', 'click', toggleIdleVillagerCycle);
+    attach('cursorDecBtn', 'click', () => adjustRange('cursorSizeSlider', -1));
+    attach('cursorIncBtn', 'click', () => adjustRange('cursorSizeSlider', 1));
+    attach('cursorSizeSlider', 'input', (e) => updateCursorSize(e.target.value));
+    attach('cameraSpeedDecBtn', 'click', () => adjustRange('cameraSpeedSlider', -1));
+    attach('cameraSpeedIncBtn', 'click', () => adjustRange('cameraSpeedSlider', 1));
+    attach('cameraSpeedSlider', 'input', (e) => updateCameraSpeed(e.target.value));
+    attach('cameraMarginDecBtn', 'click', () => adjustRange('cameraMarginSlider', -1));
+    attach('cameraMarginIncBtn', 'click', () => adjustRange('cameraMarginSlider', 1));
+    attach('cameraMarginSlider', 'input', (e) => updateCameraMargin(e.target.value));
+    attach('copySeedBtn', 'click', copyMapSeed);
+    attach('saveGameBtn', 'click', saveGame);
+    attach('loadGameBtn', 'click', loadGame);
+    attach('exportGameBtn', 'click', exportGameToFile);
+    attach('quitGameBtn', 'click', confirmQuitGame);
+    attach('restartGameBtn', 'click', confirmRestartGame);
+    attach('resumeSettingsBtn', 'click', hideSettings);
+    attach('closeShortcutsBtn', 'click', hideShortcuts);
+    attach('resumeShortcutsBtn', 'click', hideShortcuts);
+    attach('resumeOverlayBtn', 'click', togglePauseGame);
 }
 
 const initApp = async () => {
@@ -2023,10 +2022,5 @@ if (document.readyState === 'loading') {
 }
 
 // ===== EXPORTS (para debugging en consola) =====
-window.debugLogger = debugLogger;
-window.CONFIG = CONFIG;
-window.TILE_SIZE = TILE_SIZE;
-window.MAP_SIZES = MAP_SIZES;
-window.TERRAIN_TYPES = TERRAIN_TYPES;
 
 debugLogger.info('main.js cargado correctamente', 'game');

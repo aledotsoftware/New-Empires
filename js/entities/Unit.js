@@ -129,8 +129,20 @@ export class Unit extends Entity {
             // Reutilizamos el predicado para comprobar validez y rango estricto (AGGRO_RADIUS_SQ)
             if (!Unit._enemyPredicate(enemy, this)) continue;
 
+            // Niebla de Guerra Táctica: No atacar enemigos que no podemos ver (excepto si nos atacan)
+            if (game && game.fow && this.team === 'player' && enemy.attackTarget !== this) {
+                const enemyCol = (enemy.x * game.fow.invTileSize) | 0;
+                const enemyRow = (enemy.y * game.fow.invTileSize) | 0;
+                if (!game.fow.isVisible(enemyCol, enemyRow)) {
+                    continue;
+                }
+            }
+
             // Detección de Amenazas: no "ignoren" ser atacadas mientras recolectan o patrullan
             // Las unidades militares patrullando o moviéndose DEBEN atacar a los enemigos en rango.
+            // Una unidad está bajo ataque si este enemigo la tiene como objetivo.
+            const isUnderAttackByThisEnemy = (enemy.attackTarget === this);
+
             let isBusy = false;
             if (this.type === 'villager') {
                 isBusy = this.gatherTarget !== null || (this.state !== 'IDLE' && this.state !== 'ATTACKING');
@@ -140,7 +152,8 @@ export class Unit extends Entity {
                 isBusy = false;
             }
 
-            if (isBusy && enemy.attackTarget !== this) {
+            // Si estamos ocupados, solo reaccionamos al enemigo que nos está atacando explícitamente.
+            if (isBusy && !isUnderAttackByThisEnemy) {
                 continue;
             }
 
@@ -148,7 +161,7 @@ export class Unit extends Entity {
             let score = 0;
 
             // Prioridad absoluta a quien nos ataca
-            if (enemy.attackTarget === this) {
+            if (isUnderAttackByThisEnemy) {
                 score += 5000;
             }
 

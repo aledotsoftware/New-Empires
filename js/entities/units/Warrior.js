@@ -11,18 +11,24 @@ export class Warrior extends Unit {
         // IA de Unidades: Mejora de decisiones para Guerrero (Cuerpo a cuerpo)
         // Priorizar enemigos vulnerables o de asedio
         if (enemy.type === 'archer') {
-            score += 800;
+            score += 1500; // Increase priority of archers over anything else
         } else if (enemy.type === 'villager') {
             score += 600;
         } else if (enemy.type === 'warrior') {
             score += 500;
         } else if (enemy.isBuilding) {
-            score -= 1000;
+            score -= 2000; // Stronger penalty so they don't attack buildings if troops are around
         }
 
         // Penalización HEAVY por distancia para evitar perseguir infinitamente a arqueros que kittean
         // Si la distancia es muy grande, ignorarlo a menos que no haya otra opción
         score -= distSq / 50;
+
+        // If HP is low, avoid retreating for now, just fight to the death as warriors do,
+        // or prioritize closer targets even more to avoid moving while dying
+        if (this.hp < this.maxHp * 0.2) {
+            score -= distSq / 20;
+        }
 
         return score;
     }

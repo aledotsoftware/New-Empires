@@ -69,25 +69,39 @@ export class Archer extends Unit {
                 const escapeX = this.x + dirX * escapeDist;
                 const escapeY = this.y + dirY * escapeDist;
 
+                // Intentar huir.
+                const oldX = this.x;
+                const oldY = this.y;
+
                 // Usar la función de Unit para movernos, dist 0 para mover exacto
                 this.moveTowardsTarget(escapeX, escapeY, deltaTime, game, 0);
 
-                // Mientras huimos, no atacamos (stutter stepping: huye, se detiene, dispara)
-                if (this.attackCooldown > 0) {
-                    this.attackCooldown -= deltaTime;
+                const movedSq = (this.x - oldX) ** 2 + (this.y - oldY) ** 2;
+
+                // Si no nos movimos porque estamos chocando contra el terreno o límite
+                if (movedSq < 0.1) {
+                    isKiting = false;
+                    // Dejar que actúe normalmente (disparar sin huir)
+                } else {
+                    // Mientras huimos exitosamente, no atacamos (stutter stepping: huye, se detiene, dispara)
+                    if (this.attackCooldown > 0) {
+                        this.attackCooldown -= deltaTime;
+                    }
+
+                    // Desvincular temporalmente el objetivo para que super.update() no nos devuelva hacia el enemigo
+                    const tempTarget = this.attackTarget;
+                    this.attackTarget = null;
+
+                    super.update(deltaTime, game);
+
+                    // Restaurar objetivo
+                    this.attackTarget = tempTarget;
                 }
-
-                // Desvincular temporalmente el objetivo para que super.update() no nos devuelva hacia el enemigo
-                const tempTarget = this.attackTarget;
-                this.attackTarget = null;
-
-                super.update(deltaTime, game);
-
-                // Restaurar objetivo
-                this.attackTarget = tempTarget;
             }
         }
 
+        // Si no estamos kiteando (ya sea porque no hace falta o porque estábamos acorralados)
+        // usamos la lógica estándar de la unidad.
         if (!isKiting) {
             super.update(deltaTime, game);
         }

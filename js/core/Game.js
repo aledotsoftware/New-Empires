@@ -827,7 +827,8 @@ export class Game {
                 const index = this.terrainMap.getIndex(x, y);
 
                 if (index >= 0 && index < this.terrainMap.grid.length) {
-                    this.terrainMap.grid[index] = terrainType;
+                    const typeId = this.terrainMap._nameToId[terrainType];
+                    this.terrainMap.grid[index] = typeId !== undefined ? typeId : 0;
                 }
             }
         }

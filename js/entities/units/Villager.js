@@ -46,6 +46,18 @@ export class Villager extends Unit {
         }
 
         switch (this.state) {
+            case 'ATTACKING':
+                // Si nuestro objetivo muere o desaparece, volvemos a IDLE
+                if (!this.attackTarget || this.attackTarget.isDead) {
+                    this.attackTarget = null;
+                    this.state = 'IDLE';
+                } else {
+                    // Solo en estado ATTACKING usamos la lógica base para atacar y movernos al objetivo.
+                    // Esto evita interferir con la recolección u otros estados.
+                    super.update(deltaTime, game);
+                }
+                break;
+
             case 'IDLE':
                 if (this.carryAmount > 0) this.findDropOffAndGo(game);
                 if (this.aiTimer <= 0) {

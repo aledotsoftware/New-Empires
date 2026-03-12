@@ -236,11 +236,18 @@ export class FormationManager {
      */
     applyFormation(formationType, units, center, spacing = this.spacing, angle = 0) {
         // Ordenar una COPIA de las unidades: los guerreros (melee) al frente para absorber daño, resto atrás
+        // Arqueros en el medio y aldeanos u otras unidades frágiles al fondo.
         // Se muta localmente el array para asignar posiciones pero no se rompe la referencia externa.
+        const typePriority = {
+            'warrior': 1,
+            'archer': 2,
+            'villager': 3
+        };
+
         const sortedUnits = [...units].sort((a, b) => {
-            if (a.type === 'warrior' && b.type !== 'warrior') return -1;
-            if (a.type !== 'warrior' && b.type === 'warrior') return 1;
-            return 0;
+            const pA = typePriority[a.type] || 4;
+            const pB = typePriority[b.type] || 4;
+            return pA - pB;
         });
 
         let positions = this.getPositions(formationType, sortedUnits, center, spacing);

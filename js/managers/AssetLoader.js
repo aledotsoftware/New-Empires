@@ -8,13 +8,19 @@ export class AssetLoader {
         this.assets = {};
         this.loadedCount = 0;
         this.totalAssets = 0;
+        // Track ongoing loads to prevent redundant lazy loads
+        this._loadingPromises = new Map();
     }
 
     loadImage(key, src) {
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.src = src;
-            img.onload = () => {
+
+            // BOLT OPTIMIZATION: Lazy loading and async decoding
+            img.loading = 'lazy';
+            img.decoding = 'async';
+
+            const handleLoad = () => {
                 this.assets[key] = img;
                 this.loadedCount++;
                 debugLogger.debug(`Asset cargado: ${key}`, 'assets', {
@@ -24,11 +30,26 @@ export class AssetLoader {
                 });
                 resolve(img);
             };
-            img.onerror = () => {
+
+            const handleError = () => {
                 debugLogger.warn(`No se pudo cargar asset`, 'assets', { key, src });
                 // Resolvemos igual para no bloquear el juego, pero sin imagen
                 resolve(null);
             };
+
+            img.onload = handleLoad;
+            img.onerror = handleError;
+
+            img.src = src;
+
+            if ('decode' in img) {
+                // BOLT OPTIMIZATION: Decode off main thread
+                img.decode().catch((e) => {
+                    // Ignoramos el error aquí porque el onerror lo manejará si falla la carga.
+                    // Si solo falla el decode pero carga bien, no queremos bloquear.
+                    debugLogger.warn(`Aviso: img.decode() falló para ${key}`, 'assets', e);
+                });
+            }
         });
     }
 
@@ -78,7 +99,26 @@ export class AssetLoader {
     }
 
     getImage(key) {
-        return this.assets[key];
+        // BOLT OPTIMIZATION: Lazy loading
+        if (this.assets[key]) {
+            return this.assets[key];
+        }
+
+        // If not loaded and not already loading, trigger async load
+        if (!this._loadingPromises.has(key)) {
+            const src = this.getSrc(key);
+            if (src) {
+                // Ensure we know it's loading
+                const loadPromise = this.loadImage(key, src).then((img) => {
+                    this._loadingPromises.delete(key);
+                    return img;
+                });
+                this._loadingPromises.set(key, loadPromise);
+            }
+        }
+
+        // Return null until loaded
+        return null;
     }
 
     getSrc(key) {

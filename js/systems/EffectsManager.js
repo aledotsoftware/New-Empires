@@ -217,6 +217,68 @@ export class ParticleSystem {
         }
     }
 
+    // Efecto de destrucción total de un edificio (humo, escombros, explosión)
+    createBuildingCollapseEffect(x, y, size = 100) {
+        // Explosión inicial (Flash)
+        for (let i = 0; i < 5; i++) {
+            this.particles.push(Particle.get(x, y, {
+                vx: (Math.random() - 0.5) * 50,
+                vy: (Math.random() - 0.5) * 50,
+                life: Math.random() * 0.3 + 0.1,
+                size: Math.random() * size * 0.5 + size * 0.2,
+                color: 'rgba(255, 200, 100, 0.8)',
+                gravity: 0,
+                friction: 0.8,
+                fadeRate: 3.0,
+                shape: 'circle'
+            }));
+        }
+
+        // Gran nube de polvo expansiva
+        const dustCount = 40;
+        for (let i = 0; i < dustCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 150 + 20;
+
+            const dustColors = [
+                'rgba(180, 160, 140, 0.8)',
+                'rgba(150, 130, 110, 0.7)',
+                'rgba(200, 180, 160, 0.6)',
+                'rgba(120, 100, 80, 0.9)'
+            ];
+
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 0.5, y + (Math.random() - 0.5) * size * 0.5, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 20, // Tendencia a subir lentamente
+                life: Math.random() * 2.0 + 1.0,
+                size: Math.random() * 20 + 10,
+                color: dustColors[Math.floor(Math.random() * dustColors.length)],
+                gravity: -5,
+                friction: 0.9,
+                fadeRate: 1.0,
+                shape: 'circle'
+            }));
+        }
+
+        // Escombros pesados volando
+        const debrisCount = 20;
+        for (let i = 0; i < debrisCount; i++) {
+            const angle = (Math.random() - 0.5) * Math.PI; // Hacia arriba
+            const speed = Math.random() * 200 + 100;
+
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 0.5, y + (Math.random() - 0.5) * size * 0.5, {
+                vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 50,
+                vy: Math.sin(angle) * speed - 150,
+                life: Math.random() * 1.5 + 0.5,
+                size: Math.random() * 8 + 4,
+                color: Math.random() > 0.5 ? '#6e5c4f' : '#4a3b2c', // Tonos de piedra/madera oscura
+                gravity: 400, // Caen muy rápido (peso)
+                friction: 0.98,
+                shape: 'square'
+            }));
+        }
+    }
+
     // Efecto de daño en edificios (humo y fuego)
     createBuildingDamageEffect(x, y, severity) {
         // severity: 0 a 1 (0 es apenas dañado, 1 es destruido)

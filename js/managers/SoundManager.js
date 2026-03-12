@@ -68,26 +68,53 @@ export class SoundManager {
         gainNode.connect(this.audioContext.destination);
 
         if (biomeName === 'Bosque') {
-            // Sintetizar cantos de pájaros (suavizado para no ser irritante)
-            const oscillator = this.audioContext.createOscillator();
-            oscillator.connect(gainNode);
-            oscillator.type = 'sine';
+            // Sintetizar cantos de pájaros y brisa entre las hojas (suavizado y orgánico)
+            const birdGain = this.audioContext.createGain();
+            const birdOsc = this.audioContext.createOscillator();
+            birdOsc.connect(birdGain);
+            birdGain.connect(gainNode);
+            birdOsc.type = 'sine';
 
-            // Variación de tono para imitar un pájaro (Frecuencias más bajas para evitar pitidos agudos)
-            oscillator.frequency.setValueAtTime(2000, now);
-            oscillator.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
-            oscillator.frequency.exponentialRampToValueAtTime(2000, now + 0.2);
+            // Canto de pájaro más orgánico (trino)
+            birdOsc.frequency.setValueAtTime(1500, now);
+            birdOsc.frequency.exponentialRampToValueAtTime(2500, now + 0.1);
+            birdOsc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
+            birdOsc.frequency.exponentialRampToValueAtTime(1800, now + 0.4);
 
-            gainNode.gain.setValueAtTime(0.01, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 0.05); // Volumen más bajo
-            gainNode.gain.linearRampToValueAtTime(0.01, now + 0.2);
+            birdGain.gain.setValueAtTime(0.01, now);
+            birdGain.gain.linearRampToValueAtTime(this.volume * 0.015, now + 0.1);
+            birdGain.gain.linearRampToValueAtTime(0.01, now + 0.4);
 
-            oscillator.start(now);
-            oscillator.stop(now + 0.2);
+            birdOsc.start(now);
+            birdOsc.stop(now + 0.4);
+
+            // Añadir una suave brisa de fondo para inmersión
+            const bufferSize = this.audioContext.sampleRate * 2;
+            const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+            const breezeSrc = this.audioContext.createBufferSource();
+            breezeSrc.buffer = buffer;
+            const breezeFilter = this.audioContext.createBiquadFilter();
+            breezeFilter.type = 'lowpass';
+            breezeFilter.frequency.setValueAtTime(200, now);
+            breezeFilter.frequency.linearRampToValueAtTime(400, now + 1);
+
+            const breezeGain = this.audioContext.createGain();
+            breezeSrc.connect(breezeFilter);
+            breezeFilter.connect(breezeGain);
+            breezeGain.connect(gainNode);
+
+            breezeGain.gain.setValueAtTime(0.01, now);
+            breezeGain.gain.linearRampToValueAtTime(this.volume * 0.008, now + 1); // Muy sutil
+            breezeGain.gain.linearRampToValueAtTime(0.01, now + 2);
+
+            breezeSrc.start(now);
 
         } else if (biomeName === 'Desierto') {
-            // Sintetizar viento (ruido blanco + filtro paso bajo)
-            const bufferSize = this.audioContext.sampleRate * 3; // 3 segundos para fade out más suave
+            // Sintetizar viento aullando (ruido blanco + filtro paso banda para "silbido" del viento)
+            const bufferSize = this.audioContext.sampleRate * 4; // 4 segundos para un aullido más largo
             const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
             const data = buffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
@@ -97,19 +124,30 @@ export class SoundManager {
             const noiseSource = this.audioContext.createBufferSource();
             noiseSource.buffer = buffer;
 
-            const filter = this.audioContext.createBiquadFilter();
-            filter.type = 'lowpass';
-            // Variar la frecuencia del filtro para simular ráfagas de viento
-            filter.frequency.setValueAtTime(80, now);
-            filter.frequency.linearRampToValueAtTime(300, now + 1.5);
-            filter.frequency.linearRampToValueAtTime(80, now + 3);
+            // Filtro paso bajo base para el rugido
+            const lowFilter = this.audioContext.createBiquadFilter();
+            lowFilter.type = 'lowpass';
+            lowFilter.frequency.setValueAtTime(150, now);
+            lowFilter.frequency.linearRampToValueAtTime(400, now + 2);
+            lowFilter.frequency.linearRampToValueAtTime(150, now + 4);
 
-            noiseSource.connect(filter);
-            filter.connect(gainNode);
+            // Filtro paso banda para el aullido ("howl")
+            const howlFilter = this.audioContext.createBiquadFilter();
+            howlFilter.type = 'bandpass';
+            howlFilter.frequency.setValueAtTime(300, now);
+            howlFilter.frequency.exponentialRampToValueAtTime(800, now + 2);
+            howlFilter.frequency.exponentialRampToValueAtTime(300, now + 4);
+            howlFilter.Q.value = 5; // Resonancia alta para silbido
+
+            noiseSource.connect(lowFilter);
+            lowFilter.connect(gainNode);
+
+            noiseSource.connect(howlFilter);
+            howlFilter.connect(gainNode);
 
             gainNode.gain.setValueAtTime(0.01, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.015, now + 1); // Volumen sutil
-            gainNode.gain.linearRampToValueAtTime(0.01, now + 3);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.02, now + 1.5); // Volumen sutil
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 4);
 
             noiseSource.start(now);
         } else if (biomeName === 'Agua') {

@@ -122,9 +122,27 @@ body,
     cursor: url('assets/icons/cursor.png'), default;
 }
 
-.hidden {
-    display: none !important;
+body.cursor-attack {
+    cursor: url('assets/icons/swords.png'), crosshair;
 }
+
+body.cursor-build {
+    cursor: url('assets/icons/workshop.png'), crosshair;
+}
+
+body.cursor-chop {
+    cursor: url('assets/icons/wood.png'), crosshair;
+}
+
+body.cursor-farm {
+    cursor: url('assets/icons/food.png'), crosshair;
+}
+
+body.cursor-mine {
+    cursor: url('assets/icons/gold.png'), crosshair;
+}
+
+/* Eliminado .hidden duplicado aquí. Usando el del final del archivo */
 
 /* ==========================================
    3. TEXTURAS Y PATRONES CSS
@@ -228,6 +246,69 @@ body.theme-sumeria {
     --civ-theme-primary-dark: #8b5622;
     --civ-theme-primary-light: #df9e5c;
     --civ-theme-accent: rgba(205, 127, 50, 0.3);
+}
+
+body.theme-argentinians {
+    --civ-theme-primary: #4a90e2;
+    --civ-theme-primary-dark: #2b6cb0;
+    --civ-theme-primary-light: #63b3ed;
+    --civ-theme-accent: rgba(74, 144, 226, 0.3);
+}
+
+body.theme-babylon {
+    --civ-theme-primary: #805ad5;
+    --civ-theme-primary-dark: #553c9a;
+    --civ-theme-primary-light: #9f7aea;
+    --civ-theme-accent: rgba(128, 90, 213, 0.3);
+}
+
+body.theme-byzantium {
+    --civ-theme-primary: #d53f8c;
+    --civ-theme-primary-dark: #97266d;
+    --civ-theme-primary-light: #ed64a6;
+    --civ-theme-accent: rgba(213, 63, 140, 0.3);
+}
+
+body.theme-caliphate {
+    --civ-theme-primary: #38a169;
+    --civ-theme-primary-dark: #276749;
+    --civ-theme-primary-light: #48bb78;
+    --civ-theme-accent: rgba(56, 161, 105, 0.3);
+}
+
+body.theme-egypt {
+    --civ-theme-primary: #dd6b20;
+    --civ-theme-primary-dark: #9c4221;
+    --civ-theme-primary-light: #ed8936;
+    --civ-theme-accent: rgba(221, 107, 32, 0.3);
+}
+
+body.theme-greece {
+    --civ-theme-primary: #3182ce;
+    --civ-theme-primary-dark: #2b6cb0;
+    --civ-theme-primary-light: #63b3ed;
+    --civ-theme-accent: rgba(49, 130, 206, 0.3);
+}
+
+body.theme-incas {
+    --civ-theme-primary: #d69e2e;
+    --civ-theme-primary-dark: #b7791f;
+    --civ-theme-primary-light: #ecc94b;
+    --civ-theme-accent: rgba(214, 158, 46, 0.3);
+}
+
+body.theme-persia {
+    --civ-theme-primary: #e53e3e;
+    --civ-theme-primary-dark: #c53030;
+    --civ-theme-primary-light: #fc8181;
+    --civ-theme-accent: rgba(229, 62, 62, 0.3);
+}
+
+body.theme-spain {
+    --civ-theme-primary: #f6ad55;
+    --civ-theme-primary-dark: #dd6b20;
+    --civ-theme-primary-light: #fbd38d;
+    --civ-theme-accent: rgba(246, 173, 85, 0.3);
 }
 
 /* Esquinas decorativas */

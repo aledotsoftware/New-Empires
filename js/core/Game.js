@@ -2236,9 +2236,9 @@ export class Game {
         const queueLength = building.productionQueue.length;
 
         let narrativeText = `Reclutando ${unitType}`;
-        if (unitType === 'villager') narrativeText = `Convocando colonos`;
-        if (unitType === 'warrior') narrativeText = `Forjando guerreros`;
-        if (unitType === 'archer') narrativeText = `Reclutando arqueros`;
+        if (unitType === 'villager') narrativeText = `Forjando la Orden de Trabajo`;
+        if (unitType === 'warrior') narrativeText = `Forjando la Orden de Caballería`;
+        if (unitType === 'archer') narrativeText = `Reclutando la Orden de Arqueros`;
         this.showNotification(`${narrativeText} (${queueLength}/5)`, 'info');
 
         this.updateUI();
@@ -2316,9 +2316,9 @@ export class Game {
 
 
             let narrativeDone = `${unit.name} listo para servir`;
-            if (unit.type === 'villager') narrativeDone = `Colonos listos para trabajar`;
-            if (unit.type === 'warrior') narrativeDone = `Guerreros forjados en batalla`;
-            if (unit.type === 'archer') narrativeDone = `Arqueros listos para el asedio`;
+            if (unit.type === 'villager') narrativeDone = `La Orden de Trabajo está lista`;
+            if (unit.type === 'warrior') narrativeDone = `La Orden de Caballería está lista`;
+            if (unit.type === 'archer') narrativeDone = `La Orden de Arqueros está lista`;
             this.showNotification(narrativeDone, 'success', { x: unit.x, y: unit.y });
 
             this.updateUI();
@@ -2639,7 +2639,7 @@ export class Game {
                 );
 
                 if (target) {
-                    badgeIcon = 'assets/icons/build.png';
+                    badgeIcon = 'assets/icons/workshop.png';
                     cursorClass = 'cursor-build';
                     showBadge = true;
                 }
@@ -2674,30 +2674,21 @@ export class Game {
             document.body.classList.add(cursorClass);
         }
 
-        if (this.cursorElement) this.cursorElement.style.display = 'block';
-
-        const cursorImg = this.cursorElement ? this.cursorElement.querySelector('img:not(.cursor-badge)') : null;
-
-        if (showBadge && cursorImg) {
-
-            // Reemplazamos el cursor principal en lugar del badge para mejor feedback
-            if (cursorImg && cursorImg.src !== badgeIcon && !cursorImg.src.endsWith(badgeIcon)) {
-                cursorImg.src = badgeIcon;
-                // Add a subtle pop animation to the cursor element
-                this.cursorElement.style.transform = 'scale(1.2)';
-                setTimeout(() => {
-                    if (this.cursorElement) this.cursorElement.style.transform = 'scale(1)';
-                }, 100);
-            }
-            if (this.cursorBadge) this.cursorBadge.style.display = 'none'; // Ocultar badge
+        // Hide DOM custom cursor if we have a contextual one applied via CSS, else show it
+        if (cursorClass) {
+            if (this.cursorElement) this.cursorElement.style.display = 'none';
         } else {
-            // Restaurar cursor original
-            const defaultCursor = 'assets/icons/cursor.png';
-            if (cursorImg && cursorImg.src !== defaultCursor && !cursorImg.src.endsWith(defaultCursor)) {
-                cursorImg.src = defaultCursor;
-                this.cursorElement.style.transform = 'scale(1)';
+            if (this.cursorElement) this.cursorElement.style.display = 'block';
+
+            const cursorImg = this.cursorElement ? this.cursorElement.querySelector('img:not(.cursor-badge)') : null;
+            if (cursorImg) {
+                const defaultCursor = 'assets/icons/cursor.png';
+                if (cursorImg.src !== defaultCursor && !cursorImg.src.endsWith(defaultCursor)) {
+                    cursorImg.src = defaultCursor;
+                    this.cursorElement.style.transform = 'scale(1)';
+                }
+                if (this.cursorBadge) this.cursorBadge.style.display = 'none';
             }
-            if (this.cursorBadge) this.cursorBadge.style.display = 'none';
         }
     }
 
@@ -5125,7 +5116,7 @@ export class Game {
             buttons.push({
                 iconKey: 'warrior',
                 iconFallback: '⚔️',
-                label: 'Reclutar Espadachín',
+                label: 'Forjar Orden de Caballería',
                 description: 'La guardia leal para la línea de frente.',
                 hotkey: 'Q',
                 cost: warriorCost,
@@ -5137,7 +5128,7 @@ export class Game {
             buttons.push({
                 iconKey: 'archer',
                 iconFallback: '🏹',
-                label: 'Instruir Arquero',
+                label: 'Reclutar Orden de Arqueros',
                 description: 'Maestros del arco, letales a la distancia.',
                 hotkey: 'W',
                 cost: archerCost,

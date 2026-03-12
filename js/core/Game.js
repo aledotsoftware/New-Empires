@@ -545,6 +545,7 @@ export class Game {
             const x = 400 + Math.cos(angle) * 100;
             const y = 400 + Math.sin(angle) * 100;
             const villager = new Villager(x, y, 'player');
+            civilizationManager.applyUnitBonuses(villager, this.civilizationId);
             this._cacheEntityTerrain(villager); // OPTIMIZATION
             this.units.push(villager);
         }

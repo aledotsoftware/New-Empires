@@ -206,7 +206,7 @@
                 </div>
 
                 <!-- Palette: Pause Button -->
-                <button id="pauseButton" class="btn-secondary" onclick="togglePauseGame()" style="padding:8px 12px;"
+                <button id="pauseButton" class="btn-secondary" style="padding:8px 12px;"
                     aria-label="Pausar juego (P)">
                     <span id="pauseIcon" style="font-size: 20px; line-height: 1;" role="img" aria-label="Pausa">⏸</span>
                     <div class="btn-tooltip" role="tooltip">
@@ -236,7 +236,7 @@
                     </div>
                 </button>
 
-                <button id="helpButton" class="btn-secondary" onclick="showShortcuts()" style="padding:8px 12px;"
+                <button id="helpButton" class="btn-secondary" style="padding:8px 12px;"
                     aria-label="Ayuda / Atajos (Shift + ?)">
                     <span style="font-weight:bold; font-size:1.2rem; line-height:1; display:inline-block; width:20px; text-align:center;">?</span>
                     <div class="btn-tooltip" role="tooltip">
@@ -245,7 +245,7 @@
                     </div>
                 </button>
 
-                <button id="settingsButton" class="btn-secondary" onclick="showSettings()" style="padding:8px 12px;"
+                <button id="settingsButton" class="btn-secondary" style="padding:8px 12px;"
                     aria-label="Configuración">
                     <img src="assets/icons/settings.png" onerror="this.style.display='none'"
                         style="width:20px;height:20px;" alt="">
@@ -466,7 +466,7 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Efectos de Sonido: <span id="soundToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
-                            <button id="soundToggleBtn" class="btn-secondary" onclick="toggleSound()"
+                            <button id="soundToggleBtn" class="btn-secondary"
                                 style="padding: 8px 16px;" aria-label="Alternar sonido" aria-pressed="true">
                                 Alternar
                             </button>
@@ -483,10 +483,10 @@
                                 <span id="volumeValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">50%</span>
                             </div>
                             <div class="range-container">
-                                <button class="btn-stepper" onclick="adjustRange('volumeSlider', -1)" aria-label="Bajar volumen">-</button>
+                                <button id="volumeDecBtn" class="btn-stepper" aria-label="Bajar volumen">-</button>
                                 <input type="range" id="volumeSlider" min="0" max="100" step="5" value="50"
-                                    style="width: 100%; accent-color: #d4af37;" oninput="updateSoundVolume(this.value)">
-                                <button class="btn-stepper" onclick="adjustRange('volumeSlider', 1)" aria-label="Subir volumen">+</button>
+                                    style="width: 100%; accent-color: #d4af37;">
+                                <button id="volumeIncBtn" class="btn-stepper" aria-label="Subir volumen">+</button>
                             </div>
                         </div>
                     </div>
@@ -499,7 +499,7 @@
                             <label style="font-weight: 600; color: #e2e8f0;">
                                 Mostrar Cuadrícula: <span id="gridToggleValue" style="color: #48bb78;">Activada</span>
                             </label>
-                            <button id="gridToggleBtn" class="btn-secondary" onclick="toggleGrid()"
+                            <button id="gridToggleBtn" class="btn-secondary"
                                 style="padding: 8px 16px;" aria-label="Alternar cuadrícula" aria-pressed="true">
                                 Alternar
                             </button>
@@ -511,7 +511,7 @@
                                 Ciclo Aldeanos Inactivos <span class="kbd-inline">Tab</span>: <span
                                     id="idleVillagerToggleValue" style="color: #48bb78;">Activado</span>
                             </label>
-                            <button id="idleVillagerToggleBtn" class="btn-secondary" onclick="toggleIdleVillagerCycle()"
+                            <button id="idleVillagerToggleBtn" class="btn-secondary"
                                 style="padding: 8px 16px;" aria-label="Alternar ciclo de aldeanos inactivos"
                                 aria-pressed="true">
                                 Alternar
@@ -525,10 +525,10 @@
                                 <span id="cursorSizeValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">32px</span>
                             </div>
                             <div class="range-container">
-                                <button class="btn-stepper" onclick="adjustRange('cursorSizeSlider', -1)" aria-label="Reducir cursor">-</button>
+                                <button id="cursorDecBtn" class="btn-stepper" aria-label="Reducir cursor">-</button>
                                 <input type="range" id="cursorSizeSlider" min="16" max="128" step="4" value="32"
-                                    style="width: 100%; accent-color: #d4af37;" oninput="updateCursorSize(this.value)">
-                                <button class="btn-stepper" onclick="adjustRange('cursorSizeSlider', 1)" aria-label="Aumentar cursor">+</button>
+                                    style="width: 100%; accent-color: #d4af37;">
+                                <button id="cursorIncBtn" class="btn-stepper" aria-label="Aumentar cursor">+</button>
                             </div>
                         </div>
                     </div>
@@ -543,10 +543,10 @@
                                 <span id="cameraSpeedValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">1200 px/s</span>
                             </div>
                             <div class="range-container">
-                                <button class="btn-stepper" onclick="adjustRange('cameraSpeedSlider', -1)" aria-label="Reducir velocidad">-</button>
+                                <button id="cameraSpeedDecBtn" class="btn-stepper" aria-label="Reducir velocidad">-</button>
                                 <input type="range" id="cameraSpeedSlider" min="500" max="3000" step="100" value="1200"
-                                    style="width: 100%; accent-color: #d4af37;" oninput="updateCameraSpeed(this.value)">
-                                <button class="btn-stepper" onclick="adjustRange('cameraSpeedSlider', 1)" aria-label="Aumentar velocidad">+</button>
+                                    style="width: 100%; accent-color: #d4af37;">
+                                <button id="cameraSpeedIncBtn" class="btn-stepper" aria-label="Aumentar velocidad">+</button>
                             </div>
                         </div>
 
@@ -557,10 +557,10 @@
                                 <span id="cameraMarginValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">30 px</span>
                             </div>
                             <div class="range-container">
-                                <button class="btn-stepper" onclick="adjustRange('cameraMarginSlider', -1)" aria-label="Reducir margen">-</button>
+                                <button id="cameraMarginDecBtn" class="btn-stepper" aria-label="Reducir margen">-</button>
                                 <input type="range" id="cameraMarginSlider" min="0" max="100" step="5" value="30"
-                                    style="width: 100%; accent-color: #d4af37;" oninput="updateCameraMargin(this.value)">
-                                <button class="btn-stepper" onclick="adjustRange('cameraMarginSlider', 1)" aria-label="Aumentar margen">+</button>
+                                    style="width: 100%; accent-color: #d4af37;">
+                                <button id="cameraMarginIncBtn" class="btn-stepper" aria-label="Aumentar margen">+</button>
                             </div>
                         </div>
                     </div>
@@ -617,7 +617,7 @@
                                 <span style="font-size: 0.8rem; color: #a0aec0;">Semilla (Seed)</span>
                                 <span id="mapSeedValue" style="font-family: monospace; color: #e8d48b; font-weight: bold; font-size: 1.1rem; user-select: all;">-</span>
                             </div>
-                            <button id="copySeedBtn" class="btn-secondary" onclick="copyMapSeed()" style="padding: 6px 12px; font-size: 0.9rem;" aria-label="Copiar semilla al portapapeles">
+                            <button id="copySeedBtn" class="btn-secondary" style="padding: 6px 12px; font-size: 0.9rem;" aria-label="Copiar semilla al portapapeles">
                                 📋 Copiar
                             </button>
                         </div>
@@ -627,15 +627,15 @@
                         <h3 style="margin-bottom: 20px; color: #d4af37;">💾 Partida</h3>
 
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                            <button id="saveGameBtn" class="btn-secondary" onclick="saveGame()"
+                            <button id="saveGameBtn" class="btn-secondary"
                                 style="padding: 10px 20px;">
                                 <img src="assets/icons/save.png" alt="" class="btn-icon"> Guardar Partida
                             </button>
-                            <button id="loadGameBtn" class="btn-secondary" onclick="loadGame()"
+                            <button id="loadGameBtn" class="btn-secondary"
                                 style="padding: 10px 20px;">
                                 <img src="assets/icons/load.png" alt="" class="btn-icon"> Cargar Partida
                             </button>
-                            <button id="exportGameBtn" class="btn-secondary" onclick="exportGameToFile()"
+                            <button id="exportGameBtn" class="btn-secondary"
                                 style="padding: 10px 20px;">
                                 <img src="assets/icons/export.png" alt="" class="btn-icon"> Exportar a Archivo
                             </button>
@@ -647,18 +647,18 @@
                     <div class="settings-footer"
                         style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                         <div style="display: flex; gap: 10px;">
-                            <button id="quitGameBtn" class="btn-secondary hidden" onclick="confirmQuitGame()"
+                            <button id="quitGameBtn" class="btn-secondary hidden"
                                 style="border-color: #c53030; color: #c53030;"
                                 aria-label="Abandonar la partida actual y volver al menú">
                                 🏳️ Abandonar
                             </button>
-                            <button id="restartGameBtn" class="btn-secondary hidden" onclick="confirmRestartGame()"
+                            <button id="restartGameBtn" class="btn-secondary hidden"
                                 style="border-color: #d69e2e; color: #d69e2e;"
                                 aria-label="Reiniciar la partida actual con un nuevo mapa">
                                 🔄 Reiniciar
                             </button>
                         </div>
-                        <button class="btn-secondary" onclick="hideSettings()" style="min-width: 100px;">Cerrar</button>
+                        <button id="resumeSettingsBtn" class="btn-secondary" style="min-width: 100px;">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -724,7 +724,7 @@
                                 class="control-desc">Destruir Unidad</span></div>
                     </div>
                     <div class="settings-footer" style="margin-top: 20px; text-align: right;">
-                        <button class="btn-secondary" onclick="hideShortcuts()">Cerrar</button>
+                        <button id="resumeShortcutsBtn" class="btn-secondary">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -737,7 +737,7 @@
         <div id="pauseOverlay" class="pause-overlay hidden">
             <h1 class="pause-title">PAUSA</h1>
             <p class="pause-subtitle">El juego está detenido</p>
-            <button id="resumeOverlayBtn" class="btn-start pause-btn" onclick="togglePauseGame()">
+            <button id="resumeOverlayBtn" class="btn-start pause-btn">
                 ▶ Reanudar
             </button>
             <div class="pause-hint">

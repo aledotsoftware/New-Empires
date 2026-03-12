@@ -1575,9 +1575,9 @@ export class Game {
         const count = toDelete.length;
         const type = count === 1 ? toDelete[0].name : `${count} entidades`;
 
-        // Usar el helper global definido en main.js
-        if (window.showConfirmation) {
-            window.showConfirmation(
+        // Usar el helper definido en main.js y pasado como propiedad
+        if (this.showConfirmation) {
+            this.showConfirmation(
                 `¿Destruir ${type}? Esta acción no se puede deshacer.`,
                 () => {
                     // Confirm callback

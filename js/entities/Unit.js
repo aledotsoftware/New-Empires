@@ -130,9 +130,16 @@ export class Unit extends Entity {
             if (!Unit._enemyPredicate(enemy, this)) continue;
 
             // Detección de Amenazas: no "ignoren" ser atacadas mientras recolectan o patrullan
-            // Solo ignoramos enemigos no agresivos si estamos recolectando o construyendo.
             // Las unidades militares patrullando o moviéndose DEBEN atacar a los enemigos en rango.
-            const isBusy = this.gatherTarget !== null || (this.type === 'villager' && this.state !== 'IDLE' && this.state !== 'ATTACKING');
+            let isBusy = false;
+            if (this.type === 'villager') {
+                isBusy = this.gatherTarget !== null || (this.state !== 'IDLE' && this.state !== 'ATTACKING');
+            } else {
+                // Militares solo están "ocupados" ignorando enemigos si el jugador explícitamente les ordenó NO atacar
+                // pero por ahora, una unidad militar nunca ignora a un enemigo en su rango de agro.
+                isBusy = false;
+            }
+
             if (isBusy && enemy.attackTarget !== this) {
                 continue;
             }
@@ -416,7 +423,7 @@ export class Unit extends Entity {
         } else if (enemy.type === 'warrior') {
             score += 500;
         } else if (enemy.isBuilding) {
-            score += 100;
+            score -= 1000; // Penalización severa a edificios si hay tropas cerca
         }
 
         // Penalización por distancia

@@ -235,7 +235,15 @@ export class FormationManager {
      * @param {number} spacing - Espaciado
      */
     applyFormation(formationType, units, center, spacing = this.spacing, angle = 0) {
-        let positions = this.getPositions(formationType, units, center, spacing);
+        // Ordenar una COPIA de las unidades: los guerreros (melee) al frente para absorber daño, resto atrás
+        // Se muta localmente el array para asignar posiciones pero no se rompe la referencia externa.
+        const sortedUnits = [...units].sort((a, b) => {
+            if (a.type === 'warrior' && b.type !== 'warrior') return -1;
+            if (a.type !== 'warrior' && b.type === 'warrior') return 1;
+            return 0;
+        });
+
+        let positions = this.getPositions(formationType, sortedUnits, center, spacing);
 
         // Rotar las posiciones calculadas alrededor del centro según el ángulo
         if (angle !== 0) {
@@ -258,9 +266,9 @@ export class FormationManager {
         }
 
         // BOLT OPTIMIZATION: Use for loop instead of forEach
-        const unitsLen = units.length;
+        const unitsLen = sortedUnits.length;
         for (let index = 0; index < unitsLen; index++) {
-            const unit = units[index];
+            const unit = sortedUnits[index];
             if (positions[index]) {
                 unit.targetX = positions[index].x;
                 unit.targetY = positions[index].y;

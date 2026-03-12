@@ -2,18 +2,18 @@
     "civilizationId": "byzantium",
     "name": "Imperio Bizantino",
     "description": "Herederos de Roma. Maestros de la diplomacia, el fuego griego y las defensas impenetrables.",
-    "icon": "☦️",
+    "icon": "assets/icons/civs/byzantium.png",
     "iconEmoji": "🔱",
     "color": "#800080",
     "bonuses": {
         "wallHp": 1.35,
-        "buildingHp": 1.20,
+        "buildingHp": 1.2,
         "religiousBonus": 1.25
     },
     "uniqueUnit": {
         "id": "cataphract",
         "name": "Catafracto",
-        "icon": "🐴",
+        "icon": "assets/icons/warrior.png",
         "baseUnit": "warrior",
         "age": 19,
         "bonuses": {
@@ -25,19 +25,19 @@
     "technologyOverrides": {
         "fortification": {
             "name": "Murallas Teodosianas",
-            "icon": "🏰",
+            "icon": "assets/icons/townCenter.png",
             "description": "Las murallas más impenetrables del mundo."
         }
     },
     "buildingOverrides": {
         "townCenter": {
             "name": "Hagia Sophia",
-            "icon": "⛪",
+            "icon": "assets/icons/temple.png",
             "description": "Catedral y centro del poder bizantino."
         },
         "temple": {
             "name": "Iglesia Ortodoxa",
-            "icon": "☦️",
+            "icon": "assets/icons/temple.png",
             "description": "Centro de la fe ortodoxa."
         }
     },
@@ -45,7 +45,7 @@
         {
             "id": "greekFire",
             "name": "Fuego Griego",
-            "icon": "🔥",
+            "icon": "assets/icons/tech_military.png",
             "category": "MILITARY",
             "age": 20,
             "description": "Arma secreta incendiaria devastadora.",
@@ -57,14 +57,14 @@
             "building": "workshop",
             "prerequisites": [],
             "effects": {
-                "siegeDamage": 1.40,
-                "shipDamage": 1.50
+                "siegeDamage": 1.4,
+                "shipDamage": 1.5
             }
         },
         {
             "id": "themataSystem",
             "name": "Sistema de Themas",
-            "icon": "🗺️",
+            "icon": "assets/icons/tech_economy.png",
             "category": "ADMINISTRATION",
             "age": 19,
             "description": "Organización militar-administrativa del imperio.",
@@ -76,7 +76,7 @@
             "building": "townCenter",
             "prerequisites": [],
             "effects": {
-                "unitProduction": 1.20,
+                "unitProduction": 1.2,
                 "taxCollection": 1.15
             }
         }

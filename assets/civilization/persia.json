@@ -2,18 +2,18 @@
     "civilizationId": "persia",
     "name": "Imperio Persa",
     "description": "El mayor imperio de la antigüedad. Constructores de caminos, tolerantes y con un poderoso ejército.",
-    "icon": "🦁",
+    "icon": "assets/icons/civs/persia.png",
     "iconEmoji": "👑",
     "color": "#800020",
     "bonuses": {
         "unitSpeed": 1.15,
-        "goldGather": 1.20,
-        "tradeBonus": 1.30
+        "goldGather": 1.2,
+        "tradeBonus": 1.3
     },
     "uniqueUnit": {
         "id": "immortal",
         "name": "Inmortal",
-        "icon": "⚔️",
+        "icon": "assets/icons/warrior.png",
         "baseUnit": "warrior",
         "age": 18,
         "bonuses": {
@@ -25,19 +25,19 @@
     "technologyOverrides": {
         "roads": {
             "name": "Camino Real",
-            "icon": "🛤️",
+            "icon": "assets/icons/tech_economy.png",
             "description": "Red de caminos que conecta todo el imperio."
         }
     },
     "buildingOverrides": {
         "townCenter": {
             "name": "Apadana",
-            "icon": "🏛️",
+            "icon": "assets/icons/townCenter.png",
             "description": "Sala de audiencias del Rey de Reyes."
         },
         "market": {
             "name": "Bazar Persa",
-            "icon": "🏪",
+            "icon": "assets/icons/market.png",
             "description": "Centro comercial del imperio."
         }
     },
@@ -45,7 +45,7 @@
         {
             "id": "royalRoad",
             "name": "Camino Real",
-            "icon": "🛤️",
+            "icon": "assets/icons/tech_economy.png",
             "category": "INFRASTRUCTURE",
             "age": 19,
             "description": "Red de caminos para comunicación rápida.",
@@ -58,14 +58,14 @@
             "building": "townCenter",
             "prerequisites": [],
             "effects": {
-                "unitSpeed": 1.20,
+                "unitSpeed": 1.2,
                 "tradeBonus": 1.25
             }
         },
         {
             "id": "immortalsTraining",
             "name": "Entrenamiento de Inmortales",
-            "icon": "🛡️",
+            "icon": "assets/icons/tech_defense.png",
             "category": "MILITARY",
             "age": 20,
             "description": "Entrenamiento de élite para los Inmortales.",
@@ -78,7 +78,7 @@
             "prerequisites": [],
             "effects": {
                 "warriorDamage": 1.25,
-                "warriorHp": 1.20
+                "warriorHp": 1.2
             }
         }
     ]

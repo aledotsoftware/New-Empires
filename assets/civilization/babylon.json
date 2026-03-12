@@ -2,18 +2,18 @@
     "civilizationId": "babylon",
     "name": "Babilonia",
     "description": "Imperio de grandes astrónomos, matemáticos y constructores. Hogar de los Jardines Colgantes.",
-    "icon": "🌟",
+    "icon": "assets/icons/civs/babylon.png",
     "iconEmoji": "✨",
     "color": "#4B0082",
     "bonuses": {
         "researchSpeed": 1.25,
-        "templeEfficiency": 1.30,
-        "wallHp": 1.20
+        "templeEfficiency": 1.3,
+        "wallHp": 1.2
     },
     "uniqueUnit": {
         "id": "bowman",
         "name": "Arquero de Babilonia",
-        "icon": "🏹",
+        "icon": "assets/icons/archer.png",
         "baseUnit": "archer",
         "age": 17,
         "bonuses": {
@@ -24,24 +24,24 @@
     "technologyOverrides": {
         "astronomy": {
             "name": "Astronomía Babilónica",
-            "icon": "🌙",
+            "icon": "assets/icons/science.png",
             "description": "Observación avanzada de los astros."
         },
         "mathematics": {
             "name": "Matemáticas Sexagesimales",
-            "icon": "🔢",
+            "icon": "assets/icons/science.png",
             "description": "Sistema numérico base 60."
         }
     },
     "buildingOverrides": {
         "townCenter": {
             "name": "Puerta de Ishtar",
-            "icon": "🚪",
+            "icon": "assets/icons/tech_defense.png",
             "description": "Majestuosa entrada a la ciudad."
         },
         "temple": {
             "name": "Torre de Babel",
-            "icon": "🗼",
+            "icon": "assets/icons/tech_defense.png",
             "description": "Gran torre escalonada."
         }
     },
@@ -49,7 +49,7 @@
         {
             "id": "astrology",
             "name": "Astrología",
-            "icon": "⭐",
+            "icon": "assets/icons/science.png",
             "category": "SCIENCE",
             "age": 19,
             "description": "Lectura de los astros para predecir el futuro.",

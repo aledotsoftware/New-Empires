@@ -219,17 +219,114 @@ export class ProceduralMapGenerator {
     }
 
     ensureConnectivity() {
-        if (this.playerStarts.length < 2) return;
+        const landmasses = this.floodFillLandmasses();
 
-        // Connect each player to the next one in the list, forming a loop
-        for (let i = 0; i < this.playerStarts.length; i++) {
-            let start = this.playerStarts[i];
-            let end = this.playerStarts[(i + 1) % this.playerStarts.length];
+        // Si no hay o hay solo 1 masa de tierra, ya está conectado
+        if (landmasses.length <= 1) return;
 
-            if (!this.areConnected(start, end)) {
-                this.carvePath(start.x, start.y, end.x, end.y);
+        console.log(`🌍 Detectadas ${landmasses.length} masas de tierra separadas. Iniciando conexiones globales.`);
+
+        // Identificar la masa principal (por tamaño o conteniendo al jugador 1)
+        let mainMass = landmasses[0];
+        if (this.playerStarts.length > 0) {
+            const p1 = this.playerStarts[0];
+            // Encontrar la masa del p1 midiendo distancias (simplificado)
+            for (let m of landmasses) {
+                // Chequeo rapido si el punto p1 esta dentro de los tiles
+                if (m.tiles.some(t => t.x === p1.x && t.y === p1.y)) {
+                    mainMass = m;
+                    break;
+                }
             }
         }
+
+        // Conectar el centro de cada isla menor al centro de la masa principal
+        for (let m of landmasses) {
+            if (m.id !== mainMass.id && m.tiles.length > 5) { // Ignorar islitas insignificantes de < 5 tiles
+                this.carvePath(m.centerX, m.centerY, mainMass.centerX, mainMass.centerY);
+            }
+        }
+    }
+
+    floodFillLandmasses() {
+        // Usa Int32Array para soportar ids mayores a 255 y evitar desbordamiento en mapas gigantes
+        const visited = new Int32Array(this.width * this.height);
+        const landmasses = [];
+        let landmassId = 1;
+
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const idx = y * this.width + x;
+                if (visited[idx] === 0) {
+                    const terrain = this.terrainTypes[y][x];
+                    if (terrain !== 'water' && terrain !== 'mountain') {
+                        // Iniciar nuevo flood fill
+                        const currentMass = { id: landmassId++, tiles: [], centerX: 0, centerY: 0 };
+                        const queue = [x, y];
+                        visited[idx] = landmassId;
+
+                        let head = 0;
+                        let sumX = 0;
+                        let sumY = 0;
+
+                        while (head < queue.length) {
+                            const cx = queue[head++];
+                            const cy = queue[head++];
+
+                            currentMass.tiles.push({x: cx, y: cy});
+                            sumX += cx;
+                            sumY += cy;
+
+                            // 4-way neighbors
+                            const neighbors = [
+                                {x: cx+1, y: cy}, {x: cx-1, y: cy},
+                                {x: cx, y: cy+1}, {x: cx, y: cy-1}
+                            ];
+
+                            for (let n of neighbors) {
+                                if (n.x >= 0 && n.x < this.width && n.y >= 0 && n.y < this.height) {
+                                    const nIdx = n.y * this.width + n.x;
+                                    if (visited[nIdx] === 0) {
+                                        const nTerrain = this.terrainTypes[n.y][n.x];
+                                        if (nTerrain !== 'water' && nTerrain !== 'mountain') {
+                                            visited[nIdx] = landmassId;
+                                            queue.push(n.x, n.y);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Calcular centro geométrico de la masa de tierra
+                        if (currentMass.tiles.length > 0) {
+                            currentMass.centerX = Math.floor(sumX / currentMass.tiles.length);
+                            currentMass.centerY = Math.floor(sumY / currentMass.tiles.length);
+
+                            // Asegurarse de que el centro sea un tile válido de la masa (por si es cóncava)
+                            let closest = currentMass.tiles[0];
+                            let minDistSq = Infinity;
+                            for (let t of currentMass.tiles) {
+                                const distSq = (t.x - currentMass.centerX)**2 + (t.y - currentMass.centerY)**2;
+                                if (distSq < minDistSq) {
+                                    minDistSq = distSq;
+                                    closest = t;
+                                }
+                            }
+                            currentMass.centerX = closest.x;
+                            currentMass.centerY = closest.y;
+
+                            landmasses.push(currentMass);
+                        }
+                    } else {
+                        // Marcar obstáculos como visitados para no iterar sobre ellos después
+                        visited[idx] = 255;
+                    }
+                }
+            }
+        }
+
+        // Ordenar landmasses por tamaño descendente
+        return landmasses.sort((a, b) => b.tiles.length - a.tiles.length);
     }
 
     areConnected(start, end) {
@@ -407,15 +504,18 @@ export class ProceduralMapGenerator {
             // Muy frío
             if (m > 0.5) return 'snow';
             return 'tundra';
-        } else if (t < 0.5) {
-            // Templado/Frío
-            if (m > 0.6) return 'forest'; // Bosque de pinos (representado como bosque normal)
-            if (m < 0.3) return 'tundra';
+        } else if (t < 0.4) {
+            // Frío de transición
+            if (m > 0.6) return 'forest';
+            return 'tundra';
+        } else if (t < 0.6) {
+            // Templado (banda intermedia obligatoria)
+            if (m > 0.6) return 'forest';
             return 'grassland';
         } else if (t < 0.75) {
             // Templado/Cálido
             if (m > 0.6) return 'forest';
-            if (m < 0.2) return 'desert';
+            if (m < 0.15) return 'desert';
             return 'grassland';
         } else {
             // Muy cálido
@@ -423,7 +523,7 @@ export class ProceduralMapGenerator {
                 if (mainBiome === 'swamp') return 'swamp';
                 return 'forest'; // Selva/Jungla
             }
-            if (m < 0.4) return 'desert';
+            if (m < 0.3) return 'desert';
             if (mainBiome === 'volcanic' && m < 0.6) return 'volcanic';
             return 'grassland'; // Sabana
         }
@@ -717,6 +817,52 @@ export class ProceduralMapGenerator {
                     if (currentAngle >= Math.PI * 2) {
                         currentAngle = 0;
                         forceDist += 2;
+                    }
+                }
+
+                // Fallback de emergencia extremo: asegurar madera y oro si fallaron todos los intentos normales
+                if (placed < config.count && (config.type === 'wood' || config.type === 'gold')) {
+                    console.warn(`Generación de emergencia absoluta para ${config.type}`);
+                    let emergencyDist = 5; // Cerca del centro urbano
+                    let currAngle = 0;
+
+                    // Bailout limit to prevent infinite loops if the map is too congested or small
+                    const maxDist = Math.max(this.width, this.height);
+
+                    while (placed < config.count && emergencyDist <= maxDist) {
+                        const ex = Math.floor(start.x + Math.cos(currAngle) * emergencyDist);
+                        const ey = Math.floor(start.y + Math.sin(currAngle) * emergencyDist);
+
+                        if (ex >= 0 && ex < this.width && ey >= 0 && ey < this.height) {
+                            // Convertir terreno estrictamente
+                            this.terrainTypes[ey][ex] = 'grassland';
+                            this.heightmap[ey][ex] = 0.5;
+
+                            // Asegurarse de que no esté ocupado
+                            let isOccupied = false;
+                            for (let res of this.resources) {
+                                if (res.x === ex && res.y === ey) {
+                                    isOccupied = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isOccupied) {
+                                this.resources.push({
+                                    x: ex, y: ey,
+                                    type: config.type,
+                                    amount: config.amount,
+                                    playerId: start.playerId
+                                });
+                                placed++;
+                            }
+                        }
+
+                        currAngle += Math.PI / 8;
+                        if (currAngle >= Math.PI * 2) {
+                            currAngle = 0;
+                            emergencyDist++;
+                        }
                     }
                 }
             }

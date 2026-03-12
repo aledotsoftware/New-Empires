@@ -17,12 +17,12 @@ export class Warrior extends Unit {
         } else if (enemy.type === 'warrior') {
             score += 500;
         } else if (enemy.isBuilding) {
-            score += 100;
+            score -= 1000;
         }
 
         // Penalización HEAVY por distancia para evitar perseguir infinitamente a arqueros que kittean
         // Si la distancia es muy grande, ignorarlo a menos que no haya otra opción
-        score -= distSq / 100;
+        score -= distSq / 50;
 
         return score;
     }

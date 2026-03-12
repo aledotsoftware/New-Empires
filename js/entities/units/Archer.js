@@ -18,7 +18,7 @@ export class Archer extends Unit {
         } else if (enemy.type === 'warrior') {
             score += 500;
         } else if (enemy.isBuilding) {
-            score += 100;
+            score -= 1000;
         }
 
         // Penalización ligera por distancia (pueden disparar de lejos)
@@ -50,8 +50,8 @@ export class Archer extends Unit {
             const dy = this.y - this.attackTarget.y;
             const distSq = dx * dx + dy * dy;
 
-            // Mantenemos distancia a un ~80% de nuestra attackRange para tener un margen seguro de disparo
-            const minKiteDistSq = this.attackRangeSq * 0.64;
+            // Mantenemos distancia a un ~90% de nuestra attackRange para tener un margen seguro de disparo
+            const minKiteDistSq = this.attackRangeSq * 0.81;
 
             // Verificamos si podemos movernos (no estamos estuneados, etc.)
             // En este motor, el Unit base maneja todo en update()

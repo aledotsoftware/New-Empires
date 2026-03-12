@@ -1,0 +1,70 @@
+{
+    "civilizationId": "chinese",
+    "name": "Imperio Chino",
+    "description": "Una de las civilizaciones más antiguas, creadores de la pólvora y el papel.",
+    "icon": "assets/icons/civs/chinese.png",
+    "color": "#d32f2f",
+    "primaryColor": "#b71c1c",
+    "secondaryColor": "#ffc107",
+    "bonuses": {
+        "startingResources": {
+            "wood": 50,
+            "food": 50,
+            "gold": 50,
+            "stone": 50
+        },
+        "gatherSpeed": 1.1,
+        "buildingHp": 1.1
+    },
+    "unitOverrides": {
+        "villager": {
+            "name": "Campesino",
+            "icon": "assets/icons/villager.png",
+            "gatherBonus": 1.1
+        },
+        "archer": {
+            "name": "Ballestero Chino",
+            "icon": "assets/icons/archer.png",
+            "attack": 9,
+            "hp": 65,
+            "speed": 50
+        }
+    },
+    "buildingOverrides": {
+        "townCenter": {
+            "name": "Palacio Imperial",
+            "icon": "assets/icons/townCenter.png",
+            "description": "Centro administrativo y palacio de la dinastía."
+        }
+    },
+    "uniqueUnit": {
+        "id": "chuKoNu",
+        "name": "Chu Ko Nu",
+        "icon": "assets/icons/archer.png",
+        "baseUnit": "archer",
+        "age": 19,
+        "bonuses": {
+            "attackSpeed": 1.5,
+            "attackDamage": 1.2
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "greatWall",
+            "name": "Gran Muralla",
+            "icon": "assets/icons/tech_defense.png",
+            "category": "DEFENSE",
+            "age": 18,
+            "description": "Incrementa la resistencia de todas las estructuras.",
+            "cost": {
+                "stone": 300
+            },
+            "researchTime": 45,
+            "building": "townCenter",
+            "prerequisites": [],
+            "effects": {
+                "buildingHp": 1.2
+            }
+        }
+    ]
+}

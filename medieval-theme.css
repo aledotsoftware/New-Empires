@@ -311,6 +311,20 @@ body.theme-spain {
     --civ-theme-accent: rgba(246, 173, 85, 0.3);
 }
 
+body.theme-chinese {
+    --civ-theme-primary: #d32f2f;
+    --civ-theme-primary-dark: #b71c1c;
+    --civ-theme-primary-light: #ffc107;
+    --civ-theme-accent: rgba(211, 47, 47, 0.3);
+}
+
+body.theme-ottomans {
+    --civ-theme-primary: #2e7d32;
+    --civ-theme-primary-dark: #1b5e20;
+    --civ-theme-primary-light: #cddc39;
+    --civ-theme-accent: rgba(46, 125, 50, 0.3);
+}
+
 /* Esquinas decorativas */
 .ornate-corners {
     position: relative;

@@ -1,0 +1,72 @@
+{
+    "civilizationId": "ottomans",
+    "name": "Imperio Otomano",
+    "description": "Poderoso imperio islámico que unió Oriente y Occidente. Maestros de la pólvora y el asedio.",
+    "icon": "assets/icons/civs/ottomans.png",
+    "color": "#2e7d32",
+    "primaryColor": "#1b5e20",
+    "secondaryColor": "#cddc39",
+    "bonuses": {
+        "infantryAttack": 1.15,
+        "buildSpeed": 1.1
+    },
+    "unitOverrides": {
+        "villager": {
+            "name": "Aldeano Otomano",
+            "icon": "assets/icons/villager.png",
+            "gatherBonus": 1.0
+        },
+        "warrior": {
+            "name": "Sipahi",
+            "icon": "assets/icons/warrior.png",
+            "attack": 12,
+            "hp": 110,
+            "speed": 55
+        }
+    },
+    "buildingOverrides": {
+        "temple": {
+            "name": "Mezquita",
+            "icon": "assets/icons/temple.png",
+            "description": "Lugar de culto y enseñanza en el imperio."
+        }
+    },
+    "uniqueUnit": {
+        "id": "janissary",
+        "name": "Jenízaro",
+        "icon": "assets/icons/archer.png",
+        "baseUnit": "archer",
+        "age": 19,
+        "bonuses": {
+            "attackDamage": 1.5,
+            "attackSpeed": 0.8
+        }
+    },
+    "uniqueTechnologies": [
+        {
+            "id": "bombardCannons",
+            "name": "Cañones de Bombardeo",
+            "icon": "assets/icons/tech_military.png",
+            "category": "MILITARY",
+            "age": 20,
+            "description": "Gran potencia de fuego para unidades de infantería y rango.",
+            "cost": {
+                "gold": 300,
+                "food": 200
+            },
+            "researchTime": 50,
+            "building": "workshop",
+            "prerequisites": [],
+            "effects": {
+                "unitStats": {
+                    "archer": {
+                        "attackDamage": 1.25
+                    },
+                    "warrior": {
+                        "attackDamage": 1.15
+                    }
+                }
+            }
+        }
+    ]
+}

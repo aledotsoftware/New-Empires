@@ -2549,6 +2549,9 @@ export class Game {
                         // El tamaño del efecto se basa en el tamaño del edificio
                         this.particleSystem.createBuildingCollapseEffect(building.x, building.y, building.size * 2);
                     }
+                    if (soundManager && typeof soundManager.playExplosion === 'function') {
+                        soundManager.playExplosion();
+                    }
                     building._collapseProcessed = true;
                 }
 

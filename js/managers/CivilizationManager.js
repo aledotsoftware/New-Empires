@@ -67,6 +67,33 @@ export class CivilizationManager {
         if (civ.bonuses.gatherSpeed && unit.canGather) {
             unit.gatherMultiplier = civ.bonuses.gatherSpeed;
         }
+
+        if (unit.type === 'warrior' || unit.type === 'spearman') {
+            const infAttack = civ.bonuses.infantryAttack || civ.bonuses.infantryDamage || 1;
+            unit.attackDamage = Math.round(unit.attackDamage * infAttack);
+
+            const infArmor = civ.bonuses.infantryArmor || 1;
+            unit.maxHp = Math.round(unit.maxHp * infArmor);
+            unit.hp = unit.maxHp;
+        }
+
+        if (unit.type === 'cavalry' || unit.type === 'scout') {
+            if (civ.bonuses.cavalryAttack) {
+                unit.attackDamage = Math.round(unit.attackDamage * civ.bonuses.cavalryAttack);
+            }
+            if (civ.bonuses.cavalrySpeed) {
+                unit.speed = Math.round(unit.speed * civ.bonuses.cavalrySpeed);
+            }
+        }
+
+        if (unit.canGather) {
+            if (civ.bonuses.gatherGold || civ.bonuses.goldGather) {
+                unit.gatherGoldMultiplier = civ.bonuses.gatherGold || civ.bonuses.goldGather;
+            }
+            if (civ.bonuses.agricultureBonus) {
+                unit.gatherFoodMultiplier = civ.bonuses.agricultureBonus;
+            }
+        }
     }
 }
 

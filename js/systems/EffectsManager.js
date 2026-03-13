@@ -128,7 +128,26 @@ export class Particle {
 }
 
 export class Ripple {
+    static pool = [];
+
+    static get(x, y, color = '#48bb78') {
+        if (this.pool.length > 0) {
+            const p = this.pool.pop();
+            p.reset(x, y, color);
+            return p;
+        }
+        return new Ripple(x, y, color);
+    }
+
+    static release(p) {
+        this.pool.push(p);
+    }
+
     constructor(x, y, color = '#48bb78') {
+        this.reset(x, y, color);
+    }
+
+    reset(x, y, color = '#48bb78') {
         this.x = x;
         this.y = y;
         this.life = 0.6;
@@ -464,30 +483,30 @@ export class ParticleSystem {
 
     // Efecto de movimiento (Ripple)
     createMoveRipple(x, y) {
-        this.particles.push(new Ripple(x, y));
+        this.particles.push(Ripple.get(x, y));
     }
 
     // Efecto de ataque (Ripple Rojo)
     createAttackRipple(x, y) {
-        this.particles.push(new Ripple(x, y, '#c53030'));
+        this.particles.push(Ripple.get(x, y, '#c53030'));
     }
 
     // Efecto de recolección (Ripple Dorado)
     createGatherRipple(x, y) {
-        this.particles.push(new Ripple(x, y, '#ecc94b'));
+        this.particles.push(Ripple.get(x, y, '#ecc94b'));
     }
 
     // Efecto de construcción (Ripple Azul)
     createBuildRipple(x, y) {
-        this.particles.push(new Ripple(x, y, '#4299e1'));
+        this.particles.push(Ripple.get(x, y, '#4299e1'));
     }
 
     // Efecto de enfoque de cámara (Palette)
     createFocusPing(x, y) {
         // Cyan ripple for focus
-        this.particles.push(new Ripple(x, y, '#4299e1'));
+        this.particles.push(Ripple.get(x, y, '#4299e1'));
         // Smaller secondary ripple for emphasis
-        const r = new Ripple(x, y, '#ffffff');
+        const r = Ripple.get(x, y, '#ffffff');
         r.maxSize = 15;
         this.particles.push(r);
     }
@@ -518,7 +537,11 @@ export class ParticleSystem {
                 this.particles[writeIdx++] = p;
             } else {
                 // BOLT OPTIMIZATION: Return to Object Pool
-                Particle.release(p);
+                if (p instanceof Ripple) {
+                    Ripple.release(p);
+                } else {
+                    Particle.release(p);
+                }
             }
         }
         this.particles.length = writeIdx;

@@ -114,7 +114,11 @@ export class Unit extends Entity {
         if (!targetGrid) return; // Safety check
 
         // REFACTOR: Usar query() para obtener todos los enemigos en rango y priorizar
-        const enemies = [];
+        // BOLT OPTIMIZATION: Reuse static array to reduce GC pressure
+        if (!Unit._enemyQueryCache) {
+            Unit._enemyQueryCache = [];
+        }
+        const enemies = Unit._enemyQueryCache;
         targetGrid.query(this.x, this.y, searchRadius, enemies, true);
 
         if (enemies.length === 0) return;

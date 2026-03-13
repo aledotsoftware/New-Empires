@@ -313,8 +313,8 @@ export class Villager extends Unit {
     }
 
     // BOLT OPTIMIZATION: Static predicate for resource search
-    static _resourcePredicate(entity, context) {
-        return entity.type === context.searchType && entity.amount > 0;
+    static _resourcePredicate(entity, searchType) {
+        return entity.type === searchType && entity.amount > 0;
     }
 
     findNearbyResource(game, searchType) {
@@ -322,12 +322,8 @@ export class Villager extends Unit {
 
         const searchRadius = 800; // Radio de busqueda razonable (aprox 25 tiles)
 
-        // Context object to avoid closure allocation
-        const context = {
-            searchType: searchType
-        };
-
-        const target = game.resourceGrid.find(this.x, this.y, searchRadius, Villager._resourcePredicate, context);
+        // Pass the string directly to avoid object allocation per call
+        const target = game.resourceGrid.find(this.x, this.y, searchRadius, Villager._resourcePredicate, searchType);
 
         if (target) {
             this.currentResourceNode = target;

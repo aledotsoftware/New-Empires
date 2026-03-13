@@ -5,3 +5,4 @@
 
 ## Agent Notes
 - **Bard Agent**: Added historical flavor to unit production queues. Verified effects, ambient sounds, and glassmorphism styles are present.
+- **Bolt Agent**: Implemented `OffscreenCanvas` for performance improvements on `_fowBufferCanvas`, `_minimapBufferCanvas`, and `_terrainBufferCanvas` static layers.

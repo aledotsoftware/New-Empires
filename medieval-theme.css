@@ -2683,12 +2683,15 @@ button:focus-visible,
 #customCursor {
     transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.1s ease-out;
     transform-origin: top left; /* Pivot from the tip of the arrow */
+    /* Hide the image because we render it on the canvas */
+    opacity: 0;
 }
 
 /* Hover State: Scale up slightly and glow when hovering interactive elements */
 /* Using :has() to detect when the body contains a hovered interactive element */
 /* Note: The custom cursor has pointer-events: none, so hovering passes through to elements below */
 body:has(button:hover, a:hover, input:hover, [role="button"]:hover, .civ-option:hover, .map-size-option:hover, .build-option:hover, .resource-item:hover, .game-time:hover) #customCursor {
+    /* Kept for when customCursor is used for DOM overlays or future effects */
     transform: scale(1.15);
     filter: drop-shadow(0 0 4px var(--gold));
 }

@@ -2738,9 +2738,15 @@ export class Game {
                 'cursor-farm': 'assets/icons/food.png',
                 'cursor-mine': 'assets/icons/stone.png'
             };
-            const newSrc = iconMap[cursorClass] || 'assets/icons/cursor.png';
+            // Note: If badgeIcon was already explicitly set (like gold.png instead of stone.png), use it
+            // if we are doing mining and badgeIcon has been specified.
+            const newSrc = (cursorClass === 'cursor-mine' && badgeIcon) ? badgeIcon : (iconMap[cursorClass] || 'assets/icons/cursor.png');
+
             if (cursorImg.src !== newSrc && !cursorImg.src.endsWith(newSrc)) {
                 cursorImg.src = newSrc;
+            }
+            if (this.cursorImage && !this.cursorImage.src.endsWith(newSrc)) {
+                this.cursorImage.src = newSrc;
             }
             if (this.cursorBadge) this.cursorBadge.style.display = 'none';
         } else {
@@ -2751,8 +2757,11 @@ export class Game {
                     cursorImg.src = defaultCursor;
                     this.cursorElement.style.transform = 'scale(1)';
                 }
-                if (this.cursorBadge) this.cursorBadge.style.display = 'none';
             }
+            if (this.cursorImage && !this.cursorImage.src.endsWith('assets/icons/cursor.png')) {
+                this.cursorImage.src = 'assets/icons/cursor.png';
+            }
+            if (this.cursorBadge) this.cursorBadge.style.display = 'none';
         }
     }
 
@@ -3478,6 +3487,10 @@ export class Game {
 
         // Renderizar minimapa
         this.renderMinimap();
+
+        // Palette: Render Contextual Cursor on canvas instead of just relying on DOM
+        // This keeps it perfectly synced and bypasses DOM reflow delays.
+        this.drawCustomCursor();
 
         // Palette: Canvas Pause Overlay removed in favor of DOM overlay for accessibility
     }
@@ -4220,8 +4233,14 @@ export class Game {
     }
 
     drawCustomCursor() {
-        if (this.cursorImage.complete) {
-            this.ctx.drawImage(this.cursorImage, this.mouse.x, this.mouse.y);
+        if (!this.mouse) return;
+
+        // We only draw if we successfully parsed cursorSize from customCursor Element
+        const sizeStr = this.cursorElement ? this.cursorElement.style.width : '32px';
+        const size = parseInt(sizeStr) || 32;
+
+        if (this.cursorImage && this.cursorImage.complete) {
+            this.ctx.drawImage(this.cursorImage, this.mouse.x, this.mouse.y, size, size);
         } else {
             // Fallback cursor
             this.ctx.fillStyle = 'white';
@@ -4229,8 +4248,8 @@ export class Game {
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();
             this.ctx.moveTo(this.mouse.x, this.mouse.y);
-            this.ctx.lineTo(this.mouse.x + 15, this.mouse.y + 15);
-            this.ctx.lineTo(this.mouse.x, this.mouse.y + 22);
+            this.ctx.lineTo(this.mouse.x + size * 0.46, this.mouse.y + size * 0.46);
+            this.ctx.lineTo(this.mouse.x, this.mouse.y + size * 0.68);
             this.ctx.fill();
             this.ctx.stroke();
         }

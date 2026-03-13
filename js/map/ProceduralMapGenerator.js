@@ -254,6 +254,9 @@ export class ProceduralMapGenerator {
         const landmasses = [];
         let landmassId = 1;
 
+        // Optimización: Usar Int32Array para la cola para evitar O(N) array push/shift overhead
+        const queue = new Int32Array(this.width * this.height * 2);
+
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const idx = y * this.width + x;
@@ -262,14 +265,18 @@ export class ProceduralMapGenerator {
                     if (terrain !== 'water' && terrain !== 'mountain') {
                         // Iniciar nuevo flood fill
                         const currentMass = { id: landmassId++, tiles: [], centerX: 0, centerY: 0 };
-                        const queue = [x, y];
-                        visited[idx] = landmassId;
 
                         let head = 0;
+                        let tail = 0;
+                        queue[tail++] = x;
+                        queue[tail++] = y;
+
+                        visited[idx] = landmassId;
+
                         let sumX = 0;
                         let sumY = 0;
 
-                        while (head < queue.length) {
+                        while (head < tail) {
                             const cx = queue[head++];
                             const cy = queue[head++];
 
@@ -290,7 +297,8 @@ export class ProceduralMapGenerator {
                                         const nTerrain = this.terrainTypes[n.y][n.x];
                                         if (nTerrain !== 'water' && nTerrain !== 'mountain') {
                                             visited[nIdx] = landmassId;
-                                            queue.push(n.x, n.y);
+                                            queue[tail++] = n.x;
+                                            queue[tail++] = n.y;
                                         }
                                     }
                                 }
@@ -511,6 +519,8 @@ export class ProceduralMapGenerator {
         } else if (t < 0.6) {
             // Templado (banda intermedia obligatoria)
             if (m > 0.6) return 'forest';
+            // Prevenir desierto tan cerca de zonas frías (t < 0.4)
+            if (m < 0.15) return 'grassland';
             return 'grassland';
         } else if (t < 0.75) {
             // Templado/Cálido
@@ -834,7 +844,7 @@ export class ProceduralMapGenerator {
                         const ey = Math.floor(start.y + Math.sin(currAngle) * emergencyDist);
 
                         if (ex >= 0 && ex < this.width && ey >= 0 && ey < this.height) {
-                            // Convertir terreno estrictamente
+                            // Convertir terreno estrictamente antes de intentar situarlo
                             this.terrainTypes[ey][ex] = 'grassland';
                             this.heightmap[ey][ex] = 0.5;
 

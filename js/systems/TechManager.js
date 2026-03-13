@@ -1045,9 +1045,16 @@ export class TechManager {
         }
 
         // Añadir a cola
+        let finalResearchTime = tech.researchTime;
+
+        // Aplicar bonificación de velocidad de investigación si existe
+        if (this.game && this.game.civilization && this.game.civilization.bonuses && this.game.civilization.bonuses.researchSpeed) {
+            finalResearchTime /= this.game.civilization.bonuses.researchSpeed;
+        }
+
         this.researchQueue.push({
             techId: techId,
-            timer: tech.researchTime
+            timer: finalResearchTime
         });
 
         this.game.updateUI();

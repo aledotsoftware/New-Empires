@@ -252,9 +252,13 @@ export class Game {
         this.visionTimer = 0;
 
         // BOLT OPTIMIZATION: Resize FOW buffer to match tile grid
-        this._fowBufferCanvas = document.createElement('canvas');
-        this._fowBufferCanvas.width = this.fow.cols;
-        this._fowBufferCanvas.height = this.fow.rows;
+        if (typeof OffscreenCanvas !== 'undefined') {
+            this._fowBufferCanvas = new OffscreenCanvas(this.fow.cols, this.fow.rows);
+        } else {
+            this._fowBufferCanvas = document.createElement('canvas');
+            this._fowBufferCanvas.width = this.fow.cols;
+            this._fowBufferCanvas.height = this.fow.rows;
+        }
         this._fowBufferCtx = this._fowBufferCanvas.getContext('2d', { alpha: true });
         this._fowImageData = this._fowBufferCtx.createImageData(this.fow.cols, this.fow.rows);
         // BOLT OPTIMIZATION: Cache Uint32Array view to avoid allocation in hot path
@@ -397,7 +401,11 @@ export class Game {
 
         // BOLT OPTIMIZATION: Minimap Buffer
         // Cache static layers (Background, Resources, Buildings) to avoid re-drawing them every frame.
-        this._minimapBufferCanvas = document.createElement('canvas');
+        if (typeof OffscreenCanvas !== 'undefined') {
+            this._minimapBufferCanvas = new OffscreenCanvas(300, 300); // Temporary size, resized later
+        } else {
+            this._minimapBufferCanvas = document.createElement('canvas');
+        }
         this._minimapBufferCtx = this._minimapBufferCanvas.getContext('2d');
         this._minimapDirty = true;
 
@@ -410,7 +418,11 @@ export class Game {
         // BOLT OPTIMIZATION: Offscreen Terrain Buffer
         // Replaces per-frame tile iteration with a cached large canvas (~1.5x viewport)
         // Only re-renders when camera moves near the edge of the buffer.
-        this._terrainBufferCanvas = document.createElement('canvas');
+        if (typeof OffscreenCanvas !== 'undefined') {
+            this._terrainBufferCanvas = new OffscreenCanvas(800, 600); // Temporary size, resized later
+        } else {
+            this._terrainBufferCanvas = document.createElement('canvas');
+        }
         this._terrainBufferCtx = this._terrainBufferCanvas.getContext('2d');
         this._terrainBufferRect = { x: -99999, y: -99999, width: 0, height: 0 };
 

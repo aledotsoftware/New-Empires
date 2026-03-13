@@ -108,6 +108,10 @@ export class Villager extends Unit {
                             multiplier *= this.gatherGoldMultiplier;
                         } else if (this.currentResourceNode.type === 'food' && this.gatherFoodMultiplier) {
                             multiplier *= this.gatherFoodMultiplier;
+                        } else if (this.currentResourceNode.type === 'wood' && this.gatherWoodMultiplier) {
+                            multiplier *= this.gatherWoodMultiplier;
+                        } else if (this.currentResourceNode.type === 'stone' && this.gatherStoneMultiplier) {
+                            multiplier *= this.gatherStoneMultiplier;
                         }
 
                         const rate = baseRate * multiplier;

@@ -90,8 +90,14 @@ export class CivilizationManager {
             if (civ.bonuses.gatherGold || civ.bonuses.goldGather) {
                 unit.gatherGoldMultiplier = civ.bonuses.gatherGold || civ.bonuses.goldGather;
             }
-            if (civ.bonuses.agricultureBonus) {
-                unit.gatherFoodMultiplier = civ.bonuses.agricultureBonus;
+            if (civ.bonuses.agricultureBonus || civ.bonuses.gatherFood) {
+                unit.gatherFoodMultiplier = civ.bonuses.agricultureBonus || civ.bonuses.gatherFood;
+            }
+            if (civ.bonuses.gatherWood || civ.bonuses.woodGather) {
+                unit.gatherWoodMultiplier = civ.bonuses.gatherWood || civ.bonuses.woodGather;
+            }
+            if (civ.bonuses.gatherStone || civ.bonuses.stoneGather) {
+                unit.gatherStoneMultiplier = civ.bonuses.gatherStone || civ.bonuses.stoneGather;
             }
         }
     }

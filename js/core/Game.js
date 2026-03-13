@@ -2269,10 +2269,10 @@ export class Game {
 
         const queueLength = building.productionQueue.length;
 
-        let narrativeText = `Reclutando ${unitType}`;
+        let narrativeText = `Forjando ${unitType}`;
         if (unitType === 'villager') narrativeText = `Forjando la Orden de Trabajo`;
         if (unitType === 'warrior') narrativeText = `Forjando la Orden de Caballería`;
-        if (unitType === 'archer') narrativeText = `Reclutando la Orden de Arqueros`;
+        if (unitType === 'archer') narrativeText = `Forjando la Orden de Arqueros`;
         this.showNotification(`${narrativeText} (${queueLength}/5)`, 'info');
 
         this.updateUI();

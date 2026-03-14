@@ -76,13 +76,26 @@ export class Archer extends Unit {
                 // Usar la función de Unit para movernos, dist 0 para mover exacto
                 this.moveTowardsTarget(escapeX, escapeY, deltaTime, game, 0);
 
-                const movedSq = (this.x - oldX) ** 2 + (this.y - oldY) ** 2;
+                let movedSq = (this.x - oldX) ** 2 + (this.y - oldY) ** 2;
 
                 // Si no nos movimos porque estamos chocando contra el terreno o límite
                 if (movedSq < 0.1) {
-                    isKiting = false;
-                    // Dejar que actúe normalmente (disparar sin huir)
-                } else {
+                    // Try rotating 90 degrees to slide around obstacle
+                    const newDirX = -dirY;
+                    const newDirY = dirX;
+                    const newEscapeX = this.x + newDirX * escapeDist;
+                    const newEscapeY = this.y + newDirY * escapeDist;
+
+                    this.moveTowardsTarget(newEscapeX, newEscapeY, deltaTime, game, 0);
+                    movedSq = (this.x - oldX) ** 2 + (this.y - oldY) ** 2;
+
+                    if (movedSq < 0.1) {
+                        isKiting = false;
+                        // Dejar que actúe normalmente (disparar sin huir)
+                    }
+                }
+
+                if (isKiting) {
                     // Mientras huimos exitosamente, no atacamos (stutter stepping: huye, se detiene, dispara)
                     if (this.attackCooldown > 0) {
                         this.attackCooldown -= deltaTime;

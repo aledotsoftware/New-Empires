@@ -245,9 +245,13 @@ export class Villager extends Unit {
 
             ctx.save(); // Save context to prevent leakage
 
-            // BOLT OPTIMIZATION: Use cached game.renderTime instead of Date.now()
+            // BOLT OPTIMIZATION: Use cached renderTime if available instead of Date.now()
             // Eliminates 1 system call per idle villager per frame
-            const time = (game && game.renderTime) ? game.renderTime : Date.now();
+            // Using a safe fallback since game is not passed to render
+            let time = Date.now();
+            if (typeof window !== 'undefined' && window.game && window.game.renderTime) {
+                time = window.game.renderTime;
+            }
             const offsetY = Math.sin(time / 200) * 3; // +/- 3px
 
             // Position above head (adjust if carrying resource)

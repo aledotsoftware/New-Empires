@@ -236,6 +236,65 @@ export class ParticleSystem {
         }
     }
 
+    // Efecto de tala de madera (Hojas y astillas)
+    createWoodChopEffect(x, y) {
+        for (let i = 0; i < 4; i++) {
+            const isLeaf = Math.random() > 0.5;
+            const angle = (Math.random() - 0.5) * Math.PI; // Hacia arriba
+            const speed = Math.random() * 30 + 15;
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 10, y + (Math.random() - 0.5) * 10, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 20,
+                life: Math.random() * 0.5 + 0.3,
+                size: isLeaf ? Math.random() * 3 + 2 : Math.random() * 4 + 1,
+                color: isLeaf ? '#48bb78' : '#8b5a2b', // Verde hoja o marrón madera
+                gravity: isLeaf ? 15 : 40, // Las hojas caen más lento
+                friction: 0.95,
+                shape: isLeaf ? 'circle' : 'square',
+                fadeRate: 1.2
+            }));
+        }
+    }
+
+    // Efecto de picar piedra (Polvo gris y chispas blancas)
+    createStoneMineEffect(x, y) {
+        for (let i = 0; i < 4; i++) {
+            const isDust = Math.random() > 0.3;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 25 + 10;
+            this.particles.push(Particle.get(x, y, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 15,
+                life: Math.random() * 0.5 + 0.2,
+                size: isDust ? Math.random() * 5 + 3 : Math.random() * 2 + 1,
+                color: isDust ? 'rgba(120, 144, 156, 0.8)' : '#ffffff', // Gris piedra o chispa blanca
+                gravity: isDust ? -5 : 30, // El polvo sube, la chispa cae
+                friction: 0.92,
+                shape: isDust ? 'circle' : 'square',
+                fadeRate: 1.5
+            }));
+        }
+    }
+
+    // Efecto de recolección de comida (Tierra y hojas)
+    createFoodGatherEffect(x, y) {
+        for (let i = 0; i < 3; i++) {
+            const angle = (Math.random() - 0.5) * Math.PI;
+            const speed = Math.random() * 20 + 10;
+            this.particles.push(Particle.get(x, y, {
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 15,
+                life: Math.random() * 0.4 + 0.2,
+                size: Math.random() * 3 + 2,
+                color: Math.random() > 0.5 ? '#7cb342' : '#5c4d3d', // Verde o marrón tierra
+                gravity: 25,
+                friction: 0.94,
+                shape: 'circle',
+                fadeRate: 1.5
+            }));
+        }
+    }
+
     // Efecto de destrucción total de un edificio (humo, escombros, explosión)
     createBuildingCollapseEffect(x, y, size = 100) {
         // Explosión inicial (Flash)

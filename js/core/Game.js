@@ -1200,9 +1200,13 @@ export class Game {
             if (closest) {
                 this.selectedEntities = [closest];
 
-                // Reproducir sonido de selección
+                // Reproducir sonido y efecto visual de selección
                 if (soundManager) {
                     soundManager.playEntitySelection(closest.type);
+                }
+
+                if (this.particleSystem && typeof this.particleSystem.createSelectionPing === 'function') {
+                    this.particleSystem.createSelectionPing(closest.x, closest.y);
                 }
             }
         } else {

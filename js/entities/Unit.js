@@ -466,8 +466,16 @@ export class Unit extends Entity {
             if (Math.random() < 0.1) {
                 soundManager.playGather();
 
-                if (node.type === 'gold' && game && game.particleSystem) {
-                    game.particleSystem.createGoldSparkle(node.x, node.y);
+                if (game && game.particleSystem) {
+                    if (node.type === 'gold') {
+                        game.particleSystem.createGoldSparkle(node.x, node.y);
+                    } else if (node.type === 'wood' && typeof game.particleSystem.createWoodChopEffect === 'function') {
+                        game.particleSystem.createWoodChopEffect(node.x, node.y);
+                    } else if (node.type === 'stone' && typeof game.particleSystem.createStoneMineEffect === 'function') {
+                        game.particleSystem.createStoneMineEffect(node.x, node.y);
+                    } else if (node.type === 'food' && typeof game.particleSystem.createFoodGatherEffect === 'function') {
+                        game.particleSystem.createFoodGatherEffect(node.x, node.y);
+                    }
                 }
             }
 

@@ -3489,6 +3489,9 @@ export class Game {
         // Palette: Day/Night Cycle
         this.drawDayNightCycle();
 
+        // Palette: Weather Effects
+        this.drawWeather();
+
         // Renderizar minimapa
         this.renderMinimap();
 
@@ -3497,6 +3500,79 @@ export class Game {
         this.drawCustomCursor();
 
         // Palette: Canvas Pause Overlay removed in favor of DOM overlay for accessibility
+    }
+
+    drawWeather() {
+        if (!this.terrainMap || !this.renderTime) return;
+
+        const centerX = this.camera.x + this.viewWidth / 2;
+        const centerY = this.camera.y + this.viewHeight / 2;
+
+        let centerTerrain = null;
+        const col = (centerX * this.terrainMap.invTileSize) | 0;
+        const row = (centerY * this.terrainMap.invTileSize) | 0;
+
+        if (col >= 0 && col < this.terrainMap.cols && row >= 0 && row < this.terrainMap.rows) {
+            centerTerrain = this.terrainMap.getTerrainDataByGrid(col, row);
+        }
+
+        if (!centerTerrain) return;
+
+        const biome = centerTerrain.name;
+
+        this.ctx.save();
+
+        if (biome === 'Bosque' || biome === 'Agua') {
+            // Rain effect
+            this.ctx.strokeStyle = 'rgba(173, 216, 230, 0.3)';
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+
+            // Generate pseudo-random rain lines based on time and camera position
+            // We use modulo arithmetic to wrap particles around the screen without maintaining state
+            const numDrops = 100;
+            const timeOffset = this.renderTime * 0.5; // fall speed
+
+            for (let i = 0; i < numDrops; i++) {
+                const px = (i * 37 + this.camera.x * 0.5) % this.viewWidth; // spread drops
+                const py = (i * 101 + timeOffset) % this.viewHeight;
+
+                // Add camera offset to keep drops somewhat attached to screen
+                const screenX = (px >= 0 ? px : px + this.viewWidth);
+                const screenY = (py >= 0 ? py : py + this.viewHeight);
+
+                this.ctx.moveTo(screenX, screenY);
+                this.ctx.lineTo(screenX - 5, screenY + 15); // slant left
+            }
+            this.ctx.stroke();
+
+        } else if (biome === 'Nieve' || biome === 'Montañas') {
+            // Snow effect
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            this.ctx.beginPath();
+
+            const numFlakes = 60;
+            const timeOffset = this.renderTime * 0.05; // slower fall speed
+
+            for (let i = 0; i < numFlakes; i++) {
+                // drift uses sine wave
+                const drift = Math.sin((this.renderTime * 0.001) + i) * 10;
+                const px = (i * 53 + drift + this.camera.x * 0.3) % this.viewWidth;
+                const py = (i * 89 + timeOffset) % this.viewHeight;
+
+                const screenX = (px >= 0 ? px : px + this.viewWidth);
+                const screenY = (py >= 0 ? py : py + this.viewHeight);
+
+                // Different size flakes
+                const size = (i % 3) + 1.5;
+
+                this.ctx.moveTo(screenX + size, screenY);
+                this.ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
+            }
+            this.ctx.fill();
+        }
+
+        this.ctx.restore();
     }
 
     drawDayNightCycle() {

@@ -32,6 +32,7 @@ export class TownCenter extends Building {
      * @returns {Object|null} Unidad completada si hay alguna
      */
     update(deltaTime, game) {
+        super.update(deltaTime, game);
         if (this.isUnderConstruction || this.isDead) return null;
 
         const completed = this.productionQueue.update(deltaTime);

@@ -2548,6 +2548,7 @@ export class Game {
         // 1. Player Units
         for (let i = 0; i < unitsLen; i++) {
             const unit = this.units[i];
+            unit._gameRenderTime = this.renderTime;
             unit.update(deltaTime, this);
             if (unit.isDead) hasDeadEntities = true;
         }
@@ -2555,6 +2556,7 @@ export class Game {
         // 2. Enemies
         for (let i = 0; i < enemiesLen; i++) {
             const enemy = this.enemies[i];
+            enemy._gameRenderTime = this.renderTime;
             enemy.update(deltaTime, this);
             if (enemy.isDead) hasDeadEntities = true;
         }
@@ -2596,6 +2598,7 @@ export class Game {
             }
 
             // Actualizar todos los edificios (efectos de daño, etc)
+            building._gameRenderTime = this.renderTime;
             const completed = building.update(deltaTime, this);
 
             // Procesar spawn si la cola de producción terminó (jugador e IA)

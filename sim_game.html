@@ -4,10 +4,7 @@
 <script type="module">
 import { Game } from './js/core/Game.js';
 import { Building } from './js/entities/Building.js';
-window.Game = Game;
-window.Building = Building;
-</script>
-<script>
+
 window.onload = function() {
     setTimeout(() => {
         try {
@@ -23,7 +20,7 @@ window.onload = function() {
             uiLayer.id = 'uiLayer';
             document.body.appendChild(uiLayer);
 
-            window.game = new window.Game('romans', {
+            const game = new Game('romans', {
                 size: 50,
                 baseRadius: 10,
                 tileSize: 32,
@@ -31,7 +28,7 @@ window.onload = function() {
             });
 
             // Let's create a building and simulate damage
-            const b = new window.Building(100, 100, 'house', 'player');
+            const b = new Building(100, 100, 'house', 'player');
             game.buildings.push(b);
             b.hp = 10; // low HP
 

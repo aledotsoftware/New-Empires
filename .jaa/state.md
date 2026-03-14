@@ -17,3 +17,4 @@
 - [Bard] Added specific audio feedback during resource gathering using synthesized Web Audio API tones differentiated by resource type (wood, stone, gold, food) to enhance medieval immersion.
 - [Chronicler] Documented the newly added civilizations (Incas, Chinese, Ottomans) in the `CIVILIZATIONS.md` reference guide and verified their CSS styling and presence in the DataLoader.
 - [Bard] Validated all visual and auditory immersion enhancements, ensuring particle effects, dynamic day/night lighting overlays, medieval UI terminology, and CSS transitions strictly match the agent directives without regressions.
+- [Bard] Optimized dynamic lighting cycle in Game.js using native multiply composition operation, securing 60 FPS gameplay without DOM mutation drops.

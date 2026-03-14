@@ -3596,9 +3596,14 @@ export class Game {
         // -Math.cos(progress * Math.PI * 2) goes from -1 (day) to 1 (night) to -1 (day)
         const nightFactor = ( -Math.cos(progress * Math.PI * 2) + 1 ) / 2;
 
-        // Only draw if night is visible
+        // Only apply filters if night is visible
         if (nightFactor > 0.05) {
             this.ctx.save();
+
+            // Palette: Performant Day/Night via native Canvas Composite
+            // We use globalCompositeOperation = 'multiply' to darken the screen performantly.
+            // This avoids DOM thrashing (canvas.style.filter) and avoids applying filter per-draw-call.
+
             this.ctx.globalCompositeOperation = 'multiply';
 
             // Base color for night: deep blue
@@ -3608,6 +3613,11 @@ export class Game {
             this.ctx.fillRect(0, 0, this.viewWidth, this.viewHeight);
 
             this.ctx.restore();
+        }
+
+        // Reset DOM filter fallback in case it was stuck from previous versions
+        if (this.canvas && this.canvas.style.filter !== 'none') {
+            this.canvas.style.filter = 'none';
         }
     }
 

@@ -111,11 +111,12 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: [],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'archer') {
                     u.attackRange += 1;
                 }
-            });
+            }
         }
     },
 
@@ -197,12 +198,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'townCenter',
         prerequisites: [],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'villager') {
                     u.maxHp += 5;
                     u.hp += 5;
                 }
-            });
+            }
         }
     },
 
@@ -219,10 +221,11 @@ Object.assign(TECHNOLOGIES, {
         building: 'townCenter',
         prerequisites: ['pottery'],
         apply: (game) => {
-            game.buildings.forEach(b => {
+            for (let i = 0; i < game.buildings.length; i++) {
+                const b = game.buildings[i];
                 b.maxHp = Math.floor(b.maxHp * 1.15);
                 b.hp = Math.min(b.hp * 1.15, b.maxHp);
-            });
+            }
         }
     },
 
@@ -271,11 +274,12 @@ Object.assign(TECHNOLOGIES, {
         building: 'storage',
         prerequisites: ['copperWorking'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'villager') {
                     u.speed *= 1.15;
                 }
-            });
+            }
         }
     },
 
@@ -291,12 +295,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'townCenter',
         prerequisites: ['weaving'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'villager') {
                     u.maxHp += 15;
                     u.hp += 15;
                 }
-            });
+            }
         }
     },
 
@@ -378,10 +383,11 @@ Object.assign(TECHNOLOGIES, {
         building: 'townCenter',
         prerequisites: ['mudBricks'],
         apply: (game) => {
-            game.buildings.forEach(b => {
+            for (let i = 0; i < game.buildings.length; i++) {
+                const b = game.buildings[i];
                 b.maxHp = Math.floor(b.maxHp * 1.25);
                 b.hp = Math.min(b.hp * 1.25, b.maxHp);
-            });
+            }
         }
     },
 
@@ -446,13 +452,14 @@ Object.assign(TECHNOLOGIES, {
         building: 'townCenter',
         prerequisites: ['wheel', 'loom'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'villager') {
                     u.speed *= 1.15;
                     u.maxHp = Math.floor(u.maxHp * 1.25);
                     u.hp = Math.min(u.hp * 1.25, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -469,12 +476,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['bronzeWorking'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.maxHp += 20;
                     u.hp = Math.min(u.hp + 20, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -507,11 +515,12 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['ironWorking'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.attackDamage += 3;
                 }
-            });
+            }
         }
     },
 
@@ -527,12 +536,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['ironWorking'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.maxHp += 15;
                     u.hp = Math.min(u.hp + 15, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -548,12 +558,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['huntingBow'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'archer') {
                     u.attackRange += 1;
                     u.attackDamage += 2;
                 }
-            });
+            }
         }
     },
 
@@ -602,11 +613,12 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['forging'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.attackDamage += 4;
                 }
-            });
+            }
         }
     },
 
@@ -622,12 +634,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['scaleMailArmor'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.maxHp += 20;
                     u.hp = Math.min(u.hp + 20, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -643,12 +656,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['fletching'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'archer') {
                     u.attackRange += 1;
                     u.attackDamage += 3;
                 }
-            });
+            }
         }
     },
 
@@ -664,10 +678,11 @@ Object.assign(TECHNOLOGIES, {
         building: 'townCenter',
         prerequisites: ['stoneMasonry'],
         apply: (game) => {
-            game.buildings.forEach(b => {
+            for (let i = 0; i < game.buildings.length; i++) {
+                const b = game.buildings[i];
                 b.maxHp = Math.floor(b.maxHp * 1.35);
                 b.hp = Math.min(b.hp * 1.35, b.maxHp);
-            });
+            }
         }
     },
 
@@ -716,12 +731,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: [],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'archer') {
                     u.maxHp += 15;
                     u.hp = Math.min(u.hp + 15, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -754,12 +770,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['chainMailArmor'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.maxHp += 30;
                     u.hp = Math.min(u.hp + 30, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -775,12 +792,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['paddedArmorArcher'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'archer') {
                     u.maxHp += 20;
                     u.hp = Math.min(u.hp + 20, u.maxHp);
                 }
-            });
+            }
         }
     },
 
@@ -796,12 +814,13 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['bodkinArrow'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'archer') {
                     u.attackRange += 2;
                     u.attackDamage += 4;
                 }
-            });
+            }
         }
     },
 
@@ -817,11 +836,12 @@ Object.assign(TECHNOLOGIES, {
         building: 'barracks',
         prerequisites: ['ironCasting'],
         apply: (game) => {
-            game.units.forEach(u => {
+            for (let i = 0; i < game.units.length; i++) {
+                const u = game.units[i];
                 if (u.type === 'warrior') {
                     u.attackDamage += 5;
                 }
-            });
+            }
         }
     },
 
@@ -941,12 +961,13 @@ export class TechManager {
             // para mantener compatibilidad con código existente
             if (civTechs && civTechs.length > 0) {
                 const techsObject = {};
-                civTechs.forEach(tech => {
+                for (let i = 0; i < civTechs.length; i++) {
+                    const tech = civTechs[i];
                     techsObject[tech.id] = {
                         ...tech,
                         category: tech.category // Ya viene como string del JSON
                     };
-                });
+                }
 
                 // Actualizar TECHNOLOGIES solo con las de esta civilización
                 TECHNOLOGIES = techsObject;

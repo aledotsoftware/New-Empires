@@ -233,7 +233,15 @@ export class ProceduralMapGenerator {
             // Encontrar la masa del p1 midiendo distancias (simplificado)
             for (let m of landmasses) {
                 // Chequeo rapido si el punto p1 esta dentro de los tiles
-                if (m.tiles.some(t => t.x === p1.x && t.y === p1.y)) {
+                let found = false;
+                for (let i = 0; i < m.tiles.length; i++) {
+                    const t = m.tiles[i];
+                    if (t.x === p1.x && t.y === p1.y) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
                     mainMass = m;
                     break;
                 }

@@ -2726,14 +2726,15 @@ body:has(button:active, a:active, input:active, [role="button"]:active, .civ-opt
 }
 
 /* Transiciones para modales y menús */
-#buildMenu, #techTree, #settingsMenu, #selectionPanel, #actionsPanel {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+#buildMenu, #techTree, #settingsMenu, #selectionPanel, #actionsPanel, .start-screen {
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    visibility: visible;
 }
 
 /* Para animar cuando se muestran/ocultan si están controlados por clases como 'hidden' */
 .hidden {
     opacity: 0 !important;
-    pointer-events: none;
+    visibility: hidden !important;
     transform: translateY(10px) scale(0.98);
 }
 /* Al remover .hidden, vuelven a opacidad 1 suavemente */

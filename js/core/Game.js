@@ -2590,12 +2590,12 @@ export class Game {
                 continue;
             }
 
-            // Procesar cola de producción (solo para edificios del jugador)
-            if (building.team === 'player' && building.productionQueue && !building.isUnderConstruction) {
-                const completed = building.update(deltaTime, this);
-                if (completed) {
-                    this._spawnUnit(completed.unitType, building);
-                }
+            // Actualizar todos los edificios (efectos de daño, etc)
+            const completed = building.update(deltaTime, this);
+
+            // Procesar spawn si la cola de producción terminó (jugador e IA)
+            if (completed && !building.isUnderConstruction) {
+                this._spawnUnit(completed.unitType, building);
             }
         }
 

@@ -204,6 +204,30 @@ export const FORMATIONS = {
             };
         }
         return positions;
+    },
+
+    /**
+     * Formación de flanqueo (dos grupos laterales)
+     * @param {Array} units - Unidades a posicionar
+     * @param {Object} center - Centro de la formación {x, y}
+     * @param {number} spacing - Espacio entre unidades (px)
+     * @returns {Array} Posiciones [{x, y}, ...]
+     */
+    flank: (units, center, spacing = 40) => {
+        const count = units.length;
+        const positions = new Array(count);
+        const halfCount = Math.ceil(count / 2);
+
+        for (let i = 0; i < count; i++) {
+            const isLeft = i < halfCount;
+            const row = isLeft ? i : i - halfCount;
+            const xOffset = isLeft ? -spacing * 1.5 : spacing * 1.5;
+            positions[i] = {
+                x: center.x + xOffset,
+                y: center.y + row * spacing
+            };
+        }
+        return positions;
     }
 };
 

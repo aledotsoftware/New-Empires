@@ -27,7 +27,7 @@ export class Warrior extends Unit {
         // If HP is low, avoid retreating for now, just fight to the death as warriors do,
         // or prioritize closer targets even more to avoid moving while dying
         if (this.hp < this.maxHp * 0.2) {
-            score -= distSq / 20;
+            score -= distSq / 10;
         }
 
         return score;

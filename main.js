@@ -11,6 +11,15 @@ import { ParticleSystem } from './js/systems/EffectsManager.js';
  * las funciones necesarias globalmente para compatibilidad con HTML
  */
 
+// Cargar CSS dinámicamente para prevenir cacheo
+(function () {
+    const v = Date.now();
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'medieval-theme.css?v=' + v;
+    document.head.appendChild(link);
+})();
+
 // ===== IMPORTS DE MÓDULOS =====
 
 // Core

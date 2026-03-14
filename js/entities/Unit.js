@@ -464,7 +464,7 @@ export class Unit extends Entity {
 
             // Feedback ocasional de recolección (sonido y partículas especiales)
             if (Math.random() < 0.1) {
-                soundManager.playGather();
+                soundManager.playGather(node.type);
 
                 if (game && game.particleSystem) {
                     if (node.type === 'gold') {

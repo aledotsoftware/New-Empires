@@ -269,9 +269,31 @@ export class SoundManager {
         oscillator.stop(now + 0.3);
     }
 
-    playGather() {
+    playGather(resourceType) {
         if (!this.enabled) return;
-        this.playTone(600, 0.05, 'sine', 0.08);
+
+        switch (resourceType) {
+            case 'wood':
+                // Chop sound (thud)
+                this.playTone(150, 0.08, 'square', 0.1);
+                break;
+            case 'stone':
+                // Clink sound (sharp strike)
+                this.playTone(400, 0.06, 'triangle', 0.08);
+                break;
+            case 'gold':
+                // Light clink/sparkle (high pitch)
+                this.playTone(800, 0.05, 'sine', 0.05);
+                break;
+            case 'food':
+                // Soft gathering sound (rustling/soft pluck)
+                this.playTone(200, 0.08, 'sine', 0.06);
+                break;
+            default:
+                // Generic gathering sound
+                this.playTone(600, 0.05, 'sine', 0.08);
+                break;
+        }
     }
 
     playTone(frequency, duration, type = 'sine', vol = 0.1) {

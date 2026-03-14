@@ -14,3 +14,4 @@
 - **Bard Agent**: Added historical flavor to unit production queues. Verified effects, ambient sounds, and glassmorphism styles are present. Implemented Canvas-rendered contextual cursors. Finished implementation of resource-specific particle effects and selection pings. Resolved black screen crash introduced by Villager.js rendering time dependency. Enabled particle damage effects for all buildings.
 - **Bolt Agent**: Implemented `OffscreenCanvas` for performance improvements on `_fowBufferCanvas`, `_minimapBufferCanvas`, and `_terrainBufferCanvas` static layers.
 - **Overseer Agent**: Resolved a population mismatch where building destruction would permanently brick maximum limits. Re-engineered closest-node fetching.
+- [Bard] Added specific audio feedback during resource gathering using synthesized Web Audio API tones differentiated by resource type (wood, stone, gold, food) to enhance medieval immersion.

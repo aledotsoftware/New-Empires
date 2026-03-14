@@ -26,6 +26,9 @@ New Empires cuenta con **12 civilizaciones** únicas, cada una con bonificacione
 | **Grecia** | 🏛️ | Cultura | - |
 | **Persia** | 👑 | Imperio | - |
 | **España** | ⚓ | Exploración | - |
+| **Imperio Inca** | 🏔️ | Montañas e infantería | #e6a100 |
+| **Imperio Chino** | 🐉 | Defensa y arqueros | #d32f2f |
+| **Imperio Otomano**| 🕌 | Pólvora e infantería | #2e7d32 |
 
 ---
 
@@ -155,6 +158,99 @@ New Empires cuenta con **12 civilizaciones** únicas, cada una con bonificacione
 
 ---
 
+### 🏔️ Imperio Inca
+
+**Especialidad**: Nación de las montañas con fortalezas de piedra y guerreros adaptados a la altura.
+
+**Bonificaciones**:
+| Bonus | Valor |
+|-------|-------|
+| Velocidad de construcción | +10% |
+| HP de edificios | +10% |
+| Velocidad de recolección | +10% |
+| Piedra inicial | +100 |
+
+**Unidad Única**: Kamayuk
+- Base: Lancero
+- +25% daño de ataque
+- +20% HP
+- +10% velocidad
+
+**Unidades Personalizadas**:
+- Aldeano → Puric (+10% recolección)
+- Guerrero → Guerrero con Macana (11 ataque, 100 HP, 50 velocidad)
+- Arquero → Hondero (9 ataque, 55 HP, 55 velocidad)
+
+**Edificios Renombrados**:
+- Centro Urbano → Ushnu
+- Casa → Kancha
+- Cuartel → Kallanka
+
+**Tecnología Única**: Qhapaq Ñan
+- +15% velocidad unidades
+- +10% recolección (todos los recursos)
+
+---
+
+### 🐉 Imperio Chino
+
+**Especialidad**: Una de las civilizaciones más antiguas, creadores de la pólvora y el papel.
+
+**Bonificaciones**:
+| Bonus | Valor |
+|-------|-------|
+| Velocidad de recolección | +10% |
+| HP de edificios | +10% |
+| Madera inicial | +50 |
+| Comida inicial | +50 |
+| Oro inicial | +50 |
+| Piedra inicial | +50 |
+
+**Unidad Única**: Chu Ko Nu
+- Base: Arquero
+- +50% velocidad de ataque
+- +20% daño de ataque
+
+**Unidades Personalizadas**:
+- Aldeano → Campesino (+10% recolección)
+- Arquero → Ballestero Chino (9 ataque, 65 HP, 50 velocidad)
+
+**Edificios Renombrados**:
+- Centro Urbano → Palacio Imperial
+
+**Tecnología Única**: Gran Muralla
+- +20% HP edificios
+
+---
+
+### 🕌 Imperio Otomano
+
+**Especialidad**: Poderoso imperio islámico que unió Oriente y Occidente. Maestros de la pólvora y el asedio.
+
+**Bonificaciones**:
+| Bonus | Valor |
+|-------|-------|
+| Ataque de infantería | +15% |
+| Velocidad de construcción | +10% |
+
+**Unidad Única**: Jenízaro
+- Base: Arquero
+- +50% daño de ataque
+- +20% velocidad de ataque (-20% tiempo)
+
+**Unidades Personalizadas**:
+- Aldeano → Aldeano Otomano
+- Guerrero → Sipahi (12 ataque, 110 HP, 55 velocidad)
+
+**Edificios Renombrados**:
+- Templo → Mezquita
+
+**Tecnología Única**: Cañones de Bombardeo
+- +25% ataque de arqueros
+- +15% ataque de guerreros
+
+---
+
 ## 🔧 Estructura de Archivos
 
 Cada civilización está definida en `assets/civilization/[nombre].json`:
@@ -167,7 +263,10 @@ assets/civilization/
 ├── caliphate.json
 ├── egypt.json
 ├── greece.json
+├── incas.json
+├── chinese.json
 ├── mongols.json
+├── ottomans.json
 ├── persia.json
 ├── romans.json
 ├── spain.json
@@ -302,6 +401,21 @@ const color = civilizationManager.getTeamColor('vikings', 'player');
 - Rush temprano con Berserkers
 - Aprovechar velocidad de recolección
 - Combinar ataques y economía
+
+### Incas
+- Aprovechar la piedra inicial para asegurar posiciones
+- Movilidad rápida gracias a Qhapaq Ñan
+- Fuertes unidades cuerpo a cuerpo tempranas
+
+### Chinos
+- Fuerte impulso inicial por los recursos extra
+- Chu Ko Nu son devastadores en masa
+- Edificios con gran supervivencia
+
+### Otomanos
+- Gran poder en ataque a distancia a finales del juego
+- Jenízaros ofrecen un enorme potencial de daño
+- Buena expansión y supervivencia con Sipahis
 
 ---
 

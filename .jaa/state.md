@@ -16,3 +16,4 @@
 - **Overseer Agent**: Resolved a population mismatch where building destruction would permanently brick maximum limits. Re-engineered closest-node fetching.
 - [Bard] Added specific audio feedback during resource gathering using synthesized Web Audio API tones differentiated by resource type (wood, stone, gold, food) to enhance medieval immersion.
 - [Chronicler] Documented the newly added civilizations (Incas, Chinese, Ottomans) in the `CIVILIZATIONS.md` reference guide and verified their CSS styling and presence in the DataLoader.
+- [Bard] Validated all visual and auditory immersion enhancements, ensuring particle effects, dynamic day/night lighting overlays, medieval UI terminology, and CSS transitions strictly match the agent directives without regressions.

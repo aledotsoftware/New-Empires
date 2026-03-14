@@ -326,11 +326,33 @@ export class Villager extends Unit {
 
         const searchRadius = 800; // Radio de busqueda razonable (aprox 25 tiles)
 
-        // Pass the string directly to avoid object allocation per call
-        const target = game.resourceGrid.find(this.x, this.y, searchRadius, Villager._resourcePredicate, searchType);
+        // BOLT OPTIMIZATION: Reuse static array to reduce GC pressure
+        if (!Villager._resourceQueryCache) {
+            Villager._resourceQueryCache = [];
+        }
+        const resources = Villager._resourceQueryCache;
+        game.resourceGrid.query(this.x, this.y, searchRadius, resources, true);
 
-        if (target) {
-            this.currentResourceNode = target;
+        let bestTarget = null;
+        let minDistSq = Infinity;
+
+        for (let i = 0; i < resources.length; i++) {
+            const res = resources[i];
+
+            if (!Villager._resourcePredicate(res, searchType)) continue;
+
+            const dx = this.x - res.x;
+            const dy = this.y - res.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                bestTarget = res;
+            }
+        }
+
+        if (bestTarget) {
+            this.currentResourceNode = bestTarget;
             this.state = 'GATHERING';
             this.targetX = null;
         }

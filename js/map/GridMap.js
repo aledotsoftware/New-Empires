@@ -22,6 +22,18 @@ export class GridMap {
         return row * this.cols + col;
     }
 
+    syncWithTerrain(terrainMap) {
+        for (let r = 0; r < this.rows; r++) {
+            for (let c = 0; c < this.cols; c++) {
+                const terrainData = terrainMap.getTerrainDataByGrid(c, r);
+                // Si el terreno es intransitable (velocidad 0 o impassable true), marcar como colisión
+                if (terrainData && (terrainData.impassable || terrainData.movementSpeed === 0)) {
+                    this.collisionGrid[this.getIndex(c, r)] = 1;
+                }
+            }
+        }
+    }
+
     isAreaFree(startCol, startRow, widthTiles, heightTiles) {
         for (let r = startRow; r < startRow + heightTiles; r++) {
             for (let c = startCol; c < startCol + widthTiles; c++) {

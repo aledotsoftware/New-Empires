@@ -798,6 +798,11 @@ export class Game {
 
         // Inicializar el grid espacial de recursos
         this.updateResourceGrid();
+
+        // Sincronizar grid de colisiones con el terreno generado (montañas, agua, etc.)
+        if (this.gridMap && this.terrainMap) {
+            this.gridMap.syncWithTerrain(this.terrainMap);
+        }
     }
 
     updateResourceGrid() {

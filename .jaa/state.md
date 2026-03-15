@@ -18,3 +18,4 @@
 - [Chronicler] Documented the newly added civilizations (Incas, Chinese, Ottomans) in the `CIVILIZATIONS.md` reference guide and verified their CSS styling and presence in the DataLoader.
 - [Bard] Validated all visual and auditory immersion enhancements, ensuring particle effects, dynamic day/night lighting overlays, medieval UI terminology, and CSS transitions strictly match the agent directives without regressions.
 - [Bard] Optimized dynamic lighting cycle in Game.js using native multiply composition operation, securing 60 FPS gameplay without DOM mutation drops.
+- [Cartographer] Refined biome generation parameters to ensure smooth transitions and avoid harsh desert-to-snow logic by adding a grassland buffer check in getTerrainFromNoise. Added guaranteed accessibility to starting resources by replacing a 2x2 area and incrementing distance in placeStartingResources. Introduced new non-colliding wildflowers decoration type and rendering logic.

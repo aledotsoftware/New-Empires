@@ -759,7 +759,34 @@ export class Game {
             }
         }
 
-        // 6. Refresh UI & Colors
+        // 6. Restore Fog Of War
+        if (state.fowGrid && this.fow) {
+            // Restore grid data
+            for (let i = 0; i < state.fowGrid.length && i < this.fow.grid.length; i++) {
+                this.fow.grid[i] = state.fowGrid[i];
+            }
+
+            // Force full buffer update on next frame by clearing previous ranges
+            this.fow._previousVisibleRanges = [];
+            this.fow.visibleRanges = [];
+            this.fow.isDirty = true;
+
+            // Rebuild base buffer if OffscreenCanvas/image data is available
+            if (this._fowImageData32) {
+                const data32 = this._fowImageData32;
+                const grid = this.fow.grid;
+                const lut = this._fowColorLUT;
+
+                for (let i = 0; i < grid.length; i++) {
+                    data32[i] = lut[grid[i]];
+                }
+                if (this._fowBufferCtx && this._fowImageData) {
+                    this._fowBufferCtx.putImageData(this._fowImageData, 0, 0);
+                }
+            }
+        }
+
+        // 7. Refresh UI & Colors
         this._updateTeamColors();
         this._minimapDirty = true;
         this._minimapFOWDirty = true;

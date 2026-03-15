@@ -1487,7 +1487,8 @@ function populateCivilizations() {
 
     civGrid.appendChild(randomOption);
 
-    civilizations.forEach(civ => {
+    for (let i = 0; i < civilizations.length; i++) {
+        const civ = civilizations[i];
         const option = document.createElement('div');
         option.className = 'civ-option';
         option.dataset.civ = civ.civilizationId;
@@ -1571,7 +1572,13 @@ function populateCivilizations() {
 
                 let textVal = '';
                 if (key === 'startingResources') {
-                    const res = Object.entries(value).filter(([_, v]) => v > 0).map(([k, v]) => `+${v} ${k}`).join(', ');
+                    let resArr = [];
+                    for (const [k, v] of Object.entries(value)) {
+                        if (v > 0) {
+                            resArr.push(`+${v} ${k}`);
+                        }
+                    }
+                    const res = resArr.join(', ');
                     if (!res) continue;
                     textVal = res;
                 } else if (typeof value === 'number') {
@@ -1680,7 +1687,7 @@ function populateCivilizations() {
         });
 
         civGrid.appendChild(option);
-    });
+    }
 
     debugLogger.success(`${civilizations.length} civilizaciones cargadas`, 'ui');
 }
@@ -1866,7 +1873,9 @@ const initApp = async () => {
 
                 // Limpiar estado de carga y restaurar nodos originales
                 startButton.textContent = '';
-                originalChildren.forEach(child => startButton.appendChild(child));
+                for (let i = 0; i < originalChildren.length; i++) {
+                    startButton.appendChild(originalChildren[i]);
+                }
 
                 // Move focus with a small tick to ensure visibility
                 setTimeout(() => FocusManager.focusFirst(mapScreen), 0);

@@ -46,58 +46,84 @@ export class CivilizationManager {
 
     applyBuildingBonuses(building, civId) {
         const civ = this.getCivilization(civId);
-        if (!civ || !civ.bonuses) return;
+        if (!civ) return;
 
-        if (civ.bonuses.buildingHp) {
-            building.maxHp = Math.floor(building.maxHp * civ.bonuses.buildingHp);
+        const bonuses = civ.bonuses;
+        if (bonuses && bonuses.buildingHp) {
+            building.maxHp = Math.floor(building.maxHp * bonuses.buildingHp);
         }
         building.hp = building.isUnderConstruction ? 1 : building.maxHp;
+
+        if (civ.buildingOverrides && civ.buildingOverrides[building.type]) {
+            const override = civ.buildingOverrides[building.type];
+            if (override.name) building.name = override.name;
+            if (override.icon) building.icon = override.icon;
+        }
     }
 
     applyUnitBonuses(unit, civId) {
         const civ = this.getCivilization(civId);
-        if (!civ || !civ.bonuses) return;
+        if (!civ) return;
 
-        if (civ.bonuses.unitSpeed) {
-            unit.speed = (unit.speed || 50) * civ.bonuses.unitSpeed;
-        }
-        if (civ.bonuses.unitAttack) {
-            unit.attackDamage = Math.floor(unit.attackDamage * civ.bonuses.unitAttack);
-        }
-        if (civ.bonuses.gatherSpeed && unit.canGather) {
-            unit.gatherMultiplier = civ.bonuses.gatherSpeed;
+        const bonuses = civ.bonuses;
+
+        if (bonuses) {
+            if (bonuses.unitSpeed) {
+                unit.speed = (unit.speed || 50) * bonuses.unitSpeed;
+            }
+            if (bonuses.unitAttack) {
+                unit.attackDamage = Math.floor(unit.attackDamage * bonuses.unitAttack);
+            }
+            if (bonuses.gatherSpeed && unit.canGather) {
+                unit.gatherMultiplier = bonuses.gatherSpeed;
+            }
+
+            if (unit.type === 'warrior' || unit.type === 'spearman') {
+                const infAttack = bonuses.infantryAttack || bonuses.infantryDamage || 1;
+                unit.attackDamage = Math.round(unit.attackDamage * infAttack);
+
+                const infArmor = bonuses.infantryArmor || 1;
+                unit.maxHp = Math.round(unit.maxHp * infArmor);
+                unit.hp = unit.maxHp;
+            }
+
+            if (unit.type === 'cavalry' || unit.type === 'scout') {
+                if (bonuses.cavalryAttack) {
+                    unit.attackDamage = Math.round(unit.attackDamage * bonuses.cavalryAttack);
+                }
+                if (bonuses.cavalrySpeed) {
+                    unit.speed = Math.round(unit.speed * bonuses.cavalrySpeed);
+                }
+            }
+
+            if (unit.canGather) {
+                if (bonuses.gatherGold || bonuses.goldGather) {
+                    unit.gatherGoldMultiplier = bonuses.gatherGold || bonuses.goldGather;
+                }
+                if (bonuses.agricultureBonus || bonuses.gatherFood) {
+                    unit.gatherFoodMultiplier = bonuses.agricultureBonus || bonuses.gatherFood;
+                }
+                if (bonuses.gatherWood || bonuses.woodGather) {
+                    unit.gatherWoodMultiplier = bonuses.gatherWood || bonuses.woodGather;
+                }
+                if (bonuses.gatherStone || bonuses.stoneGather) {
+                    unit.gatherStoneMultiplier = bonuses.gatherStone || bonuses.stoneGather;
+                }
+            }
         }
 
-        if (unit.type === 'warrior' || unit.type === 'spearman') {
-            const infAttack = civ.bonuses.infantryAttack || civ.bonuses.infantryDamage || 1;
-            unit.attackDamage = Math.round(unit.attackDamage * infAttack);
-
-            const infArmor = civ.bonuses.infantryArmor || 1;
-            unit.maxHp = Math.round(unit.maxHp * infArmor);
-            unit.hp = unit.maxHp;
-        }
-
-        if (unit.type === 'cavalry' || unit.type === 'scout') {
-            if (civ.bonuses.cavalryAttack) {
-                unit.attackDamage = Math.round(unit.attackDamage * civ.bonuses.cavalryAttack);
+        if (civ.unitOverrides && civ.unitOverrides[unit.type]) {
+            const override = civ.unitOverrides[unit.type];
+            if (override.name) unit.name = override.name;
+            if (override.icon) unit.icon = override.icon;
+            if (override.attack !== undefined) unit.attackDamage = override.attack;
+            if (override.hp !== undefined) {
+                unit.maxHp = override.hp;
+                unit.hp = override.hp;
             }
-            if (civ.bonuses.cavalrySpeed) {
-                unit.speed = Math.round(unit.speed * civ.bonuses.cavalrySpeed);
-            }
-        }
-
-        if (unit.canGather) {
-            if (civ.bonuses.gatherGold || civ.bonuses.goldGather) {
-                unit.gatherGoldMultiplier = civ.bonuses.gatherGold || civ.bonuses.goldGather;
-            }
-            if (civ.bonuses.agricultureBonus || civ.bonuses.gatherFood) {
-                unit.gatherFoodMultiplier = civ.bonuses.agricultureBonus || civ.bonuses.gatherFood;
-            }
-            if (civ.bonuses.gatherWood || civ.bonuses.woodGather) {
-                unit.gatherWoodMultiplier = civ.bonuses.gatherWood || civ.bonuses.woodGather;
-            }
-            if (civ.bonuses.gatherStone || civ.bonuses.stoneGather) {
-                unit.gatherStoneMultiplier = civ.bonuses.gatherStone || civ.bonuses.stoneGather;
+            if (override.speed !== undefined) unit.speed = override.speed;
+            if (override.gatherBonus && unit.canGather) {
+                unit.gatherMultiplier = (unit.gatherMultiplier || 1) * override.gatherBonus;
             }
         }
     }

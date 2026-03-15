@@ -14,6 +14,7 @@ import { GridMap } from '../map/GridMap.js';
 import { TerrainMap } from '../map/TerrainMap.js';
 import { TerrainDecorManager } from '../map/TerrainDecor.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';
+import { RefundManager } from '../systems/Refund.js';
 import { Villager } from '../entities/units/Villager.js';
 import { Warrior } from '../entities/units/Warrior.js';
 import { Archer } from '../entities/units/Archer.js';
@@ -1610,10 +1611,7 @@ export class Game {
                             if (entity.isBuilding && entity.isUnderConstruction) {
                                 const cost = CONFIG.COSTS[entity.type];
                                 if (cost) {
-                                    for (const [res, amount] of Object.entries(cost)) {
-                                        this.resources[res] = (this.resources[res] || 0) + amount;
-                                        this.flashResource(res);
-                                    }
+                                    RefundManager.refundCost(this, cost);
                                 }
                             }
 
@@ -1630,10 +1628,7 @@ export class Game {
                                 if (Array.isArray(cancelledItems)) {
                                     for (const item of cancelledItems) {
                                         if (item && item.cost) {
-                                            for (const [res, amount] of Object.entries(item.cost)) {
-                                                this.resources[res] = (this.resources[res] || 0) + amount;
-                                                this.flashResource(res);
-                                            }
+                                            RefundManager.refundCost(this, item.cost);
                                         }
                                     }
                                 }
@@ -2128,11 +2123,6 @@ export class Game {
             return;
         }
 
-        // Deducir recursos
-        for (let [resource, amount] of Object.entries(cost)) {
-            this.resources[resource] -= amount;
-        }
-
         // Calcular centro del edificio basado en tiles
         const centerX = snap.x + (size.width * TILE_SIZE) / 2;
         const centerY = snap.y + (size.height * TILE_SIZE) / 2;
@@ -2168,6 +2158,11 @@ export class Game {
         }
 
         if (building) {
+            // Deducir recursos solo si la construcción procede
+            for (let [resource, amount] of Object.entries(cost)) {
+                this.resources[resource] -= amount;
+            }
+
             // Asignar propiedades de grid
             building.widthTiles = size.width;
             building.heightTiles = size.height;
@@ -2256,6 +2251,12 @@ export class Game {
             return;
         }
 
+        // Verificar si el edificio puede entrenar la unidad antes de cobrar
+        if (!building.trainableUnits || !building.trainableUnits.includes(unitType)) {
+            this.showNotification('Este edificio no puede entrenar esta unidad', 'error');
+            return;
+        }
+
         // Verificar cola llena
         if (building.productionQueue.isFull()) {
             this.showNotification('Cola de producción llena (máx 5)', 'error');
@@ -2276,11 +2277,6 @@ export class Game {
             return;
         }
 
-        // Deducir recursos inmediatamente
-        for (let [resource, amount] of Object.entries(cost)) {
-            this.resources[resource] -= amount;
-        }
-
         // Tiempo de entrenamiento según tipo
         const TRAINING_TIMES = {
             villager: 25,
@@ -2288,6 +2284,11 @@ export class Game {
             archer: 35
         };
         const trainingTime = TRAINING_TIMES[unitType] || 30;
+
+        // Deducir recursos inmediatamente
+        for (let [resource, amount] of Object.entries(cost)) {
+            this.resources[resource] -= amount;
+        }
 
         // Encolar unidad
         building.queueUnit(unitType, cost, trainingTime);
@@ -2596,6 +2597,14 @@ export class Game {
 
                 if (building.team === 'player') {
                     this._updateBuildingCount(building.type, -1);
+
+                    if (building.type === 'house') {
+                        this.maxPopulation -= CONFIG.HOUSE_POPULATION_INCREASE;
+                        if (this.maxPopulation < CONFIG.STARTING_MAX_POPULATION) {
+                            this.maxPopulation = CONFIG.STARTING_MAX_POPULATION;
+                        }
+                        this._forceUIUpdate = true;
+                    }
                 }
 
                 continue;
@@ -5021,10 +5030,7 @@ export class Game {
 
                                 if (cancelled && cancelled.cost) {
                                     // Refund Resources
-                                    for (const [res, amount] of Object.entries(cancelled.cost)) {
-                                        this.resources[res] = (this.resources[res] || 0) + amount;
-                                        this.flashResource(res);
-                                    }
+                                    RefundManager.refundCost(this, cancelled.cost);
 
                                     // Feedback
                                     this.showNotification(`${item.unitType} cancelado`, 'info');

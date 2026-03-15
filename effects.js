@@ -401,17 +401,17 @@ class ParticleSystem {
             const smokeColors = ['rgba(80, 80, 80, 0.85)', 'rgba(100, 100, 100, 0.75)', 'rgba(40, 40, 40, 0.9)', 'rgba(15, 15, 15, 0.85)'];
             const fireColors = ['rgba(255, 80, 40, 0.9)', 'rgba(255, 140, 20, 0.9)', 'rgba(255, 200, 50, 0.8)', 'rgba(255, 50, 0, 0.95)'];
             const color = isFire ? fireColors[Math.floor(Math.random() * fireColors.length)] : smokeColors[Math.floor(Math.random() * smokeColors.length)];
-            const size = isFire ? Math.random() * 8 + 4 : Math.random() * 16 + 8;
+            const size = isFire ? Math.random() * 10 + 6 : Math.random() * 20 + 10; // Bard: Aumentamos ligeramente el tamaño para más impacto visual
 
             this.particles.push(Particle.get(x + (Math.random() - 0.5) * 60, y + (Math.random() - 0.5) * 60, {
                 vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 15, // Algo de turbulencia
-                vy: Math.sin(angle) * speed - 40, // Tendencia a subir más rápida
-                life: isFire ? Math.random() * 1.0 + 0.3 : Math.random() * 2.5 + 1.2, // El humo dura más
+                vy: Math.sin(angle) * speed - 50, // Tendencia a subir más rápida (aumentada de 40 a 50)
+                life: isFire ? Math.random() * 1.2 + 0.4 : Math.random() * 3.0 + 1.5, // Bard: Aumentamos la vida útil del fuego y humo para mayor inmersión
                 size: size,
                 color: color,
-                gravity: isFire ? -20 : -8, // El fuego sube más rápido que el humo
+                gravity: isFire ? -25 : -10, // Bard: El fuego sube ligeramente más rápido
                 friction: 0.90,
-                fadeRate: isFire ? 1.8 : 0.6, // El fuego se apaga más rápido
+                fadeRate: isFire ? 1.8 : 0.5, // El fuego se apaga más rápido, el humo se disipa suavemente
                 shape: 'circle' // Ambos circulares para difuminar mejor
             }));
         }
@@ -452,23 +452,23 @@ class ParticleSystem {
             const py = y + dy * fraction + parabolaY;
 
             // Variar ligeramente el tiempo de vida para dar efecto de "disparo" continuo
-            const baseLife = 0.2;
-            const lifeOffset = fraction * 0.15; // Las partículas más cercanas al objetivo duran más
+            const baseLife = 0.25; // Bard: Ligeramente más duraderas las estelas
+            const lifeOffset = fraction * 0.2; // Las partículas más cercanas al objetivo duran más
 
             // Mezclar el color base con tonos de estela dorada (Medieval aesthetics)
-            const isGold = Math.random() > 0.6;
-            const trailColor = isGold ? `rgba(255, ${200 + Math.random() * 55}, 0, ${0.7 + Math.random() * 0.3})` : color;
+            const isGold = Math.random() > 0.5; // Bard: Aumentamos la frecuencia de destellos dorados
+            const trailColor = isGold ? `rgba(255, ${200 + Math.random() * 55}, 0, ${0.8 + Math.random() * 0.2})` : color; // Bard: Estelas doradas un poco más opacas
 
-            this.particles.push(Particle.get(px + (Math.random() - 0.5) * 4, py + (Math.random() - 0.5) * 4, {
-                vx: dx * 0.08 + (Math.random() - 0.5) * 8, // Ligeramente en la dirección del proyectil
-                vy: dy * 0.08 + (Math.random() - 0.5) * 8,
+            this.particles.push(Particle.get(px + (Math.random() - 0.5) * 6, py + (Math.random() - 0.5) * 6, { // Bard: Ligeramente más dispersión inicial
+                vx: dx * 0.1 + (Math.random() - 0.5) * 10, // Ligeramente en la dirección del proyectil con más fuerza
+                vy: dy * 0.1 + (Math.random() - 0.5) * 10,
                 life: baseLife + lifeOffset,
-                size: Math.random() * 3 + 1.5,
+                size: Math.random() * 4 + 2, // Bard: Estelas ligeramente más grandes
                 color: trailColor,
-                gravity: 3, // Ligera caída de la estela
-                friction: 0.95,
-                fadeRate: 2.0,
-                shape: isGold && Math.random() > 0.5 ? 'square' : 'circle' // Variedad de formas para chispas doradas
+                gravity: 2, // Ligera caída de la estela
+                friction: 0.94,
+                fadeRate: 1.8, // Bard: Desvanecimiento más suave
+                shape: isGold && Math.random() > 0.4 ? 'square' : 'circle' // Variedad de formas para chispas doradas
             }));
         }
     }

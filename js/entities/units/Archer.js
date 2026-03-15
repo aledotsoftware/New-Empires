@@ -96,8 +96,11 @@ export class Archer extends Unit {
                 }
 
                 if (isKiting) {
-                    // Mientras huimos exitosamente, no atacamos (stutter stepping: huye, se detiene, dispara)
-                    if (this.attackCooldown > 0) {
+                    // Stutter Stepping Perfection
+                    // Shoot while kiting if cooldown is ready and target is in range
+                    if (this.attackCooldown <= 0 && distSq <= this.attackRangeSq) {
+                        this.tryAttack(this.attackTarget, deltaTime, game);
+                    } else if (this.attackCooldown > 0) {
                         this.attackCooldown -= deltaTime;
                     }
 

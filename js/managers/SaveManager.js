@@ -154,6 +154,7 @@ export class SaveManager {
         if (!Array.isArray(state.buildings)) return false;
         if (!Array.isArray(state.enemies)) return false;
         if (!Array.isArray(state.resourceNodes)) return false;
+        if (state.fowGrid !== undefined && !Array.isArray(state.fowGrid)) return false;
 
         // Optional: Validate resource structure (prevent negative values or NaN)
         const resourceKeys = ['wood', 'food', 'gold', 'stone'];
@@ -234,6 +235,8 @@ export class SaveManager {
             });
         }
 
+        const serializedFowGrid = game.fow ? Array.from(game.fow.grid) : [];
+
         return {
             version: this.VERSION,
             timestamp: Date.now(),
@@ -261,7 +264,10 @@ export class SaveManager {
             resourceNodes: serializedResourceNodes,
 
             // Tecnologías
-            researchedTechs: game.techManager?.researchedTechs || []
+            researchedTechs: game.techManager?.researchedTechs || [],
+
+            // Fog Of War
+            fowGrid: serializedFowGrid
         };
     }
 

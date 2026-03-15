@@ -1955,7 +1955,9 @@ export class Game {
 
                 // Check specific resource costs
                 const costSpans = option.querySelectorAll('.build-cost span');
-                costSpans.forEach(span => {
+                const costSpansLen = costSpans.length;
+                for (let i = 0; i < costSpansLen; i++) {
+                    const span = costSpans[i];
                     span.style.color = ''; // Reset
                     const img = span.querySelector('img');
                     if (img) {
@@ -1970,7 +1972,7 @@ export class Game {
                             span.style.color = 'var(--accent-red)';
                         }
                     }
-                });
+                }
 
                 // Check total affordability
                 if (!this.canAfford(cost)) {
@@ -2031,7 +2033,9 @@ export class Game {
 
         // Setup build options handlers
         const buildOptions = document.querySelectorAll('.build-option');
-        buildOptions.forEach(option => {
+        const buildOptionsLen = buildOptions.length;
+        for (let i = 0; i < buildOptionsLen; i++) {
+            const option = buildOptions[i];
             const handleAction = (e) => {
                 // Palette: Prevent action if disabled
                 if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
@@ -2075,7 +2079,7 @@ export class Game {
                     handleAction(e);
                 }
             };
-        });
+        }
     }
 
     closeBuildMenu() {
@@ -5101,10 +5105,12 @@ export class Game {
 
             // Group entities by type
             const groups = {};
-            this.selectedEntities.forEach(e => {
+            const selLen = this.selectedEntities.length;
+            for (let i = 0; i < selLen; i++) {
+                const e = this.selectedEntities[i];
                 if (!groups[e.type]) groups[e.type] = 0;
                 groups[e.type]++;
-            });
+            }
 
             const groupContainer = document.createElement('div');
             groupContainer.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;';

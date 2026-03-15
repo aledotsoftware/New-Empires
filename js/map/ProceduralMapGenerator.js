@@ -523,6 +523,8 @@ export class ProceduralMapGenerator {
         } else if (t < 0.4) {
             // Frío de transición
             if (m > 0.6) return 'forest';
+            // Prevenir desierto tan cerca de zonas nevadas si la humedad es muy baja
+            if (m < 0.3) return 'grassland';
             return 'tundra';
         } else if (t < 0.6) {
             // Templado (banda intermedia obligatoria)
@@ -841,7 +843,7 @@ export class ProceduralMapGenerator {
                 // Fallback de emergencia extremo: asegurar madera y oro si fallaron todos los intentos normales
                 if (placed < config.count && (config.type === 'wood' || config.type === 'gold')) {
                     console.warn(`Generación de emergencia absoluta para ${config.type}`);
-                    let emergencyDist = 5; // Cerca del centro urbano
+                    let emergencyDist = 7; // Más lejos del centro urbano para no bloquear
                     let currAngle = 0;
 
                     // Bailout limit to prevent infinite loops if the map is too congested or small
@@ -851,10 +853,14 @@ export class ProceduralMapGenerator {
                         const ex = Math.floor(start.x + Math.cos(currAngle) * emergencyDist);
                         const ey = Math.floor(start.y + Math.sin(currAngle) * emergencyDist);
 
-                        if (ex >= 0 && ex < this.width && ey >= 0 && ey < this.height) {
-                            // Convertir terreno estrictamente antes de intentar situarlo
-                            this.terrainTypes[ey][ex] = 'grassland';
-                            this.heightmap[ey][ex] = 0.5;
+                        if (ex >= 0 && ex < this.width - 1 && ey >= 0 && ey < this.height - 1) {
+                            // Convertir terreno estrictamente antes de intentar situarlo (área 2x2 para garantizar acceso)
+                            for (let dy = 0; dy <= 1; dy++) {
+                                for (let dx = 0; dx <= 1; dx++) {
+                                    this.terrainTypes[ey + dy][ex + dx] = 'grassland';
+                                    this.heightmap[ey + dy][ex + dx] = 0.5;
+                                }
+                            }
 
                             // Asegurarse de que no esté ocupado
                             let isOccupied = false;

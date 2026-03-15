@@ -22,8 +22,10 @@ export class TerrainDecorManager {
                 if (rng.next() < 0.08) {
                     if (terrain === 'grassland') {
                         const roll = rng.next();
-                        if (roll > 0.8) {
+                        if (roll > 0.9) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'flower', variant: rng.int(0, 2) });
+                        } else if (roll > 0.8) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'wildflowers', variant: rng.int(0, 1) });
                         } else if (roll > 0.6) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'pebbles', variant: rng.int(0, 1) });
                         } else if (roll > 0.3) {
@@ -156,6 +158,21 @@ export class TerrainDecorManager {
                 ctx.moveTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 1.5);
                 ctx.lineTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 5);
                 ctx.stroke();
+            } else if (decor.type === 'wildflowers') {
+                const color = this.getColorForDecor(decor);
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 2, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 3, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(screenX + (TILE_SIZE * 2) / 3, screenY + TILE_SIZE / 2, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(screenX + TILE_SIZE / 2, screenY + (TILE_SIZE * 2) / 3, 2, 0, Math.PI * 2);
+                ctx.fill();
             } else {
                 // Default simple arc
                 ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, TILE_SIZE / 4, 0, Math.PI * 2);
@@ -183,6 +200,7 @@ export class TerrainDecorManager {
             case 'lily_pad': return '#2e7d32';
             case 'pebbles': return decor.variant === 0 ? '#bdbdbd' : '#9e9e9e';
             case 'fern': return decor.variant === 0 ? '#2e7d32' : '#1b5e20';
+            case 'wildflowers': return decor.variant === 0 ? '#ff9800' : '#03a9f4';
             default: return '#000000';
         }
     }

@@ -2532,8 +2532,21 @@ export class Game {
                 // 1. Unidades del jugador
                 const unitsLen = this.units.length;
                 for (let i = 0; i < unitsLen; i++) {
-                    if (this.units[i].team === 'player') {
-                        this.fow.addEntity(this.units[i]);
+                    const unit = this.units[i];
+                    if (unit.team === 'player') {
+                        // Apply tactical topography vision bonus
+                        let tempVision = unit.visionRadius || 200;
+                        let originalVision = tempVision;
+                        if (unit._cachedTerrainData && (unit._cachedTerrainData.name === 'Colina' || unit._cachedTerrainData.name === 'Montaña' || unit._cachedTerrainData.name === 'Volcánico')) {
+                            unit.visionRadius = tempVision * 1.5;
+                        }
+
+                        this.fow.addEntity(unit);
+
+                        // Restore
+                        if (unit.visionRadius !== originalVision) {
+                            unit.visionRadius = originalVision;
+                        }
                     }
                 }
 
@@ -2542,7 +2555,19 @@ export class Game {
                 for (let i = 0; i < buildingsLen; i++) {
                     const b = this.buildings[i];
                     if (b.team === 'player') {
+                        // Apply tactical topography vision bonus
+                        let tempVision = b.visionRadius || 200;
+                        let originalVision = tempVision;
+                        if (b._cachedTerrainData && (b._cachedTerrainData.name === 'Colina' || b._cachedTerrainData.name === 'Montaña' || b._cachedTerrainData.name === 'Volcánico')) {
+                            b.visionRadius = tempVision * 1.5;
+                        }
+
                         this.fow.addEntity(b);
+
+                        // Restore
+                        if (b.visionRadius !== originalVision) {
+                            b.visionRadius = originalVision;
+                        }
                     }
                 }
 
@@ -3622,6 +3647,29 @@ export class Game {
                 this.ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
             }
             this.ctx.fill();
+        } else if (biome === 'Desierto') {
+            // Sandstorm effect
+            this.ctx.strokeStyle = 'rgba(218, 165, 32, 0.3)'; // Goldenrod with opacity
+            this.ctx.lineWidth = 1.5;
+            this.ctx.beginPath();
+
+            const numSandParticles = 150;
+            const timeOffset = this.renderTime * 1.2; // Fast horizontal wind
+
+            for (let i = 0; i < numSandParticles; i++) {
+                // Fast movement mostly horizontal, slightly diagonal
+                const px = (i * 71 + timeOffset + this.camera.x * 0.8) % this.viewWidth;
+                const py = (i * 109 + timeOffset * 0.1 + this.camera.y * 0.2) % this.viewHeight;
+
+                const screenX = (px >= 0 ? px : px + this.viewWidth);
+                const screenY = (py >= 0 ? py : py + this.viewHeight);
+
+                const length = (i % 5) * 3 + 5; // Variation in streak length
+
+                this.ctx.moveTo(screenX, screenY);
+                this.ctx.lineTo(screenX + length, screenY + length * 0.1); // mostly horizontal
+            }
+            this.ctx.stroke();
         }
 
         this.ctx.restore();

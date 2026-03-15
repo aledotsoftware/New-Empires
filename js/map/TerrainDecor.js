@@ -22,7 +22,9 @@ export class TerrainDecorManager {
                 if (rng.next() < 0.08) {
                     if (terrain === 'grassland') {
                         const roll = rng.next();
-                        if (roll > 0.9) {
+                        if (roll > 0.95) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'ancient_ruins', variant: rng.int(0, 1) });
+                        } else if (roll > 0.9) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'flower', variant: rng.int(0, 2) });
                         } else if (roll > 0.8) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'wildflowers', variant: rng.int(0, 1) });
@@ -44,7 +46,9 @@ export class TerrainDecorManager {
                         }
                     } else if (terrain === 'desert') {
                         const roll = rng.next();
-                        if (roll > 0.7) {
+                        if (roll > 0.85) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'ancient_ruins', variant: rng.int(0, 1) });
+                        } else if (roll > 0.7) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'cactus', variant: rng.int(0, 1) });
                         } else if (roll > 0.4) {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'animal_bones', variant: rng.int(0, 1) });
@@ -173,6 +177,16 @@ export class TerrainDecorManager {
                 ctx.beginPath();
                 ctx.arc(screenX + TILE_SIZE / 2, screenY + (TILE_SIZE * 2) / 3, 2, 0, Math.PI * 2);
                 ctx.fill();
+            } else if (decor.type === 'ancient_ruins') {
+                ctx.fillStyle = this.getColorForDecor(decor);
+                ctx.strokeStyle = '#4a4a4a';
+                ctx.lineWidth = 1;
+                // Main pillar
+                ctx.fillRect(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 4, TILE_SIZE / 3, TILE_SIZE / 2);
+                ctx.strokeRect(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 4, TILE_SIZE / 3, TILE_SIZE / 2);
+                // Fallen block
+                ctx.fillRect(screenX + TILE_SIZE / 6, screenY + TILE_SIZE / 1.5, TILE_SIZE / 2, TILE_SIZE / 6);
+                ctx.strokeRect(screenX + TILE_SIZE / 6, screenY + TILE_SIZE / 1.5, TILE_SIZE / 2, TILE_SIZE / 6);
             } else {
                 // Default simple arc
                 ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, TILE_SIZE / 4, 0, Math.PI * 2);
@@ -201,6 +215,7 @@ export class TerrainDecorManager {
             case 'pebbles': return decor.variant === 0 ? '#bdbdbd' : '#9e9e9e';
             case 'fern': return decor.variant === 0 ? '#2e7d32' : '#1b5e20';
             case 'wildflowers': return decor.variant === 0 ? '#ff9800' : '#03a9f4';
+            case 'ancient_ruins': return '#757575';
             default: return '#000000';
         }
     }

@@ -251,7 +251,24 @@ export class ProceduralMapGenerator {
         // Conectar el centro de cada isla menor al centro de la masa principal
         for (let m of landmasses) {
             if (m.id !== mainMass.id && m.tiles.length > 5) { // Ignorar islitas insignificantes de < 5 tiles
-                this.carvePath(m.centerX, m.centerY, mainMass.centerX, mainMass.centerY);
+                let closestM = m.tiles[0];
+                let closestMain = mainMass.tiles[0];
+                let minSubDist = Infinity;
+
+                for (let i = 0; i < m.tiles.length; i+=3) { // skip some tiles for performance
+                    const t1 = m.tiles[i];
+                    for (let j = 0; j < mainMass.tiles.length; j+=10) { // skip more main tiles
+                        const t2 = mainMass.tiles[j];
+                        const distSq = (t1.x - t2.x)**2 + (t1.y - t2.y)**2;
+                        if (distSq < minSubDist) {
+                            minSubDist = distSq;
+                            closestM = t1;
+                            closestMain = t2;
+                        }
+                    }
+                }
+
+                this.carvePath(closestM.x, closestM.y, closestMain.x, closestMain.y);
             }
         }
     }
@@ -501,7 +518,7 @@ export class ProceduralMapGenerator {
 
         // 2. Manejo de montañas (siempre en elevaciones altas)
         if (elevation > 0.75 - (t * 0.05)) {
-            if (t < 0.3) return 'snow'; // Montañas nevadas
+            if (t < 0.35) return 'snow'; // Montañas nevadas
             if (t > 0.8 && mainBiome === 'volcanic') return 'volcanic';
             return 'mountain';
         }
@@ -861,6 +878,7 @@ export class ProceduralMapGenerator {
                                     this.heightmap[ey + dy][ex + dx] = 0.5;
                                 }
                             }
+                            this.carvePath(start.x, start.y, ex, ey);
 
                             // Asegurarse de que no esté ocupado
                             let isOccupied = false;

@@ -1,6 +1,6 @@
 import { soundManager } from '../managers/SoundManager.js';
 import { Entity } from './Entity.js';
-import { CONFIG } from '../core/constants.js';
+import { CONFIG, COMBAT_BONUSES } from '../core/constants.js';
 
 /**
  * Unit - Clase base para unidades móviles
@@ -26,6 +26,7 @@ export class Unit extends Entity {
         this.attackCooldown = 0;
         this.canAttack = false;
         this.canGather = false;
+        this.explicitTarget = false;
 
         // Vision
         this.visionRadius = CONFIG.VISION.DEFAULT_UNIT;
@@ -47,8 +48,11 @@ export class Unit extends Entity {
     update(deltaTime, game) {
         this.aiTimer -= deltaTime;
 
-        if (!this.attackTarget && this.canAttack && this.aiTimer <= 0) {
-            this.scanForEnemies(game);
+        if (this.canAttack && this.aiTimer <= 0) {
+            // Continously scan for better targets unless the player explicitly right-clicked an enemy
+            if (!this.explicitTarget) {
+                this.scanForEnemies(game);
+            }
             this.aiTimer = this.aiCheckInterval;
         }
 
@@ -167,6 +171,11 @@ export class Unit extends Entity {
             // Prioridad absoluta a quien nos ataca
             if (isUnderAttackByThisEnemy) {
                 score += 5000;
+            }
+
+            // Target Stickiness: Evitar cambiar de objetivo constantemente si ya estamos peleando
+            if (this.attackTarget === enemy) {
+                score += 1000;
             }
 
             const dx = this.x - enemy.x;
@@ -360,6 +369,14 @@ export class Unit extends Entity {
 
         if (distSq <= attackRangeSq && this.attackCooldown <= 0) {
             let damage = this.attackDamage;
+
+            // Combat Triangle / Bonus System
+            if (COMBAT_BONUSES[this.type]) {
+                const targetType = target.isBuilding ? 'building' : target.type;
+                if (COMBAT_BONUSES[this.type][targetType]) {
+                    damage *= COMBAT_BONUSES[this.type][targetType];
+                }
+            }
 
             // Aplicar bonificaciones de terreno si el juego está disponible
             if (game && game.terrainMap) {

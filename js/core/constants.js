@@ -155,6 +155,21 @@ export const TERRAIN_TYPES = {
     }
 };
 
+// Bonus de daño de unidades (piedra, papel, tijera)
+export const COMBAT_BONUSES = {
+    warrior: {
+        archer: 1.25,     // +25% daño contra arqueros
+        building: 1.5     // +50% daño contra edificios (asedio base)
+    },
+    archer: {
+        villager: 1.5,    // +50% daño contra aldeanos
+        warrior: 0.8      // -20% daño contra guerreros (armadura)
+    },
+    villager: {
+        building: 0.5     // -50% daño contra edificios
+    }
+};
+
 export const CONFIG = {
     // Tamaño de mapa actual (se establece al iniciar el juego)
     CANVAS_WIDTH: 6400,  // Normal por defecto

@@ -9,9 +9,9 @@ export class Warrior extends Unit {
         let score = baseScore;
 
         // IA de Unidades: Mejora de decisiones para Guerrero (Cuerpo a cuerpo)
-        // Priorizar enemigos vulnerables o de asedio
+        // Priorizar enemigos vulnerables o de asedio fuertemente
         if (enemy.type === 'archer') {
-            score += 1500; // Increase priority of archers over anything else
+            score += 3000; // Increase priority of archers significantly over anything else
         } else if (enemy.type === 'villager') {
             score += 600;
         } else if (enemy.type === 'warrior') {

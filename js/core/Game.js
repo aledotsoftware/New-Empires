@@ -1425,8 +1425,12 @@ export class Game {
 
         for (let entity of this.selectedEntities) {
             if (entity.isUnit) {
+                // Reset explicit target whenever a new command is given
+                entity.explicitTarget = false;
+
                 if (targetEnemy && entity.canAttack) {
                     entity.attackTarget = targetEnemy;
+                    entity.explicitTarget = true;
                     entity.gatherTarget = null;
                     entity.targetX = null;
                     if (entity.type === 'villager') entity.state = 'ATTACKING';

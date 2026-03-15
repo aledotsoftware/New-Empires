@@ -74,6 +74,8 @@ export const FORMATIONS = {
 
     /**
      * Formación en cuña/flecha (para ataques)
+     * Optimizada: Crea un patrón en "V" estricto que maximiza el frente de ataque
+     * minimizando obstrucciones entre unidades.
      * @param {Array} units - Unidades a posicionar
      * @param {Object} center - Centro de la formación {x, y}
      * @param {number} spacing - Espacio entre unidades (px)
@@ -81,28 +83,24 @@ export const FORMATIONS = {
      */
     wedge: (units, center, spacing = 40) => {
         const count = units.length;
-        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
+        const positions = new Array(count);
 
         if (count === 0) return positions;
 
         // La punta de la flecha al frente
         positions[0] = { x: center.x, y: center.y };
 
-        let row = 1;
-        let placed = 1;
-        while (placed < count) {
-            const unitsInRow = Math.min(row + 1, count - placed);
-            const startX = center.x - (unitsInRow - 1) * spacing / 2;
+        for (let i = 1; i < count; i++) {
+            // Alternar izquierda/derecha para cada nueva unidad
+            const side = i % 2 === 0 ? 1 : -1;
+            // El "nivel" de profundidad en la cuña
+            const level = Math.ceil(i / 2);
 
-            for (let i = 0; i < unitsInRow; i++) {
-                if (placed >= count) break;
-                positions[placed] = {
-                    x: startX + i * spacing,
-                    y: center.y + row * spacing
-                };
-                placed++;
-            }
-            row++;
+            // X se expande lateralmente, Y retrocede
+            positions[i] = {
+                x: center.x + (level * spacing * side),
+                y: center.y + (level * spacing)
+            };
         }
         return positions;
     },
@@ -162,6 +160,8 @@ export const FORMATIONS = {
 
     /**
      * Formación en escala/echelon (ataque/defensa en diagonal)
+     * Optimizada: Organiza las unidades en una línea escalonada estricta,
+     * perfecta para flanquear o cubrir avances.
      * @param {Array} units - Unidades a posicionar
      * @param {Object} center - Centro de la formación {x, y}
      * @param {number} spacing - Espacio entre unidades (px)
@@ -169,9 +169,9 @@ export const FORMATIONS = {
      */
     echelon: (units, center, spacing = 40) => {
         const count = units.length;
-        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
+        const positions = new Array(count);
 
-        // Centrar la diagonal (que tiene tamaño de count * spacing)
+        // Centrar la diagonal
         const offset = ((count - 1) * spacing) / 2;
 
         for (let i = 0; i < count; i++) {

@@ -719,6 +719,13 @@ export class Game {
                 }
             }
 
+            // Clear FOW cache so moving units/buildings will force a visibility update
+            entity._fowCacheRanges = null;
+            entity._fowCacheCount = undefined;
+            entity._fowGridX = -1;
+            entity._fowGridY = -1;
+            entity._fowRadius = -1;
+
             // Optimization cache
             this._cacheEntityTerrain(entity);
 

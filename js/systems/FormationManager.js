@@ -17,11 +17,20 @@ export const FORMATIONS = {
     line: (units, center, spacing = 40) => {
         const count = units.length;
         const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
-        const startX = center.x - ((count - 1) * spacing) / 2;
 
-        for (let i = 0; i < count; i++) {
+        if (count === 0) return positions;
+
+        // La primera unidad en el centro exacto
+        positions[0] = { x: center.x, y: center.y };
+
+        for (let i = 1; i < count; i++) {
+            // Alternar izquierda/derecha
+            const side = i % 2 === 0 ? 1 : -1;
+            // El nivel de distancia desde el centro
+            const level = Math.ceil(i / 2);
+
             positions[i] = {
-                x: startX + i * spacing,
+                x: center.x + (level * spacing * side),
                 y: center.y
             };
         }

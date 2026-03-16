@@ -38,6 +38,35 @@ export const FORMATIONS = {
     },
 
     /**
+     * Formación staggered (escalonada), variante de la línea para reducir daño de área
+     * @param {Array} units - Unidades a posicionar
+     * @param {Object} center - Centro de la formación {x, y}
+     * @param {number} spacing - Espacio entre unidades (px)
+     * @returns {Array} Posiciones [{x, y}, ...]
+     */
+    staggered: (units, center, spacing = 40) => {
+        const count = units.length;
+        const positions = new Array(count);
+
+        if (count === 0) return positions;
+
+        positions[0] = { x: center.x, y: center.y };
+
+        for (let i = 1; i < count; i++) {
+            const side = i % 2 === 0 ? 1 : -1;
+            const level = Math.ceil(i / 2);
+            // Alternate depth for staggered effect
+            const depth = (level % 2 === 0) ? spacing : 0;
+
+            positions[i] = {
+                x: center.x + (level * spacing * side),
+                y: center.y + depth
+            };
+        }
+        return positions;
+    },
+
+    /**
      * Formación en columna vertical
      * @param {Array} units - Unidades a posicionar
      * @param {Object} center - Centro de la formación {x, y}
@@ -275,6 +304,8 @@ export class FormationManager {
         // Se muta localmente el array para asignar posiciones pero no se rompe la referencia externa.
         const typePriority = {
             'warrior': 1,
+            'spearman': 1,
+            'cavalry': 1,
             'archer': 2,
             'villager': 3
         };

@@ -1470,6 +1470,11 @@ export class Game {
                 } else {
                     entity.targetX = this.mouse.worldX;
                     entity.targetY = this.mouse.worldY;
+                    // El jugador ha comandado moverse, marcamos como movimiento explícito para que no se distraiga de su ruta primaria,
+                    // aunque la lógica en Unit.js le permite defenderse si explicitTarget es true en caso de ataques.
+                    // Para evitar que ignoren a los enemigos, configuramos explicitTarget = false y permitimos que la unidad escoja si atacar en el camino
+                    // a menos que sea un "Attack Move" u orden forzada, en este caso, se asume movimiento estándar y deben atacar a enemigos cercanos.
+                    entity.explicitTarget = false;
                     entity.attackTarget = null;
                     entity.gatherTarget = null;
                     if (entity.type === 'villager') entity.state = 'MOVING';

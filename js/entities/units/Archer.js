@@ -12,13 +12,13 @@ export class Archer extends Unit {
         // Los arqueros deben priorizar a otros arqueros (counter-fire)
         // o a unidades frágiles. Nunca edificios si hay tropas cerca.
         if (enemy.type === 'archer') {
-            score += 1200;
+            score += 2000;
         } else if (enemy.type === 'villager') {
-            score += 800;
-        } else if (enemy.type === 'warrior') {
+            score += 1200;
+        } else if (enemy.type === 'warrior' || enemy.type === 'spearman' || enemy.type === 'cavalry') {
             score += 500;
         } else if (enemy.isBuilding) {
-            score -= 1000;
+            score -= 2000;
         }
 
         // Penalización ligera por distancia (pueden disparar de lejos)
@@ -106,12 +106,15 @@ export class Archer extends Unit {
 
                     // Desvincular temporalmente el objetivo para que super.update() no nos devuelva hacia el enemigo
                     const tempTarget = this.attackTarget;
+                    const tempExplicit = this.explicitTarget;
                     this.attackTarget = null;
+                    this.explicitTarget = false;
 
                     super.update(deltaTime, game);
 
                     // Restaurar objetivo
                     this.attackTarget = tempTarget;
+                    this.explicitTarget = tempExplicit;
                 }
             }
         }

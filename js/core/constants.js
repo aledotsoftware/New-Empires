@@ -159,11 +159,20 @@ export const TERRAIN_TYPES = {
 export const COMBAT_BONUSES = {
     warrior: {
         archer: 1.25,     // +25% daño contra arqueros
+        spearman: 1.25,   // +25% daño contra lanceros
         building: 1.5     // +50% daño contra edificios (asedio base)
     },
     archer: {
         villager: 1.5,    // +50% daño contra aldeanos
+        spearman: 1.5,    // +50% daño contra lanceros
         warrior: 0.8      // -20% daño contra guerreros (armadura)
+    },
+    spearman: {
+        cavalry: 1.5      // +50% daño contra caballería
+    },
+    cavalry: {
+        archer: 1.5,      // +50% daño contra arqueros
+        warrior: 1.2      // +20% daño contra guerreros
     },
     villager: {
         building: 0.5     // -50% daño contra edificios

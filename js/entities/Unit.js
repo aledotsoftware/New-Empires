@@ -157,7 +157,7 @@ export class Unit extends Entity {
             } else {
                 // Militares solo están "ocupados" ignorando enemigos si el jugador explícitamente les ordenó NO atacar
                 // pero por ahora, una unidad militar nunca ignora a un enemigo en su rango de agro.
-                isBusy = this.targetX !== null; // Si se están moviendo a un objetivo específico, están ocupados
+                isBusy = this.targetX !== null && this.explicitTarget; // Si se están moviendo a un objetivo específico, están ocupados
             }
 
             // Si estamos ocupados, solo reaccionamos al enemigo que nos está atacando explícitamente.

@@ -374,10 +374,14 @@ export class Unit extends Entity {
             let damage = this.attackDamage;
 
             // Combat Triangle / Bonus System
-            if (COMBAT_BONUSES[this.type]) {
-                const targetType = target.isBuilding ? 'building' : target.type;
-                if (COMBAT_BONUSES[this.type][targetType]) {
-                    damage *= COMBAT_BONUSES[this.type][targetType];
+            // Usamos baseType de la unidad (ej. kamayuk es spearman) si type original no está mapeado
+            const myType = COMBAT_BONUSES[this.type] ? this.type : (this.baseType || this.type);
+            const targetRealType = target.isBuilding ? 'building' : target.type;
+            const targetType = COMBAT_BONUSES[targetRealType] ? targetRealType : (target.baseType || targetRealType);
+
+            if (COMBAT_BONUSES[myType]) {
+                if (COMBAT_BONUSES[myType][targetType]) {
+                    damage *= COMBAT_BONUSES[myType][targetType];
                 }
             }
 

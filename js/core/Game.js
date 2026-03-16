@@ -19,6 +19,11 @@ import { PopulationManager } from '../managers/PopulationManager.js';
 import { Villager } from '../entities/units/Villager.js';
 import { Warrior } from '../entities/units/Warrior.js';
 import { Archer } from '../entities/units/Archer.js';
+import { Spearman } from '../entities/units/Spearman.js';
+import { Cavalry } from '../entities/units/Cavalry.js';
+import { Scout } from '../entities/units/Scout.js';
+import { Priest } from '../entities/units/Priest.js';
+import { Trader } from '../entities/units/Trader.js';
 import { TownCenter } from '../entities/buildings/TownCenter.js';
 import { House } from '../entities/buildings/House.js';
 import { Barracks } from '../entities/buildings/Barracks.js';
@@ -2335,10 +2340,12 @@ export class Game {
 
         const queueLength = building.productionQueue.length;
 
-        let narrativeText = `Forjando ${unitType}`;
-        if (unitType === 'villager') narrativeText = `Forjando la Orden de Trabajo`;
-        if (unitType === 'warrior') narrativeText = `Forjando la Orden de Caballería`;
-        if (unitType === 'archer') narrativeText = `Forjando la Orden de Arqueros`;
+        let narrativeText = `Forjando unidad`;
+        if (unitType === 'villager' || unitType === 'puric' || unitType === 'gaucho' || unitType === 'aldeanoVikingo') narrativeText = `Forjando la Orden de Trabajo`;
+        else if (unitType === 'warrior' || unitType === 'spearman' || unitType === 'cavalry' || unitType === 'scout') narrativeText = `Forjando la Orden de Caballería`;
+        else if (unitType === 'archer') narrativeText = `Forjando la Orden de Arqueros`;
+        else narrativeText = `Forjando la Orden`;
+
         this.showNotification(`${narrativeText} (${queueLength}/5)`, 'info');
 
         this.updateUI();
@@ -2389,8 +2396,19 @@ export class Game {
             y = building.y + Math.sin(angle) * (building.size + 30);
         }
 
+        // Determinar clase base si es unidad única
+        let baseType = unitType;
+        if (window.dataLoader) {
+            const unitsForCiv = dataLoader.getUnitsForCivilization(this.civilizationId);
+            const unitData = unitsForCiv.find(u => u.id === unitType);
+            if (unitData) {
+                // If it's a unique unit (has baseUnit) use that, otherwise use its id
+                baseType = unitData.baseUnit || unitData.id;
+            }
+        }
+
         let unit;
-        switch (unitType) {
+        switch (baseType) {
             case 'villager':
                 unit = new Villager(x, y, 'player');
                 break;
@@ -2400,9 +2418,33 @@ export class Game {
             case 'archer':
                 unit = new Archer(x, y, 'player');
                 break;
+            case 'spearman':
+                unit = new Spearman(x, y, 'player');
+                break;
+            case 'cavalry':
+                unit = new Cavalry(x, y, 'player');
+                break;
+            case 'scout':
+                unit = new Scout(x, y, 'player');
+                break;
+            case 'priest':
+                unit = new Priest(x, y, 'player');
+                break;
+            case 'trader':
+                unit = new Trader(x, y, 'player');
+                break;
+            default:
+                // Fallback a warrior
+                unit = new Warrior(x, y, 'player');
+                console.warn(`Tipo de unidad no reconocido: ${baseType}, usando Warrior como fallback.`);
+                break;
         }
 
+        // Asignar el tipo exacto para aplicar las mejoras correctas (ej. kamayuk, chuKoNu)
         if (unit) {
+            unit.type = unitType;
+            unit.baseType = baseType;
+
             civilizationManager.applyUnitBonuses(unit, this.civilizationId);
 
             this._cacheEntityTerrain(unit); // OPTIMIZATION

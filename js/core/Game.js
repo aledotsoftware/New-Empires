@@ -2,7 +2,7 @@ import { formationManager } from '../systems/FormationManager.js';
 import { debugLogger } from '../utils/DebugLogger.js';
 import { civilizationManager } from '../managers/CivilizationManager.js';
 import { TechManager } from '../systems/TechManager.js';
-import { ProceduralMapGenerator } from '../map/ProceduralMapGenerator.js';
+import { ProceduralMapGenerator, SeededRandom } from '../map/ProceduralMapGenerator.js';
 import { soundManager } from '../managers/SoundManager.js';
 import { ParticleSystem } from '../systems/EffectsManager.js';
 // Imports de módulos creados
@@ -910,6 +910,7 @@ export class Game {
 
     generateSimpleMap() {
         // Código original de generación simple (fallback)
+        const rng = new SeededRandom(this.mapSeed || Date.now());
         const resourceTypes = [
             { type: 'wood', amount: 600, weight: 0.35 },  // 35% de probabilidad (más común)
             { type: 'food', amount: 500, weight: 0.30 },  // 30% de probabilidad
@@ -920,7 +921,7 @@ export class Game {
         // Generar 60 nodos de recursos (triplicamos la cantidad original)
         for (let i = 0; i < 60; i++) {
             // Selección ponderada de tipo de recurso
-            const rand = Math.random();
+            const rand = rng.next();
             let cumulative = 0;
             let resType = resourceTypes[0];
 
@@ -932,8 +933,8 @@ export class Game {
                 }
             }
 
-            const x = Math.random() * CONFIG.CANVAS_WIDTH;
-            const y = Math.random() * CONFIG.CANVAS_HEIGHT;
+            const x = rng.next() * CONFIG.CANVAS_WIDTH;
+            const y = rng.next() * CONFIG.CANVAS_HEIGHT;
 
             // Evitar spawn cerca del centro inicial (jugador)
             // OPTIMIZATION: Squared distance check
@@ -967,10 +968,11 @@ export class Game {
     }
 
     spawnEnemies() {
+        const rng = new SeededRandom(this.mapSeed ? this.mapSeed + 999 : Date.now());
         // Spawn enemigos en el lado opuesto
         for (let i = 0; i < 5; i++) {
-            const x = CONFIG.CANVAS_WIDTH - 400 + Math.random() * 200 - 100;
-            const y = CONFIG.CANVAS_HEIGHT - 400 + Math.random() * 200 - 100;
+            const x = CONFIG.CANVAS_WIDTH - 400 + rng.next() * 200 - 100;
+            const y = CONFIG.CANVAS_HEIGHT - 400 + rng.next() * 200 - 100;
             const enemy = new Warrior(x, y, 'enemy');
             this._cacheEntityTerrain(enemy); // OPTIMIZATION
             this.enemies.push(enemy);

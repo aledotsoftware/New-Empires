@@ -76,7 +76,7 @@ export class Archer extends Unit {
                 // Usar la función de Unit para movernos, dist 0 para mover exacto
                 this.moveTowardsTarget(escapeX, escapeY, deltaTime, game, 0);
 
-                let movedSq = (this.x - oldX) ** 2 + (this.y - oldY) ** 2;
+                let movedSq = (this.x - oldX) * (this.x - oldX) + (this.y - oldY) * (this.y - oldY);
 
                 // Si no nos movimos porque estamos chocando contra el terreno o límite
                 if (movedSq < 0.1) {
@@ -87,7 +87,7 @@ export class Archer extends Unit {
                     const newEscapeY = this.y + newDirY * escapeDist;
 
                     this.moveTowardsTarget(newEscapeX, newEscapeY, deltaTime, game, 0);
-                    movedSq = (this.x - oldX) ** 2 + (this.y - oldY) ** 2;
+                    movedSq = (this.x - oldX) * (this.x - oldX) + (this.y - oldY) * (this.y - oldY);
 
                     if (movedSq < 0.1) {
                         isKiting = false;

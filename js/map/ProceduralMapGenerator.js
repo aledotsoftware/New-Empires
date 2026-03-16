@@ -609,8 +609,8 @@ export class ProceduralMapGenerator {
                 // Crear islas usando distancia al centro
                 const centerX = this.width / 2;
                 const centerY = this.height / 2;
-                const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-                const maxDist = Math.sqrt(centerX ** 2 + centerY ** 2);
+                const dist = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                const maxDist = Math.sqrt(centerX * centerX + centerY * centerY);
                 const islandFactor = 1 - (dist / maxDist);
 
                 if (elevation < 0.3 || islandFactor < 0.4) {
@@ -623,7 +623,7 @@ export class ProceduralMapGenerator {
                 // Lago central
                 const lakeCenterX = this.width / 2;
                 const lakeCenterY = this.height / 2;
-                const lakeDist = Math.sqrt((x - lakeCenterX) ** 2 + (y - lakeCenterY) ** 2);
+                const lakeDist = Math.sqrt((x - lakeCenterX) * (x - lakeCenterX) + (y - lakeCenterY) * (y - lakeCenterY));
                 const lakeRadius = Math.min(this.width, this.height) / 6;
 
                 // Bordes difuminados usando el ruido Perlin existente
@@ -695,7 +695,7 @@ export class ProceduralMapGenerator {
                 // Calcular distancia mínima a otros jugadores
                 let minDistToOthers = Infinity;
                 for (let other of this.playerStarts) {
-                    const dist = Math.sqrt((x - other.x) ** 2 + (y - other.y) ** 2);
+                    const dist = Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
                     minDistToOthers = Math.min(minDistToOthers, dist);
                 }
 
@@ -929,7 +929,7 @@ export class ProceduralMapGenerator {
             if (this.isValidResourceCenter(cx, cy)) {
                 let tooClose = false;
                 for (let start of this.playerStarts) {
-                    const dist = Math.sqrt((cx - start.x) ** 2 + (cy - start.y) ** 2);
+                    const dist = Math.sqrt((cx - start.x) * (cx - start.x) + (cy - start.y) * (cy - start.y));
                     if (dist < 25) {
                         tooClose = true;
                         break;
@@ -959,7 +959,7 @@ export class ProceduralMapGenerator {
 
         // Verificar que el centro no esté muy cerca de otros recursos
         for (let res of this.resources) {
-            const dist = Math.sqrt((cx - res.x) ** 2 + (cy - res.y) ** 2);
+            const dist = Math.sqrt((cx - res.x) * (cx - res.x) + (cy - res.y) * (cy - res.y));
             if (dist < 5) return false; // Distancia mínima entre clústers
         }
 

@@ -161,8 +161,9 @@ export class Ripple {
     update(deltaTime) {
         this.life -= deltaTime;
         const progress = 1 - (this.life / this.maxLife);
+        const invProgress = 1 - progress;
         // Cubic ease out for expansion
-        this.size = 2 + (this.maxSize - 2) * (1 - Math.pow(1 - progress, 3));
+        this.size = 2 + (this.maxSize - 2) * (1 - (invProgress * invProgress * invProgress));
         this.alpha = Math.max(0, this.life / this.maxLife);
         return this.life > 0;
     }

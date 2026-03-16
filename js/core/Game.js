@@ -5086,6 +5086,41 @@ export class Game {
                     timeLeft.textContent = `${Math.ceil(current.remaining)}s`;
                     currentDiv.appendChild(timeLeft);
 
+                    // Botón de cancelar
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.className = 'btn-close';
+                    cancelBtn.style.cssText = 'width: 20px; height: 20px; font-size: 14px; padding: 0; line-height: 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.5); cursor: pointer; color: #fc8181;';
+                    cancelBtn.innerHTML = '×';
+                    cancelBtn.setAttribute('aria-label', `Cancelar ${current.unitType}`);
+                    cancelBtn.title = `Cancelar ${current.unitType} (Click para reembolsar)`;
+
+                    cancelBtn.onmouseenter = () => cancelBtn.style.background = 'rgba(197, 48, 48, 0.8)';
+                    cancelBtn.onmouseleave = () => cancelBtn.style.background = 'rgba(0, 0, 0, 0.5)';
+
+                    const cancelCurrentAction = () => {
+                        const cancelled = entity.productionQueue.cancelAt(0);
+
+                        if (cancelled && cancelled.cost) {
+                            // Refund Resources
+                            RefundManager.refundCost(this, cancelled.cost);
+
+                            // Feedback
+                            this.showNotification(`${current.unitType} cancelado`, 'info');
+                            if (soundManager) soundManager.play('click');
+
+                            // Force UI Refresh
+                            this.updateSelectionPanel();
+                            this.updateUI();
+                        }
+                    };
+
+                    cancelBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        cancelCurrentAction();
+                    };
+
+                    currentDiv.appendChild(cancelBtn);
+
                     prodContainer.appendChild(currentDiv);
 
                     // Barra de progreso

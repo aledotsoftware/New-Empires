@@ -13,11 +13,11 @@ export class Warrior extends Unit {
         if (enemy.type === 'archer') {
             score += 3000; // Increase priority of archers significantly over anything else
         } else if (enemy.type === 'villager') {
-            score += 600;
-        } else if (enemy.type === 'warrior') {
+            score += 1500;
+        } else if (enemy.type === 'warrior' || enemy.type === 'spearman' || enemy.type === 'cavalry') {
             score += 500;
         } else if (enemy.isBuilding) {
-            score -= 2000; // Stronger penalty so they don't attack buildings if troops are around
+            score -= 3000; // Stronger penalty so they don't attack buildings if troops are around
         }
 
         // Penalización HEAVY por distancia para evitar perseguir infinitamente a arqueros que kittean

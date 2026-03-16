@@ -110,7 +110,9 @@ export class TerrainDecorManager {
                 ctx.strokeStyle = this.getColorForDecor(decor);
                 for (let i = 0; i < 3; i++) {
                     ctx.moveTo(screenX + TILE_SIZE/3 + i * 4, screenY + TILE_SIZE/1.5);
-                    ctx.lineTo(screenX + TILE_SIZE/3 + i * 4 + (i - 1) * 2, screenY + TILE_SIZE/3 + Math.random() * 4);
+                    // Use deterministic pseudo-random offset based on coordinates to avoid visual jitter
+                    const pseudoRandomOffset = ((decor.x * 13 + decor.y * 31 + i * 17) % 40) / 10;
+                    ctx.lineTo(screenX + TILE_SIZE/3 + i * 4 + (i - 1) * 2, screenY + TILE_SIZE/3 + pseudoRandomOffset);
                 }
                 ctx.stroke();
             } else if (decor.type === 'bush') {

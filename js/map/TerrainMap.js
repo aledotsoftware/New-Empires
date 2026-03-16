@@ -5,10 +5,11 @@ import { TERRAIN_TYPES } from '../core/constants.js';
  * Genera y gestiona los diferentes tipos de terreno del mapa
  */
 export class TerrainMap {
-    constructor(width, height, tileSize) {
+    constructor(width, height, tileSize, seed = Date.now()) {
         this.width = width;
         this.height = height;
         this.tileSize = tileSize;
+        this.seed = seed;
         this.cols = Math.floor(width / tileSize);
         this.rows = Math.floor(height / tileSize);
 
@@ -79,16 +80,27 @@ export class TerrainMap {
         const maxAttempts = targetTiles * 3;
         let attempts = 0;
 
+        // Use a deterministic pseudo-random approach based on the global map seed
+        // offset by the terrain type to avoid generating the exact same pattern for different terrains
+        let localSeed = this.seed + this._nameToId[terrainType] * 1000;
+
+        const nextRandom = () => {
+            let t = localSeed += 0x6D2B79F5;
+            t = Math.imul(t ^ t >>> 15, t | 1);
+            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+
         while (tilesPlaced < targetTiles && attempts < maxAttempts) {
             attempts++;
-            const startCol = Math.floor(Math.random() * this.cols);
-            const startRow = Math.floor(Math.random() * this.rows);
+            const startCol = Math.floor(nextRandom() * this.cols);
+            const startRow = Math.floor(nextRandom() * this.rows);
 
-            // Crear parche usando distribución aleatoria
-            const patchTiles = Math.floor(patchSize + Math.random() * patchSize);
+            // Crear parche usando distribución aleatoria determinística
+            const patchTiles = Math.floor(patchSize + nextRandom() * patchSize);
             for (let i = 0; i < patchTiles; i++) {
-                const offsetX = Math.floor(Math.random() * patchSize) - patchSize / 2;
-                const offsetY = Math.floor(Math.random() * patchSize) - patchSize / 2;
+                const offsetX = Math.floor(nextRandom() * patchSize) - patchSize / 2;
+                const offsetY = Math.floor(nextRandom() * patchSize) - patchSize / 2;
                 const col = startCol + offsetX;
                 const row = startRow + offsetY;
 

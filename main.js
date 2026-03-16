@@ -1002,7 +1002,6 @@ function closeBuildMenu() {
 /**
  * Inicia una nueva partida
  */
-window.startGame = startGame;
 function startGame(civId, mapConfig, loadedState = null) {
     debugLogger.start('Iniciando nuevo juego', 'game');
     debugLogger.info(`Civilización: ${civId}`, 'game');
@@ -1032,7 +1031,6 @@ function startGame(civId, mapConfig, loadedState = null) {
 
     // Crear instancia del juego ahora que el contenedor es visible
     game = new Game(civId, mapConfig);
-    window.game = game;
     game.showConfirmation = showConfirmation;
 
 

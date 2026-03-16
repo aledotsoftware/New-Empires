@@ -15,6 +15,7 @@ import { TerrainMap } from '../map/TerrainMap.js';
 import { TerrainDecorManager } from '../map/TerrainDecor.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';
 import { RefundManager } from '../systems/Refund.js';
+import { PopulationManager } from '../managers/PopulationManager.js';
 import { Villager } from '../entities/units/Villager.js';
 import { Warrior } from '../entities/units/Warrior.js';
 import { Archer } from '../entities/units/Archer.js';
@@ -171,8 +172,7 @@ export class Game {
         this.resources.gold += bonusResources.gold || 0;
         this.resources.stone += bonusResources.stone || 0;
 
-        this.population = CONFIG.STARTING_POPULATION;
-        this.maxPopulation = CONFIG.STARTING_MAX_POPULATION;
+        this.populationManager = new PopulationManager();
 
         // Entidades del juego
         this.selectedEntities = [];
@@ -597,8 +597,8 @@ export class Game {
         this.gameStartTime = Date.now() - (state.gameTime || 0);
 
         if (state.resources) this.resources = { ...state.resources };
-        if (state.population !== undefined) this.population = state.population;
-        if (state.maxPopulation !== undefined) this.maxPopulation = state.maxPopulation;
+        if (state.population !== undefined) this.populationManager.loadState(state.population, undefined);
+        if (state.maxPopulation !== undefined) this.populationManager.loadState(undefined, state.maxPopulation);
 
         if (state.camera) {
             this.camera.x = state.camera.x;
@@ -2163,7 +2163,7 @@ export class Game {
         switch (this.buildMode) {
             case 'house':
                 building = new House(centerX, centerY, 'player');
-                this.maxPopulation += CONFIG.HOUSE_POPULATION_INCREASE;
+                this.populationManager.increaseMaxPopulation(CONFIG.HOUSE_POPULATION_INCREASE);
                 break;
             case 'barracks':
                 building = new Barracks(centerX, centerY, 'player');
@@ -2302,7 +2302,7 @@ export class Game {
             return;
         }
 
-        if (this.population + building.productionQueue.length >= this.maxPopulation) {
+        if (!this.populationManager.canAddPopulation(1, building.productionQueue.length)) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
             this.flashResource('population');
             return;
@@ -2349,7 +2349,7 @@ export class Game {
             return;
         }
 
-        if (this.population >= this.maxPopulation) {
+        if (!this.populationManager.canAddPopulation()) {
             this.showNotification('Límite de población alcanzado', 'error');
             this.flashResource('population');
             return;
@@ -2398,7 +2398,9 @@ export class Game {
 
             this._cacheEntityTerrain(unit); // OPTIMIZATION
             this.units.push(unit);
-            this.population++;
+
+            // Increment population synchronously to avoid frame-delay overpopulation
+            this.populationManager.addPopulation(1);
 
             if (soundManager) {
                 const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
@@ -2655,10 +2657,7 @@ export class Game {
                     this._updateBuildingCount(building.type, -1);
 
                     if (building.type === 'house') {
-                        this.maxPopulation -= CONFIG.HOUSE_POPULATION_INCREASE;
-                        if (this.maxPopulation < CONFIG.STARTING_MAX_POPULATION) {
-                            this.maxPopulation = CONFIG.STARTING_MAX_POPULATION;
-                        }
+                        this.populationManager.decreaseMaxPopulation(CONFIG.HOUSE_POPULATION_INCREASE);
                         this._forceUIUpdate = true;
                     }
                 }
@@ -2697,7 +2696,7 @@ export class Game {
         // OPTIMIZACIÓN: Análisis estático confirma que this.units contiene EXCLUSIVAMENTE unidades del jugador.
         // Los enemigos se gestionan en this.enemies.
         // Acceso directo a length es O(1), eliminando el loop O(N) redundante.
-        this.population = this.units.length;
+        this.populationManager.population = this.units.length;
 
         // Palette: Update Contextual Cursor
         this.updateCursorState();
@@ -2979,7 +2978,7 @@ export class Game {
             popLabel.className = 'text-medium'; // Use existing theme class
 
             const popValue = document.createElement('span');
-            popValue.textContent = `${Math.floor(this.population)}`;
+            popValue.textContent = `${Math.floor(this.populationManager.getPopulation())}`;
             popValue.className = 'text-light'; // Use existing theme class
             popValue.style.fontWeight = 'bold';
 
@@ -4479,13 +4478,13 @@ export class Game {
 
         // Actualizar población
         // BOLT OPTIMIZATION: Only write if changed
-        const currentPop = Math.floor(this.population);
+        const currentPop = Math.floor(this.populationManager.getPopulation());
         if (forceUpdate || this._lastRenderedPopulation !== currentPop) {
             if (this.uiElements.currentPopulation) this.uiElements.currentPopulation.textContent = currentPop;
             this._lastRenderedPopulation = currentPop;
         }
 
-        if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.maxPopulation;
+        if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.populationManager.getMaxPopulation();
 
         // Palette: Detailed Population Tooltip
         const popTooltip = document.getElementById('popTooltip');
@@ -5340,7 +5339,7 @@ export class Game {
         // --- LÓGICA DE GENERACIÓN DE BOTONES ---
         // (Movemos la lógica de botones aquí para calcular el hash antes de tocar el DOM)
 
-        const popFull = this.population >= this.maxPopulation;
+        const popFull = !this.populationManager.canAddPopulation();
 
         if (entity.type === 'villager') {
             buttons.push({

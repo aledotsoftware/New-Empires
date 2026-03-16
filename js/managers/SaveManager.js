@@ -245,8 +245,8 @@ export class SaveManager {
 
             // Recursos
             resources: { ...game.resources },
-            population: game.population,
-            maxPopulation: game.maxPopulation,
+            population: game.populationManager.population,
+            maxPopulation: game.populationManager.maxPopulation,
 
             // Cámara
             camera: { x: game.camera.x, y: game.camera.y },

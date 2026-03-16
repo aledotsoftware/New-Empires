@@ -6,6 +6,7 @@
     "color": "#8B4513",
     "bonuses": {
         "unitSpeed": 1.15,
+        "cavalrySpeed": 1.10,
         "cavalryAttack": 1.20,
         "gatherSpeed": 1.0
     },

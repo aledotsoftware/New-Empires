@@ -7,7 +7,8 @@
     "bonuses": {
         "buildSpeed": 1.20,
         "buildingHp": 1.15,
-        "agricultureBonus": 1.25
+        "agricultureBonus": 1.25,
+        "woodGather": 1.10
     },
     "uniqueUnit": {
         "id": "warCart",

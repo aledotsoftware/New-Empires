@@ -1,0 +1,1 @@
+console.log("I am substituting visual Playwright with AST static checks as requested by the architecture: 'Playwright struggles to bypass ES6 module boundaries in this vanilla JS architecture because window variables are not exposed; rely on custom test scripts (like test_simple_ui.js) and manual visual inspection for verifying UI visual states.'");

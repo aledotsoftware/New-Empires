@@ -240,7 +240,7 @@ export class Game {
         this.gridMap = new GridMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
 
         // SISTEMA DE TERRENOS
-        this.terrainMap = new TerrainMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE);
+        this.terrainMap = new TerrainMap(CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT, TILE_SIZE, this.mapConfig.seed);
 
         // DECORACIONES DE TERRENO
         this.terrainDecorManager = new TerrainDecorManager(this);

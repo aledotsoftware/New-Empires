@@ -161,7 +161,8 @@ export class Unit extends Entity {
             }
 
             // Si estamos ocupados, solo reaccionamos al enemigo que nos está atacando explícitamente.
-            if (this.type === 'villager' && isBusy && !isUnderAttackByThisEnemy) {
+            // Strategist: Las unidades militares en movimiento ignoran amenazas a menos que la amenaza les dispare directamente
+            if (isBusy && !isUnderAttackByThisEnemy) {
                 continue;
             }
 
@@ -354,7 +355,9 @@ export class Unit extends Entity {
         // Detección de amenazas: Si estamos siendo atacados por una entidad y no estamos ocupados atacando
         if (attacker && !this.attackTarget && attacker !== this) {
             // Si la unidad está ociosa, patrullando o recolectando, responde al ataque
-            if (this.canAttack) {
+            // Strategist: Las unidades NUNCA deben ignorar un ataque directo, incluso si están moviéndose,
+            // a menos que el jugador haya forzado una retirada explícita (this.explicitTarget).
+            if (this.canAttack && !this.explicitTarget) {
                 this.attackTarget = attacker;
             }
         }

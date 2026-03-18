@@ -233,6 +233,28 @@ export class SoundManager {
 
             oscillator.start(now);
             oscillator.stop(now + 2);
+        } else if (biomeName === 'Pantano Venenoso') {
+            // Insectos y ranas en el pantano
+            const cricketOsc = this.audioContext.createOscillator();
+            cricketOsc.type = 'square';
+            cricketOsc.frequency.setValueAtTime(800, now);
+            cricketOsc.frequency.linearRampToValueAtTime(820, now + 0.1);
+            cricketOsc.frequency.linearRampToValueAtTime(800, now + 0.2);
+
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1200, now);
+            filter.frequency.linearRampToValueAtTime(1500, now + 0.5);
+
+            cricketOsc.connect(filter);
+            filter.connect(gainNode);
+
+            gainNode.gain.setValueAtTime(0.005, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0.005, now + 1);
+
+            cricketOsc.start(now);
+            cricketOsc.stop(now + 1);
         }
     }
 

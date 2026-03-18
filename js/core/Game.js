@@ -2816,7 +2816,7 @@ export class Game {
                 );
 
                 if (target) {
-                    badgeIcon = 'assets/icons/swords.png';
+                    badgeIcon = 'assets/icons/espada.png';
                     cursorClass = 'cursor-attack';
                     showBadge = true;
                 }
@@ -2833,7 +2833,7 @@ export class Game {
                 );
 
                 if (target) {
-                    badgeIcon = 'assets/icons/workshop.png';
+                    badgeIcon = 'assets/icons/martillo.png';
                     cursorClass = 'cursor-build';
                     showBadge = true;
                 }
@@ -2853,9 +2853,9 @@ export class Game {
                     // Map resource type to icon
                     if (res.type === 'wood') { badgeIcon = 'assets/icons/wood.png'; cursorClass = 'cursor-chop'; }
                     else if (res.type === 'food') { badgeIcon = 'assets/icons/food.png'; cursorClass = 'cursor-farm'; }
-                    else if (res.type === 'gold') { badgeIcon = 'assets/icons/gold.png'; cursorClass = 'cursor-mine'; }
-                    else if (res.type === 'stone') { badgeIcon = 'assets/icons/stone.png'; cursorClass = 'cursor-mine'; }
-                    else { badgeIcon = 'assets/icons/gold.png'; cursorClass = 'cursor-mine'; }
+                    else if (res.type === 'gold') { badgeIcon = 'assets/icons/pico.png'; cursorClass = 'cursor-mine'; }
+                    else if (res.type === 'stone') { badgeIcon = 'assets/icons/pico.png'; cursorClass = 'cursor-mine'; }
+                    else { badgeIcon = 'assets/icons/pico.png'; cursorClass = 'cursor-mine'; }
 
                     showBadge = true;
                 }
@@ -2868,11 +2868,11 @@ export class Game {
         if (cursorClass && cursorImg) {
             this.cursorElement.style.display = 'block';
             const iconMap = {
-                'cursor-attack': 'assets/icons/swords.png',
-                'cursor-build': 'assets/icons/workshop.png',
+                'cursor-attack': 'assets/icons/espada.png',
+                'cursor-build': 'assets/icons/martillo.png',
                 'cursor-chop': 'assets/icons/wood.png',
                 'cursor-farm': 'assets/icons/food.png',
-                'cursor-mine': 'assets/icons/stone.png'
+                'cursor-mine': 'assets/icons/pico.png'
             };
             // Note: If badgeIcon was already explicitly set (like gold.png instead of stone.png), use it
             // if we are doing mining and badgeIcon has been specified.

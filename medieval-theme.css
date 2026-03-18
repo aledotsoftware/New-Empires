@@ -123,11 +123,11 @@ body,
 }
 
 body.cursor-attack {
-    cursor: url('assets/icons/swords.png'), crosshair;
+    cursor: url('assets/icons/espada.png'), crosshair;
 }
 
 body.cursor-build {
-    cursor: url('assets/icons/workshop.png'), crosshair;
+    cursor: url('assets/icons/martillo.png'), crosshair;
 }
 
 body.cursor-chop {
@@ -139,7 +139,7 @@ body.cursor-farm {
 }
 
 body.cursor-mine {
-    cursor: url('assets/icons/gold.png'), crosshair;
+    cursor: url('assets/icons/pico.png'), crosshair;
 }
 
 /* Eliminado .hidden duplicado aquí. Usando el del final del archivo */
@@ -323,6 +323,13 @@ body.theme-ottomans {
     --civ-theme-primary-dark: #1b5e20;
     --civ-theme-primary-light: #cddc39;
     --civ-theme-accent: rgba(46, 125, 50, 0.3);
+}
+
+body.theme-mayans {
+    --civ-theme-primary: #16a085;
+    --civ-theme-primary-dark: #0e6655;
+    --civ-theme-primary-light: #1abc9c;
+    --civ-theme-accent: rgba(22, 160, 133, 0.3);
 }
 
 /* Esquinas decorativas */
@@ -812,6 +819,11 @@ body.theme-ottomans {
    ========================================== */
 
 /* Efecto de cristal medieval para interfaces flotantes */
+@keyframes glassPulse {
+    0%, 100% { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05); }
+    50% { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 0 15px var(--civ-theme-accent); }
+}
+
 .medieval-glass {
     background: rgba(26, 22, 18, 0.7);
     backdrop-filter: blur(8px);
@@ -820,6 +832,7 @@ body.theme-ottomans {
     box-shadow:
         0 8px 32px 0 rgba(0, 0, 0, 0.5),
         inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    animation: glassPulse 4s infinite ease-in-out;
 }
 
 /* Panel Premium con temática de civilización */

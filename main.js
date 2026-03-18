@@ -33,12 +33,7 @@ import { FocusManager } from './js/utils/FocusManager.js';
 // Managers
 import { assetLoader } from './js/managers/AssetLoader.js';
 
-// Note: Los siguientes scripts se cargarán como globales por ahora:
-// - dataLoader.js (civilizationManager)
-// - technologies.js (TechManager, TECHNOLOGIES)
-// - mapGenerator.js (ProceduralMapGenerator)
-// - soundManager.js (soundManager)
-// - effects.js (efectos visuales)
+// Todos los scripts han sido migrados a ES6 modules.
 
 // ===== VARIABLES GLOBALES =====
 let game = null;
@@ -358,7 +353,7 @@ function togglePauseGame() {
 
 function toggleSound() {
     let newState = false;
-    if (typeof soundManager !== 'undefined') {
+    if (soundManager) {
         soundManager.setEnabled(!soundManager.enabled);
         newState = soundManager.enabled;
 
@@ -416,7 +411,7 @@ function adjustRange(id, direction) {
     input.dispatchEvent(new Event('input'));
 
     // Audio Feedback
-    if (typeof soundManager !== 'undefined') {
+    if (soundManager) {
         soundManager.play('click');
     }
 };
@@ -429,7 +424,7 @@ function updateSoundVolume(value) {
     const volume = parseInt(value);
 
     // 1. Update backend
-    if (typeof soundManager !== 'undefined') {
+    if (soundManager) {
         soundManager.setVolume(volume / 100);
     }
 
@@ -916,7 +911,7 @@ function renderTechTreeCommon(isInteractive) {
                         techItem.classList.add('shake');
 
                         // Sound feedback
-                        if (typeof soundManager !== 'undefined') {
+                        if (soundManager) {
                             soundManager.play('error');
                         }
 
@@ -1014,7 +1009,7 @@ function startGame(civId, mapConfig, loadedState = null) {
     }
 
     // Iniciar música y ambiente
-    if (typeof soundManager !== 'undefined') {
+    if (soundManager) {
         soundManager.startMusic();
         if (typeof soundManager.startAmbient === 'function') {
             const biome = mapConfig && mapConfig.biome ? mapConfig.biome : 'grassland';
@@ -1370,7 +1365,7 @@ function createSafeIconElement(iconPath, alt = '', size = '64px') {
  */
 function populateCivilizations() {
     const civGrid = document.getElementById('civGrid');
-    if (!civGrid || typeof dataLoader === 'undefined') {
+    if (!civGrid || !dataLoader) {
         debugLogger.warn('No se puede popular civilizaciones - civGrid o dataLoader no disponibles', 'ui');
         return;
     }
@@ -1713,7 +1708,7 @@ function copyMapSeed() {
         btn.style.borderColor = '#48bb78'; // Green
         btn.style.color = '#48bb78';
 
-        if (typeof soundManager !== 'undefined') {
+        if (soundManager) {
             soundManager.play('click');
         }
 
@@ -1955,7 +1950,7 @@ const initApp = async () => {
     });
 
     // Inicializar sonidos si soundManager está disponible
-    if (typeof soundManager !== 'undefined') {
+    if (soundManager) {
         debugLogger.info('Inicializando sistema de sonido...', 'sound');
         if (typeof soundManager.loadAll === 'function') {
             soundManager.loadAll();

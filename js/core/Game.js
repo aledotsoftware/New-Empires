@@ -11,6 +11,7 @@ import { FogOfWar } from '../map/FogOfWar.js';
 import { FocusManager } from '../utils/FocusManager.js';
 import { assetLoader } from '../managers/AssetLoader.js';
 import { GridMap } from '../map/GridMap.js';
+import { dataLoader } from '../managers/DataLoader.js';
 import { TerrainMap } from '../map/TerrainMap.js';
 import { TerrainDecorManager } from '../map/TerrainDecor.js';
 import { SpatialGrid } from '../managers/SpatialGrid.js';
@@ -2403,7 +2404,7 @@ export class Game {
 
         // Determinar clase base si es unidad única
         let baseType = unitType;
-        if (window.dataLoader) {
+        if (dataLoader && dataLoader.isLoaded()) {
             const unitsForCiv = dataLoader.getUnitsForCivilization(this.civilizationId);
             const unitData = unitsForCiv.find(u => u.id === unitType);
             if (unitData) {

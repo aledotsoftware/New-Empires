@@ -5,9 +5,9 @@ import { dataLoader } from "../managers/DataLoader.js";
 
 
 
-export var AGES = {};
-export var TECH_CATEGORIES = {};
-export var TECHNOLOGIES = {};
+export let AGES = {};
+export let TECH_CATEGORIES = {};
+export let TECHNOLOGIES = {};
 
 // Función para inicializar datos desde DataLoader
 export async function initializeTechData() {

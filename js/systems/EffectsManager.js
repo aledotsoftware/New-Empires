@@ -425,9 +425,10 @@ export class ParticleSystem {
         }
     }
 
-    createDebrisEffect(x, y) {
+    createDebrisEffect(x, y, size = 50) {
+        // Bard: Add dynamic dust with debris for a more satisfying crunch
         for (let i = 0; i < 8; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 50, y + (Math.random() - 0.5) * 50, {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: (Math.random() - 0.5) * 180,
                 vy: (Math.random() - 0.5) * 120 - 80,
                 life: Math.random() * 1.5 + 0.5,
@@ -436,6 +437,35 @@ export class ParticleSystem {
                 gravity: 200,
                 friction: 0.96,
                 shape: 'square'
+            }));
+        }
+        // Dust cloud accompanying debris
+        for (let i = 0; i < 5; i++) {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * (size * 0.6), y + (Math.random() - 0.5) * (size * 0.6), {
+                vx: (Math.random() - 0.5) * 40,
+                vy: (Math.random() - 0.5) * 40 - 20,
+                life: Math.random() * 2.0 + 1.0,
+                size: Math.random() * 15 + 10,
+                color: `rgba(180, 170, 150, ${Math.random() * 0.4 + 0.2})`,
+                gravity: -5,
+                friction: 0.92,
+                shape: 'circle',
+                fadeRate: 0.8
+            }));
+        }
+
+        // Bard: Polvo volando cuando cae un edificio
+        for (let i = 0; i < 15; i++) {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 1.5, y + size * 0.2, {
+                vx: (Math.random() - 0.5) * 120, // Explosión lateral
+                vy: -Math.random() * 30 - 10,
+                life: Math.random() * 2 + 1,
+                size: Math.random() * 15 + 8,
+                color: `rgba(180, 170, 150, ${Math.random() * 0.5 + 0.3})`, // Polvo marrón/gris claro
+                gravity: -5,
+                friction: 0.88,
+                shape: 'circle',
+                fadeRate: 1.2
             }));
         }
     }
@@ -560,6 +590,27 @@ export class ParticleSystem {
             'gold': '💰',
             'stone': '🪨'
         };
+
+        // Bard: Add specific micro-effects per resource
+        if (resourceType === 'gold') {
+            this.createGoldSparkle(x, y);
+        } else if (resourceType === 'stone') {
+            this.createDebrisEffect(x, y); // reuse debris for stone hit
+        } else if (resourceType === 'wood') {
+            // Little wood chips
+            for (let i = 0; i < 3; i++) {
+                this.particles.push(Particle.get(x + (Math.random() - 0.5) * 20, y, {
+                    vx: (Math.random() - 0.5) * 100,
+                    vy: (Math.random() - 0.5) * 50 - 50,
+                    life: Math.random() * 0.5 + 0.2,
+                    size: Math.random() * 4 + 2,
+                    color: '#8b5a2b',
+                    gravity: 150,
+                    friction: 0.96,
+                    shape: 'square'
+                }));
+            }
+        }
 
         for (let i = 0; i < 5; i++) {
             // BOLT OPTIMIZATION: Use Object Pool

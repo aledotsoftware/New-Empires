@@ -2739,7 +2739,8 @@ body:has(button:active, a:active, input:active, [role="button"]:active, .civ-opt
 }
 
 /* Transiciones para modales y menús */
-.start-screen, .modal-overlay, #buildMenu, #techTree, #settingsMenu, #selectionPanel, #actionsPanel {
+.start-screen, .modal-overlay, #buildMenu, #techTree, #settingsMenu, #selectionPanel, #actionsPanel,
+#gameScreen, #gameOverScreen, #settingsScreen, #techTreeScreen, #mapSizeScreen, #civSelectionScreen, #shortcutsScreen {
     transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
 }
 
@@ -2747,6 +2748,7 @@ body:has(button:active, a:active, input:active, [role="button"]:active, .civ-opt
 .hidden {
     opacity: 0 !important;
     visibility: hidden !important;
+    pointer-events: none !important;
     transform: translateY(10px) scale(0.98);
 }
 /* Al remover .hidden, vuelven a opacidad 1 suavemente */

@@ -121,7 +121,7 @@ export class Villager extends Unit {
                         if (game && game.particleSystem) {
                             game.particleSystem.createResourceEffect(this.currentResourceNode.x, this.currentResourceNode.y, this.currentResourceNode.type);
                         }
-                        if (typeof soundManager !== 'undefined' && soundManager) {
+                        if (soundManager) {
                             soundManager.playGather(this.currentResourceNode.type);
                         }
                         this.carryAmount += amount;

@@ -547,8 +547,18 @@ export class Game {
         // Crear mapa
         this.generateMap();
 
+        // Determine starting coordinates
+        let startX = 400;
+        let startY = 400;
+
+        if (this.proceduralPlayerStarts && this.proceduralPlayerStarts.length > 0) {
+            const start = this.proceduralPlayerStarts[0];
+            startX = start.x * TILE_SIZE;
+            startY = start.y * TILE_SIZE;
+        }
+
         // Crear Centro Urbano inicial (jugador)
-        const townCenter = new TownCenter(400, 400, 'player');
+        const townCenter = new TownCenter(startX, startY, 'player');
         this._cacheEntityTerrain(townCenter); // OPTIMIZATION
         this.buildings.push(townCenter);
         this.dropOffPoints.push(townCenter);
@@ -561,8 +571,8 @@ export class Game {
         // Crear aldeanos iniciales
         for (let i = 0; i < 3; i++) {
             const angle = (Math.PI * 2 / 3) * i;
-            const x = 400 + Math.cos(angle) * 100;
-            const y = 400 + Math.sin(angle) * 100;
+            const x = startX + Math.cos(angle) * 100;
+            const y = startY + Math.sin(angle) * 100;
             const villager = new Villager(x, y, 'player');
             civilizationManager.applyUnitBonuses(villager, this.civilizationId);
             this._cacheEntityTerrain(villager); // OPTIMIZATION
@@ -573,8 +583,8 @@ export class Game {
         this.spawnEnemies();
 
         // Centrar cámara en el Centro Urbano
-        this.camera.x = 400 - this.viewWidth / 2;
-        this.camera.y = 400 - this.viewHeight / 2;
+        this.camera.x = startX - this.viewWidth / 2;
+        this.camera.y = startY - this.viewHeight / 2;
 
         // Palette: Game Start Feedback
         if (soundManager) {
@@ -582,9 +592,9 @@ export class Game {
         }
 
         if (this.particleSystem) {
-            // Visual flair at the starting position (Town Center is at 400, 400)
-            this.particleSystem.createFloatingText(400, 350, "¡A JUGAR!", '#d4af37');
-            this.particleSystem.createExplosion(400, 400, '#d4af37', 20);
+            // Visual flair at the starting position
+            this.particleSystem.createFloatingText(startX, startY - 50, "¡A JUGAR!", '#d4af37');
+            this.particleSystem.createExplosion(startX, startY, '#d4af37', 20);
         }
     }
 
@@ -975,17 +985,27 @@ export class Game {
 
     spawnEnemies() {
         const rng = new SeededRandom(this.mapSeed ? this.mapSeed + 999 : Date.now());
-        // Spawn enemigos en el lado opuesto
+
+        let startX = CONFIG.CANVAS_WIDTH - 400;
+        let startY = CONFIG.CANVAS_HEIGHT - 400;
+
+        if (this.proceduralPlayerStarts && this.proceduralPlayerStarts.length > 1) {
+            const start = this.proceduralPlayerStarts[1];
+            startX = start.x * TILE_SIZE;
+            startY = start.y * TILE_SIZE;
+        }
+
+        // Spawn enemigos
         for (let i = 0; i < 5; i++) {
-            const x = CONFIG.CANVAS_WIDTH - 400 + rng.next() * 200 - 100;
-            const y = CONFIG.CANVAS_HEIGHT - 400 + rng.next() * 200 - 100;
+            const x = startX + rng.next() * 200 - 100;
+            const y = startY + rng.next() * 200 - 100;
             const enemy = new Warrior(x, y, 'enemy');
             this._cacheEntityTerrain(enemy); // OPTIMIZATION
             this.enemies.push(enemy);
         }
 
         // Enemy town center
-        const enemyTC = new TownCenter(CONFIG.CANVAS_WIDTH - 400, CONFIG.CANVAS_HEIGHT - 400, 'enemy');
+        const enemyTC = new TownCenter(startX, startY, 'enemy');
         this._cacheEntityTerrain(enemyTC); // OPTIMIZATION
         this.buildings.push(enemyTC);
         this.buildingGrid.add(enemyTC);

@@ -166,54 +166,62 @@ export class ProceduralMapGenerator {
     ensureResourceAccessibility() {
         if (this.playerStarts.length === 0 || this.resources.length === 0) return;
 
-        // Flood fill global desde el primer jugador para encontrar toda el área conectada
-        const start = this.playerStarts[0];
-        const visited = new Uint8Array(this.width * this.height);
-        const queue = new Int32Array(this.width * this.height * 2);
+        // Flood fill global desde cada jugador para encontrar las áreas conectadas
+        // Esto previene que recursos iniciales garantizados queden encerrados en otro lado
+        for (let j = 0; j < this.playerStarts.length; j++) {
+            const start = this.playerStarts[j];
+            const visited = new Uint8Array(this.width * this.height);
+            const queue = new Int32Array(this.width * this.height * 2);
 
-        let head = 0;
-        let tail = 0;
+            let head = 0;
+            let tail = 0;
 
-        // Push inicial
-        queue[tail++] = start.x;
-        queue[tail++] = start.y;
-        visited[start.y * this.width + start.x] = 1;
+            // Push inicial
+            queue[tail++] = start.x;
+            queue[tail++] = start.y;
+            visited[start.y * this.width + start.x] = 1;
 
-        while (head < tail) {
-            const cx = queue[head++];
-            const cy = queue[head++];
+            while (head < tail) {
+                const cx = queue[head++];
+                const cy = queue[head++];
 
-            // Check neighbors (4-way)
-            const neighbors = [
-                {x: cx+1, y: cy}, {x: cx-1, y: cy},
-                {x: cx, y: cy+1}, {x: cx, y: cy-1}
-            ];
+                // Check neighbors (4-way)
+                const neighbors = [
+                    {x: cx+1, y: cy}, {x: cx-1, y: cy},
+                    {x: cx, y: cy+1}, {x: cx, y: cy-1}
+                ];
 
-            for (let n of neighbors) {
-                if (n.x >= 0 && n.x < this.width && n.y >= 0 && n.y < this.height) {
-                    const idx = n.y * this.width + n.x;
-                    if (visited[idx] === 0) {
-                        const terrain = this.terrainTypes[n.y][n.x];
-                        if (terrain !== 'water' && terrain !== 'mountain') {
-                            visited[idx] = 1;
-                            queue[tail++] = n.x;
-                            queue[tail++] = n.y;
+                for (let n of neighbors) {
+                    if (n.x >= 0 && n.x < this.width && n.y >= 0 && n.y < this.height) {
+                        const idx = n.y * this.width + n.x;
+                        if (visited[idx] === 0) {
+                            const terrain = this.terrainTypes[n.y][n.x];
+                            if (terrain !== 'water' && terrain !== 'mountain') {
+                                visited[idx] = 1;
+                                queue[tail++] = n.x;
+                                queue[tail++] = n.y;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        // Ahora comprobamos cada recurso en O(1) mirando el array visited
-        for (let i = 0; i < this.resources.length; i++) {
-            const res = this.resources[i];
-            const idx = res.y * this.width + res.x;
+            // Comprobamos recursos asociados a este jugador o recursos neutrales en el primer pase
+            for (let i = 0; i < this.resources.length; i++) {
+                const res = this.resources[i];
 
-            if (visited[idx] === 0) {
-                // El recurso es inaccesible, hacemos un túnel hasta el inicio
-                // En una implementación más avanzada se conectaría al nodo visitado más cercano,
-                // pero carvePath hacia el inicio maestro es robusto y simple.
-                this.carvePath(start.x, start.y, res.x, res.y);
+                // Si el recurso es de este jugador, o si es el jugador 1 chequeando recursos neutrales
+                if (res.playerId === start.playerId || (j === 0 && !res.playerId)) {
+                    const idx = res.y * this.width + res.x;
+
+                    if (visited[idx] === 0) {
+                        // El recurso es inaccesible, hacemos un túnel hasta el inicio
+                        this.carvePath(start.x, start.y, res.x, res.y);
+
+                        // Una vez tallado el camino, marcar como visitado para siguientes chequeos (simplificación)
+                        visited[idx] = 1;
+                    }
+                }
             }
         }
     }
@@ -543,16 +551,16 @@ export class ProceduralMapGenerator {
             // Prevenir desierto tan cerca de zonas nevadas si la humedad es muy baja
             if (m < 0.3) return 'grassland';
             return 'tundra';
-        } else if (t < 0.6) {
-            // Templado (banda intermedia obligatoria)
+        } else if (t < 0.65) {
+            // Templado (banda intermedia obligatoria más amplia para evitar transiciones abruptas)
             if (m > 0.6) return 'forest';
-            // Prevenir desierto tan cerca de zonas frías (t < 0.4)
-            if (m < 0.15) return 'grassland';
+            // Prevenir desierto tan cerca de zonas frías
+            if (m < 0.2) return 'grassland';
             return 'grassland';
-        } else if (t < 0.75) {
+        } else if (t < 0.8) {
             // Templado/Cálido
             if (m > 0.6) return 'forest';
-            if (m < 0.15) return 'desert';
+            if (m < 0.2) return 'desert';
             return 'grassland';
         } else {
             // Muy cálido
@@ -560,7 +568,8 @@ export class ProceduralMapGenerator {
                 if (mainBiome === 'swamp') return 'swamp';
                 return 'forest'; // Selva/Jungla
             }
-            if (m < 0.3) return 'desert';
+            // Transición más gradual hacia el desierto asegurando niveles de humedad
+            if (m < 0.35) return 'desert';
             if (mainBiome === 'volcanic' && m < 0.6) return 'volcanic';
             return 'grassland'; // Sabana
         }
@@ -796,10 +805,11 @@ export class ProceduralMapGenerator {
     }
 
     placeStartingResources(start) {
+        // Aumentadas las cantidades mínimas garantizadas de madera y oro según los requisitos de sincronía de recursos
         const resourceConfig = [
-            { type: 'wood', count: 12, minDist: 8, maxDist: 14, amount: 800 },
+            { type: 'wood', count: 16, minDist: 8, maxDist: 14, amount: 1000 },
             { type: 'food', count: 8, minDist: 7, maxDist: 12, amount: 500 },
-            { type: 'gold', count: 6, minDist: 9, maxDist: 15, amount: 1200 },
+            { type: 'gold', count: 10, minDist: 9, maxDist: 15, amount: 1500 },
             { type: 'stone', count: 4, minDist: 10, maxDist: 18, amount: 800 }
         ];
 

@@ -56,7 +56,11 @@ export class TerrainDecorManager {
                             this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'dry_brush', variant: rng.int(0, 1) });
                         }
                     } else if (terrain === 'mountain' || terrain === 'hill' || terrain === 'volcanic') {
-                        this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'rock', variant: rng.int(0, 2) });
+                        if (rng.next() > 0.8) {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'crystal', variant: rng.int(0, 1) });
+                        } else {
+                            this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'rock', variant: rng.int(0, 2) });
+                        }
                     } else if (terrain === 'snow' || terrain === 'tundra') {
                         this.decorations.push({ x: x * TILE_SIZE, y: y * TILE_SIZE, type: 'snow_drift', variant: rng.int(0, 2) });
                     } else if (terrain === 'swamp') {
@@ -189,6 +193,22 @@ export class TerrainDecorManager {
                 // Fallen block
                 ctx.fillRect(screenX + TILE_SIZE / 6, screenY + TILE_SIZE / 1.5, TILE_SIZE / 2, TILE_SIZE / 6);
                 ctx.strokeRect(screenX + TILE_SIZE / 6, screenY + TILE_SIZE / 1.5, TILE_SIZE / 2, TILE_SIZE / 6);
+            } else if (decor.type === 'crystal') {
+                ctx.fillStyle = this.getColorForDecor(decor);
+                ctx.beginPath();
+                ctx.moveTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 5);
+                ctx.lineTo(screenX + TILE_SIZE / 3, screenY + TILE_SIZE / 2);
+                ctx.lineTo(screenX + TILE_SIZE / 2, screenY + (TILE_SIZE * 4) / 5);
+                ctx.lineTo(screenX + (TILE_SIZE * 2) / 3, screenY + TILE_SIZE / 2);
+                ctx.fill();
+
+                // Add a highlight
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.beginPath();
+                ctx.moveTo(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 5);
+                ctx.lineTo(screenX + TILE_SIZE / 2.5, screenY + TILE_SIZE / 2);
+                ctx.lineTo(screenX + TILE_SIZE / 2, screenY + (TILE_SIZE * 4) / 5);
+                ctx.fill();
             } else {
                 // Default simple arc
                 ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, TILE_SIZE / 4, 0, Math.PI * 2);
@@ -218,6 +238,7 @@ export class TerrainDecorManager {
             case 'fern': return decor.variant === 0 ? '#2e7d32' : '#1b5e20';
             case 'wildflowers': return decor.variant === 0 ? '#ff9800' : '#03a9f4';
             case 'ancient_ruins': return '#757575';
+            case 'crystal': return decor.variant === 0 ? '#8e24aa' : '#b39ddb';
             default: return '#000000';
         }
     }

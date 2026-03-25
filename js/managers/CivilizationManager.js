@@ -78,7 +78,9 @@ export class CivilizationManager {
                 unit.gatherMultiplier = bonuses.gatherSpeed;
             }
 
-            if (unit.type === 'warrior' || unit.type === 'spearman') {
+            const unitBaseClass = unit.baseType || unit.type;
+
+            if (unitBaseClass === 'warrior' || unitBaseClass === 'spearman') {
                 const infAttack = bonuses.infantryAttack || bonuses.infantryDamage || 1;
                 unit.attackDamage = Math.round(unit.attackDamage * infAttack);
 
@@ -87,7 +89,7 @@ export class CivilizationManager {
                 unit.hp = unit.maxHp;
             }
 
-            if (unit.type === 'cavalry' || unit.type === 'scout') {
+            if (unitBaseClass === 'cavalry' || unitBaseClass === 'scout') {
                 if (bonuses.cavalryAttack) {
                     unit.attackDamage = Math.round(unit.attackDamage * bonuses.cavalryAttack);
                 }

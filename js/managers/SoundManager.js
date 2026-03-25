@@ -173,22 +173,48 @@ export class SoundManager {
 
             oscillator.start(now);
             oscillator.stop(now + 2.0);
-        } else if (biomeName === 'Pastizal') {
-            // Viento muy suave y sutil
-            const oscillator = this.audioContext.createOscillator();
-            oscillator.connect(gainNode);
-            oscillator.type = 'sine';
+        } else if (biomeName === 'Pastizal' || biomeName === 'Pastizales') {
+            // Bard: Sonido de viento suave entre el pasto y pequeños grillos
+            const cricketOsc = this.audioContext.createOscillator();
+            const cricketGain = this.audioContext.createGain();
 
-            oscillator.frequency.setValueAtTime(200, now);
-            oscillator.frequency.linearRampToValueAtTime(150, now + 1);
+            cricketOsc.type = 'square';
+            cricketOsc.frequency.setValueAtTime(4500, now);
+            cricketOsc.frequency.linearRampToValueAtTime(4800, now + 0.1);
+            cricketOsc.frequency.linearRampToValueAtTime(4500, now + 0.2);
 
-            gainNode.gain.setValueAtTime(0.01, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 0.5);
-            gainNode.gain.linearRampToValueAtTime(0.01, now + 1);
+            cricketGain.gain.setValueAtTime(0, now);
+            cricketGain.gain.linearRampToValueAtTime(this.volume * 0.005, now + 0.05);
+            cricketGain.gain.linearRampToValueAtTime(0, now + 0.2);
 
-            oscillator.start(now);
-            oscillator.stop(now + 1);
-        } else if (biomeName === 'Montañas' || biomeName === 'Colinas') {
+            cricketOsc.connect(cricketGain);
+            cricketGain.connect(gainNode);
+
+            cricketOsc.start(now);
+            cricketOsc.stop(now + 0.2);
+
+            // Suave murmullo de viento
+            const bufferSize = this.audioContext.sampleRate * 2;
+            const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+            const grassWind = this.audioContext.createBufferSource();
+            grassWind.buffer = buffer;
+
+            const grassFilter = this.audioContext.createBiquadFilter();
+            grassFilter.type = 'lowpass';
+            grassFilter.frequency.setValueAtTime(800, now);
+
+            grassWind.connect(grassFilter);
+            grassFilter.connect(gainNode);
+
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 1);
+            gainNode.gain.linearRampToValueAtTime(0, now + 2);
+
+            grassWind.start(now);
+        } else if (biomeName === 'Montañas' || biomeName === 'Colinas' || biomeName === 'Montaña') {
             // Eco sutil / viento de altura
             const bufferSize = this.audioContext.sampleRate * 2; // 2 segundos
             const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);

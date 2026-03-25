@@ -2854,10 +2854,22 @@ export class Game {
                     // Map resource type to icon
                     if (res.type === 'wood') { badgeIcon = 'assets/icons/wood.png'; cursorClass = 'cursor-chop'; }
                     else if (res.type === 'food') { badgeIcon = 'assets/icons/food.png'; cursorClass = 'cursor-farm'; }
-                    else if (res.type === 'gold') { badgeIcon = 'assets/icons/pico.png'; cursorClass = 'cursor-mine'; }
-                    else if (res.type === 'stone') { badgeIcon = 'assets/icons/pico.png'; cursorClass = 'cursor-mine'; }
+                    else if (res.type === 'gold') { badgeIcon = 'assets/icons/gold.png'; cursorClass = 'cursor-mine'; }
+                    else if (res.type === 'stone') { badgeIcon = 'assets/icons/stone.png'; cursorClass = 'cursor-mine'; }
                     else { badgeIcon = 'assets/icons/pico.png'; cursorClass = 'cursor-mine'; }
 
+                    showBadge = true;
+                }
+            }
+
+            // Bard: Movement Cursor Logic (If hovering impassable terrain)
+            if (!showBadge && this.terrainMap) {
+                const targetCol = Math.floor(this.mouse.worldX / this.tileSize);
+                const targetRow = Math.floor(this.mouse.worldY / this.tileSize);
+                const terrain = this.terrainMap.getTerrainDataByGrid(targetCol, targetRow);
+
+                if (terrain && (terrain.name === 'Agua' || terrain.impassable)) {
+                    cursorClass = 'cursor-forbidden';
                     showBadge = true;
                 }
             }
@@ -2873,7 +2885,8 @@ export class Game {
                 'cursor-build': 'assets/icons/martillo.png',
                 'cursor-chop': 'assets/icons/wood.png',
                 'cursor-farm': 'assets/icons/food.png',
-                'cursor-mine': 'assets/icons/pico.png'
+                'cursor-mine': 'assets/icons/pico.png',
+                'cursor-forbidden': 'assets/icons/cancel.png'
             };
             // Note: If badgeIcon was already explicitly set (like gold.png instead of stone.png), use it
             // if we are doing mining and badgeIcon has been specified.

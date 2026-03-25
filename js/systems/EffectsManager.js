@@ -408,64 +408,64 @@ export class ParticleSystem {
     }
 
     createFireEffect(x, y) {
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 20; i++) {
             const angle = (Math.random() - 0.5) * Math.PI;
-            const speed = Math.random() * 60 + 20;
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 50, y + (Math.random() - 0.5) * 50, {
+            const speed = Math.random() * 75 + 25;
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 60, y + (Math.random() - 0.5) * 60, {
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 50, // Sube rápidamente
-                life: Math.random() * 1.2 + 0.5,
-                size: Math.random() * 12 + 6,
-                color: 'rgba(255, 100, 20, 0.9)', // Naranja fuego vibrante
-                gravity: -25,
-                friction: 0.90,
-                fadeRate: 1.5,
-                shape: 'circle'
+                vy: Math.sin(angle) * speed - 60, // Sube rápidamente
+                life: Math.random() * 1.5 + 0.6,
+                size: Math.random() * 15 + 8,
+                color: `rgba(255, ${Math.random() * 120 + 30}, 20, 0.95)`, // Naranja fuego vibrante dinámico
+                gravity: -30,
+                friction: 0.88,
+                fadeRate: 1.8,
+                shape: Math.random() > 0.5 ? 'circle' : 'square' // Variedad para fuego
             }));
         }
     }
 
-    createDebrisEffect(x, y, size = 50) {
+    createDebrisEffect(x, y, size = 60) {
         // Bard: Add dynamic dust with debris for a more satisfying crunch
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 12; i++) {
             this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
-                vx: (Math.random() - 0.5) * 180,
-                vy: (Math.random() - 0.5) * 120 - 80,
-                life: Math.random() * 1.5 + 0.5,
-                size: Math.random() * 8 + 4,
-                color: '#5c4a3d', // Madera/Piedra
-                gravity: 200,
-                friction: 0.96,
+                vx: (Math.random() - 0.5) * 220,
+                vy: (Math.random() - 0.5) * 160 - 100,
+                life: Math.random() * 1.8 + 0.7,
+                size: Math.random() * 10 + 5,
+                color: Math.random() > 0.5 ? '#8b7355' : '#4a3d30', // Madera/Piedra dinámico
+                gravity: 250,
+                friction: 0.95,
                 shape: 'square'
             }));
         }
         // Dust cloud accompanying debris
-        for (let i = 0; i < 5; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * (size * 0.6), y + (Math.random() - 0.5) * (size * 0.6), {
-                vx: (Math.random() - 0.5) * 40,
-                vy: (Math.random() - 0.5) * 40 - 20,
-                life: Math.random() * 2.0 + 1.0,
-                size: Math.random() * 15 + 10,
-                color: `rgba(180, 170, 150, ${Math.random() * 0.4 + 0.2})`,
-                gravity: -5,
-                friction: 0.92,
+        for (let i = 0; i < 10; i++) {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
+                vx: (Math.random() - 0.5) * 50,
+                vy: (Math.random() - 0.5) * 50,
+                life: Math.random() * 2.0 + 0.8,
+                size: Math.random() * 18 + 8,
+                color: `rgba(190, 180, 160, ${Math.random() * 0.6 + 0.4})`, // Polvo más denso
+                gravity: -8,
+                friction: 0.85,
                 shape: 'circle',
-                fadeRate: 0.8
+                fadeRate: 1.0
             }));
         }
 
         // Bard: Polvo volando cuando cae un edificio
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 20; i++) {
             this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 1.5, y + size * 0.2, {
-                vx: (Math.random() - 0.5) * 120, // Explosión lateral
-                vy: -Math.random() * 30 - 10,
-                life: Math.random() * 2 + 1,
-                size: Math.random() * 15 + 8,
-                color: `rgba(180, 170, 150, ${Math.random() * 0.5 + 0.3})`, // Polvo marrón/gris claro
-                gravity: -5,
-                friction: 0.88,
+                vx: (Math.random() - 0.5) * 140, // Explosión lateral
+                vy: -Math.random() * 40 - 15,
+                life: Math.random() * 2.5 + 1.2,
+                size: Math.random() * 18 + 10,
+                color: `rgba(170, 160, 140, ${Math.random() * 0.6 + 0.4})`, // Polvo marrón/gris claro
+                gravity: -6,
+                friction: 0.86,
                 shape: 'circle',
-                fadeRate: 1.2
+                fadeRate: 1.0
             }));
         }
     }
@@ -477,13 +477,13 @@ export class ParticleSystem {
             this.createSmokeEffect(x, y);
         }
 
-        if (severity > 0.4) {
+        if (severity > 0.3) {
             this.createFireEffect(x, y);
         }
 
         // Escombros cayendo a altos niveles de daño
-        if (severity > 0.7) {
-            this.createDebrisEffect(x, y);
+        if (severity > 0.6) {
+            this.createDebrisEffect(x, y, 60 * severity);
         }
     }
 

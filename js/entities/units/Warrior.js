@@ -20,9 +20,14 @@ export class Warrior extends Unit {
             score -= 3000; // Stronger penalty so they don't attack buildings if troops are around
         }
 
-        // Penalización HEAVY por distancia para evitar perseguir infinitamente a arqueros que kittean
-        // Si la distancia es muy grande, ignorarlo a menos que no haya otra opción
-        score -= distSq / 50;
+        // Penalización por distancia para evitar perseguir infinitamente a arqueros que kittean,
+        // pero reducimos la penalización si el enemigo es nuestro objetivo actual para darle "stickiness"
+        // y evitar que cambie de objetivo constantemente mientras persigue.
+        if (this.attackTarget === enemy) {
+            score -= distSq / 200; // Menor penalización si ya lo estamos persiguiendo
+        } else {
+            score -= distSq / 50; // Penalización normal para nuevos objetivos
+        }
 
         // If HP is low, avoid retreating for now, just fight to the death as warriors do,
         // or prioritize closer targets even more to avoid moving while dying

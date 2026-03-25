@@ -55,8 +55,8 @@ export class Archer extends Unit {
 
             // Verificamos si podemos movernos (no estamos estuneados, etc.)
             // En este motor, el Unit base maneja todo en update()
-            // Si está muy cerca y no es un objetivo de recolección/movimiento forzado:
-            if (distSq < minKiteDistSq && this.targetX === null) {
+            // Si está muy cerca y no es un objetivo de recolección/movimiento forzado, Y no es un edificio:
+            if (distSq < minKiteDistSq && this.targetX === null && !this.attackTarget.isBuilding) {
                 isKiting = true;
 
                 // Calcular vector de huida

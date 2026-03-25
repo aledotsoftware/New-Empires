@@ -383,7 +383,8 @@ export class Villager extends Unit {
                 isValid = true;
             } else if (this.carryType === 'wood' && b.type === 'storageWood') {
                 isValid = true;
-            } else if (this.carryType !== 'wood' && b.type === 'storage') {
+            } else if (b.type === 'storage') {
+                // BUG FIX: El depósito general ahora acepta TODOS los recursos, no solo los que no son madera.
                 isValid = true;
             }
 

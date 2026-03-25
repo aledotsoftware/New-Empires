@@ -171,12 +171,12 @@ export class Unit extends Entity {
 
             // Prioridad absoluta a quien nos ataca
             if (isUnderAttackByThisEnemy) {
-                score += 5000;
+                score += 10000; // Aumento masivo para asegurar reacción inmediata y persistente ante atacantes directos
             }
 
             // Target Stickiness: Evitar cambiar de objetivo constantemente si ya estamos peleando
             if (this.attackTarget === enemy) {
-                score += 1000;
+                score += 2000;
             }
 
             const dx = this.x - enemy.x;

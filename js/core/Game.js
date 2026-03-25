@@ -5385,7 +5385,7 @@ export class Game {
         }
     }
 
-    updateActionsPanel() {
+    updateActionsPanel(shouldRenderEmpty) {
         // Usar el nuevo ID commandPanel
         // OPTIMIZACIÓN: Usar elemento cacheado
         const grid = this.uiElements.commandPanel || document.getElementById('commandPanel');
@@ -5451,7 +5451,7 @@ export class Game {
         };
 
         // Si hay que renderizar vacío, comprobamos si ya estaba vacío
-        if (typeof shouldRenderEmpty !== 'undefined' && shouldRenderEmpty) {
+        if (shouldRenderEmpty) {
             if (this.lastActionsStateKey === 'empty') return;
 
             // Renderizar vacío y salir

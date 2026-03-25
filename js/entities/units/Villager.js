@@ -119,7 +119,15 @@ export class Villager extends Unit {
 
                         this.currentResourceNode.amount -= amount;
                         if (game && game.particleSystem) {
-                            game.particleSystem.createResourceEffect(this.currentResourceNode.x, this.currentResourceNode.y, this.currentResourceNode.type);
+                            if (this.currentResourceNode.type === 'gold' && typeof game.particleSystem.createGoldSparkle === 'function') {
+                                game.particleSystem.createGoldSparkle(this.currentResourceNode.x, this.currentResourceNode.y);
+                            } else if (this.currentResourceNode.type === 'wood' && typeof game.particleSystem.createWoodChopEffect === 'function') {
+                                game.particleSystem.createWoodChopEffect(this.currentResourceNode.x, this.currentResourceNode.y);
+                            } else if (this.currentResourceNode.type === 'stone' && typeof game.particleSystem.createStoneMineEffect === 'function') {
+                                game.particleSystem.createStoneMineEffect(this.currentResourceNode.x, this.currentResourceNode.y);
+                            } else if (this.currentResourceNode.type === 'food' && typeof game.particleSystem.createFoodGatherEffect === 'function') {
+                                game.particleSystem.createFoodGatherEffect(this.currentResourceNode.x, this.currentResourceNode.y);
+                            }
                         }
                         if (soundManager) {
                             soundManager.playGather(this.currentResourceNode.type);

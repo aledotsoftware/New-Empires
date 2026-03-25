@@ -255,6 +255,31 @@ export class ParticleSystem {
                 fadeRate: 1.2
             }));
         }
+        for (let i = 0; i < 3; i++) {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 20, y, {
+                vx: (Math.random() - 0.5) * 100,
+                vy: (Math.random() - 0.5) * 50 - 50,
+                life: Math.random() * 0.5 + 0.2,
+                size: Math.random() * 4 + 2,
+                color: '#8b5a2b',
+                gravity: 150,
+                friction: 0.96,
+                shape: 'square'
+            }));
+        }
+
+        for (let i = 0; i < 5; i++) {
+            this.particles.push(Particle.get(x, y, {
+                vx: (Math.random() - 0.5) * 50,
+                vy: -Math.random() * 100 - 50,
+                life: Math.random() * 0.6 + 0.4,
+                size: 16,
+                emoji: '🌲',
+                gravity: -20,
+                friction: 0.95,
+                fadeRate: 1.5
+            }));
+        }
     }
 
     // Efecto de picar piedra (Polvo gris y chispas blancas)
@@ -272,6 +297,18 @@ export class ParticleSystem {
                 gravity: isDust ? -5 : 30, // El polvo sube, la chispa cae
                 friction: 0.92,
                 shape: isDust ? 'circle' : 'square',
+                fadeRate: 1.5
+            }));
+        }
+        for (let i = 0; i < 5; i++) {
+            this.particles.push(Particle.get(x, y, {
+                vx: (Math.random() - 0.5) * 50,
+                vy: -Math.random() * 100 - 50,
+                life: Math.random() * 0.6 + 0.4,
+                size: 16,
+                emoji: '🪨',
+                gravity: -20,
+                friction: 0.95,
                 fadeRate: 1.5
             }));
         }
@@ -468,6 +505,18 @@ export class ParticleSystem {
                 fadeRate: 1.0
             }));
         }
+        for (let i = 0; i < 5; i++) {
+            this.particles.push(Particle.get(x, y, {
+                vx: (Math.random() - 0.5) * 50,
+                vy: -Math.random() * 100 - 50,
+                life: Math.random() * 0.6 + 0.4,
+                size: 16,
+                emoji: '🌾',
+                gravity: -20,
+                friction: 0.95,
+                fadeRate: 1.5
+            }));
+        }
     }
 
     // Efecto de daño en edificios refactorizado para usar métodos semánticos
@@ -543,6 +592,18 @@ export class ParticleSystem {
                 fadeRate: 1.5
             }));
         }
+        for (let i = 0; i < 5; i++) {
+            this.particles.push(Particle.get(x, y, {
+                vx: (Math.random() - 0.5) * 50,
+                vy: -Math.random() * 100 - 50,
+                life: Math.random() * 0.6 + 0.4,
+                size: 16,
+                emoji: '💰',
+                gravity: -20,
+                friction: 0.95,
+                fadeRate: 1.5
+            }));
+        }
     }
 
     // Efecto de sangre/impacto
@@ -578,51 +639,6 @@ export class ParticleSystem {
                 gravity: 30,
                 friction: 0.97,
                 fadeRate: 0.7
-            }));
-        }
-    }
-
-    // Efecto de recolección de recursos
-    createResourceEffect(x, y, resourceType) {
-        const emojis = {
-            'wood': '🌲',
-            'food': '🌾',
-            'gold': '💰',
-            'stone': '🪨'
-        };
-
-        // Bard: Add specific micro-effects per resource
-        if (resourceType === 'gold') {
-            this.createGoldSparkle(x, y);
-        } else if (resourceType === 'stone') {
-            this.createDebrisEffect(x, y); // reuse debris for stone hit
-        } else if (resourceType === 'wood') {
-            // Little wood chips
-            for (let i = 0; i < 3; i++) {
-                this.particles.push(Particle.get(x + (Math.random() - 0.5) * 20, y, {
-                    vx: (Math.random() - 0.5) * 100,
-                    vy: (Math.random() - 0.5) * 50 - 50,
-                    life: Math.random() * 0.5 + 0.2,
-                    size: Math.random() * 4 + 2,
-                    color: '#8b5a2b',
-                    gravity: 150,
-                    friction: 0.96,
-                    shape: 'square'
-                }));
-            }
-        }
-
-        for (let i = 0; i < 5; i++) {
-            // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
-                vx: (Math.random() - 0.5) * 50,
-                vy: -Math.random() * 100 - 50,
-                life: Math.random() * 0.6 + 0.4,
-                size: 16,
-                emoji: emojis[resourceType] || '✨',
-                gravity: -20,
-                friction: 0.95,
-                fadeRate: 1.5
             }));
         }
     }

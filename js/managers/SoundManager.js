@@ -287,7 +287,9 @@ export class SoundManager {
     // --- Sonidos Sintetizados (Acciones Rápidas) ---
     playAttack() {
         if (!this.enabled) return;
-        this.playTone(150, 0.08, 'sawtooth', 0.2);
+        // Bard: Variación de tono (+/- 5%) para evitar fatiga auditiva
+        const freq = 150 + (Math.random() * 15 - 7.5);
+        this.playTone(freq, 0.08, 'sawtooth', 0.2);
     }
 
     playArrow() {
@@ -325,7 +327,9 @@ export class SoundManager {
 
     playHit() {
         if (!this.enabled) return;
-        this.playTone(100, 0.06, 'triangle', 0.15);
+        // Bard: Variación de tono (+/- 5%)
+        const freq = 100 + (Math.random() * 10 - 5);
+        this.playTone(freq, 0.06, 'triangle', 0.15);
     }
 
     playExplosion() {
@@ -353,26 +357,27 @@ export class SoundManager {
     playGather(resourceType) {
         if (!this.enabled) return;
 
+        // Bard: Variación de tono dinámico para cada recurso (+/- 5 a 10%)
         switch (resourceType) {
             case 'wood':
                 // Chop sound (thud)
-                this.playTone(150, 0.08, 'square', 0.1);
+                this.playTone(150 + (Math.random() * 10 - 5), 0.08, 'square', 0.1);
                 break;
             case 'stone':
                 // Clink sound (sharp strike)
-                this.playTone(400, 0.06, 'triangle', 0.08);
+                this.playTone(400 + (Math.random() * 30 - 15), 0.06, 'triangle', 0.08);
                 break;
             case 'gold':
                 // Light clink/sparkle (high pitch)
-                this.playTone(800, 0.05, 'sine', 0.05);
+                this.playTone(800 + (Math.random() * 60 - 30), 0.05, 'sine', 0.05);
                 break;
             case 'food':
                 // Soft gathering sound (rustling/soft pluck)
-                this.playTone(200, 0.08, 'sine', 0.06);
+                this.playTone(200 + (Math.random() * 20 - 10), 0.08, 'sine', 0.06);
                 break;
             default:
                 // Generic gathering sound
-                this.playTone(600, 0.05, 'sine', 0.08);
+                this.playTone(600 + (Math.random() * 40 - 20), 0.05, 'sine', 0.08);
                 break;
         }
     }

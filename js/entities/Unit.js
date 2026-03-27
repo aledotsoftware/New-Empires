@@ -448,7 +448,8 @@ export class Unit extends Entity {
 
                 // Projectile Trail for ranged units
                 if (this.type === 'archer') {
-                    game.particleSystem.createProjectileTrail(this.x, this.y, target.x, target.y, '#ffffff');
+                    // Bard: Pass a slightly yellow/orange color to simulate a wooden arrow or flaming tip
+                    game.particleSystem.createProjectileTrail(this.x, this.y, target.x, target.y, 'rgba(255, 230, 180, 0.9)');
                 }
             }
         }

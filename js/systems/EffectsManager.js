@@ -531,8 +531,14 @@ export class ParticleSystem {
         }
 
         // Escombros cayendo a altos niveles de daño
-        if (severity > 0.6) {
-            this.createDebrisEffect(x, y, 60 * severity);
+        if (severity > 0.5) {
+            // Bard: Añadir más espectacularidad a la destrucción
+            this.createDebrisEffect(x, y, 70 * severity);
+
+            // Más humo acompañando a los escombros para mayor impacto
+            if (Math.random() > 0.5) {
+                this.createSmokeEffect(x, y);
+            }
         }
     }
 

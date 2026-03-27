@@ -161,7 +161,7 @@ export class Entity {
 
     getTeamColor() {
         // game is global for now
-        if (this.team === 'player' && game && game.civilizationId) {
+        if (this.team === 'player' && typeof game !== 'undefined' && game && game.civilizationId) {
             return civilizationManager.getTeamColor(game.civilizationId, this.team);
         }
 

@@ -2748,7 +2748,7 @@ export class Game {
             const completed = building.update(deltaTime, this);
 
             // Procesar spawn si la cola de producción terminó (jugador e IA)
-            if (completed && !building.isUnderConstruction) {
+            if (completed && completed.unitType && !building.isUnderConstruction) {
                 this._spawnUnit(completed.unitType, building);
             }
         }

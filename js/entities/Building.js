@@ -32,5 +32,6 @@ export class Building extends Entity {
                 }
             }
         }
+        return null;
     }
 }

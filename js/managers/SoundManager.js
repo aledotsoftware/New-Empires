@@ -290,6 +290,39 @@ export class SoundManager {
         this.playTone(150, 0.08, 'sawtooth', 0.2);
     }
 
+    playArrow() {
+        if (!this.enabled || !this.audioContext) return;
+        const now = this.audioContext.currentTime;
+
+        // Use a short white noise burst with bandpass filter to simulate an arrow swish
+        const bufferSize = this.audioContext.sampleRate * 0.15; // 150ms
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noiseSource = this.audioContext.createBufferSource();
+        noiseSource.buffer = buffer;
+
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1500, now);
+        filter.frequency.exponentialRampToValueAtTime(3000, now + 0.1);
+        filter.Q.value = 1.0;
+
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(this.volume * 0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+        noiseSource.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        noiseSource.start(now);
+    }
+
     playHit() {
         if (!this.enabled) return;
         this.playTone(100, 0.06, 'triangle', 0.15);

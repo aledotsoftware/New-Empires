@@ -422,9 +422,15 @@ export class Unit extends Entity {
 
             target.takeDamage(damage, this);
 
-            soundManager.playAttack();
-            // Play hit sound with slight delay
-            setTimeout(() => soundManager.playHit(), 100);
+            if (this.type === 'archer') {
+                if (soundManager.playArrow) soundManager.playArrow();
+            } else {
+                soundManager.playAttack();
+            }
+
+            // Play hit sound with slight delay based on range vs melee
+            const hitDelay = this.type === 'archer' ? 300 : 100;
+            setTimeout(() => soundManager.playHit(), hitDelay);
 
             // Palette: Notify if player is under attack
             if (target.team === 'player' && game && game.notifyUnderAttack) {

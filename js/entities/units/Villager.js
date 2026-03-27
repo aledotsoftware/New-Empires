@@ -261,6 +261,7 @@ export class Villager extends Unit {
             // Using a safe fallback since game is not passed to render
             let time = this._gameRenderTime || Date.now();
             const offsetY = Math.sin(time / 200) * 3; // +/- 3px
+            const pulseAlpha = Math.max(0, Math.sin(time / 150)); // Pulsation 0 to 1
 
             // Position above head (adjust if carrying resource)
             let iconY = screenY - this.size - 25 + offsetY;
@@ -270,20 +271,26 @@ export class Villager extends Unit {
                 iconY -= 18;
             }
 
-            const iconSize = 16;
+            const iconSize = 20; // Increased size
 
-            // Background
-            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            // Glowing Background (Warning effect)
+            ctx.shadowColor = `rgba(255, 165, 0, ${0.4 + pulseAlpha * 0.6})`; // Golden orange glow
+            ctx.shadowBlur = 8 + pulseAlpha * 12; // Dynamic glow
+
+            ctx.fillStyle = `rgba(30, 0, 0, 0.8)`; // Dark background to contrast the glow
             ctx.beginPath();
-            ctx.arc(screenX, iconY + iconSize / 2, iconSize / 2 + 2, 0, Math.PI * 2);
+            ctx.arc(screenX, iconY + iconSize / 2, iconSize / 2 + 3, 0, Math.PI * 2);
             ctx.fill();
 
+            // Reset shadow before drawing text
+            ctx.shadowBlur = 0;
+
             // Icon
-            ctx.font = '12px Arial';
+            ctx.font = '16px Arial'; // Increased font size
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = '#ffffff';
-            ctx.fillText('💤', screenX, iconY + iconSize / 2 + 1);
+            ctx.fillText('💤', screenX, iconY + iconSize / 2 + 2);
 
             ctx.restore(); // Restore context
         }

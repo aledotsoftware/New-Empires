@@ -161,7 +161,7 @@ function showSettings() {
     screen.classList.remove('hidden');
 
     // Palette: Show quit and restart buttons only if game is active
-    const isGameActive = typeof game !== 'undefined' && game && !game.isGameOver;
+    const isGameActive = game && !game.isGameOver;
 
     const quitBtn = document.getElementById('quitGameBtn');
     if (quitBtn) {
@@ -436,7 +436,7 @@ function updateSoundVolume(value) {
     const icon = document.getElementById('volumeIcon');
     if (icon) {
         // Check if sound is globally disabled first
-        const isEnabled = typeof soundManager !== 'undefined' ? soundManager.enabled : true;
+        const isEnabled = soundManager ? soundManager.enabled : true;
 
         if (!isEnabled || volume === 0) {
             icon.textContent = '🔇';
@@ -559,7 +559,7 @@ function saveGame() {
         return;
     }
 
-    if (typeof saveManager !== 'undefined') {
+    if (saveManager) {
         const success = saveManager.save(game);
         if (success) {
             updateSaveStatus('✅ Partida guardada correctamente', 'success');
@@ -578,7 +578,7 @@ function saveGame() {
  * Carga la última partida guardada
  */
 function loadGame() {
-    if (typeof saveManager === 'undefined') {
+    if (!saveManager) {
         updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
         return;
     }
@@ -609,7 +609,7 @@ function exportGameToFile() {
         return;
     }
 
-    if (typeof saveManager !== 'undefined') {
+    if (saveManager) {
         saveManager.exportToFile(game);
         updateSaveStatus('📤 Archivo exportado', 'success');
     } else {
@@ -764,13 +764,13 @@ function createTechItemElement(tech, status, isInteractive) {
         let total = 1; // Avoid divide by zero
 
         // Palette: Calculate real-time progress
-        if (typeof game !== 'undefined' && game && game.techManager && game.techManager.researchQueue) {
+        if (game && game.techManager && game.techManager.researchQueue) {
             const item = game.techManager.researchQueue.find(i => i.techId === tech.id);
             if (item) {
                 remaining = item.timer;
                 if (typeof tech.researchTime === 'number') {
                     total = tech.researchTime;
-                } else if (typeof TECHNOLOGIES !== 'undefined' && TECHNOLOGIES[tech.id]) {
+                } else if (TECHNOLOGIES && TECHNOLOGIES[tech.id]) {
                     total = TECHNOLOGIES[tech.id].researchTime;
                 }
                 percent = Math.max(0, Math.min(100, (1 - remaining / total) * 100));
@@ -813,7 +813,7 @@ function renderTechTreeCommon(isInteractive) {
 
     // Convert to array if it's an object
     let techArray = [];
-    if (typeof TECHNOLOGIES !== 'undefined') {
+    if (TECHNOLOGIES) {
         techArray = Array.isArray(TECHNOLOGIES) ? TECHNOLOGIES : Object.values(TECHNOLOGIES);
     }
 
@@ -1011,7 +1011,7 @@ function startGame(civId, mapConfig, loadedState = null) {
     // Iniciar música y ambiente
     if (soundManager) {
         soundManager.startMusic();
-        if (typeof soundManager.startAmbient === 'function') {
+        if (soundManager.startAmbient) {
             const biome = mapConfig && mapConfig.biome ? mapConfig.biome : 'grassland';
             soundManager.startAmbient(biome);
         }
@@ -1037,7 +1037,7 @@ function startGame(civId, mapConfig, loadedState = null) {
     // Forzar un resize inmediato por si el render inicial se hizo antes de que
     // el layout estuviera listo en algunos navegadores
     try {
-        if (typeof game.resizeCanvas === 'function') {
+        if (game.resizeCanvas) {
             // Ejecutar en el siguiente tick para asegurar que estilos se apliquen
             setTimeout(() => game.resizeCanvas(), 0);
         }
@@ -1134,7 +1134,7 @@ function initModalBackdropHandlers() {
                 // Solo cerrar si se clickea el fondo (overlay), no el contenido
                 if (e.target === modal) {
                     debugLogger.info(`Cerrando modal ${id} por click en fondo`, 'ui');
-                    if (typeof closeAction === 'function') {
+                    if (closeAction) {
                         closeAction();
                     }
                 }
@@ -1901,7 +1901,7 @@ const initApp = async () => {
             // Palette: Restore focus to Map Size options
             // Try to focus the selected option, or fallback to container
             let targetFocus = null;
-            if (typeof selectedMapSize !== 'undefined') {
+            if (selectedMapSize !== undefined) {
                 targetFocus = document.querySelector(`.map-size-option[data-size="${selectedMapSize}"]`);
             }
             if (!targetFocus) {
@@ -1952,7 +1952,7 @@ const initApp = async () => {
     // Inicializar sonidos si soundManager está disponible
     if (soundManager) {
         debugLogger.info('Inicializando sistema de sonido...', 'sound');
-        if (typeof soundManager.loadAll === 'function') {
+        if (soundManager.loadAll) {
             soundManager.loadAll();
         }
     }

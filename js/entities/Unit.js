@@ -449,7 +449,7 @@ export class Unit extends Entity {
                     game.particleSystem.createBloodSplatter(target.x, target.y, 5);
                 } else if (target.isBuilding) {
                     const severity = 1 - (target.hp / target.maxHp);
-                    game.particleSystem.createBuildingDamageEffect(target.x, target.y, severity);
+                    game.particleSystem.createBuildingDamageEffect(target.x, target.y, severity, target.size);
                 }
 
                 // Projectile Trail for ranged units

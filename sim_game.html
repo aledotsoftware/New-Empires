@@ -1,49 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<script type="module">
-import { Game } from './js/core/Game.js';
-import { Building } from './js/entities/Building.js';
-
-window.onload = function() {
-    setTimeout(() => {
-        try {
-            const canvas = document.createElement('canvas');
-            canvas.id = 'gameCanvas';
-            document.body.appendChild(canvas);
-
-            const minimap = document.createElement('canvas');
-            minimap.id = 'minimapCanvas';
-            document.body.appendChild(minimap);
-
-            const uiLayer = document.createElement('div');
-            uiLayer.id = 'uiLayer';
-            document.body.appendChild(uiLayer);
-
-            const game = new Game('romans', {
-                size: 50,
-                baseRadius: 10,
-                tileSize: 32,
-                seed: '123'
-            });
-
-            // Let's create a building and simulate damage
-            const b = new Building(100, 100, 'house', 'player');
-            game.buildings.push(b);
-            b.hp = 10; // low HP
-
-            // update it
-            b.update(1/60);
-
-            console.log("Building update completed without crash. particleSystem particles:", game.particleSystem ? game.particleSystem.particles.length : 0);
-            document.title = "SUCCESS";
-        } catch(e) {
-            console.error(e);
-            document.title = "ERROR: " + e.message;
-        }
-    }, 1000);
-};
-</script>
+    <meta charset="UTF-8">
+    <title>New Empires Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
 </head>
-<body></body>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="selectionContent" style="display:none;"></div>
+    <div id="commandPanel" style="display:none;"></div>
+    <div id="notifications" style="display:none;"></div>
+    <div id="buildMenu" style="display:none;"></div>
+    <div id="pauseButton" style="display:none;"></div>
+    <div id="pauseIcon" style="display:none;"></div>
+    <script type="module">
+        import { Game } from './js/core/Game.js';
+
+        window.startSim = function() {
+            // Mock out particle system and sound manager
+            window.game = new Game('romans');
+
+            // Spawn a building and set it to low hp
+            const building = game.buildings[0];
+            building.hp = 10;
+            building.maxHp = 1000;
+            building.isUnderConstruction = false;
+
+            // Run update loop a few times to trigger damage effects
+            for(let i = 0; i < 60; i++) {
+                game.update(0.016);
+            }
+
+            // Mark dead and run update to trigger collapse
+            building.hp = 0;
+            building.isDead = true;
+
+            game.update(0.016);
+
+            game.render();
+            console.log("Simulation complete, particle system called:", game.particleSystem ? "yes" : "no");
+        };
+    </script>
+</body>
 </html>

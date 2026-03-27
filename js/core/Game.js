@@ -2711,6 +2711,7 @@ export class Game {
                 if (!building._collapseProcessed) {
                     if (this.particleSystem && typeof this.particleSystem.createBuildingCollapseEffect === 'function') {
                         // El tamaño del efecto se basa en el tamaño del edificio
+                        // Use building.size which represents radius, multiplying by 2 for full diameter.
                         this.particleSystem.createBuildingCollapseEffect(building.x, building.y, building.size * 2);
                     }
                     if (soundManager && typeof soundManager.playExplosion === 'function') {

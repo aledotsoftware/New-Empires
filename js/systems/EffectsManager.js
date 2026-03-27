@@ -520,7 +520,7 @@ export class ParticleSystem {
     }
 
     // Efecto de daño en edificios refactorizado para usar métodos semánticos
-    createBuildingDamageEffect(x, y, severity) {
+    createBuildingDamageEffect(x, y, severity, size = 60) {
         // severity: 0 a 1 (0 es apenas dañado, 1 es destruido)
         if (severity > 0.05) {
             this.createSmokeEffect(x, y);
@@ -533,7 +533,7 @@ export class ParticleSystem {
         // Escombros cayendo a altos niveles de daño
         if (severity > 0.5) {
             // Bard: Añadir más espectacularidad a la destrucción
-            this.createDebrisEffect(x, y, 70 * severity);
+            this.createDebrisEffect(x, y, size * severity);
 
             // Más humo acompañando a los escombros para mayor impacto
             if (Math.random() > 0.5) {

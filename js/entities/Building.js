@@ -28,7 +28,7 @@ export class Building extends Entity {
                 this.damageEffectTimer = Math.random() + 0.5;
                 if (game && game.particleSystem) {
                     const severity = 1 - (this.hp / this.maxHp);
-                    game.particleSystem.createBuildingDamageEffect(this.x, this.y, severity);
+                    game.particleSystem.createBuildingDamageEffect(this.x, this.y, severity, this.size);
                 }
             }
         }

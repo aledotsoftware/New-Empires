@@ -67,6 +67,42 @@ export class SoundManager {
         const gainNode = this.audioContext.createGain();
         gainNode.connect(this.audioContext.destination);
 
+        // Bard: Integrate Weather Sounds over Ambient
+        // En Bosque/Agua hay lluvia (drawWeather asume lluvia)
+        if (biomeName === 'Bosque' || biomeName === 'Agua') {
+            // Lluvia persistente (Ruido blanco + filtro lowpass para amortiguar)
+            const bufferSize = this.audioContext.sampleRate * 2;
+            const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+            const rainSrc = this.audioContext.createBufferSource();
+            rainSrc.buffer = buffer;
+            const rainFilter = this.audioContext.createBiquadFilter();
+            rainFilter.type = 'lowpass';
+            rainFilter.frequency.setValueAtTime(400, now);
+
+            // Añadir un poco de modulación para simular gotas
+            const modOsc = this.audioContext.createOscillator();
+            modOsc.type = 'sine';
+            modOsc.frequency.value = 2; // 2 Hz modulación
+            const modGain = this.audioContext.createGain();
+            modGain.gain.value = 100;
+            modOsc.connect(modGain);
+            modGain.connect(rainFilter.frequency);
+
+            rainSrc.connect(rainFilter);
+            rainFilter.connect(gainNode);
+
+            gainNode.gain.setValueAtTime(0.01, now);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.015, now + 0.5);
+            gainNode.gain.linearRampToValueAtTime(0.01, now + 2);
+
+            rainSrc.start(now);
+            modOsc.start(now);
+            modOsc.stop(now + 2);
+        }
+
         if (biomeName === 'Bosque') {
             // Sintetizar cantos de pájaros y brisa entre las hojas (suavizado y orgánico)
             const birdGain = this.audioContext.createGain();
@@ -240,25 +276,30 @@ export class SoundManager {
 
             noiseSource.start(now);
         } else if (biomeName === 'Nieve' || biomeName === 'Tundra') {
-            // Viento helado
-            const oscillator = this.audioContext.createOscillator();
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(300, now);
-            oscillator.frequency.linearRampToValueAtTime(200, now + 2);
+            // Viento helado / Tormenta de Nieve
+            const bufferSize = this.audioContext.sampleRate * 2;
+            const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
 
+            const noiseSource = this.audioContext.createBufferSource();
+            noiseSource.buffer = buffer;
+
+            // Filtro para viento frío (ruido agudo silbante)
             const filter = this.audioContext.createBiquadFilter();
-            filter.type = 'highpass';
-            filter.frequency.value = 800;
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1000, now);
+            filter.frequency.linearRampToValueAtTime(1200, now + 1);
+            filter.Q.value = 2;
 
-            oscillator.connect(filter);
+            noiseSource.connect(filter);
             filter.connect(gainNode);
 
             gainNode.gain.setValueAtTime(0.01, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 1);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.015, now + 0.5);
             gainNode.gain.linearRampToValueAtTime(0.01, now + 2);
 
-            oscillator.start(now);
-            oscillator.stop(now + 2);
+            noiseSource.start(now);
         } else if (biomeName === 'Pantano Venenoso') {
             // Insectos y ranas en el pantano
             const cricketOsc = this.audioContext.createOscillator();

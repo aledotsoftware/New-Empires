@@ -1,7 +1,7 @@
 const fs = require('fs');
 const acorn = require('acorn');
-const code = fs.readFileSync('effects.js', 'utf8');
-const ast = acorn.parse(code, { ecmaVersion: 2022 });
+const code = fs.readFileSync('js/systems/EffectsManager.js', 'utf8');
+const ast = acorn.parse(code, { ecmaVersion: 2022, sourceType: 'module' });
 
 let foundMethod = false;
 

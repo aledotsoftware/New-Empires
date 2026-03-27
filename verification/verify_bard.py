@@ -13,14 +13,14 @@ def verify():
         page.wait_for_timeout(2000)
 
         # Take a screenshot to verify game is running
-        page.screenshot(path="verification/game_started.png")
+        page.screenshot(timeout=60000, path="verification/game_started.png")
 
 
         # We also need to select something to show the UI updates
         page.mouse.click(400, 400) # Town center
         page.wait_for_timeout(500)
 
-        page.screenshot(path="verification/ui_selected.png")
+        page.screenshot(timeout=60000, path="verification/ui_selected.png")
 
         page.mouse.click(450, 450) # Villager
         page.wait_for_timeout(500)
@@ -28,7 +28,7 @@ def verify():
         page.keyboard.press("b")
         page.wait_for_timeout(500)
 
-        page.screenshot(path="verification/build_menu.png")
+        page.screenshot(timeout=60000, path="verification/build_menu.png")
 
         browser.close()
 

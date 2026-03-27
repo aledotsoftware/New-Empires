@@ -2827,7 +2827,7 @@ export class Game {
                 }
             }
 
-            // Attack Cursor Logic
+            // Bard: Attack Cursor Logic (Espada sobre enemigo)
             if (canAttack) {
                 const target = this.enemyUnitGrid.find(
                     this.mouse.worldX,
@@ -2844,7 +2844,7 @@ export class Game {
                 }
             }
 
-            // Build/Repair Cursor Logic (Villager only) - Before Gather
+            // Bard: Build/Repair Cursor Logic (Martillo sobre edificio)
             if (!showBadge && canBuild && this.buildingGrid) {
                 const target = this.buildingGrid.find(
                     this.mouse.worldX,
@@ -2861,7 +2861,7 @@ export class Game {
                 }
             }
 
-            // Gather Cursor Logic (Villager only) - Lower priority than attack
+            // Bard: Gather Cursor Logic (Pico sobre piedra / etc)
             if (!showBadge && canGather && this.resourceGrid) {
                 const res = this.resourceGrid.find(
                     this.mouse.worldX,
@@ -2885,11 +2885,21 @@ export class Game {
 
             // Bard: Movement Cursor Logic (If hovering impassable terrain)
             if (!showBadge && this.terrainMap) {
-                const targetCol = Math.floor(this.mouse.worldX / this.tileSize);
-                const targetRow = Math.floor(this.mouse.worldY / this.tileSize);
-                const terrain = this.terrainMap.getTerrainDataByGrid(targetCol, targetRow);
+                // Ensure we use the correct tile size (TILE_SIZE is imported, this.tileSize might be undefined)
+                const tileSize = typeof this.tileSize !== 'undefined' ? this.tileSize : (this.terrainMap.invTileSize ? 1/this.terrainMap.invTileSize : 20);
+                const targetCol = Math.floor(this.mouse.worldX / tileSize);
+                const targetRow = Math.floor(this.mouse.worldY / tileSize);
 
-                if (terrain && (terrain.name === 'Agua' || terrain.impassable)) {
+                // Only check bounds if within map
+                if (targetCol >= 0 && targetCol < this.terrainMap.cols && targetRow >= 0 && targetRow < this.terrainMap.rows) {
+                    const terrain = this.terrainMap.getTerrainDataByGrid(targetCol, targetRow);
+
+                    if (terrain && (terrain.name === 'Agua' || terrain.impassable)) {
+                        cursorClass = 'cursor-forbidden';
+                        showBadge = true;
+                    }
+                } else {
+                    // Clicking outside the map is forbidden
                     cursorClass = 'cursor-forbidden';
                     showBadge = true;
                 }

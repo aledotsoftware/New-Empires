@@ -2733,16 +2733,22 @@ body:has(button:active, a:active, input:active, [role="button"]:active, .civ-opt
 }
 
 
-/* Motion Design: Transiciones suaves para todos los paneles y elementos clave */
+/* Motion Design: Transiciones suaves (fades, slides) para todos los paneles y elementos clave */
 #infoPanel, #commandPanel, #minimapPanel, .top-panel, .resources-panel {
-    transition: all 0.3s ease-in-out;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
 }
 
-/* Transiciones para modales y menús */
+/* Efecto hover Premium Glassmorphism UI */
+.premium-panel:hover {
+    box-shadow: var(--shadow-strong), inset 0 0 25px var(--civ-theme-accent);
+    transform: translateY(-2px);
+}
+
+/* Transiciones de opacidad para pantallas completas (fades/slides) */
 .start-screen, .modal-overlay, #buildMenu, #techTree, #settingsMenu, #selectionPanel, #actionsPanel,
 #gameScreen, #gameOverScreen, #settingsScreen, #techTreeScreen, #mapSizeScreen, #civSelectionScreen, #shortcutsScreen,
 #infoPanel, #commandPanel, #minimapPanel, #resourcePanel, .premium-panel {
-    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Para animar cuando se muestran/ocultan si están controlados por clases como 'hidden' */

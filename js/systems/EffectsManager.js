@@ -426,11 +426,12 @@ export class ParticleSystem {
     }
 
     // Efectos base semánticos añadidos para cumplimiento del AI Reviewer (Bard)
-    createSmokeEffect(x, y) {
-        for (let i = 0; i < 10; i++) {
+    createSmokeEffect(x, y, size = 40) {
+        const numParticles = Math.max(5, Math.floor(size / 4));
+        for (let i = 0; i < numParticles; i++) {
             const angle = (Math.random() - 0.5) * Math.PI;
             const speed = Math.random() * 40 + 10;
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 40, {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 30, // Sube lentamente
                 life: Math.random() * 2.5 + 1.0,
@@ -444,11 +445,12 @@ export class ParticleSystem {
         }
     }
 
-    createFireEffect(x, y) {
-        for (let i = 0; i < 20; i++) {
+    createFireEffect(x, y, size = 60) {
+        const numParticles = Math.max(10, Math.floor(size / 3));
+        for (let i = 0; i < numParticles; i++) {
             const angle = (Math.random() - 0.5) * Math.PI;
             const speed = Math.random() * 75 + 25;
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 60, y + (Math.random() - 0.5) * 60, {
+            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 60, // Sube rápidamente
                 life: Math.random() * 1.5 + 0.6,
@@ -523,11 +525,11 @@ export class ParticleSystem {
     createBuildingDamageEffect(x, y, severity, size = 60) {
         // severity: 0 a 1 (0 es apenas dañado, 1 es destruido)
         if (severity > 0.05) {
-            this.createSmokeEffect(x, y);
+            this.createSmokeEffect(x, y, size);
         }
 
         if (severity > 0.3) {
-            this.createFireEffect(x, y);
+            this.createFireEffect(x, y, size);
         }
 
         // Escombros cayendo a altos niveles de daño
@@ -537,19 +539,20 @@ export class ParticleSystem {
 
             // Más humo acompañando a los escombros para mayor impacto
             if (Math.random() > 0.5) {
-                this.createSmokeEffect(x, y);
+                this.createSmokeEffect(x, y, size);
             }
         }
     }
 
-    // Estelas de proyectiles dinámicas
-    createProjectileTrail(x, y, targetX, targetY, color = 'rgba(255, 255, 255, 0.8)') {
+    // Estelas de proyectiles dinámicas (ahora con soporte para flechas normales y en llamas)
+    createProjectileTrail(x, y, targetX, targetY, trailType = 'normal') {
         const dx = targetX - x;
         const dy = targetY - y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         // Calcular partículas a lo largo de la trayectoria
         const numParticles = Math.min(Math.floor(dist / 6), 25);
+        const isFlaming = trailType === 'flaming';
 
         for (let i = 0; i < numParticles; i++) {
             const fraction = i / numParticles;
@@ -559,23 +562,49 @@ export class ParticleSystem {
             const py = y + dy * fraction + parabolaY;
 
             // Variar ligeramente el tiempo de vida para dar efecto de "disparo" continuo
-            const baseLife = 0.25; // Bard: Ligeramente más duraderas las estelas
+            const baseLife = isFlaming ? 0.35 : 0.25; // Flaming trails last slightly longer
             const lifeOffset = fraction * 0.2; // Las partículas más cercanas al objetivo duran más
 
-            // Mezclar el color base con tonos de estela dorada (Medieval aesthetics)
-            const isGold = Math.random() > 0.5; // Bard: Aumentamos la frecuencia de destellos dorados
-            const trailColor = isGold ? `rgba(255, ${200 + Math.random() * 55}, 0, ${0.8 + Math.random() * 0.2})` : color; // Bard: Estelas doradas un poco más opacas
+            let trailColor, size, shape, gravity;
 
-            this.particles.push(Particle.get(px + (Math.random() - 0.5) * 6, py + (Math.random() - 0.5) * 6, { // Bard: Ligeramente más dispersión inicial
-                vx: dx * 0.1 + (Math.random() - 0.5) * 10, // Ligeramente en la dirección del proyectil con más fuerza
-                vy: dy * 0.1 + (Math.random() - 0.5) * 10,
+            if (isFlaming) {
+                // Flaming arrow effect: Orange/Red core, yellowish sparks
+                const r = Math.random();
+                if (r > 0.6) {
+                    trailColor = `rgba(255, ${Math.random() * 100 + 100}, 20, 0.9)`; // Fuego intenso
+                    shape = 'circle';
+                    size = Math.random() * 5 + 3;
+                    gravity = -15; // El fuego sube ligeramente
+                } else if (r > 0.3) {
+                    trailColor = `rgba(255, 200, 50, 0.8)`; // Chispas amarillas
+                    shape = 'square';
+                    size = Math.random() * 3 + 2;
+                    gravity = -5;
+                } else {
+                    trailColor = `rgba(100, 100, 100, 0.6)`; // Humo sutil detrás de la flecha
+                    shape = 'circle';
+                    size = Math.random() * 6 + 4;
+                    gravity = -5;
+                }
+            } else {
+                // Normal wooden/iron arrow effect
+                const isWood = Math.random() > 0.6;
+                trailColor = isWood ? `rgba(139, 90, 43, 0.8)` : `rgba(200, 200, 200, 0.6)`; // Marrón madera o gris hierro
+                shape = 'square';
+                size = Math.random() * 3 + 1;
+                gravity = 5; // Caen ligeramente
+            }
+
+            this.particles.push(Particle.get(px + (Math.random() - 0.5) * (isFlaming ? 10 : 4), py + (Math.random() - 0.5) * (isFlaming ? 10 : 4), {
+                vx: dx * 0.1 + (Math.random() - 0.5) * (isFlaming ? 20 : 10),
+                vy: dy * 0.1 + (Math.random() - 0.5) * (isFlaming ? 20 : 10),
                 life: baseLife + lifeOffset,
-                size: Math.random() * 4 + 2, // Bard: Estelas ligeramente más grandes
+                size: size,
                 color: trailColor,
-                gravity: 2, // Ligera caída de la estela
+                gravity: gravity,
                 friction: 0.94,
-                fadeRate: 1.8, // Bard: Desvanecimiento más suave
-                shape: isGold && Math.random() > 0.4 ? 'square' : 'circle' // Variedad de formas para chispas doradas
+                fadeRate: 1.8,
+                shape: shape
             }));
         }
     }

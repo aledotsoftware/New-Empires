@@ -210,17 +210,19 @@ export class SoundManager {
             oscillator.start(now);
             oscillator.stop(now + 2.0);
         } else if (biomeName === 'Pastizal' || biomeName === 'Pastizales') {
-            // Bard: Sonido de viento suave entre el pasto y pequeños grillos
+            // Bard: Sonido de viento suave entre el pasto y pequeños grillos (mejorado)
             const cricketOsc = this.audioContext.createOscillator();
             const cricketGain = this.audioContext.createGain();
 
             cricketOsc.type = 'square';
-            cricketOsc.frequency.setValueAtTime(4500, now);
-            cricketOsc.frequency.linearRampToValueAtTime(4800, now + 0.1);
-            cricketOsc.frequency.linearRampToValueAtTime(4500, now + 0.2);
+            // Variar frecuencia para no fatigar
+            const baseFreq = 4500 + (Math.random() * 500 - 250);
+            cricketOsc.frequency.setValueAtTime(baseFreq, now);
+            cricketOsc.frequency.linearRampToValueAtTime(baseFreq + 300, now + 0.1);
+            cricketOsc.frequency.linearRampToValueAtTime(baseFreq, now + 0.2);
 
             cricketGain.gain.setValueAtTime(0, now);
-            cricketGain.gain.linearRampToValueAtTime(this.volume * 0.005, now + 0.05);
+            cricketGain.gain.linearRampToValueAtTime(this.volume * 0.006, now + 0.05); // Ligeramente más audible
             cricketGain.gain.linearRampToValueAtTime(0, now + 0.2);
 
             cricketOsc.connect(cricketGain);
@@ -228,6 +230,24 @@ export class SoundManager {
 
             cricketOsc.start(now);
             cricketOsc.stop(now + 0.2);
+
+            // Añadir un segundo grillo asíncrono
+            const cricket2Osc = this.audioContext.createOscillator();
+            const cricket2Gain = this.audioContext.createGain();
+            cricket2Osc.type = 'square';
+            cricket2Osc.frequency.setValueAtTime(baseFreq + 800, now + 0.5);
+            cricket2Osc.frequency.linearRampToValueAtTime(baseFreq + 1000, now + 0.6);
+            cricket2Osc.frequency.linearRampToValueAtTime(baseFreq + 800, now + 0.7);
+
+            cricket2Gain.gain.setValueAtTime(0, now + 0.5);
+            cricket2Gain.gain.linearRampToValueAtTime(this.volume * 0.004, now + 0.55);
+            cricket2Gain.gain.linearRampToValueAtTime(0, now + 0.7);
+
+            cricket2Osc.connect(cricket2Gain);
+            cricket2Gain.connect(gainNode);
+            cricket2Osc.start(now + 0.5);
+            cricket2Osc.stop(now + 0.7);
+
 
             // Suave murmullo de viento
             const bufferSize = this.audioContext.sampleRate * 2;
@@ -240,13 +260,16 @@ export class SoundManager {
 
             const grassFilter = this.audioContext.createBiquadFilter();
             grassFilter.type = 'lowpass';
-            grassFilter.frequency.setValueAtTime(800, now);
+            // Variar el filtro para simular ráfagas
+            grassFilter.frequency.setValueAtTime(600, now);
+            grassFilter.frequency.linearRampToValueAtTime(900, now + 1);
+            grassFilter.frequency.linearRampToValueAtTime(600, now + 2);
 
             grassWind.connect(grassFilter);
             grassFilter.connect(gainNode);
 
             gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(this.volume * 0.01, now + 1);
+            gainNode.gain.linearRampToValueAtTime(this.volume * 0.012, now + 1);
             gainNode.gain.linearRampToValueAtTime(0, now + 2);
 
             grassWind.start(now);

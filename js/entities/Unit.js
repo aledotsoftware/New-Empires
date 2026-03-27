@@ -500,11 +500,11 @@ export class Unit extends Entity {
                 if (game && game.particleSystem) {
                     if (node.type === 'gold') {
                         game.particleSystem.createGoldSparkle(node.x, node.y);
-                    } else if (node.type === 'wood' && typeof game.particleSystem.createWoodChopEffect === 'function') {
+                    } else if (node.type === 'wood' && game.particleSystem.createWoodChopEffect) {
                         game.particleSystem.createWoodChopEffect(node.x, node.y);
-                    } else if (node.type === 'stone' && typeof game.particleSystem.createStoneMineEffect === 'function') {
+                    } else if (node.type === 'stone' && game.particleSystem.createStoneMineEffect) {
                         game.particleSystem.createStoneMineEffect(node.x, node.y);
-                    } else if (node.type === 'food' && typeof game.particleSystem.createFoodGatherEffect === 'function') {
+                    } else if (node.type === 'food' && game.particleSystem.createFoodGatherEffect) {
                         game.particleSystem.createFoodGatherEffect(node.x, node.y);
                     }
                 }

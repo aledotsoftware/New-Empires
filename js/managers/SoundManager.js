@@ -150,7 +150,7 @@ export class SoundManager {
             gainNode.gain.linearRampToValueAtTime(0.01, now + 4);
 
             noiseSource.start(now);
-        } else if (biomeName === 'Agua') {
+        } else if (biomeName === 'Agua' || biomeName === 'Archipiélago') {
             // Sonido de olas suaves
             const oscillator = this.audioContext.createOscillator();
 
@@ -214,7 +214,7 @@ export class SoundManager {
             gainNode.gain.linearRampToValueAtTime(0, now + 2);
 
             grassWind.start(now);
-        } else if (biomeName === 'Montañas' || biomeName === 'Colinas' || biomeName === 'Montaña') {
+        } else if (biomeName === 'Montañas' || biomeName === 'Colinas' || biomeName === 'Montaña' || biomeName === 'Volcánico') {
             // Eco sutil / viento de altura
             const bufferSize = this.audioContext.sampleRate * 2; // 2 segundos
             const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
@@ -239,7 +239,7 @@ export class SoundManager {
             gainNode.gain.linearRampToValueAtTime(0.01, now + 2);
 
             noiseSource.start(now);
-        } else if (biomeName === 'Nieve') {
+        } else if (biomeName === 'Nieve' || biomeName === 'Tundra') {
             // Viento helado
             const oscillator = this.audioContext.createOscillator();
             oscillator.type = 'triangle';

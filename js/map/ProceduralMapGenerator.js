@@ -114,8 +114,8 @@ export class PerlinNoise {
 export class ProceduralMapGenerator {
     constructor(config) {
         this.seed = config.seed || Date.now();
-        this.width = config.width || 200;
-        this.height = config.height || 200;
+        this.width = config.tiles || (config.width ? Math.floor(config.width / 32) : 200);
+        this.height = config.tiles || (config.height ? Math.floor(config.height / 32) : 200);
         this.numPlayers = config.numPlayers || 2;
         this.biome = config.biome || 'grassland'; // grassland, forest, desert, tundra, coastal
         this.style = config.style || 'continental'; // continental, islands, arena, lake, symmetric, asymmetric

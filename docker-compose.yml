@@ -13,16 +13,16 @@ services:
 
     # Publish port to host
     ports:
-      - "3000:3000"
+      - "8080:8080"
 
     # Environment variables
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=8080
 
     # Healthcheck
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -51,7 +51,7 @@ services:
         - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
         - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
         - "traefik.http.routers.newempire-pss-txn-01.priority=100"
-        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=3000"
+        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=8080"
 
     networks:
       - dokploy-network

@@ -2608,7 +2608,15 @@ export class Game {
      * WARNING: This creates a new array on every access. Do not use in hot paths.
      */
     get entities() {
-        return [...this.units, ...this.buildings, ...this.enemies];
+        const u = this.units;
+        const b = this.buildings;
+        const e = this.enemies;
+        const res = new Array(u.length + b.length + e.length);
+        let i = 0;
+        for (let j = 0; j < u.length; j++) res[i++] = u[j];
+        for (let j = 0; j < b.length; j++) res[i++] = b[j];
+        for (let j = 0; j < e.length; j++) res[i++] = e[j];
+        return res;
     }
 
     update(deltaTime) {
@@ -2643,18 +2651,18 @@ export class Game {
                     const unit = this.units[i];
                     if (unit.team === 'player') {
                         // Apply tactical topography vision bonus
-                        let tempVision = unit.visionRadius || 200;
-                        let originalVision = tempVision;
-                        if (unit._cachedTerrainData && (unit._cachedTerrainData.name === 'Colina' || unit._cachedTerrainData.name === 'Montaña' || unit._cachedTerrainData.name === 'Volcánico')) {
-                            unit.visionRadius = tempVision * 1.5;
+                        const originalVision = unit.visionRadius || 200;
+                        if (unit._cachedTerrainData) {
+                            const name = unit._cachedTerrainData.name;
+                            if (name === 'Colina' || name === 'Montaña' || name === 'Volcánico') {
+                                unit.visionRadius = originalVision * 1.5;
+                            }
                         }
 
                         this.fow.addEntity(unit);
 
                         // Restore
-                        if (unit.visionRadius !== originalVision) {
-                            unit.visionRadius = originalVision;
-                        }
+                        unit.visionRadius = originalVision;
                     }
                 }
 
@@ -2664,18 +2672,18 @@ export class Game {
                     const b = this.buildings[i];
                     if (b.team === 'player') {
                         // Apply tactical topography vision bonus
-                        let tempVision = b.visionRadius || 200;
-                        let originalVision = tempVision;
-                        if (b._cachedTerrainData && (b._cachedTerrainData.name === 'Colina' || b._cachedTerrainData.name === 'Montaña' || b._cachedTerrainData.name === 'Volcánico')) {
-                            b.visionRadius = tempVision * 1.5;
+                        const originalVision = b.visionRadius || 200;
+                        if (b._cachedTerrainData) {
+                            const name = b._cachedTerrainData.name;
+                            if (name === 'Colina' || name === 'Montaña' || name === 'Volcánico') {
+                                b.visionRadius = originalVision * 1.5;
+                            }
                         }
 
                         this.fow.addEntity(b);
 
                         // Restore
-                        if (b.visionRadius !== originalVision) {
-                            b.visionRadius = originalVision;
-                        }
+                        b.visionRadius = originalVision;
                     }
                 }
 

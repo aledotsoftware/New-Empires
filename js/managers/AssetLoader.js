@@ -122,11 +122,17 @@ export class AssetLoader {
     }
 
     getSrc(key) {
+        // BOLT OPTIMIZATION: Avoid startsWith calls when key is in the map.
+        // Direct map lookup is O(1) and faster than prefix checking for the majority of keys.
+        const cached = AssetLoader.ASSET_MAP[key];
+        if (cached) return cached;
+
         // If key starts with assets/ then it is already a path
         if (typeof key === 'string' && (key.startsWith('assets/') || key.startsWith('./assets/'))) {
             return key;
         }
-        return AssetLoader.ASSET_MAP[key] || '';
+
+        return '';
     }
 
     /**
@@ -137,7 +143,9 @@ export class AssetLoader {
     getIconPath(key) {
         if (!key) return '';
         const src = this.getSrc(key);
-        return src || `assets/icons/${key}.png`;
+        // Avoid template string allocation if we have the src
+        if (src) return src;
+        return 'assets/icons/' + key + '.png';
     }
 }
 

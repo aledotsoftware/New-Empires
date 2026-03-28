@@ -200,36 +200,28 @@ export class SpatialGrid {
         // Clamping para no salir de los bordes al iterar
         // BOLT OPTIMIZATION: Calculate bounds directly from world coordinates instead of cell radius
         // This calculates the exact bounding box and avoids Math.ceil(radius * invCellSize) + additions
-        const rawStartCol = ((x - radius) * invCellSize) | 0;
-        const startCol = rawStartCol > 0 ? rawStartCol : 0;
+        let startCol = ((x - radius) * invCellSize) | 0;
+        if (startCol < 0) startCol = 0;
 
-        const rawEndCol = ((x + radius) * invCellSize) | 0;
+        let endCol = ((x + radius) * invCellSize) | 0;
         const maxCol = cols - 1;
-        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
+        if (endCol > maxCol) endCol = maxCol;
 
-        const rawStartRow = ((y - radius) * invCellSize) | 0;
-        const startRow = rawStartRow > 0 ? rawStartRow : 0;
+        let startRow = ((y - radius) * invCellSize) | 0;
+        if (startRow < 0) startRow = 0;
 
-        const rawEndRow = ((y + radius) * invCellSize) | 0;
+        let endRow = ((y + radius) * invCellSize) | 0;
         const maxRow = rows - 1;
-        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
+        if (endRow > maxRow) endRow = maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
             const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
-                const index = rowBase + c;
-                const bucket = buckets[index];
-
-                // Iterar bucket y agregar a resultados
+                const bucket = buckets[rowBase + c];
                 const bLen = bucket.length;
                 if (bLen > 0) {
-                    // OPTIMIZATION: Use manual loop instead of push.apply
-                    // Benchmarks show manual loop is ~34% faster for small buckets (5 items)
-                    // and ~8% faster for medium buckets (20 items).
-                    // Also avoids stack overflow risk for very large buckets.
                     for (let i = 0; i < bLen; i++) {
-                        // OPTIMIZATION: Manual indexing is faster than push
                         result[count++] = bucket[i];
                     }
                 }
@@ -288,29 +280,28 @@ export class SpatialGrid {
         let count = result.length;
 
         // OPTIMIZATION: Bitwise truncation (~19% speedup)
-        const rawStartCol = (minX * this.invCellSize) | 0;
-        const startCol = rawStartCol > 0 ? rawStartCol : 0;
+        const invCellSize = this.invCellSize;
+        let startCol = (minX * invCellSize) | 0;
+        if (startCol < 0) startCol = 0;
 
-        const rawEndCol = ((minX + width) * this.invCellSize) | 0;
+        let endCol = ((minX + width) * invCellSize) | 0;
         const maxCol = cols - 1;
-        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
+        if (endCol > maxCol) endCol = maxCol;
 
-        const rawStartRow = (minY * this.invCellSize) | 0;
-        const startRow = rawStartRow > 0 ? rawStartRow : 0;
+        let startRow = (minY * invCellSize) | 0;
+        if (startRow < 0) startRow = 0;
 
-        const rawEndRow = ((minY + height) * this.invCellSize) | 0;
+        let endRow = ((minY + height) * invCellSize) | 0;
         const maxRow = rows - 1;
-        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
+        if (endRow > maxRow) endRow = maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             const rowBase = r * cols;
             for (let c = startCol; c <= endCol; c++) {
-                const index = rowBase + c;
-                const bucket = buckets[index];
+                const bucket = buckets[rowBase + c];
                 const bLen = bucket.length;
                 if (bLen > 0) {
                     for (let i = 0; i < bLen; i++) {
-                        // OPTIMIZATION: Manual indexing is faster than push
                         result[count++] = bucket[i];
                     }
                 }

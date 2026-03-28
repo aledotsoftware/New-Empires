@@ -50,22 +50,6 @@ static _numericSort(a, b) {
     return a - b;
 }
 
-    // BOLT OPTIMIZATION: Push to Int32Array with auto-growth
-    _pushToRowBuffer(r, packed) {
-        let count = this._rowCounts[r];
-        let buffer = this._rowBuffers[r];
-
-        if (count >= buffer.length) {
-            // Resize buffer if needed (double size)
-            const newBuffer = new Int32Array(buffer.length * 2);
-            newBuffer.set(buffer);
-            this._rowBuffers[r] = newBuffer;
-            buffer = newBuffer;
-        }
-
-        buffer[count] = packed;
-        this._rowCounts[r] = count + 1;
-    }
 
     /**
      * Resets currently visible tiles to 'EXPLORED' before re-calculating vision.
@@ -201,7 +185,18 @@ static _numericSort(a, b) {
             for (let i = 0; i < len; i += 2) {
                 const r = ranges[i];
                 const packed = ranges[i + 1];
-                this._pushToRowBuffer(r, packed);
+                let count = this._rowCounts[r];
+                let buffer = this._rowBuffers[r];
+
+                if (count >= buffer.length) {
+                    const newBuffer = new Int32Array(buffer.length * 2);
+                    newBuffer.set(buffer);
+                    this._rowBuffers[r] = newBuffer;
+                    buffer = newBuffer;
+                }
+
+                buffer[count] = packed;
+                this._rowCounts[r] = count + 1;
             }
             return;
         }
@@ -241,7 +236,18 @@ static _numericSort(a, b) {
 
                 if (minX <= maxX) {
                     const packed = (minX << 16) | maxX;
-                    this._pushToRowBuffer(y, packed);
+                    let rc = this._rowCounts[y];
+                    let rbuf = this._rowBuffers[y];
+
+                    if (rc >= rbuf.length) {
+                        const newBuffer = new Int32Array(rbuf.length * 2);
+                        newBuffer.set(rbuf);
+                        this._rowBuffers[y] = newBuffer;
+                        rbuf = newBuffer;
+                    }
+
+                    rbuf[rc] = packed;
+                    this._rowCounts[y] = rc + 1;
 
                     // Store in cache
                     cache[count++] = y;
@@ -290,7 +296,19 @@ static _numericSort(a, b) {
                     // BOLT OPTIMIZATION: Pack start and end into one integer
                     // Max map size (Ludicrous) is 480 tiles. 16 bits is 65536.
                     // (start << 16) | end
-                    this._pushToRowBuffer(y, (minX << 16) | maxX);
+                    const packed = (minX << 16) | maxX;
+                    let rc = this._rowCounts[y];
+                    let rbuf = this._rowBuffers[y];
+
+                    if (rc >= rbuf.length) {
+                        const newBuffer = new Int32Array(rbuf.length * 2);
+                        newBuffer.set(rbuf);
+                        this._rowBuffers[y] = newBuffer;
+                        rbuf = newBuffer;
+                    }
+
+                    rbuf[rc] = packed;
+                    this._rowCounts[y] = rc + 1;
                 }
             }
         }

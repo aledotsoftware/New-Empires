@@ -1300,15 +1300,17 @@ export class Game {
 
             // Filter results
             const len = cache.length;
+            let selCount = 0;
             for (let i = 0; i < len; i++) {
                 const entity = cache[i];
                 if (entity.team !== 'player') continue;
 
                 if (entity.x >= minX && entity.x <= maxX &&
                     entity.y >= minY && entity.y <= maxY) {
-                    this.selectedEntities.push(entity);
+                    this.selectedEntities[selCount++] = entity;
                 }
             }
+            this.selectedEntities.length = selCount;
         }
 
         this.updateSelectionPanel();
@@ -1696,11 +1698,16 @@ export class Game {
                                     const result = entity.productionQueue.clear();
                                     if (Array.isArray(result)) cancelledItems = result;
                                 } else if (entity.productionQueue.queue && Array.isArray(entity.productionQueue.queue)) {
-                                    cancelledItems = entity.productionQueue.queue.splice(0, entity.productionQueue.queue.length);
+                                    // BOLT OPTIMIZATION: Avoid splice by saving the reference and clearing
+                                    const q = entity.productionQueue.queue;
+                                    cancelledItems = q.slice();
+                                    q.length = 0;
                                 }
 
                                 if (Array.isArray(cancelledItems)) {
-                                    for (const item of cancelledItems) {
+                                    const cancelledLen = cancelledItems.length;
+                                    for (let j = 0; j < cancelledLen; j++) {
+                                        const item = cancelledItems[j];
                                         if (item && item.cost) {
                                             RefundManager.refundCost(this, item.cost);
                                         }

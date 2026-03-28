@@ -1988,6 +1988,25 @@ export class Game {
         for (let i = 0; i < len; i++) {
             const option = buildOptions[i];
             const type = option.dataset.building;
+
+            // Resolve civilization specific building data
+            if (typeof civilizationManager !== 'undefined' && civilizationManager) {
+                const override = civilizationManager.getBuildingOverride(type, this.civilizationId);
+                if (override) {
+                    const nameEl = option.querySelector('.build-name');
+                    if (nameEl && override.name) nameEl.textContent = override.name;
+
+                    const infoEl = option.querySelector('.build-info');
+                    if (infoEl && override.description) infoEl.textContent = override.description;
+
+                    const imgEl = option.querySelector('.build-icon img');
+                    if (imgEl && override.icon && typeof assetLoader !== 'undefined') {
+                        const fullPath = assetLoader.getIconPath(override.icon);
+                        if (!imgEl.src.includes(fullPath)) imgEl.src = fullPath;
+                    }
+                }
+            }
+
             const cost = CONFIG.COSTS[type];
             // Access cached count directly
             const currentCount = this.playerBuildingCounts[type] || 0;
@@ -4249,7 +4268,7 @@ export class Game {
         // Dibujar icono centrado
         let drawn = false;
         if (assetLoader) {
-            const img = assetLoader.getImage(this.buildMode);
+            const img = assetLoader.getImage(civilizationManager.getBuildingIcon(this.buildMode, this.civilizationId));
             if (img && img.complete) {
                 // Dibujar imagen con opacidad
                 this.ctx.globalAlpha = 0.7;
@@ -5497,71 +5516,18 @@ export class Game {
         const popFull = !this.populationManager.canAddPopulation();
 
         if (entity.type === 'villager') {
-            buttons.push({
-                iconKey: 'workshop',
-                iconFallback: '🏗️',
-                label: 'Erigir Estructura',
-                description: 'Diseñar los cimientos de la civilización',
-                hotkey: 'Q',
-                action: () => this.openBuildMenu(),
-                enabled: true
-            });
-        } else if (entity.type === 'townCenter') {
-            const cost = CONFIG.UNIT_COSTS.villager;
-            const canAfford = this.canAfford(cost);
-            const enabled = canAfford && !popFull;
-            let error = null;
-            if (!canAfford) error = 'Recursos insuficientes';
-            else if (popFull) error = 'Límite de población alcanzado';
-
-            buttons.push({
-                iconKey: 'villager',
-                iconFallback: '👨‍🌾',
-                label: 'Convocar Aldeano',
-                description: 'La columna vertebral de la economía. Recolecta y erige.',
-                hotkey: 'Q',
-                cost: cost,
-                action: () => this.trainUnit('villager', this.selectedEntities[0]),
-                enabled: enabled,
-                error: error
-            });
-        } else if (entity.type === 'barracks') {
-            const warriorCost = CONFIG.UNIT_COSTS.warrior;
-            const archerCost = CONFIG.UNIT_COSTS.archer;
-            const canAffordWarrior = this.canAfford(warriorCost);
-            const canAffordArcher = this.canAfford(archerCost);
-
-            let warriorError = null;
-            if (!canAffordWarrior) warriorError = 'Las arcas del reino están vacías';
-            else if (popFull) warriorError = 'Necesitas construir más moradas';
-
-            let archerError = null;
-            if (!canAffordArcher) archerError = 'Las arcas del reino están vacías';
-            else if (popFull) archerError = 'Necesitas construir más moradas';
-
-            buttons.push({
-                iconKey: 'warrior',
-                iconFallback: '⚔️',
-                label: 'Forjar Orden de Caballería',
-                description: 'La guardia leal para la línea de frente.',
-                hotkey: 'Q',
-                cost: warriorCost,
-                action: () => this.trainUnit('warrior', this.selectedEntities[0]),
-                enabled: canAffordWarrior && !popFull,
-                error: warriorError
-            });
-
-            buttons.push({
-                iconKey: 'archer',
-                iconFallback: '🏹',
-                label: 'Reclutar Orden de Arqueros',
-                description: 'Maestros del arco, letales a la distancia.',
-                hotkey: 'W',
-                cost: archerCost,
-                action: () => this.trainUnit('archer', this.selectedEntities[0]),
-                enabled: canAffordArcher && !popFull,
-                error: archerError
-            });
+                buttons.push({
+                    iconKey: iconKey,
+                    iconFallback: unitType === 'villager' ? '👨‍🌾' : '⚔️',
+                    label: `Convocar ${name}`,
+                    description: desc,
+                    hotkey: hotkeys[i] || 'Q',
+                    cost: cost,
+                    action: () => this.trainUnit(unitType, this.selectedEntities[0]),
+                    enabled: enabled,
+                    error: error
+                });
+            }
         }
 
         // Añadir tecnologías disponibles

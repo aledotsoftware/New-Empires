@@ -4578,7 +4578,10 @@ export class Game {
         }
 
         // Update history for next frame
-        this.lastResources = { ...this.resources };
+        this.lastResources.wood = this.resources.wood;
+        this.lastResources.food = this.resources.food;
+        this.lastResources.gold = this.resources.gold;
+        this.lastResources.stone = this.resources.stone;
 
         // Actualizar población
         // BOLT OPTIMIZATION: Only write if changed
@@ -5581,12 +5584,15 @@ export class Game {
                     else techIconKey = 'science';
                 }
 
+                const currentLen = buttons.length;
+                const nextHotkey = currentLen < hotkeys.length ? hotkeys[currentLen] : '';
+
                 buttons.push({
                     iconKey: techIconKey,
                     iconFallback: tech.icon || techFallback,
                     label: tech.name,
                     description: tech.description,
-                    hotkey: hotkeys[buttons.length],
+                    hotkey: nextHotkey,
                     cost: tech.cost,
                     action: () => this.techManager.startResearch(tech.id),
                     enabled: canAfford
@@ -5887,11 +5893,10 @@ export class Game {
     renderEmptyGrid(grid) {
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',
-            'A', 'S', 'D', 'F', 'G',
-            'Z', 'X', 'C', 'V', 'B'
+            'A', 'S', 'D', 'F', 'G'
         ];
 
-        // Ensure grid has 15 children
+        // Ensure grid has 10 children
         if (grid.childElementCount !== 10) {
             grid.innerHTML = '';
             for (let i = 0; i < 10; i++) {
@@ -5899,7 +5904,7 @@ export class Game {
             }
         }
 
-        const gridButtons = Array.from(grid.children);
+        const gridButtons = grid.children;
 
         for (let i = 0; i < 10; i++) {
             const btn = gridButtons[i];

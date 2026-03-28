@@ -232,8 +232,12 @@ static _numericSort(a, b) {
             const y = gridY + dy;
 
             if (y >= 0 && y < rows) {
-                const minX = Math.max(0, gridX - span);
-                const maxX = Math.min(cols - 1, gridX + span);
+                const rawMinX = gridX - span;
+                const minX = rawMinX > 0 ? rawMinX : 0;
+
+                const rawMaxX = gridX + span;
+                const maxCol = cols - 1;
+                const maxX = rawMaxX < maxCol ? rawMaxX : maxCol;
 
                 if (minX <= maxX) {
                     const packed = (minX << 16) | maxX;
@@ -275,8 +279,12 @@ static _numericSort(a, b) {
 
             // Bounds check Y
             if (y >= 0 && y < rows) {
-                const minX = Math.max(0, gridX - span);
-                const maxX = Math.min(cols - 1, gridX + span);
+                const rawMinX = gridX - span;
+                const minX = rawMinX > 0 ? rawMinX : 0;
+
+                const rawMaxX = gridX + span;
+                const maxCol = cols - 1;
+                const maxX = rawMaxX < maxCol ? rawMaxX : maxCol;
 
                 if (minX <= maxX) {
                     // BOLT OPTIMIZATION: Pack start and end into one integer

@@ -131,10 +131,19 @@ export class SpatialGrid {
         // Clamping para no salir de los bordes al iterar
         // BOLT OPTIMIZATION: Calculate bounds directly from world coordinates instead of cell radius
         // This calculates the exact bounding box and avoids Math.ceil(radius * invCellSize) + additions
-        const startCol = Math.max(0, ((x - radius) * invCellSize) | 0);
-        const endCol = Math.min(cols - 1, ((x + radius) * invCellSize) | 0);
-        const startRow = Math.max(0, ((y - radius) * invCellSize) | 0);
-        const endRow = Math.min(rows - 1, ((y + radius) * invCellSize) | 0);
+        const rawStartCol = ((x - radius) * invCellSize) | 0;
+        const startCol = rawStartCol > 0 ? rawStartCol : 0;
+
+        const rawEndCol = ((x + radius) * invCellSize) | 0;
+        const maxCol = cols - 1;
+        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
+
+        const rawStartRow = ((y - radius) * invCellSize) | 0;
+        const startRow = rawStartRow > 0 ? rawStartRow : 0;
+
+        const rawEndRow = ((y + radius) * invCellSize) | 0;
+        const maxRow = rows - 1;
+        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
@@ -191,10 +200,19 @@ export class SpatialGrid {
         // Clamping para no salir de los bordes al iterar
         // BOLT OPTIMIZATION: Calculate bounds directly from world coordinates instead of cell radius
         // This calculates the exact bounding box and avoids Math.ceil(radius * invCellSize) + additions
-        const startCol = Math.max(0, ((x - radius) * invCellSize) | 0);
-        const endCol = Math.min(cols - 1, ((x + radius) * invCellSize) | 0);
-        const startRow = Math.max(0, ((y - radius) * invCellSize) | 0);
-        const endRow = Math.min(rows - 1, ((y + radius) * invCellSize) | 0);
+        const rawStartCol = ((x - radius) * invCellSize) | 0;
+        const startCol = rawStartCol > 0 ? rawStartCol : 0;
+
+        const rawEndCol = ((x + radius) * invCellSize) | 0;
+        const maxCol = cols - 1;
+        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
+
+        const rawStartRow = ((y - radius) * invCellSize) | 0;
+        const startRow = rawStartRow > 0 ? rawStartRow : 0;
+
+        const rawEndRow = ((y + radius) * invCellSize) | 0;
+        const maxRow = rows - 1;
+        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
@@ -270,10 +288,19 @@ export class SpatialGrid {
         let count = result.length;
 
         // OPTIMIZATION: Bitwise truncation (~19% speedup)
-        const startCol = Math.max(0, (minX * this.invCellSize) | 0);
-        const endCol = Math.min(cols - 1, ((minX + width) * this.invCellSize) | 0);
-        const startRow = Math.max(0, (minY * this.invCellSize) | 0);
-        const endRow = Math.min(rows - 1, ((minY + height) * this.invCellSize) | 0);
+        const rawStartCol = (minX * this.invCellSize) | 0;
+        const startCol = rawStartCol > 0 ? rawStartCol : 0;
+
+        const rawEndCol = ((minX + width) * this.invCellSize) | 0;
+        const maxCol = cols - 1;
+        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
+
+        const rawStartRow = (minY * this.invCellSize) | 0;
+        const startRow = rawStartRow > 0 ? rawStartRow : 0;
+
+        const rawEndRow = ((minY + height) * this.invCellSize) | 0;
+        const maxRow = rows - 1;
+        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             const rowBase = r * cols;

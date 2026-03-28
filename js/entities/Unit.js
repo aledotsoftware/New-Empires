@@ -95,9 +95,7 @@ export class Unit extends Entity {
         if (!entity.isDead) {
             const dx = unit.x - entity.x;
             const dy = unit.y - entity.y;
-            const distSq = dx * dx + dy * dy;
-
-            return distSq < AGGRO_RADIUS_SQ;
+            return (dx * dx + dy * dy) < AGGRO_RADIUS_SQ;
         }
         return false;
     }

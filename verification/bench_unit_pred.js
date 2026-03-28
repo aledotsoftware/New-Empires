@@ -13,15 +13,12 @@ function enemyPredicateBaseline(entity, unit) {
 }
 
 function enemyPredicateOptimized(entity, unit) {
-    if (entity.isDead) return false;
-
-    const dx = unit.x - entity.x;
-    if (dx > 200 || dx < -200) return false; // Early exit
-
-    const dy = unit.y - entity.y;
-    if (dy > 200 || dy < -200) return false; // Early exit
-
-    return (dx * dx + dy * dy) < AGGRO_RADIUS_SQ;
+    if (!entity.isDead) {
+        const dx = unit.x - entity.x;
+        const dy = unit.y - entity.y;
+        return (dx * dx + dy * dy) < AGGRO_RADIUS_SQ;
+    }
+    return false;
 }
 
 const unit = { x: 500, y: 500 };

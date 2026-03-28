@@ -54,6 +54,16 @@ export class CivilizationManager {
         }
         building.hp = building.isUnderConstruction ? 1 : building.maxHp;
 
+        // Redireccionar unidades entrenables si la civilización tiene unidades únicas que reemplazan a las base
+        if (civ.uniqueUnit && civ.uniqueUnit.baseUnit) {
+            const base = civ.uniqueUnit.baseUnit;
+            const unique = civ.uniqueUnit.id;
+            if (building.trainableUnits && building.trainableUnits.includes(base)) {
+                // Reemplazar base con unidad única
+                building.trainableUnits = building.trainableUnits.map(u => u === base ? unique : u);
+            }
+        }
+
         if (civ.buildingOverrides && civ.buildingOverrides[building.type]) {
             const override = civ.buildingOverrides[building.type];
             if (override.name) building.name = override.name;
@@ -114,6 +124,19 @@ export class CivilizationManager {
             }
         }
 
+        // Aplicar datos de unidad única si aplica
+        if (civ.uniqueUnit && civ.uniqueUnit.id === unit.type) {
+            const uu = civ.uniqueUnit;
+            if (uu.name) unit.name = uu.name;
+            if (uu.icon) unit.icon = uu.icon;
+            if (uu.attack !== undefined) unit.attackDamage = uu.attack;
+            if (uu.hp !== undefined) {
+                unit.maxHp = uu.hp;
+                unit.hp = uu.hp;
+            }
+            if (uu.speed !== undefined) unit.speed = uu.speed;
+        }
+
         if (civ.unitOverrides && civ.unitOverrides[unit.type]) {
             const override = civ.unitOverrides[unit.type];
             if (override.name) unit.name = override.name;
@@ -128,6 +151,38 @@ export class CivilizationManager {
                 unit.gatherMultiplier = (unit.gatherMultiplier || 1) * override.gatherBonus;
             }
         }
+    }
+
+    getBuildingIcon(type, civId) {
+        const civ = this.getCivilization(civId);
+        if (civ && civ.buildingOverrides && civ.buildingOverrides[type]) {
+            return civ.buildingOverrides[type].icon || type;
+        }
+        return type;
+    }
+
+    /**
+     * Obtiene el posible override de edificio para una civilización
+     * @param {string} type 
+     * @param {string} civId 
+     * @returns {Object|null}
+     */
+    getBuildingOverride(type, civId) {
+        const civ = this.getCivilization(civId);
+        return civ?.buildingOverrides?.[type] || null;
+    }
+
+    getUnitIcon(type, civId) {
+        const civ = this.getCivilization(civId);
+        // Check unique unit first
+        if (civ && civ.uniqueUnit && civ.uniqueUnit.id === type) {
+            return civ.uniqueUnit.icon || type;
+        }
+        // Then check overrides
+        if (civ && civ.unitOverrides && civ.unitOverrides[type]) {
+            return civ.unitOverrides[type].icon || type;
+        }
+        return type;
     }
 }
 

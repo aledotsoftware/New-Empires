@@ -25,7 +25,7 @@
         },
         "warrior": {
             "name": "Berserker",
-            "icon": "assets/icons/warrior.png",
+            "icon": "assets/icons/vikings/berserker.png",
             "attack": 14,
             "hp": 100,
             "speed": 60
@@ -40,19 +40,19 @@
     },
     "buildingOverrides": {
         "townCenter": {
-            "name": "Gran Salon",
-            "icon": "assets/icons/townCenter.png",
-            "description": "Salon de reunion vikingo"
+            "name": "Gran Salón",
+            "icon": "assets/icons/vikings/gran_salon.png",
+            "description": "Salón de reunión vikingo"
         },
         "house": {
-            "name": "Cabana Vikinga",
-            "icon": "assets/icons/house.png",
-            "description": "Vivienda nordica resistente"
+            "name": "Cabaña Vikinga",
+            "icon": "assets/icons/vikings/cabana.png",
+            "description": "Vivienda nórdica resistente"
         },
         "barracks": {
             "name": "Campo de Guerra",
-            "icon": "assets/icons/barracks.png",
-            "description": "Area de entrenamiento de guerreros vikingos"
+            "icon": "assets/icons/vikings/campo_guerra.png",
+            "description": "Área de entrenamiento de guerreros vikingos"
         }
     },
     "uniqueUnit": {

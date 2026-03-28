@@ -13,16 +13,16 @@ services:
 
     # Publish port to host
     ports:
-      - "8080:8080"
+      - "8099:8099"
 
     # Environment variables
     environment:
       - NODE_ENV=production
-      - PORT=8080
+      - PORT=8099
 
     # Healthcheck
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8099/" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -47,11 +47,11 @@ services:
 
     # Labels for Dockploy/Traefik
     labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
-        - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
-        - "traefik.http.routers.newempire-pss-txn-01.priority=100"
-        - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=8080"
+      - "traefik.enable=true"
+      - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
+      - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
+      - "traefik.http.routers.newempire-pss-txn-01.priority=100"
+      - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=8099"
 
     networks:
       - dokploy-network

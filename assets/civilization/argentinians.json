@@ -20,7 +20,7 @@
     "unitOverrides": {
         "villager": {
             "name": "Gaucho",
-            "icon": "assets/icons/villager.png",
+            "icon": "assets/icons/argentina/villager.png",
             "gatherBonus": 1.2
         },
         "warrior": {
@@ -41,24 +41,24 @@
     "buildingOverrides": {
         "townCenter": {
             "name": "Cabildo",
-            "icon": "assets/icons/townCenter.png",
+            "icon": "assets/icons/argentina/cabildo.png",
             "description": "Centro administrativo colonial argentino"
         },
         "house": {
             "name": "Rancho",
-            "icon": "assets/icons/house.png",
+            "icon": "assets/icons/argentina/rancho.png",
             "description": "Vivienda de las pampas"
         },
         "barracks": {
-            "name": "Fortin",
-            "icon": "assets/icons/barracks.png",
+            "name": "Fortín",
+            "icon": "assets/icons/argentina/fortin.png",
             "description": "Fortaleza fronteriza argentina"
         }
     },
     "uniqueUnit": {
         "id": "granadero",
         "name": "Granadero a Caballo",
-        "icon": "assets/icons/warrior.png",
+        "icon": "assets/icons/argentina/granadero.png",
         "baseUnit": "warrior",
         "age": 19,
         "bonuses": {

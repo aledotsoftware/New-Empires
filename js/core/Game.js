@@ -127,7 +127,8 @@ export class Game {
         return (dx * dx + dy * dy) < (entity.radius * entity.radius);
     }
 
-    constructor(civId = 'romans', mapConfig = null) {
+    constructor(civId = 'romans', enemyCivId = 'vikings', mapConfig = null) {
+        this.enemyCivilizationId = enemyCivId;
         this.civilizationId = civId;
         this.civilization = civilizationManager.getCivilization(civId);
 
@@ -255,52 +256,54 @@ export class Game {
         this.techManager = new TechManager(this);
 
         // SISTEMA DE FOG OF WAR (Niebla de Guerra)
-        this.fow = new FogOfWar(this.terrainMap.cols, this.terrainMap.rows);
+        this.fow = null;
         this.visionTimer = 0;
+        this._fowBufferCanvas = null;
+        this._fowBufferCtx = null;
+        this._fowImageData = null;
+        this._fowImageData32 = null;
+        this._fowColorLUT = null;
 
-        // BOLT OPTIMIZATION: Resize FOW buffer to match tile grid
-        if (typeof OffscreenCanvas !== 'undefined') {
-            this._fowBufferCanvas = new OffscreenCanvas(this.fow.cols, this.fow.rows);
-        } else {
-            this._fowBufferCanvas = document.createElement('canvas');
-            this._fowBufferCanvas.width = this.fow.cols;
-            this._fowBufferCanvas.height = this.fow.rows;
+        if (CONFIG.VISION.ENABLED) {
+            this.fow = new FogOfWar(this.terrainMap.cols, this.terrainMap.rows);
+
+            // BOLT OPTIMIZATION: Resize FOW buffer to match tile grid
+            if (typeof OffscreenCanvas !== 'undefined') {
+                this._fowBufferCanvas = new OffscreenCanvas(this.fow.cols, this.fow.rows);
+            } else {
+                this._fowBufferCanvas = document.createElement('canvas');
+                this._fowBufferCanvas.width = this.fow.cols;
+                this._fowBufferCanvas.height = this.fow.rows;
+            }
+            this._fowBufferCtx = this._fowBufferCanvas.getContext('2d', { alpha: true });
+            this._fowImageData = this._fowBufferCtx.createImageData(this.fow.cols, this.fow.rows);
+            // BOLT OPTIMIZATION: Cache Uint32Array view to avoid allocation in hot path
+            this._fowImageData32 = new Uint32Array(this._fowImageData.data.buffer);
+
+            // BOLT OPTIMIZATION: Pre-fill buffer with black (HIDDEN state) at init time
+            this._fowImageData32.fill(0xFF000000);
+            this._fowBufferCtx.putImageData(this._fowImageData, 0, 0);
+
+            // BOLT OPTIMIZATION: Initialize FOW Color Lookup Table (endian-safe)
+            this._fowColorLUT = new Uint32Array(3);
+
+            const _colorBuf = new ArrayBuffer(4);
+            const _colorBuf8 = new Uint8ClampedArray(_colorBuf);
+            const _colorBuf32 = new Uint32Array(_colorBuf);
+
+            const getInt32Color = (r, g, b, a) => {
+                _colorBuf8[0] = r;
+                _colorBuf8[1] = g;
+                _colorBuf8[2] = b;
+                _colorBuf8[3] = a;
+                return _colorBuf32[0];
+            };
+
+            const exploredAlpha = Math.floor(CONFIG.VISION.EXPLORED_OPACITY * 255);
+            this._fowColorLUT[FOW_STATES.HIDDEN] = getInt32Color(0, 0, 0, 255);
+            this._fowColorLUT[FOW_STATES.EXPLORED] = getInt32Color(0, 0, 0, exploredAlpha);
+            this._fowColorLUT[FOW_STATES.VISIBLE] = getInt32Color(0, 0, 0, 0);
         }
-        this._fowBufferCtx = this._fowBufferCanvas.getContext('2d', { alpha: true });
-        this._fowImageData = this._fowBufferCtx.createImageData(this.fow.cols, this.fow.rows);
-        // BOLT OPTIMIZATION: Cache Uint32Array view to avoid allocation in hot path
-        this._fowImageData32 = new Uint32Array(this._fowImageData.data.buffer);
-
-        // BOLT OPTIMIZATION: Pre-fill buffer with black (HIDDEN state) at init time
-        // This avoids expensive first-frame full update (e.g., 230,400 iterations on ludicrous map)
-        // HIDDEN color is RGBA(0,0,0,255) = 0xFF000000 in little-endian
-        this._fowImageData32.fill(0xFF000000);
-        this._fowBufferCtx.putImageData(this._fowImageData, 0, 0);
-
-        // BOLT OPTIMIZATION: Initialize FOW Color Lookup Table (endian-safe)
-        // We use a Uint32Array view to write pixels 4x faster (1 write vs 4 writes)
-        // This requires pre-calculating the 32-bit integer values for each state.
-        this._fowColorLUT = new Uint32Array(3);
-
-        // Determine platform endianness for correct 32-bit color construction
-        // Create a temporary buffer to map RGBA components to 32-bit integer
-        const _colorBuf = new ArrayBuffer(4);
-        const _colorBuf8 = new Uint8ClampedArray(_colorBuf);
-        const _colorBuf32 = new Uint32Array(_colorBuf);
-
-        const getInt32Color = (r, g, b, a) => {
-            _colorBuf8[0] = r;
-            _colorBuf8[1] = g;
-            _colorBuf8[2] = b;
-            _colorBuf8[3] = a;
-            return _colorBuf32[0];
-        };
-
-        const exploredAlpha = Math.floor(CONFIG.VISION.EXPLORED_OPACITY * 255);
-        // Map FOW_STATES indices (0, 1, 2) to colors
-        this._fowColorLUT[FOW_STATES.HIDDEN] = getInt32Color(0, 0, 0, 255);
-        this._fowColorLUT[FOW_STATES.EXPLORED] = getInt32Color(0, 0, 0, exploredAlpha);
-        this._fowColorLUT[FOW_STATES.VISIBLE] = getInt32Color(0, 0, 0, 0);
 
         // SISTEMA DE PARTÍCULAS (Palette: Visual Feedback)
         if (ParticleSystem) {
@@ -558,7 +561,7 @@ export class Game {
         }
 
         // Crear Centro Urbano inicial (jugador)
-        const townCenter = new TownCenter(startX, startY, 'player');
+        const townCenter = new TownCenter(startX, startY, 'player'); if (typeof civilizationManager !== 'undefined') civilizationManager.applyBuildingBonuses(townCenter, this.civilizationId);
         this._cacheEntityTerrain(townCenter); // OPTIMIZATION
         this.buildings.push(townCenter);
         this.dropOffPoints.push(townCenter);
@@ -999,13 +1002,13 @@ export class Game {
         for (let i = 0; i < 5; i++) {
             const x = startX + rng.next() * 200 - 100;
             const y = startY + rng.next() * 200 - 100;
-            const enemy = new Warrior(x, y, 'enemy');
+            const enemy = new Warrior(x, y, 'enemy'); if (typeof civilizationManager !== 'undefined') civilizationManager.applyUnitBonuses(enemy, this.enemyCivilizationId || 'vikings');
             this._cacheEntityTerrain(enemy); // OPTIMIZATION
             this.enemies.push(enemy);
         }
 
         // Enemy town center
-        const enemyTC = new TownCenter(startX, startY, 'enemy');
+        const enemyTC = new TownCenter(startX, startY, 'enemy'); if (typeof civilizationManager !== 'undefined') civilizationManager.applyBuildingBonuses(enemyTC, this.enemyCivilizationId || 'vikings');
         this._cacheEntityTerrain(enemyTC); // OPTIMIZATION
         this.buildings.push(enemyTC);
         this.buildingGrid.add(enemyTC);
@@ -1233,7 +1236,7 @@ export class Game {
                 const col = entity._lastGridCol !== undefined ? entity._lastGridCol : (entity.x / TILE_SIZE) | 0;
                 const row = entity._lastGridRow !== undefined ? entity._lastGridRow : (entity.y / TILE_SIZE) | 0;
 
-                if (!this.fow.isVisible(col, row)) {
+                if (this.fow && !this.fow.isVisible(col, row)) {
                     continue;
                 }
             }
@@ -3472,11 +3475,11 @@ export class Game {
         const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
 
         // BOLT OPTIMIZATION: Hoist FOW constants for inline check
-        const isVisionEnabled = CONFIG.VISION.ENABLED;
-        const fowGrid = this.fow.grid;
-        const fowCols = this.fow.cols;
-        const fowRows = this.fow.rows;
-        const fowInvTileSize = this.fow.invTileSize;
+        const isVisionEnabled = CONFIG.VISION.ENABLED && !!this.fow;
+        const fowGrid = this.fow ? this.fow.grid : null;
+        const fowCols = this.fow ? this.fow.cols : 0;
+        const fowRows = this.fow ? this.fow.rows : 0;
+        const fowInvTileSize = this.fow ? this.fow.invTileSize : 0;
         const fowVisibleState = FOW_STATES.VISIBLE; // Hoist constant
 
         for (let r = startRow; r <= endRow; r++) {
@@ -4337,7 +4340,7 @@ export class Game {
         const nodesLen = this.resourceNodes.length;
         // Hoist FOW lookups
         const fow = this.fow;
-        const invTileSize = fow.invTileSize;
+        const invTileSize = fow ? fow.invTileSize : 0;
 
         for (let i = 0; i < nodesLen; i++) {
             const node = this.resourceNodes[i];
@@ -4347,7 +4350,7 @@ export class Game {
                 const col = node._gridCol !== undefined ? node._gridCol : (node.x * invTileSize) | 0;
                 const row = node._gridRow !== undefined ? node._gridRow : (node.y * invTileSize) | 0;
 
-                if (fow.isExplored(col, row)) {
+                if (!fow || fow.isExplored(col, row)) {
                     ctx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
                 }
             }
@@ -4366,7 +4369,7 @@ export class Game {
             const col = (building._lastGridCol !== -1) ? building._lastGridCol : (building.x * invTileSize) | 0;
             const row = (building._lastGridRow !== -1) ? building._lastGridRow : (building.y * invTileSize) | 0;
 
-            if (!fow.isExplored(col, row)) {
+            if (fow && !fow.isExplored(col, row)) {
                 continue;
             }
 
@@ -4425,7 +4428,7 @@ export class Game {
 
         // BOLT OPTIMIZATION: Hoist FOW and inverse tile size
         const fow = this.fow;
-        const invTileSize = fow.invTileSize;
+        const invTileSize = fow ? fow.invTileSize : 0;
 
         for (let i = 0; i < enemiesLen; i++) {
             const enemy = this.enemies[i];
@@ -4436,7 +4439,7 @@ export class Game {
             const col = (enemy._lastGridCol !== -1) ? enemy._lastGridCol : (enemy.x * invTileSize) | 0;
             const row = (enemy._lastGridRow !== -1) ? enemy._lastGridRow : (enemy.y * invTileSize) | 0;
 
-            if (!fow.isVisible(col, row)) {
+            if (fow && !fow.isVisible(col, row)) {
                 continue;
             }
 
@@ -6132,3 +6135,5 @@ export class Game {
         }
     }
 }
+
+

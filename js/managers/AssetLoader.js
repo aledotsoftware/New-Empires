@@ -122,7 +122,22 @@ export class AssetLoader {
     }
 
     getSrc(key) {
+        // If key starts with assets/ then it is already a path
+        if (typeof key === 'string' && (key.startsWith('assets/') || key.startsWith('./assets/'))) {
+            return key;
+        }
         return AssetLoader.ASSET_MAP[key] || '';
+    }
+
+    /**
+     * Obtiene la ruta de un icono para usar en el DOM
+     * @param {string} key 
+     * @returns {string}
+     */
+    getIconPath(key) {
+        if (!key) return '';
+        const src = this.getSrc(key);
+        return src || `assets/icons/${key}.png`;
     }
 }
 

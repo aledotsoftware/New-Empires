@@ -688,9 +688,17 @@ function createTechItemElement(tech, status, isInteractive) {
     // Icon
     const iconDiv = document.createElement('div');
     iconDiv.className = 'tech-icon';
-    if (assetLoader && assetLoader.getSrc && assetLoader.getSrc(tech.id)) {
+    
+    // Prioritize tech.icon (key or path), then tech.id (key)
+    let iconSrc = null;
+    if (assetLoader && assetLoader.getSrc) {
+        if (tech.icon) iconSrc = assetLoader.getSrc(tech.icon);
+        if (!iconSrc) iconSrc = assetLoader.getSrc(tech.id);
+    }
+
+    if (iconSrc) {
         const img = document.createElement('img');
-        img.src = assetLoader.getSrc(tech.id);
+        img.src = iconSrc;
         img.className = 'tech-icon-img';
         img.alt = '';
         iconDiv.appendChild(img);
@@ -997,9 +1005,24 @@ function closeBuildMenu() {
 /**
  * Inicia una nueva partida
  */
-function startGame(civId, mapConfig, loadedState = null) {
+function startGame(civId, mapConfig, loadedState = null, enemyCivId = null) {
     debugLogger.start('Iniciando nuevo juego', 'game');
+    
+    // Pick random enemy if not provided
+    if (!enemyCivId && !loadedState) {
+        const civs = dataLoader.getAllCivilizations();
+        const availableEnemyCivs = civs.filter(c => c.civilizationId !== civId);
+        if (availableEnemyCivs.length > 0) {
+            enemyCivId = availableEnemyCivs[Math.floor(Math.random() * availableEnemyCivs.length)].civilizationId;
+        } else {
+            enemyCivId = 'vikings';
+        }
+    } else if (loadedState && loadedState.enemyCivilizationId) {
+        enemyCivId = loadedState.enemyCivilizationId;
+    }
+
     debugLogger.info(`Civilización: ${civId}`, 'game');
+    debugLogger.info(`Enemigo: ${enemyCivId}`, 'game');
     debugLogger.info(`Mapa: ${mapConfig.name || 'Normal'}`, 'game');
 
     // Cancel existing loop
@@ -1025,7 +1048,7 @@ function startGame(civId, mapConfig, loadedState = null) {
     document.getElementById('gameScreen').classList.remove('hidden');
 
     // Crear instancia del juego ahora que el contenedor es visible
-    game = new Game(civId, mapConfig);
+    game = new Game(civId, enemyCivId, mapConfig);
     game.showConfirmation = showConfirmation;
 
 

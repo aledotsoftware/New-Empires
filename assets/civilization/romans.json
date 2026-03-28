@@ -25,7 +25,7 @@
         },
         "warrior": {
             "name": "Legionario",
-            "icon": "assets/icons/warrior.png",
+            "icon": "assets/icons/romans/legionario.png",
             "attack": 12,
             "hp": 110,
             "speed": 45
@@ -41,17 +41,17 @@
     "buildingOverrides": {
         "townCenter": {
             "name": "Foro Romano",
-            "icon": "assets/icons/townCenter.png",
+            "icon": "assets/icons/romans/foro.png",
             "description": "Centro administrativo del imperio romano"
         },
         "house": {
             "name": "Domus",
-            "icon": "assets/icons/house.png",
-            "description": "Vivienda romana tipica"
+            "icon": "assets/icons/romans/domus.png",
+            "description": "Vivienda romana típica"
         },
         "barracks": {
             "name": "Castra",
-            "icon": "assets/icons/barracks.png",
+            "icon": "assets/icons/romans/castra.png",
             "description": "Campamento militar romano"
         }
     },

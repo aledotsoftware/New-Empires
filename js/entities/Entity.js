@@ -55,7 +55,11 @@ export class Entity {
 
     loadIcon() {
         if (!this.type) return;
-        const preloadedImage = assetLoader.getImage(this.type);
+
+        // If this.icon is a specific path (not a generic name), use it as the key
+        const loadKey = (this.icon && (this.icon.includes('/') || this.icon.includes('.'))) ? this.icon : this.type;
+        
+        const preloadedImage = assetLoader.getImage(loadKey);
         if (preloadedImage) {
             this.image = preloadedImage;
         }

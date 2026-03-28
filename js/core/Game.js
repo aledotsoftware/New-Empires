@@ -5516,6 +5516,40 @@ export class Game {
         const popFull = !this.populationManager.canAddPopulation();
 
         if (entity.type === 'villager') {
+            buttons.push({
+                iconKey: 'workshop',
+                iconFallback: '🏗️',
+                label: 'Erigir Estructura',
+                description: 'Diseñar los cimientos de la civilización',
+                hotkey: 'Q',
+                action: () => this.openBuildMenu(),
+                enabled: true
+            });
+        } else if (entity.trainableUnits && entity.trainableUnits.length > 0) {
+            // BOLT OPTIMIZATION: Dynamic production buttons
+            const unitsForCiv = (typeof dataLoader !== 'undefined' && dataLoader.isLoaded()) 
+                ? dataLoader.getUnitsForCivilization(this.civilizationId) 
+                : [];
+
+            for (let i = 0; i < entity.trainableUnits.length; i++) {
+                const unitType = entity.trainableUnits[i];
+                const unitData = unitsForCiv.find(u => u.id === unitType) || {};
+                
+                const cost = CONFIG.UNIT_COSTS[unitType] || CONFIG.UNIT_COSTS.villager;
+                const canAfford = this.canAfford(cost);
+                const enabled = canAfford && !popFull;
+                
+                let error = null;
+                if (!canAfford) error = 'Recursos insuficientes';
+                else if (popFull) error = 'Límite de población alcanzado';
+
+                const iconKey = (typeof civilizationManager !== 'undefined' && civilizationManager) 
+                    ? civilizationManager.getUnitIcon(unitType, this.civilizationId) 
+                    : unitType;
+                
+                const name = unitData.name || (unitType === 'villager' ? 'Aldeano' : unitType === 'warrior' ? 'Guerrero' : unitType);
+                const desc = unitData.description || 'Unidad de la civilización.';
+
                 buttons.push({
                     iconKey: iconKey,
                     iconFallback: unitType === 'villager' ? '👨‍🌾' : '⚔️',

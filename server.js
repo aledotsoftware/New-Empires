@@ -291,7 +291,7 @@ const server = http.createServer((req, res) => {
             // Referrer: Only send origin when cross-origin
             'Referrer-Policy': 'strict-origin-when-cross-origin',
             // Permissions: Disable sensitive features
-            'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), vr=()',
+            'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), xr-spatial-tracking=()',
             // Isolation: Protect against cross-origin attacks (Spectre, etc.)
             'Cross-Origin-Opener-Policy': 'same-origin',
             'Cross-Origin-Resource-Policy': 'same-origin'

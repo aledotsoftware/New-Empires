@@ -4588,7 +4588,11 @@ export class Game {
             this._lastRenderedPopulation = currentPop;
         }
 
-        if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = this.populationManager.getMaxPopulation();
+        const maxPop = this.populationManager.getMaxPopulation();
+        if (forceUpdate || this._lastRenderedMaxPopulation !== maxPop) {
+            if (this.uiElements.maxPopulation) this.uiElements.maxPopulation.textContent = maxPop;
+            this._lastRenderedMaxPopulation = maxPop;
+        }
 
         // Palette: Detailed Population Tooltip
         const popTooltip = document.getElementById('popTooltip');
@@ -4688,13 +4692,15 @@ export class Game {
 
         // Actualizar tiempo de juego
         const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
-        const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
-        const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
-        const timeStr = `${minutes}:${seconds}`;
 
-        // BOLT OPTIMIZATION: Only write if changed (updates once per sec instead of 10x/sec)
-        if (forceUpdate || this._lastRenderedTimeStr !== timeStr) {
+        // BOLT OPTIMIZATION: Only calculate string and update DOM if seconds changed
+        if (forceUpdate || this._lastRenderedSeconds !== elapsedSeconds) {
+            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
+            const timeStr = `${minutes}:${seconds}`;
+
             if (this.uiElements.gameTime) this.uiElements.gameTime.textContent = timeStr;
+            this._lastRenderedSeconds = elapsedSeconds;
             this._lastRenderedTimeStr = timeStr;
         }
 

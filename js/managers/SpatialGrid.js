@@ -200,19 +200,19 @@ export class SpatialGrid {
         // Clamping para no salir de los bordes al iterar
         // BOLT OPTIMIZATION: Calculate bounds directly from world coordinates instead of cell radius
         // This calculates the exact bounding box and avoids Math.ceil(radius * invCellSize) + additions
-        let startCol = ((x - radius) * invCellSize) | 0;
-        if (startCol < 0) startCol = 0;
+        const rawStartCol = ((x - radius) * invCellSize) | 0;
+        const startCol = rawStartCol > 0 ? rawStartCol : 0;
 
-        let endCol = ((x + radius) * invCellSize) | 0;
+        const rawEndCol = ((x + radius) * invCellSize) | 0;
         const maxCol = cols - 1;
-        if (endCol > maxCol) endCol = maxCol;
+        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
 
-        let startRow = ((y - radius) * invCellSize) | 0;
-        if (startRow < 0) startRow = 0;
+        const rawStartRow = ((y - radius) * invCellSize) | 0;
+        const startRow = rawStartRow > 0 ? rawStartRow : 0;
 
-        let endRow = ((y + radius) * invCellSize) | 0;
+        const rawEndRow = ((y + radius) * invCellSize) | 0;
         const maxRow = rows - 1;
-        if (endRow > maxRow) endRow = maxRow;
+        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             // Optimización: calcular índice base de la fila
@@ -281,19 +281,19 @@ export class SpatialGrid {
 
         // OPTIMIZATION: Bitwise truncation (~19% speedup)
         const invCellSize = this.invCellSize;
-        let startCol = (minX * invCellSize) | 0;
-        if (startCol < 0) startCol = 0;
+        const rawStartCol = (minX * invCellSize) | 0;
+        const startCol = rawStartCol > 0 ? rawStartCol : 0;
 
-        let endCol = ((minX + width) * invCellSize) | 0;
+        const rawEndCol = ((minX + width) * invCellSize) | 0;
         const maxCol = cols - 1;
-        if (endCol > maxCol) endCol = maxCol;
+        const endCol = rawEndCol < maxCol ? rawEndCol : maxCol;
 
-        let startRow = (minY * invCellSize) | 0;
-        if (startRow < 0) startRow = 0;
+        const rawStartRow = (minY * invCellSize) | 0;
+        const startRow = rawStartRow > 0 ? rawStartRow : 0;
 
-        let endRow = ((minY + height) * invCellSize) | 0;
+        const rawEndRow = ((minY + height) * invCellSize) | 0;
         const maxRow = rows - 1;
-        if (endRow > maxRow) endRow = maxRow;
+        const endRow = rawEndRow < maxRow ? rawEndRow : maxRow;
 
         for (let r = startRow; r <= endRow; r++) {
             const rowBase = r * cols;

@@ -223,10 +223,11 @@ static _numericSort(a, b) {
         let count = 0;
 
         for (let i = 0; i < len; i++) {
-            const { dy, span } = spans[i];
-            const y = gridY + dy;
+            const spanObj = spans[i];
+            const y = gridY + spanObj.dy;
 
             if (y >= 0 && y < rows) {
+                const span = spanObj.span;
                 const rawMinX = gridX - span;
                 const minX = rawMinX > 0 ? rawMinX : 0;
 
@@ -280,11 +281,12 @@ static _numericSort(a, b) {
         const buffers = this._rowBuffers;
 
         for (let i = 0; i < len; i++) {
-            const { dy, span } = spans[i];
-            const y = gridY + dy;
+            const spanObj = spans[i];
+            const y = gridY + spanObj.dy;
 
             // Bounds check Y
             if (y >= 0 && y < rows) {
+                const span = spanObj.span;
                 const rawMinX = gridX - span;
                 const minX = rawMinX > 0 ? rawMinX : 0;
 

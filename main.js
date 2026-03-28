@@ -439,16 +439,16 @@ function updateSoundVolume(value) {
         const isEnabled = soundManager ? soundManager.enabled : true;
 
         if (!isEnabled || volume === 0) {
-            icon.textContent = '🔇';
+            icon.textContent = '';
             icon.setAttribute('aria-label', 'Silenciado');
         } else if (volume < 30) {
-            icon.textContent = '🔈';
+            icon.textContent = '';
             icon.setAttribute('aria-label', 'Volumen bajo');
         } else if (volume < 70) {
-            icon.textContent = '🔉';
+            icon.textContent = '';
             icon.setAttribute('aria-label', 'Volumen medio');
         } else {
-            icon.textContent = '🔊';
+            icon.textContent = '';
             icon.setAttribute('aria-label', 'Volumen alto');
         }
     }
@@ -562,15 +562,15 @@ function saveGame() {
     if (saveManager) {
         const success = saveManager.save(game);
         if (success) {
-            updateSaveStatus('✅ Partida guardada correctamente', 'success');
+            updateSaveStatus(' Partida guardada correctamente', 'success');
             // Palette: Toast notification
             if (game && game.showNotification) game.showNotification('Partida guardada', 'success');
         } else {
-            updateSaveStatus('❌ Error al guardar la partida', 'error');
+            updateSaveStatus(' Error al guardar la partida', 'error');
             if (game && game.showNotification) game.showNotification('Error al guardar', 'error');
         }
     } else {
-        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+        updateSaveStatus(' Sistema de guardado no disponible', 'error');
     }
 };
 
@@ -579,7 +579,7 @@ function saveGame() {
  */
 function loadGame() {
     if (!saveManager) {
-        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+        updateSaveStatus(' Sistema de guardado no disponible', 'error');
         return;
     }
 
@@ -597,7 +597,7 @@ function loadGame() {
     // We pass state.mapConfig and state.civilizationId
     startGame(state.civilizationId, state.mapConfig, state);
 
-    updateSaveStatus('✅ Partida cargada', 'success');
+    updateSaveStatus(' Partida cargada', 'success');
 };
 
 /**
@@ -611,9 +611,9 @@ function exportGameToFile() {
 
     if (saveManager) {
         saveManager.exportToFile(game);
-        updateSaveStatus('📤 Archivo exportado', 'success');
+        updateSaveStatus(' Archivo exportado', 'success');
     } else {
-        updateSaveStatus('❌ Sistema de guardado no disponible', 'error');
+        updateSaveStatus(' Sistema de guardado no disponible', 'error');
     }
 };
 
@@ -1416,7 +1416,7 @@ function populateCivilizations() {
 
     const randomIconDiv = document.createElement('div');
     randomIconDiv.className = 'civ-icon';
-    randomIconDiv.appendChild(createSafeIconElement('🎲', 'Aleatorio', '80px'));
+    randomIconDiv.appendChild(createSafeIconElement('', 'Aleatorio', '80px'));
 
     const randomNameDiv = document.createElement('div');
     randomNameDiv.className = 'civ-name';
@@ -1727,7 +1727,7 @@ function copyMapSeed() {
     const showFeedback = () => {
         if (!btn) return;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '✅ Copiado!';
+        btn.innerHTML = ' Copiado!';
         btn.style.borderColor = '#48bb78'; // Green
         btn.style.color = '#48bb78';
 

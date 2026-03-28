@@ -81,7 +81,7 @@
             <div class="modal-header">
                 <h2 id="techTreeTitle"><img src="assets/icons/tech.png" onerror="this.style.display='none'"
                         style="width:24px;vertical-align:middle" alt=""> Árbol de Tecnologías</h2>
-                <button id="closeTechTreeBtn" class="btn-close" aria-label="Cerrar">✕</button>
+                <button id="closeTechTreeBtn" class="btn-close" aria-label="Cerrar"></button>
             </div>
             <div class="tech-tree-content" id="techTreeContent">
                 <!-- Se llena dinámicamente con JavaScript -->
@@ -210,7 +210,7 @@
                 <button id="returnToStatsBtn" class="btn-secondary hidden"
                     style="padding:8px 12px; border-color: var(--gold); background: var(--stone-dark); color: var(--gold);"
                     aria-label="Volver a los resultados">
-                    <span class="btn-icon" style="font-size: 1.2em;" role="img" aria-label="Copa">🏆</span> Resultados
+                    <span class="btn-icon" style="font-size: 1.2em;" role="img" aria-label="Copa"></span> Resultados
                 </button>
 
                 <!-- Palette: Idle Villager Indicator (Hidden by default) -->
@@ -255,7 +255,7 @@
                 <div class="modal-header">
                     <h2 id="buildMenuTitle"><img src="assets/icons/workshop.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Construir Edificio</h2>
-                    <button id="closeBuildMenuBtn" class="btn-close" aria-label="Cerrar">✕</button>
+                    <button id="closeBuildMenuBtn" class="btn-close" aria-label="Cerrar"></button>
                 </div>
                 <div class="build-grid">
                     <div class="build-option" data-building="house" role="button" tabindex="0" aria-keyshortcuts="Q"
@@ -408,14 +408,14 @@
                 <div class="game-over-stats" id="gameOverStats"></div>
                 <div class="game-over-actions" style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
                     <button id="playAgainButton" class="btn-restart" style="font-size: 1.2rem; padding: 1rem 2rem;">
-                        🔄 Jugar de Nuevo
+                         Jugar de Nuevo
                     </button>
                     <button id="returnMenuButton" class="btn-secondary"
                         style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
-                        🏠 Volver al Menú
+                         Volver al Menú
                     </button>
                     <button id="viewMapButton" class="btn-secondary" style="font-size: 1.1rem; padding: 0.8rem 1.5rem;">
-                        👁️ Ver Mapa
+                        ️ Ver Mapa
                     </button>
                 </div>
             </div>
@@ -446,7 +446,7 @@
                 <div class="modal-header">
                     <h2 id="settingsTitle"><img src="assets/icons/settings.png" onerror="this.style.display='none'"
                             style="width:24px;vertical-align:middle" alt=""> Configuración</h2>
-                    <button id="closeSettingsBtn" class="btn-close" aria-label="Cerrar">✕</button>
+                    <button id="closeSettingsBtn" class="btn-close" aria-label="Cerrar"></button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
                     <div style="margin-bottom: 30px;">
@@ -468,7 +468,7 @@
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                 <label for="volumeSlider"
                                     style="font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px;">
-                                    <span id="volumeIcon" aria-hidden="true" style="font-size: 1.2rem;">🔊</span>
+                                    <span id="volumeIcon" aria-hidden="true" style="font-size: 1.2rem;"></span>
                                     Volumen Maestro
                                 </label>
                                 <span id="volumeValue" style="color: #48bb78;" aria-live="polite" aria-atomic="true">50%</span>
@@ -602,33 +602,33 @@
 
                     <!-- Palette: Map Info Section -->
                     <div id="mapInfoSection" class="hidden" style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                        <h3 style="margin-bottom: 20px; color: #d4af37;">🗺️ Mapa</h3>
+                        <h3 style="margin-bottom: 20px; color: #d4af37;">️ Mapa</h3>
                         <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="font-size: 0.8rem; color: #a0aec0;">Semilla (Seed)</span>
                                 <span id="mapSeedValue" style="font-family: monospace; color: #e8d48b; font-weight: bold; font-size: 1.1rem; user-select: all;">-</span>
                             </div>
                             <button id="copySeedBtn" class="btn-secondary" style="padding: 6px 12px; font-size: 0.9rem;" aria-label="Copiar semilla al portapapeles">
-                                📋 Copiar
+                                 Copiar
                             </button>
                         </div>
                     </div>
 
                     <div style="margin-bottom: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                        <h3 style="margin-bottom: 20px; color: #d4af37;">💾 Partida</h3>
+                        <h3 style="margin-bottom: 20px; color: #d4af37;">Menú de Partida</h3>
 
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
                             <button id="saveGameBtn" class="btn-secondary"
                                 style="padding: 10px 20px;">
-                                💾 Guardar Partida
+                                Guardar Partida
                             </button>
                             <button id="loadGameBtn" class="btn-secondary"
                                 style="padding: 10px 20px;">
-                                📂 Cargar Partida
+                                Cargar Partida
                             </button>
                             <button id="exportGameBtn" class="btn-secondary"
                                 style="padding: 10px 20px;">
-                                📤 Exportar a Archivo
+                                Exportar a Archivo
                             </button>
                         </div>
                         <p id="saveStatus"
@@ -641,12 +641,12 @@
                             <button id="quitGameBtn" class="btn-secondary hidden"
                                 style="border-color: #c53030; color: #c53030;"
                                 aria-label="Abandonar la partida actual y volver al menú">
-                                🏳️ Abandonar
+                                ️ Abandonar
                             </button>
                             <button id="restartGameBtn" class="btn-secondary hidden"
                                 style="border-color: #d69e2e; color: #d69e2e;"
                                 aria-label="Reiniciar la partida actual con un nuevo mapa">
-                                🔄 Reiniciar
+                                 Reiniciar
                             </button>
                         </div>
                         <button id="resumeSettingsBtn" class="btn-secondary" style="min-width: 100px;">Cerrar</button>
@@ -661,7 +661,7 @@
             <div class="modal-content" style="max-width: 800px;">
                 <div class="modal-header">
                     <h2 id="shortcutsTitle">⌨️ Atajos de Teclado</h2>
-                    <button id="closeShortcutsBtn" class="btn-close" aria-label="Cerrar">✕</button>
+                    <button id="closeShortcutsBtn" class="btn-close" aria-label="Cerrar"></button>
                 </div>
                 <div class="settings-content" style="padding: 20px;">
                     <div class="controls-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">

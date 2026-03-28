@@ -45,6 +45,7 @@ export class SoundManager {
         this.pools = new Map(); // BOLT OPTIMIZATION: Store pools here
         this.enabled = true;
         this.volume = 0.5; // Volumen por defecto (0.0 a 1.0)
+        this.isPlayingMusic = false;
 
         this.audioContext = null;
         try {
@@ -623,7 +624,8 @@ export class SoundManager {
      * Inicia la música de fondo
      */
     startMusic() {
-        if (!this.enabled) return;
+        if (!this.enabled || this.isPlayingMusic) return;
+        this.isPlayingMusic = true;
 
         // Playlist logic
         const musicTracks = [
@@ -638,20 +640,42 @@ export class SoundManager {
         let currentTrackIndex = Math.floor(Math.random() * musicTracks.length);
 
         const playNext = () => {
+            if (!this.isPlayingMusic) return;
+
             const track = musicTracks[currentTrackIndex];
+            
+            // Clean up old instance if exists
+            if (this.musicAudio) {
+                this.musicAudio.pause();
+                this.musicAudio = null;
+            }
+
             this.musicAudio = new Audio(track);
             this.musicAudio.volume = this.volume * 0.5; // Música un poco más baja
             this.musicAudio.addEventListener('ended', () => {
+                if (!this.isPlayingMusic) return;
                 currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
                 playNext();
             });
+
             this.musicAudio.play().catch(e => {
+                this.isPlayingMusic = false;
                 console.warn("Autoplay blocked or error playing music:", e);
-                // Try again on interaction if needed, but for now we log
             });
         };
 
         playNext();
+    }
+
+    /**
+     * Detiene la música de fondo
+     */
+    stopMusic() {
+        this.isPlayingMusic = false;
+        if (this.musicAudio) {
+            this.musicAudio.pause();
+            this.musicAudio = null;
+        }
     }
 
     /**

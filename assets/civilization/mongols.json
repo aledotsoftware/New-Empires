@@ -64,17 +64,17 @@
         },
         "temple": {
             "name": "Templo de Tengri",
-            "icon": "assets/icons/mongols/templo.png",
+            "icon": "assets/icons/mongols/yurta.png",
             "description": "Lugar de adoración al Cielo Eterno."
         },
         "market": {
             "name": "Bazar de la Ruta de la Seda",
-            "icon": "assets/icons/mongols/mercado.png",
+            "icon": "assets/icons/mongols/yurta.png",
             "description": "Intercambia recursos con comerciantes de todo el mundo."
         },
         "workshop": {
             "name": "Taller de Máquinas de Asedio",
-            "icon": "assets/icons/mongols/taller.png",
+            "icon": "assets/icons/mongols/campamento.png",
             "description": "Construye poderosas máquinas para destruir murallas enemigas."
         }
     },

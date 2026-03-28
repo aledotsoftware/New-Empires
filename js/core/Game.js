@@ -843,10 +843,10 @@ export class Game {
             // Generar decoraciones de terreno adicionales (flores, rocas, etc.)
             this.terrainDecorManager.generateDecorations(generatedMap);
 
-            console.log(`✅ Mapa procedural aplicado (Semilla: ${generatedMap.metadata.seed})`);
+            console.log(` Mapa procedural aplicado (Semilla: ${generatedMap.metadata.seed})`);
         } else {
             // Fallback: generación simple de recursos (código original)
-            console.log('⚠️ Generador procedural no disponible, usando generación simple');
+            console.log('️ Generador procedural no disponible, usando generación simple');
             this.generateSimpleMap();
         }
 
@@ -983,7 +983,7 @@ export class Game {
             }
         }
 
-        console.log(`✅ Mapa simple generado con ${this.resourceNodes.length} nodos de recursos`);
+        console.log(` Mapa simple generado con ${this.resourceNodes.length} nodos de recursos`);
     }
 
     spawnEnemies() {
@@ -2096,7 +2096,7 @@ export class Game {
                             warning.style.fontSize = '0.8rem';
                             warning.style.marginTop = '4px';
                             warning.style.fontWeight = 'bold';
-                            warning.textContent = '⚠️ Faltan recursos';
+                            warning.textContent = '️ Faltan recursos';
                             option.appendChild(warning);
                         }
                     }
@@ -2946,7 +2946,7 @@ export class Game {
                 'cursor-chop': 'assets/icons/wood.png',
                 'cursor-farm': 'assets/icons/food.png',
                 'cursor-mine': 'assets/icons/pico.png',
-                'cursor-forbidden': 'assets/icons/cancel.png'
+                'cursor-forbidden': 'assets/icons/error.png'
             };
             // Note: If badgeIcon was already explicitly set (like gold.png instead of stone.png), use it
             // if we are doing mining and badgeIcon has been specified.
@@ -3057,14 +3057,14 @@ export class Game {
         const statsContainer = document.getElementById('gameOverStats');
 
         if (victory) {
-            title.textContent = '🏆 Victoria';
+            title.textContent = ' Victoria';
             title.style.background = 'linear-gradient(135deg, #48bb78, #38a169)';
             title.style.webkitBackgroundClip = 'text';
             title.style.webkitTextFillColor = 'transparent';
             message.textContent = '¡Has derrotado a todos los enemigos!';
             this.startVictoryConfetti(); // Palette: Trigger celebration
         } else {
-            title.textContent = '💀 Derrota';
+            title.textContent = ' Derrota';
             title.style.background = 'linear-gradient(135deg, #c53030, #9b2c2c)';
             title.style.webkitBackgroundClip = 'text';
             title.style.webkitTextFillColor = 'transparent';
@@ -3104,7 +3104,7 @@ export class Game {
             popStat.style.justifyContent = 'space-between';
 
             const popLabel = document.createElement('span');
-            popLabel.textContent = '👥 Población Alcanzada: ';
+            popLabel.textContent = ' Población Alcanzada: ';
             popLabel.className = 'text-medium'; // Use existing theme class
 
             const popValue = document.createElement('span');
@@ -4278,18 +4278,14 @@ export class Game {
             }
         }
 
-        if (!drawn) {
-            let icon = '🏗️';
-            switch (this.buildMode) {
-                case 'house': icon = '🏠'; break;
-                case 'barracks': icon = '⚔️'; break;
-                case 'townCenter': icon = '🏰'; break;
-                case 'storage': icon = '📦'; break;
-                case 'storageWood': icon = '🌲'; break;
-                case 'market': icon = '🏪'; break;
-                case 'temple': icon = '⛪'; break;
-                case 'workshop': icon = '🔨'; break;
-            }
+                if (!drawn) {
+            const fontSize = Math.min(width, height) * 0.2;
+            this.ctx.font = `${fontSize}px sans-serif`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillStyle = 'rgba(212, 175, 55, 0.4)';
+            this.ctx.strokeRect(screenX, screenY, width, height);
+        }
 
             const fontSize = Math.min(width, height) * 0.6;
             this.ctx.font = `${fontSize}px Arial`;
@@ -4309,10 +4305,10 @@ export class Game {
             // Shadow/Stroke for visibility
             this.ctx.lineWidth = 4;
             this.ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-            this.ctx.strokeText('🚫', screenX + width / 2, screenY + height / 2);
+            this.ctx.strokeText('', screenX + width / 2, screenY + height / 2);
 
             this.ctx.fillStyle = '#c53030';
-            this.ctx.fillText('🚫', screenX + width / 2, screenY + height / 2);
+            this.ctx.fillText('', screenX + width / 2, screenY + height / 2);
 
             // Reason Text
             const reason = !isGridFree ? 'Ocupado' : 'Terreno Inválido';
@@ -4678,8 +4674,8 @@ export class Game {
                     return row;
                 };
 
-                container.appendChild(createRow('👨‍🌾 Aldeanos:', villagers));
-                container.appendChild(createRow('⚔️ Militares:', military));
+                container.appendChild(createRow('‍ Aldeanos:', villagers));
+                container.appendChild(createRow('️ Militares:', military));
 
                 // Capacity Section
                 const capSection = document.createElement('div');
@@ -4711,8 +4707,8 @@ export class Game {
                     return row;
                 };
 
-                capSection.appendChild(createCapRow('🏠 Casas:', houses));
-                capSection.appendChild(createCapRow('🏰 Centros:', this.townCenterCounts.player));
+                capSection.appendChild(createCapRow(' Casas:', houses));
+                capSection.appendChild(createCapRow(' Centros:', this.townCenterCounts.player));
 
                 container.appendChild(capSection);
                 popTooltip.appendChild(container);
@@ -4823,7 +4819,7 @@ export class Game {
                 tipEl.style.opacity = '0';
 
                 setTimeout(() => {
-                    tipEl.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
+                    tipEl.textContent = ` Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
                     tipEl.style.opacity = '0.8'; // Match default opacity
                 }, 200);
 
@@ -4848,7 +4844,7 @@ export class Game {
 
                 if (hpText) {
                     if (ent.isUnderConstruction) {
-                        hpText.textContent = `🚧 Alzando estructura: ${Math.floor(hpPercent)}%`;
+                        hpText.textContent = ` Alzando estructura: ${Math.floor(hpPercent)}%`;
                     } else {
                         hpText.textContent = `HP: ${Math.floor(ent.hp)}/${ent.maxHp}`;
                     }
@@ -4932,7 +4928,7 @@ export class Game {
             // Show fallback text if image fails (safety net for missing asset)
             iconImg.onerror = () => {
                 iconImg.style.display = 'none';
-                iconDiv.textContent = '👆'; // Text fallback (better than nothing)
+                iconDiv.textContent = ''; // Text fallback (better than nothing)
             };
 
             iconDiv.appendChild(iconImg);
@@ -4959,7 +4955,7 @@ export class Game {
             }
             // Palette: Tip of the Moment
             // Ensure aria-live updates are announced gracefully
-            tipDiv.textContent = `💡 Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
+            tipDiv.textContent = ` Tip: ${GAMEPLAY_TIPS[this.currentTipIndex]}`;
 
             emptyState.appendChild(iconDiv);
             emptyState.appendChild(textDiv);
@@ -5082,7 +5078,7 @@ export class Game {
                 statusText.style.color = '#ecc94b'; // Yellow/Gold
                 statusText.style.marginBottom = '2px';
                 statusText.style.fontWeight = 'bold';
-                statusText.textContent = `🚧 Alzando estructura: ${Math.floor(hpPercent)}%`;
+                statusText.textContent = ` Alzando estructura: ${Math.floor(hpPercent)}%`;
                 hpContainer.appendChild(statusText);
             } else {
                 const hpText = document.createElement('div');
@@ -5140,7 +5136,7 @@ export class Game {
                 prodTitle.style.fontSize = '0.75rem';
                 prodTitle.style.opacity = '0.7';
                 prodTitle.style.marginBottom = '4px';
-                prodTitle.textContent = '🔨 Forjando destino:';
+                prodTitle.textContent = ' Forjando destino:';
                 prodContainer.appendChild(prodTitle);
 
                 const current = entity.productionQueue.getCurrentItem();
@@ -5518,7 +5514,7 @@ export class Game {
         if (entity.type === 'villager') {
             buttons.push({
                 iconKey: 'workshop',
-                iconFallback: '🏗️',
+                iconFallback: '️',
                 label: 'Erigir Estructura',
                 description: 'Diseñar los cimientos de la civilización',
                 hotkey: 'Q',
@@ -5552,7 +5548,7 @@ export class Game {
 
                 buttons.push({
                     iconKey: iconKey,
-                    iconFallback: unitType === 'villager' ? '👨‍🌾' : '⚔️',
+                    iconFallback: '',
                     label: `Convocar ${name}`,
                     description: desc,
                     hotkey: hotkeys[i] || 'Q',
@@ -5575,7 +5571,7 @@ export class Game {
 
                 // Determine best icon for technology
                 let techIconKey = tech.id;
-                let techFallback = '🔬';
+                let techFallback = '';
 
                 let hasSpecificIcon = false;
                 if (assetLoader) {
@@ -5610,7 +5606,7 @@ export class Game {
         // Palette: Add Destroy Button for all player entities
         buttons.push({
             iconKey: 'skull', // Will fallback
-            iconFallback: '💀',
+            iconFallback: '',
             label: 'Destruir',
             description: 'Elimina la unidad o edificio seleccionado',
             hotkey: 'Supr',
@@ -5791,9 +5787,9 @@ export class Game {
                                 }
                             } else {
                                 let icon = '';
-                                if (res === 'food') icon = '🌾';
-                                else if (res === 'wood') icon = '🌲';
-                                else if (res === 'gold') icon = '💰';
+                                if (res === 'food') icon = '';
+                                else if (res === 'wood') icon = '';
+                                else if (res === 'gold') icon = '';
                                 else if (res === 'stone') icon = '🪨';
                                 resSpan.textContent = icon;
                             }
@@ -5826,7 +5822,7 @@ export class Game {
                         errorDiv.style.marginTop = '4px';
                         errorDiv.style.fontSize = '0.75rem';
                         errorDiv.style.fontWeight = 'bold';
-                        errorDiv.textContent = `❌ ${buttonData.error}`;
+                        errorDiv.textContent = ` ${buttonData.error}`;
                         tooltipDiv.appendChild(errorDiv);
                     } else if (!buttonData.enabled && buttonData.cost && !this.canAfford(buttonData.cost)) {
                         // Fallback for legacy items without explicit error
@@ -5852,9 +5848,9 @@ export class Game {
                                 else if (name === 'stone') name = 'piedra';
                                 translatedMissing.push(`${name} ${amt}`);
                             }
-                            errorDiv.textContent = `❌ Falta: ${translatedMissing.join(', ')}`;
+                            errorDiv.textContent = ` Falta: ${translatedMissing.join(', ')}`;
                         } else {
-                            errorDiv.textContent = '❌ Recursos insuficientes';
+                            errorDiv.textContent = ' Recursos insuficientes';
                         }
                         tooltipDiv.appendChild(errorDiv);
                     }
@@ -5997,7 +5993,7 @@ export class Game {
         // Add error handler for image loading failure
         img.onerror = () => {
             img.style.display = 'none';
-            iconDiv.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            iconDiv.textContent = type === 'success' ? '' : type === 'error' ? '' : 'ℹ️';
         };
 
         iconDiv.appendChild(img);
@@ -6092,7 +6088,7 @@ export class Game {
         const distSq = dx * dx + dy * dy;
 
         if (now - this.lastAttackNotification.time > COOLDOWN || distSq > DIST_SQ) {
-            this.showNotification('⚠️ ¡Estamos bajo ataque!', 'error', { x: entity.x, y: entity.y });
+            this.showNotification('️ ¡Estamos bajo ataque!', 'error', { x: entity.x, y: entity.y });
             this.lastAttackNotification = { time: now, x: entity.x, y: entity.y };
 
             // Optional: visual flair or sound

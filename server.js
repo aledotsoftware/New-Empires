@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 // Security: Rate Limiting Configuration
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 300; // 300 requests per minute per IP
+const RATE_LIMIT_MAX_REQUESTS = 10000; // 1200 requests per minute per IP
 const MAX_TRACKED_IPS = 10000; // Security: Limit memory usage to prevent DoS
 const ipCounts = new Map();
 
@@ -60,6 +60,7 @@ const MIME_TYPES = {
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
     '.gif': 'image/gif',
+    '.webp': 'image/webp',
     '.svg': 'image/svg+xml; charset=utf-8',
     '.wav': 'audio/wav',
     '.mp3': 'audio/mpeg',

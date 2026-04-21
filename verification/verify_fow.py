@@ -1,4 +1,3 @@
-
 from playwright.sync_api import Page, expect, sync_playwright
 import time
 
@@ -10,18 +9,20 @@ def test_fow_render(page: Page):
     page.click("#startButton")
 
     # Wait for Map Size screen
-    page.wait_for_selector("#mapSizeScreen:not(.hidden)")
+    page.wait_for_selector("#mapSizeScreen:not(.hidden)", timeout=10000)
+    time.sleep(1)
     # Select 'Small' (should be quick to render)
     page.click(".map-size-option[data-size='small']")
 
     # Wait for Civ Selection
-    page.wait_for_selector("#civSelectionScreen:not(.hidden)")
+    page.wait_for_selector("#civSelectionScreen:not(.hidden)", timeout=10000)
+    time.sleep(1)
     # Select first civ (e.g. random or first available)
     page.click(".civ-option")
 
     # Wait for Game Screen
-    page.wait_for_selector("#gameScreen:not(.hidden)")
-    page.wait_for_selector("#gameCanvas")
+    page.wait_for_selector("#gameScreen:not(.hidden)", timeout=10000)
+    page.wait_for_selector("#gameCanvas", timeout=10000)
 
     # 3. Assert: Verify game is running
     # Check if canvas exists

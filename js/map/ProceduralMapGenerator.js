@@ -618,11 +618,16 @@ export class ProceduralMapGenerator {
                 // Crear islas usando distancia al centro
                 const centerX = this.width / 2;
                 const centerY = this.height / 2;
-                const dist = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
-                const maxDist = Math.sqrt(centerX * centerX + centerY * centerY);
-                const islandFactor = 1 - (dist / maxDist);
+                const dx = x - centerX;
+                const dy = y - centerY;
+                // Calculamos factor usando distSq en lugar de dist para evitar 2 Math.sqrt por tile
+                // dist^2 / maxDist^2 = (dist/maxDist)^2
+                const distSq = dx * dx + dy * dy;
+                const maxDistSq = centerX * centerX + centerY * centerY;
 
-                if (elevation < 0.3 || islandFactor < 0.4) {
+                // Si dist/maxDist > 0.6 => (dist/maxDist)^2 > 0.36
+                // islandFactor < 0.4 significa 1 - dist/maxDist < 0.4 => dist/maxDist > 0.6
+                if (elevation < 0.3 || (distSq / maxDistSq) > 0.36) {
                     this.terrainTypes[y][x] = 'water';
                     this.heightmap[y][x] = 0.1;
                 }
@@ -632,11 +637,14 @@ export class ProceduralMapGenerator {
                 // Lago central
                 const lakeCenterX = this.width / 2;
                 const lakeCenterY = this.height / 2;
-                const lakeDist = Math.sqrt((x - lakeCenterX) * (x - lakeCenterX) + (y - lakeCenterY) * (y - lakeCenterY));
+                const ldx = x - lakeCenterX;
+                const ldy = y - lakeCenterY;
+                const lakeDistSq = ldx * ldx + ldy * ldy;
                 const lakeRadius = Math.min(this.width, this.height) / 6;
 
                 // Bordes difuminados usando el ruido Perlin existente
-                if (lakeDist < lakeRadius + (elevation * 10 - 5)) {
+                const threshold = lakeRadius + (elevation * 10 - 5);
+                if (threshold > 0 && lakeDistSq < threshold * threshold) {
                     this.terrainTypes[y][x] = 'water';
                     this.heightmap[y][x] = 0.1;
                 }
@@ -702,15 +710,20 @@ export class ProceduralMapGenerator {
                 }
 
                 // Calcular distancia mínima a otros jugadores
-                let minDistToOthers = Infinity;
+                let minDistToOthersSq = Infinity;
                 for (let other of this.playerStarts) {
-                    const dist = Math.sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
-                    minDistToOthers = Math.min(minDistToOthers, dist);
+                    const dx = x - other.x;
+                    const dy = y - other.y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < minDistToOthersSq) {
+                        minDistToOthersSq = distSq;
+                    }
                 }
 
+                const minDistanceSq = minDistance * minDistance;
                 // Preferir posiciones más alejadas
-                if (minDistToOthers > bestScore && minDistToOthers > minDistance) {
-                    bestScore = minDistToOthers;
+                if (minDistToOthersSq > bestScore && minDistToOthersSq > minDistanceSq) {
+                    bestScore = minDistToOthersSq;
                     bestPos = { x, y };
                 }
             }
@@ -723,14 +736,14 @@ export class ProceduralMapGenerator {
     }
 
     ensureBuildableArea(centerX, centerY, radius) {
+        const radiusSq = radius * radius;
         for (let dy = -radius; dy <= radius; dy++) {
             for (let dx = -radius; dx <= radius; dx++) {
                 const x = centerX + dx;
                 const y = centerY + dy;
 
                 if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist <= radius) {
+                    if ((dx * dx + dy * dy) <= radiusSq) {
                         this.terrainTypes[y][x] = 'grassland';
                         this.heightmap[y][x] = 0.5;
                     }
@@ -939,8 +952,9 @@ export class ProceduralMapGenerator {
             if (this.isValidResourceCenter(cx, cy)) {
                 let tooClose = false;
                 for (let start of this.playerStarts) {
-                    const dist = Math.sqrt((cx - start.x) * (cx - start.x) + (cy - start.y) * (cy - start.y));
-                    if (dist < 25) {
+                    const dx = cx - start.x;
+                    const dy = cy - start.y;
+                    if ((dx * dx + dy * dy) < 625) { // 25 * 25 = 625
                         tooClose = true;
                         break;
                     }
@@ -969,8 +983,9 @@ export class ProceduralMapGenerator {
 
         // Verificar que el centro no esté muy cerca de otros recursos
         for (let res of this.resources) {
-            const dist = Math.sqrt((cx - res.x) * (cx - res.x) + (cy - res.y) * (cy - res.y));
-            if (dist < 5) return false; // Distancia mínima entre clústers
+            const dx = cx - res.x;
+            const dy = cy - res.y;
+            if ((dx * dx + dy * dy) < 25) return false; // 5 * 5 = 25 Distancia mínima entre clústers
         }
 
         return true;

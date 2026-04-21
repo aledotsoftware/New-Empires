@@ -271,7 +271,8 @@ window.game.isPaused = true;
 // Ver estado actual
 console.log({
     fps: window.game.lastFPS,
-    entities: window.game.entities.length,
+    units: window.game.units.length,
+    buildings: window.game.buildings.length,
     deltaTime: window.game.lastDeltaTime
 });
 

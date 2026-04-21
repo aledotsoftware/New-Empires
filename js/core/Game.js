@@ -2603,22 +2603,6 @@ export class Game {
         array.length = writeIdx;
     }
 
-    /**
-     * Legacy getter for backward compatibility.
-     * WARNING: This creates a new array on every access. Do not use in hot paths.
-     */
-    get entities() {
-        const u = this.units;
-        const b = this.buildings;
-        const e = this.enemies;
-        const res = new Array(u.length + b.length + e.length);
-        let i = 0;
-        for (let j = 0; j < u.length; j++) res[i++] = u[j];
-        for (let j = 0; j < b.length; j++) res[i++] = b[j];
-        for (let j = 0; j < e.length; j++) res[i++] = e[j];
-        return res;
-    }
-
     update(deltaTime) {
         if (this.isPaused) return;
 

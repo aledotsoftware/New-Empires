@@ -149,8 +149,8 @@ console.log('tipo:', typeof window.game);
 **Diagnóstico**:
 ```javascript
 // Ver FPS actual
-console.log('Entidades:', window.game?.entities?.length);
 console.log('Unidades:', window.game?.units?.length);
+console.log('Edificios:', window.game?.buildings?.length);
 ```
 
 ---
@@ -264,7 +264,6 @@ console.log({
     poblacion: window.game?.population,
     unidades: window.game?.units?.length,
     edificios: window.game?.buildings?.length,
-    entidades: window.game?.entities?.length,
     civilizacion: window.game?.civilizationId
 });
 

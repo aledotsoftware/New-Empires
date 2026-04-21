@@ -116,7 +116,7 @@ const game = new Game('test', mapConfig);
 
 const tc = new dom.window.TownCenter(100, 100, 1, game);
 tc.isConstructed = true;
-game.entities.push(tc);
+game.buildings.push(tc);
 
 // give resources
 game.resources = { food: 500, wood: 500, gold: 500, stone: 500 };

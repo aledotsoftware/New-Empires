@@ -1,37 +1,36 @@
-import { SpatialGrid } from '../js/managers/SpatialGrid.js';
+const data = new Uint8Array(480 * 480);
+data.fill(1); // Explored
+for (let i = 0; i < 10000; i++) data[Math.floor(Math.random() * data.length)] = 2; // Visible
 
-const grid = new SpatialGrid(6400, 6400, 100);
+const width = 300, height = 300;
+const cols = 480, rows = 480;
+const scaleX = width / cols;
+const scaleY = height / rows;
 
-const entities = [];
-for (let i = 0; i < 5000; i++) {
-    entities.push({
-        x: Math.random() * 6400,
-        y: Math.random() * 6400,
-        visionRadius: 10 * 32,
-        _spatialMinX: null,
-        _spatialMaxX: null,
-        _spatialMinY: null,
-        _spatialMaxY: null,
-        _spatialIndex: -1,
-        _spatialCellSize: 0
-    });
-}
+console.time('Optimized - drawRect');
+for (let iter = 0; iter < 100; iter++) {
+    // We cannot create Path2D in node, simulating iteration cost
+    let ops = 0;
+    for (let r = 0; r < rows; r++) {
+        const y = r * scaleY;
+        const rowOffset = r * cols;
+        // Group rectangles on X axis to avoid multiple calls per row!
+        let startC = -1;
+        let currentState = -1;
 
-// Warm up
-for (let j = 0; j < 5000; j++) {
-    grid.add(entities[j]);
-}
-
-console.time('Optimized (Cached)');
-for (let i = 0; i < 1000; i++) {
-    grid.clear();
-    for (let j = 0; j < 5000; j++) {
-        // simulate slight movement
-        if (Math.random() < 0.1) {
-            entities[j].x += (Math.random() - 0.5) * 5;
-            entities[j].y += (Math.random() - 0.5) * 5;
+        for (let c = 0; c < cols; c++) {
+            const state = data[rowOffset + c];
+            if (state !== currentState) {
+                if (startC !== -1) {
+                    if (currentState === 0 || currentState === 1) ops++; // Flush previous
+                }
+                startC = c;
+                currentState = state;
+            }
         }
-        grid.add(entities[j]);
+        if (startC !== -1 && (currentState === 0 || currentState === 1)) {
+            ops++; // Flush end
+        }
     }
 }
-console.timeEnd('Optimized (Cached)');
+console.timeEnd('Optimized - drawRect');

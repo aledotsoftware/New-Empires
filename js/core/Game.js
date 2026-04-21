@@ -4518,12 +4518,35 @@ export class Game {
             for (let r = 0; r < rows; r++) {
                 const y = r * scaleY;
                 const rowOffset = r * cols;
+
+                // BOLT OPTIMIZATION: Group adjacent tiles of the same state to minimize Path2D rect allocations
+                let startC = -1;
+                let currentState = -1;
+
                 for (let c = 0; c < cols; c++) {
                     const state = grid[rowOffset + c];
-                    if (state === FOW_STATES.HIDDEN) {
-                        this._minimapFOWHiddenPath.rect(c * scaleX, y, scaleX, scaleY);
-                    } else if (state === FOW_STATES.EXPLORED) {
-                        this._minimapFOWExploredPath.rect(c * scaleX, y, scaleX, scaleY);
+
+                    if (state !== currentState) {
+                        if (startC !== -1) {
+                            const w = (c - startC) * scaleX;
+                            if (currentState === FOW_STATES.HIDDEN) {
+                                this._minimapFOWHiddenPath.rect(startC * scaleX, y, w, scaleY);
+                            } else if (currentState === FOW_STATES.EXPLORED) {
+                                this._minimapFOWExploredPath.rect(startC * scaleX, y, w, scaleY);
+                            }
+                        }
+                        startC = c;
+                        currentState = state;
+                    }
+                }
+
+                // Flush end of row
+                if (startC !== -1) {
+                    const w = (cols - startC) * scaleX;
+                    if (currentState === FOW_STATES.HIDDEN) {
+                        this._minimapFOWHiddenPath.rect(startC * scaleX, y, w, scaleY);
+                    } else if (currentState === FOW_STATES.EXPLORED) {
+                        this._minimapFOWExploredPath.rect(startC * scaleX, y, w, scaleY);
                     }
                 }
             }

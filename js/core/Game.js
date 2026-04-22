@@ -1189,7 +1189,13 @@ export class Game {
             return;
         }
 
-        this.selectedEntities = [...army];
+        // BOLT OPTIMIZATION: Reuse array instead of spread syntax
+        this.selectedEntities.length = 0;
+        const len = army.length;
+        for (let i = 0; i < len; i++) {
+            this.selectedEntities[i] = army[i];
+        }
+
         this.updateSelectionPanel();
         this.updateActionsPanel();
         this.showNotification(`${army.length} unidades militares seleccionadas`, 'info');
@@ -1260,16 +1266,22 @@ export class Game {
         const minY = Math.min(this.dragStart.y, this.mouse.worldY);
         const maxY = Math.max(this.dragStart.y, this.mouse.worldY);
 
-        this.selectedEntities = [];
+        this.selectedEntities.length = 0;
 
         // Si es un click simple (área muy pequeña), seleccionar la entidad más cercana
-        if (Math.abs(this.dragStart.x - this.mouse.worldX) < 10 &&
-            Math.abs(this.dragStart.y - this.mouse.worldY) < 10) {
+        const dx = this.dragStart.x - this.mouse.worldX;
+        const dy = this.dragStart.y - this.mouse.worldY;
+
+        // BOLT OPTIMIZATION: Math.abs is slower than simple arithmetic and ternary
+        const absDx = dx < 0 ? -dx : dx;
+        const absDy = dy < 0 ? -dy : dy;
+
+        if (absDx < 10 && absDy < 10) {
 
             const closest = this.getEntityAt(this.mouse.worldX, this.mouse.worldY);
 
             if (closest) {
-                this.selectedEntities = [closest];
+                this.selectedEntities[0] = closest;
 
                 // Reproducir sonido y efecto visual de selección
                 if (soundManager) {
@@ -1344,9 +1356,9 @@ export class Game {
                 cache.length = 0;
             }
 
-            const visibleSameType = [];
-            let visibleCount = 0;
             const len = cache.length;
+            this.selectedEntities.length = 0;
+            let visibleCount = 0;
             const camX = this.camera.x;
             const camY = this.camera.y;
             const viewW = this.viewWidth;
@@ -1357,13 +1369,12 @@ export class Game {
                 if (u.team === 'player' && u.type === type && !u.isDead) {
                     if (u.x >= camX && u.x <= camX + viewW &&
                         u.y >= camY && u.y <= camY + viewH) {
-                        visibleSameType[visibleCount++] = u;
+                        this.selectedEntities[visibleCount++] = u;
                     }
                 }
             }
 
-            if (visibleSameType.length > 0) {
-                this.selectedEntities = visibleSameType;
+            if (visibleCount > 0) {
                 this.updateSelectionPanel();
                 this.updateActionsPanel();
 
@@ -1414,7 +1425,8 @@ export class Game {
         }
 
         // Seleccionar el aldeano
-        this.selectedEntities = [foundVillager];
+        this.selectedEntities.length = 0;
+        this.selectedEntities[0] = foundVillager;
         this.updateSelectionPanel();
         this.updateActionsPanel();
 
@@ -1618,12 +1630,16 @@ export class Game {
             // Añadir al grupo actual
             for (const entity of aliveEntities) {
                 if (!this.selectedEntities.includes(entity)) {
-                    this.selectedEntities.push(entity);
+                    this.selectedEntities[this.selectedEntities.length] = entity;
                 }
             }
         } else {
-            // Reemplazar selección
-            this.selectedEntities = [...aliveEntities];
+            // Reemplazar selección (reutilizando el array)
+            this.selectedEntities.length = 0;
+            const len = aliveEntities.length;
+            for (let i = 0; i < len; i++) {
+                this.selectedEntities[i] = aliveEntities[i];
+            }
         }
 
         // Centrar cámara en el grupo
@@ -1727,7 +1743,7 @@ export class Game {
                         if (soundManager) {
                             soundManager.play('error');
                         }
-                        this.selectedEntities = [];
+                        this.selectedEntities.length = 0;
                         this.updateSelectionPanel();
                         this.updateActionsPanel();
                     }
@@ -1822,7 +1838,7 @@ export class Game {
 
             // 2. Palette: Deselect entities if nothing else is active
             if (this.selectedEntities.length > 0) {
-                this.selectedEntities = [];
+                this.selectedEntities.length = 0;
                 this.updateSelectionPanel();
                 this.updateActionsPanel();
                 return;
@@ -4270,21 +4286,34 @@ export class Game {
             }
         }
 
-                if (!drawn) {
+        if (!drawn) {
             const fontSize = Math.min(width, height) * 0.2;
             this.ctx.font = `${fontSize}px sans-serif`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillStyle = 'rgba(212, 175, 55, 0.4)';
             this.ctx.strokeRect(screenX, screenY, width, height);
-        }
 
-            const fontSize = Math.min(width, height) * 0.6;
-            this.ctx.font = `${fontSize}px Arial`;
+            const iconFontSize = Math.min(width, height) * 0.6;
+            this.ctx.font = `${iconFontSize}px Arial`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            this.ctx.fillText(icon, screenX + width / 2, screenY + height / 2);
+
+            // BOLT OPTIMIZATION: Avoid Array.find() inside render loop. Look up directly via DataLoader/CivilizationManager cache or use predefined icon mappings if possible, or use a manual loop if strictly needed.
+            let iconStr = '';
+            if (this.buildMode && typeof dataLoader !== 'undefined' && dataLoader) {
+                const bDefs = dataLoader.getBuildingsForCivilization(this.civilizationId);
+                const bLen = bDefs ? bDefs.length : 0;
+                for (let i = 0; i < bLen; i++) {
+                    if (bDefs[i].id === this.buildMode) {
+                        iconStr = bDefs[i].icon || '';
+                        break;
+                    }
+                }
+            }
+
+            this.ctx.fillText(iconStr, screenX + width / 2, screenY + height / 2);
         }
 
         // Palette: Accessible Invalid Feedback (High Contrast)
@@ -4919,7 +4948,7 @@ export class Game {
             closeBtn.setAttribute('aria-label', 'Deseleccionar (Esc)');
             closeBtn.onclick = (e) => {
                 e.stopPropagation();
-                this.selectedEntities = [];
+                this.selectedEntities.length = 0;
                 this.updateSelectionPanel();
                 this.updateActionsPanel();
             };
@@ -5412,15 +5441,16 @@ export class Game {
                 btn.onclick = (e) => {
                     e.stopPropagation();
                     // Filter selection
-                    // BOLT OPTIMIZATION: Replace .filter with loop
-                    const newSelection = [];
+                    // BOLT OPTIMIZATION: Replace .filter with loop and in-place update
                     let newSelectionCount = 0;
                     const selLen = this.selectedEntities.length;
                     for (let i = 0; i < selLen; i++) {
                         const ent = this.selectedEntities[i];
-                        if (ent.type === type) newSelection[newSelectionCount++] = ent;
+                        if (ent.type === type) {
+                            this.selectedEntities[newSelectionCount++] = ent;
+                        }
                     }
-                    this.selectedEntities = newSelection;
+                    this.selectedEntities.length = newSelectionCount;
                     // Refresh
                     this.updateSelectionPanel();
                     this.updateActionsPanel();

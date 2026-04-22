@@ -28,3 +28,4 @@
 - [Bard] Enhanced building destruction visuals in `EffectsManager.js` with earlier debris triggers and accompanying dust. Updated projectile trails in `Unit.js` to simulate wooden arrows or flaming tips. Added smooth CSS transitions to remaining UI panels in `medieval-theme.css`.
 - [Sentinel] Replaced deprecated global typeof existence checks across the codebase with ES6-compliant boolean truthy evaluations for modern module architecture.
 - [Bard] Integrated procedurally synthesized weather sounds directly into the ambient biome logic within `SoundManager.js`. Adding rain effects to Forest/Water and whistling blizzards to Snow/Tundra biomes, providing true multisensory feedback matching the dynamic visual conditions.
+# [Bolt] Micro-optimized Game.js loops to reduce frame time and allocations.

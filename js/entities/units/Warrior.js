@@ -24,9 +24,9 @@ export class Warrior extends Unit {
         // pero reducimos la penalización si el enemigo es nuestro objetivo actual para darle "stickiness"
         // y evitar que cambie de objetivo constantemente mientras persigue.
         if (this.attackTarget === enemy) {
-            score -= distSq / 200; // Menor penalización si ya lo estamos persiguiendo
+            score -= distSq / 100; // Menor penalización si ya lo estamos persiguiendo
         } else {
-            score -= distSq / 50; // Penalización normal para nuevos objetivos
+            score -= distSq / 15; // Penalización normal para nuevos objetivos
         }
 
         // If HP is low, avoid retreating for now, just fight to the death as warriors do,
@@ -47,6 +47,7 @@ export class Warrior extends Unit {
         this.hp = 100;
         this.attackDamage = 10;
         this.attackSpeed = 1.2;
+        this.attackRange = 35;
         this.canAttack = true;
     }
 }

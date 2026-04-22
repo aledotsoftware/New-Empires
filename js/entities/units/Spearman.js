@@ -14,7 +14,7 @@ export class Spearman extends Unit {
         this.hp = 90;
         this.attackDamage = 9;
         this.attackSpeed = 1.1;
-        this.attackRange = 15;
+        this.attackRange = 38;
         this.speed = 48;
         this.canAttack = true;
     }
@@ -30,7 +30,7 @@ export class Spearman extends Unit {
             score -= 1000;
         }
 
-        score -= distSq / 50;
+        score -= distSq / 15;
 
         if (this.hp < this.maxHp * 0.2) {
             score -= distSq / 10;

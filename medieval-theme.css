@@ -1021,7 +1021,7 @@ body.theme-mayans {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 130px;
+    height: 180px;
 
     display: grid;
     grid-template-columns: 200px 1fr 160px;
@@ -1142,7 +1142,7 @@ body.theme-mayans {
 #commandPanel {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
     gap: 3px;
     padding: 4px;
     max-width: 350px;
@@ -2157,12 +2157,12 @@ button:focus-visible,
     }
 
     #gameHUD {
-        height: 140px;
+        height: 180px;
     }
 
     #commandPanel {
         grid-template-columns: repeat(5, 1fr);
-        grid-template-rows: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
     }
 
     .minimap-container {

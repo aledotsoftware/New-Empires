@@ -538,8 +538,13 @@ export class ParticleSystem {
             this.createDebrisEffect(x, y, size * severity);
 
             // Más humo acompañando a los escombros para mayor impacto
-            if (Math.random() > 0.5) {
+            if (Math.random() > 0.3) {
                 this.createSmokeEffect(x, y, size);
+            }
+
+            // Add fire sparks
+            if (Math.random() > 0.5) {
+                this.createFireEffect(x, y, size * 0.5);
             }
         }
     }

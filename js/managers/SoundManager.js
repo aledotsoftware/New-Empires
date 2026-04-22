@@ -447,6 +447,28 @@ export class SoundManager {
         }
     }
 
+    playMilitaryComplete() {
+        if (!this.enabled) return;
+        // Fanfare for military completion
+        this.playTone(300, 0.1, 'sine', 0.1);
+        setTimeout(() => this.playTone(400, 0.15, 'sine', 0.1), 100);
+        setTimeout(() => this.playTone(500, 0.25, 'sine', 0.15), 250);
+    }
+
+    playVillagerComplete() {
+        if (!this.enabled) return;
+        // Simple positive chime for villager
+        this.playTone(450, 0.1, 'sine', 0.1);
+        setTimeout(() => this.playTone(600, 0.15, 'sine', 0.1), 100);
+    }
+
+    playAlarm() {
+        if (!this.enabled) return;
+        // Warning alarm
+        this.playTone(600, 0.2, 'square', 0.15);
+        setTimeout(() => this.playTone(600, 0.2, 'square', 0.15), 300);
+    }
+
     playTone(frequency, duration, type = 'sine', vol = 0.1) {
         if (!this.audioContext) return;
 
@@ -603,6 +625,13 @@ export class SoundManager {
      */
     playEntitySelection(entityType) {
         if (!entityType) return;
+
+        // Synthesize a generic selection sound for better feedback
+        if (entityType === 'villager' || entityType === 'warrior' || entityType === 'archer') {
+            this.playTone(350, 0.1, 'sine', 0.15);
+        } else {
+            this.playTone(200, 0.1, 'triangle', 0.15);
+        }
 
         // Mapear el tipo de entidad al sonido correspondiente (ej: villager -> selectVillager)
         const soundKey = `select${entityType.charAt(0).toUpperCase() + entityType.slice(1)}`;

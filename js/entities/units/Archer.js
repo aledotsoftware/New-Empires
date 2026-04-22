@@ -22,7 +22,7 @@ export class Archer extends Unit {
         }
 
         // Penalización ligera por distancia (pueden disparar de lejos)
-        score -= distSq / 1000;
+        score -= distSq / 150;
 
         return score;
     }
@@ -51,7 +51,7 @@ export class Archer extends Unit {
             const distSq = dx * dx + dy * dy;
 
             // Mantenemos distancia a un ~90% de nuestra attackRange para tener un margen seguro de disparo
-            const minKiteDistSq = this.attackRangeSq * 0.81;
+            const minKiteDistSq = this.attackRangeSq * 0.36;
 
             // Verificamos si podemos movernos (no estamos estuneados, etc.)
             // En este motor, el Unit base maneja todo en update()

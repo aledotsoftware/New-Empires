@@ -33,6 +33,7 @@ import { StorageWood } from '../entities/buildings/StorageWood.js';
 import { Market } from '../entities/buildings/Market.js';
 import { Temple } from '../entities/buildings/Temple.js';
 import { Workshop } from '../entities/buildings/Workshop.js';
+import { ProductionQueue } from '../systems/ProductionQueue.js';
 
 /**
  * Game - Clase principal del juego
@@ -735,6 +736,10 @@ export class Game {
                 // Mark grid
                 if (this.gridMap && entity.widthTiles && entity.heightTiles) {
                     this.gridMap.occupyArea(entity.gridCol, entity.gridRow, entity.widthTiles, entity.heightTiles, entity);
+                }
+
+                if (eData.productionQueue && entity.productionQueue) {
+                    entity.productionQueue = ProductionQueue.deserialize(eData.productionQueue, entity);
                 }
             }
 

@@ -300,7 +300,7 @@ export class SaveManager {
 
         // Propiedades específicas de edificios
         if (entity.isBuilding) {
-            return {
+            const buildingData = {
                 ...base,
                 isUnderConstruction: entity.isUnderConstruction,
                 constructionProgress: entity.isUnderConstruction ?
@@ -310,6 +310,12 @@ export class SaveManager {
                 gridCol: entity.gridCol,
                 gridRow: entity.gridRow
             };
+
+            if (entity.productionQueue) {
+                buildingData.productionQueue = entity.productionQueue.serialize();
+            }
+
+            return buildingData;
         }
 
         return base;

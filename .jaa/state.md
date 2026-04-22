@@ -29,3 +29,4 @@
 - [Sentinel] Replaced deprecated global typeof existence checks across the codebase with ES6-compliant boolean truthy evaluations for modern module architecture.
 - [Bard] Integrated procedurally synthesized weather sounds directly into the ambient biome logic within `SoundManager.js`. Adding rain effects to Forest/Water and whistling blizzards to Snow/Tundra biomes, providing true multisensory feedback matching the dynamic visual conditions.
 # [Bolt] Micro-optimized Game.js loops to reduce frame time and allocations.
+- [Sentinel] Fixed a persistent save system regression where active ProductionQueues on buildings were permanently lost. Updated `SaveManager.js` to serialize queue data and `Game.js` to deserialize and attach it upon loading, ensuring queue states survive save cycles.

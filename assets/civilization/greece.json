@@ -20,7 +20,8 @@
             "armor": 1.5,
             "maxHp": 1.3,
             "attackDamage": 1.2
-        }
+        },
+        "description": "Infantería pesada de élite con lanza y escudo, mortal en formación."
     },
     "technologyOverrides": {
         "democracy": {

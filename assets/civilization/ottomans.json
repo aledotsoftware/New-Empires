@@ -14,14 +14,16 @@
         "villager": {
             "name": "Aldeano Otomano",
             "icon": "assets/icons/villager.png",
-            "gatherBonus": 1.0
+            "gatherBonus": 1,
+            "description": "Recolecta recursos y construye edificios."
         },
         "warrior": {
             "name": "Sipahi",
             "icon": "assets/icons/warrior.png",
             "attack": 12,
             "hp": 110,
-            "speed": 55
+            "speed": 55,
+            "description": "Unidad de infanteria basica."
         }
     },
     "buildingOverrides": {
@@ -40,7 +42,8 @@
         "bonuses": {
             "attackDamage": 1.5,
             "attackSpeed": 0.8
-        }
+        },
+        "description": "Poderosa infantería de élite del Imperio Otomano equipada con mosquetes."
     },
     "uniqueTechnologies": [
         {

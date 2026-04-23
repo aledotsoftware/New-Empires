@@ -6,9 +6,9 @@
     "color": "#8B4513",
     "bonuses": {
         "unitSpeed": 1.15,
-        "cavalrySpeed": 1.10,
-        "cavalryAttack": 1.20,
-        "gatherSpeed": 1.0
+        "cavalrySpeed": 1.1,
+        "cavalryAttack": 1.2,
+        "gatherSpeed": 1
     },
     "unitOverrides": {
         "villager": {
@@ -27,7 +27,8 @@
             "attackDamage": 1.3,
             "attackSpeed": 1.2,
             "speed": 1.4
-        }
+        },
+        "description": "Arquero a caballo mongol de gran velocidad y daño."
     },
     "technologyOverrides": {
         "weaving": {

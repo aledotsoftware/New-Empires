@@ -1763,6 +1763,38 @@ export class Game {
     }
 
     handleKeyPress(e) {
+
+        // Hotkeys para botones del panel de control (grid 3x5)
+        // Funciona siempre que el menú de construcción NO está abierto
+        const buildMenu = document.getElementById('buildMenu');
+        const isBuildMenuOpen = buildMenu && !buildMenu.classList.contains('hidden');
+
+        if (!isBuildMenuOpen) {
+            const hotkeyActions = {
+                'Q': 0, 'W': 1, 'E': 2, 'R': 3, 'T': 4,  // Fila 1
+                'A': 5, 'S': 6, 'D': 7, 'F': 8, 'G': 9,  // Fila 2
+                'Z': 10, 'X': 11, 'C': 12, 'V': 13, 'B': 14  // Fila 3
+            };
+
+            const key = e.key.toUpperCase();
+            if (hotkeyActions.hasOwnProperty(key)) {
+                const btnIndex = hotkeyActions[key];
+                const actionsGrid = document.getElementById('commandPanel');
+                if (actionsGrid) {
+                    const buttons = actionsGrid.querySelectorAll('.action-btn');
+                    if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
+                        // Palette: Visual feedback for hotkey
+                        buttons[btnIndex].classList.add('active-key');
+                        setTimeout(() => buttons[btnIndex].classList.remove('active-key'), 150);
+
+                        buttons[btnIndex].click();
+                        e.preventDefault();
+                        return; // Stop processing other keys
+                    }
+                }
+            }
+        }
+
         // Delete - Destruir selección (Palette)
         if (e.key === 'Delete') {
             this.deleteSelectedEntities();
@@ -1807,32 +1839,9 @@ export class Game {
         }
 
         // B - Build menu
-        if (e.key === 'b' || e.key === 'B') {
-            const selLen = this.selectedEntities.length;
-            if (selLen === 1 &&
-                this.selectedEntities[0].type === 'villager') {
-                this.openBuildMenu();
-            } else {
-                // Palette: Feedback for invalid action
-                if (selLen === 0) {
-                    this.showNotification('Convoca a un siervo para erigir estructuras', 'error');
-                } else {
-                    // BOLT OPTIMIZATION: Replace .some with loop
-                    let hasNonVillager = false;
-                    for (let i = 0; i < selLen; i++) {
-                        if (this.selectedEntities[i].type !== 'villager') {
-                            hasNonVillager = true;
-                            break;
-                        }
-                    }
-                    if (hasNonVillager) {
-                        this.showNotification('Solo los aldeanos pueden construir', 'error');
-                    } else {
-                        this.showNotification('Selecciona un solo aldeano para construir', 'error');
-                    }
-                }
-                if (soundManager) soundManager.play('error');
-            }
+        // B is now handled by the hotkey map or specifically below if no hotkey action applies
+        if ((e.key === 'b' || e.key === 'B') && this.selectedEntities.length === 1 && this.selectedEntities[0].type === 'villager') {
+            this.openBuildMenu();
         }
 
         // ESC - Cancel y liberar pointer lock
@@ -1885,8 +1894,7 @@ export class Game {
 
         // Atajos de teclado para construcción rápida (Q, W, E, R)
         // Solo funciona cuando el menú de construcción está abierto
-        const buildMenu = document.getElementById('buildMenu');
-        if (buildMenu && !buildMenu.classList.contains('hidden')) {
+        if (isBuildMenuOpen) {
             const buildingMap = {
                 'q': 'house',
                 'w': 'barracks',
@@ -1902,32 +1910,6 @@ export class Game {
             if (buildingMap[key]) {
                 this.buildMode = buildingMap[key];
                 this.closeBuildMenu();
-            }
-        } else {
-            // Hotkeys para botones del panel de control (grid 3x5)
-            // Solo funciona cuando el menú de construcción NO está abierto
-            const hotkeyActions = {
-                'Q': 0, 'W': 1, 'E': 2, 'R': 3, 'T': 4,  // Fila 1
-                'A': 5, 'S': 6, 'D': 7, 'F': 8, 'G': 9,  // Fila 2
-                'Z': 10, 'X': 11, 'C': 12, 'V': 13, 'B': 14  // Fila 3
-            };
-
-            const key = e.key.toUpperCase();
-            if (hotkeyActions.hasOwnProperty(key)) {
-                const btnIndex = hotkeyActions[key];
-                const actionsGrid = document.getElementById('commandPanel');
-                if (actionsGrid) {
-                    const buttons = actionsGrid.querySelectorAll('.action-btn');
-                    if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
-                        // Palette: Visual feedback for hotkey
-                        buttons[btnIndex].classList.add('active-key');
-                        setTimeout(() => buttons[btnIndex].classList.remove('active-key'), 150);
-
-                        buttons[btnIndex].click();
-                        e.preventDefault();
-                        return;
-                    }
-                }
             }
         }
 
@@ -2457,6 +2439,15 @@ export class Game {
         }
 
         this._spawnUnit(unitType, building);
+
+        // Audio feedback for instant train
+        if (typeof soundManager !== 'undefined' && soundManager) {
+            if (unitType === 'villager') {
+                if (soundManager.playVillagerComplete) soundManager.playVillagerComplete();
+            } else {
+                if (soundManager.playMilitaryComplete) soundManager.playMilitaryComplete();
+            }
+        }
     }
 
     /**
@@ -2797,6 +2788,14 @@ export class Game {
             // Procesar spawn si la cola de producción terminó (jugador e IA)
             if (completed && completed.unitType && !building.isUnderConstruction) {
                 this._spawnUnit(completed.unitType, building);
+                // Audio feedback for queue complete
+                if (building.team === 'player' && typeof soundManager !== 'undefined' && soundManager) {
+                    if (completed.unitType === 'villager') {
+                        if (soundManager.playVillagerComplete) soundManager.playVillagerComplete();
+                    } else {
+                        if (soundManager.playMilitaryComplete) soundManager.playMilitaryComplete();
+                    }
+                }
             }
         }
 
@@ -5514,12 +5513,13 @@ export class Game {
         // OPTIMIZATION: Initialize grid only once
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',
-            'A', 'S', 'D', 'F', 'G'
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
         ];
 
-        if (grid.childElementCount !== 10) {
+        if (grid.childElementCount !== 15) {
             grid.innerHTML = '';
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 const btn = document.createElement('button');
                 btn.className = 'action-btn disabled';
                 btn.setAttribute('data-hotkey', hotkeys[i]);
@@ -5640,7 +5640,7 @@ export class Game {
             const availableTechs = this.techManager.getAvailableTechsForBuilding(entity.type);
 
             for (let tech of availableTechs) {
-                if (buttons.length >= 10) break;
+                if (buttons.length >= 15) break;
 
                 const canAfford = this.techManager.canResearch(tech.id);
 
@@ -5693,7 +5693,7 @@ export class Game {
         // OPTIMIZATION: Reuse DOM elements
         const gridButtons = Array.from(grid.children);
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 15; i++) {
             const btn = gridButtons[i];
             const hotkey = hotkeys[i];
 
@@ -5971,20 +5971,21 @@ export class Game {
     renderEmptyGrid(grid) {
         const hotkeys = [
             'Q', 'W', 'E', 'R', 'T',
-            'A', 'S', 'D', 'F', 'G'
+            'A', 'S', 'D', 'F', 'G',
+            'Z', 'X', 'C', 'V', 'B'
         ];
 
         // Ensure grid has 10 children
-        if (grid.childElementCount !== 10) {
+        if (grid.childElementCount !== 15) {
             grid.innerHTML = '';
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 grid.appendChild(document.createElement('button'));
             }
         }
 
         const gridButtons = grid.children;
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 15; i++) {
             const btn = gridButtons[i];
             const hotkey = hotkeys[i];
             const newStateKey = `empty|${hotkey}`;
@@ -6167,8 +6168,11 @@ export class Game {
             this.lastAttackNotification = { time: now, x: entity.x, y: entity.y };
 
             // Optional: visual flair or sound
-            if (this.particleSystem) {
-                // Could add a special ping here
+            if (this.particleSystem && this.particleSystem.createFocusPing) {
+                this.particleSystem.createFocusPing(entity.x, entity.y);
+            }
+            if (typeof soundManager !== 'undefined' && soundManager && soundManager.playAlarm) {
+                soundManager.playAlarm();
             }
         }
     }

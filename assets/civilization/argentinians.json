@@ -21,21 +21,24 @@
         "villager": {
             "name": "Gaucho",
             "icon": "assets/icons/argentina/villager.png",
-            "gatherBonus": 1.2
+            "gatherBonus": 1.2,
+            "description": "Recolecta recursos y construye edificios."
         },
         "warrior": {
             "name": "Miliciano",
             "icon": "assets/icons/warrior.png",
             "attack": 12,
             "hp": 110,
-            "speed": 45
+            "speed": 45,
+            "description": "Unidad de infanteria basica."
         },
         "archer": {
             "name": "Cazador",
             "icon": "assets/icons/archer.png",
             "attack": 8,
             "hp": 60,
-            "speed": 50
+            "speed": 50,
+            "description": "Unidad de rango basica."
         }
     },
     "buildingOverrides": {
@@ -66,7 +69,8 @@
             "maxHp": 1.45,
             "speed": 1.44,
             "attackSpeed": 1.2
-        }
+        },
+        "description": "Infanteria que lanza proyectiles explosivos. Eficaz contra edificios y grupos."
     },
     "uniqueTechnologies": [
         {

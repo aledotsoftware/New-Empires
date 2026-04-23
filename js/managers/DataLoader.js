@@ -243,7 +243,8 @@ export class DataLoader {
             name: uniqueUnitData.name,
             icon: uniqueUnitData.icon,
             availableFromAge: uniqueUnitData.age,
-            isUnique: true
+            isUnique: true,
+            description: uniqueUnitData.description || baseUnit.baseDescription || baseUnit.description
         });
 
         // Aplicar bonificaciones matemáticamente

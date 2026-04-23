@@ -260,19 +260,19 @@ export class ProceduralMapGenerator {
         for (let m of landmasses) {
             if (m.id !== mainMass.id && m.tiles.length > 5) { // Ignorar islitas insignificantes de < 5 tiles
                 let closestM = m.tiles[0];
-                let closestMain = mainMass.tiles[0];
+                // En lugar de conectar a cualquier borde de la masa principal, intentamos conectar
+                // a un punto que esté más hacia el centro de la masa principal para evitar caminos por el borde
+                let closestMain = {x: Math.floor(mainMass.centerX), y: Math.floor(mainMass.centerY)};
                 let minSubDist = Infinity;
 
                 for (let i = 0; i < m.tiles.length; i+=3) { // skip some tiles for performance
                     const t1 = m.tiles[i];
-                    for (let j = 0; j < mainMass.tiles.length; j+=10) { // skip more main tiles
-                        const t2 = mainMass.tiles[j];
-                        const distSq = (t1.x - t2.x)**2 + (t1.y - t2.y)**2;
-                        if (distSq < minSubDist) {
-                            minSubDist = distSq;
-                            closestM = t1;
-                            closestMain = t2;
-                        }
+
+                    // Solo encontramos el punto más cercano en la isla actual al centro de la masa principal
+                    const distSq = (t1.x - closestMain.x)**2 + (t1.y - closestMain.y)**2;
+                    if (distSq < minSubDist) {
+                        minSubDist = distSq;
+                        closestM = t1;
                     }
                 }
 
@@ -428,16 +428,18 @@ export class ProceduralMapGenerator {
             const wobbleX = this.rng.int(-1, 1);
             const wobbleY = this.rng.int(-1, 1);
 
-            // Carve a small radius to make a wider path
+            // Carve a circular radius to make a wider, smoother path
             for(let py = -2; py <= 2; py++) {
                 for(let px = -2; px <= 2; px++) {
-                    let nx = cx + px + wobbleX;
-                    let ny = cy + py + wobbleY;
-                    if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
-                        let t = this.terrainTypes[ny][nx];
-                        if (t === 'water' || t === 'mountain') {
-                            this.terrainTypes[ny][nx] = 'grassland';
-                            this.heightmap[ny][nx] = 0.5; // Neutral elevation
+                    if (px*px + py*py <= 5) { // Patrón más circular en vez de un cuadrado estricto
+                        let nx = cx + px + wobbleX;
+                        let ny = cy + py + wobbleY;
+                        if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                            let t = this.terrainTypes[ny][nx];
+                            if (t === 'water' || t === 'mountain' || t === 'forest') {
+                                this.terrainTypes[ny][nx] = 'grassland';
+                                this.heightmap[ny][nx] = 0.5; // Neutral elevation
+                            }
                         }
                     }
                 }
@@ -496,6 +498,53 @@ export class ProceduralMapGenerator {
         if (this.biome === 'coastal') {
             this.addCoastalBiome();
         }
+
+        // Suavizar terreno para eliminar obstáculos aislados molestos
+        this.smoothTerrain();
+    }
+
+    smoothTerrain() {
+        const newTerrain = [];
+
+        for (let y = 0; y < this.height; y++) {
+            newTerrain[y] = [];
+            for (let x = 0; x < this.width; x++) {
+                const currentType = this.terrainTypes[y][x];
+
+                // Solo suavizar montañas y bosques aislados
+                if (currentType === 'mountain' || currentType === 'forest') {
+                    let matchingNeighbors = 0;
+
+                    // Chequear 8 vecinos
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (dx === 0 && dy === 0) continue;
+
+                            const nx = x + dx;
+                            const ny = y + dy;
+
+                            if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                                if (this.terrainTypes[ny][nx] === currentType) {
+                                    matchingNeighbors++;
+                                }
+                            }
+                        }
+                    }
+
+                    // Si tiene menos de 3 vecinos del mismo tipo, convertir a pastizal
+                    if (matchingNeighbors < 3) {
+                        newTerrain[y][x] = 'grassland';
+                        this.heightmap[y][x] = 0.5;
+                        continue;
+                    }
+                }
+
+                newTerrain[y][x] = currentType;
+            }
+        }
+
+        // Aplicar los cambios
+        this.terrainTypes = newTerrain;
     }
 
     getTerrainFromNoise(elevation, temperature, moisture, mainBiome) {
@@ -709,6 +758,21 @@ export class ProceduralMapGenerator {
                     continue;
                 }
 
+                // Evaluar espacio abierto alrededor (radio de 8 tiles)
+                let openSpaceScore = 0;
+                for (let dy = -8; dy <= 8; dy++) {
+                    for (let dx = -8; dx <= 8; dx++) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                            const t = this.terrainTypes[ny][nx];
+                            if (t !== 'water' && t !== 'mountain' && t !== 'forest') {
+                                openSpaceScore++;
+                            }
+                        }
+                    }
+                }
+
                 // Calcular distancia mínima a otros jugadores
                 let minDistToOthersSq = Infinity;
                 for (let other of this.playerStarts) {
@@ -721,16 +785,27 @@ export class ProceduralMapGenerator {
                 }
 
                 const minDistanceSq = minDistance * minDistance;
-                // Preferir posiciones más alejadas
-                if (minDistToOthersSq > bestScore && minDistToOthersSq > minDistanceSq) {
-                    bestScore = minDistToOthersSq;
-                    bestPos = { x, y };
+
+                // Si cumple la distancia mínima (o no hay otros jugadores), calcular score compuesto
+                if (minDistToOthersSq >= minDistanceSq || this.playerStarts.length === 0) {
+                    // Combinar distancia y espacio abierto (ponderar para que ambos importen)
+                    const score = (minDistToOthersSq === Infinity ? 0 : Math.sqrt(minDistToOthersSq)) * 2 + openSpaceScore;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestPos = { x, y };
+                    }
                 }
             }
 
             if (bestPos) {
                 this.ensureBuildableArea(bestPos.x, bestPos.y, 15);
                 this.playerStarts.push({ x: bestPos.x, y: bestPos.y, playerId: i + 1 });
+            } else if (this.playerStarts.length === 0) {
+                // Fallback extremo
+                this.playerStarts.push({ x: this.width/2, y: this.height/2, playerId: i + 1 });
+            } else {
+                 // Fallback si no encontró lugar perfecto, relajar restricciones
+                 this.playerStarts.push({ x: this.rng.int(20, this.width - 20), y: this.rng.int(20, this.height - 20), playerId: i + 1 });
             }
         }
     }

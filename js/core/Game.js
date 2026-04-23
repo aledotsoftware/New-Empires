@@ -1700,7 +1700,10 @@ export class Game {
                                 } else if (entity.productionQueue.queue && Array.isArray(entity.productionQueue.queue)) {
                                     // BOLT OPTIMIZATION: Avoid splice by saving the reference and clearing
                                     const q = entity.productionQueue.queue;
-                                    cancelledItems = q.slice();
+                                    const qLen = q.length;
+                                    for (let k = 0; k < qLen; k++) {
+                                        cancelledItems[k] = q[k];
+                                    }
                                     q.length = 0;
                                 }
 

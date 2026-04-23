@@ -76,7 +76,14 @@ export class ProductionQueue {
         if (index < 0 || index >= this.queue.length) {
             return null;
         }
-        return this.queue.splice(index, 1)[0];
+
+        const item = this.queue[index];
+        const len = this.queue.length;
+        for (let i = index; i < len - 1; i++) {
+            this.queue[i] = this.queue[i + 1];
+        }
+        this.queue.length = len - 1;
+        return item;
     }
 
     /**
@@ -95,7 +102,13 @@ export class ProductionQueue {
 
         if (current.remaining <= 0) {
             // Unidad completada, remover de la cola y retornar
-            return this.queue.shift();
+            const item = this.queue[0];
+            const len = this.queue.length;
+            for (let i = 0; i < len - 1; i++) {
+                this.queue[i] = this.queue[i + 1];
+            }
+            this.queue.length = len - 1;
+            return item;
         }
 
         return null;

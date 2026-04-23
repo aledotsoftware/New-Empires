@@ -76,7 +76,19 @@ export class ProductionQueue {
         if (index < 0 || index >= this.queue.length) {
             return null;
         }
-        return this.queue.splice(index, 1)[0];
+
+        const cancelled = this.queue[index];
+        // BOLT OPTIMIZATION: Avoid splice
+        let writeIdx = 0;
+        const len = this.queue.length;
+        for (let i = 0; i < len; i++) {
+            if (i !== index) {
+                this.queue[writeIdx++] = this.queue[i];
+            }
+        }
+        this.queue.length = writeIdx;
+
+        return cancelled;
     }
 
     /**

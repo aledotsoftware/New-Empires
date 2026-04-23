@@ -1263,8 +1263,9 @@ export class Game {
         this.selectedEntities = [];
 
         // Si es un click simple (área muy pequeña), seleccionar la entidad más cercana
-        if (Math.abs(this.dragStart.x - this.mouse.worldX) < 10 &&
-            Math.abs(this.dragStart.y - this.mouse.worldY) < 10) {
+        const dxStart = this.dragStart.x - this.mouse.worldX;
+        const dyStart = this.dragStart.y - this.mouse.worldY;
+        if (dxStart * dxStart + dyStart * dyStart < 100) {
 
             const closest = this.getEntityAt(this.mouse.worldX, this.mouse.worldY);
 
@@ -2546,10 +2547,17 @@ export class Game {
 
         // Normalizar vector de teclado si es diagonal
         if (dx !== 0 || dy !== 0) {
-            // OPTIMIZATION: Math.sqrt is faster than Math.hypot
-            const length = Math.sqrt(dx * dx + dy * dy);
-            dx = (dx / length) * this.cameraConfig.baseSpeed;
-            dy = (dy / length) * this.cameraConfig.baseSpeed;
+            // OPTIMIZATION: Fast path for orthogonal movement
+            if (dx === 0) {
+                dy = Math.sign(dy) * this.cameraConfig.baseSpeed;
+            } else if (dy === 0) {
+                dx = Math.sign(dx) * this.cameraConfig.baseSpeed;
+            } else {
+                // OPTIMIZATION: Math.sqrt is faster than Math.hypot
+                const length = Math.sqrt(dx * dx + dy * dy);
+                dx = (dx / length) * this.cameraConfig.baseSpeed;
+                dy = (dy / length) * this.cameraConfig.baseSpeed;
+            }
         }
 
         // 2. Panning por bordes (Edge Scrolling)

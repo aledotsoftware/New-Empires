@@ -1084,14 +1084,20 @@ export class TechManager {
     }
 
     update(deltaTime) {
-        for (let i = this.researchQueue.length - 1; i >= 0; i--) {
+        let writeIdx = 0;
+        const len = this.researchQueue.length;
+        for (let i = 0; i < len; i++) {
             const item = this.researchQueue[i];
             item.timer -= deltaTime;
 
             if (item.timer <= 0) {
                 this.completeResearch(item.techId);
-                this.researchQueue.splice(i, 1);
+            } else {
+                this.researchQueue[writeIdx++] = item;
             }
+        }
+        if (writeIdx !== len) {
+            this.researchQueue.length = writeIdx;
         }
     }
 

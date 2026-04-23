@@ -35,3 +35,6 @@
 - [Cartographer] Addressed critical map playability issues in `ProceduralMapGenerator.js`. Implemented `smoothTerrain()` to perform a cellular automata pass that eliminates isolated 1-tile or 2-tile forests and mountains, preventing annoying pathfinding blockers.
 - [Cartographer] Overhauled `generateBalancedStarts` to evaluate a 17x17 grid around potential start locations, calculating an `openSpaceScore` that prevents players from spawning in boxed-in areas while maintaining safe distances from other players.
 - [Cartographer] Upgraded `carvePath` to cut circular corridors instead of jagged squares, and improved `ensureConnectivity` to connect islands directly towards the center of the main landmass, eliminating narrow, winding coastal choke points.
+- [Bolt] Eliminated `Array.prototype.find()` and `Array.prototype.filter()` from the main simulation and UI hot paths in `Game.js`, adopting in-place `for` loops to drastically cut memory allocation rate and Garbage Collection stalls.
+- [Bolt] Rewrote hotpath Math library calls (`Math.abs`) inside map generation algorithms to utilize inline bitwise and ternary operations, slicing redundant execution overhead.
+- [Bolt] Unified `mousemove` and `mouseup` handler logic in `Game.js` and securely destroyed them in `Game.destroy()`, patching a memory leak that retained detached game instances.

@@ -486,6 +486,12 @@ export class Game {
         if (this._resizeHandler) {
             window.removeEventListener('resize', this._resizeHandler);
         }
+        if (this._mouseMoveHandler) {
+            window.removeEventListener('mousemove', this._mouseMoveHandler);
+        }
+        if (this._mouseUpHandler) {
+            window.removeEventListener('mouseup', this._mouseUpHandler);
+        }
 
         // Remover cursor personalizado del DOM
         if (this.cursorElement && this.cursorElement.parentNode) {
@@ -1028,7 +1034,7 @@ export class Game {
 
     setupEventListeners() {
         // Mouse move - Actualizar cursor DOM y posición lógica
-        window.addEventListener('mousemove', (e) => {
+        this._mouseMoveHandler = (e) => {
             this.hasMouseMoved = true;
 
             // Actualizar posición del cursor visual (DOM)
@@ -1044,22 +1050,21 @@ export class Game {
 
             this.mouse.worldX = this.mouse.x + this.camera.x;
             this.mouse.worldY = this.mouse.y + this.camera.y;
-        });
 
-        // Palette: Dedicated Minimap Drag Handler
-        window.addEventListener('mousemove', (e) => {
             if (this.isMinimapDragging) {
                 this.handleMinimapInput(e.clientX, e.clientY, false);
             }
-        });
+        };
+        window.addEventListener('mousemove', this._mouseMoveHandler);
 
         // Global mouseup to stop dragging anywhere
-        window.addEventListener('mouseup', () => {
+        this._mouseUpHandler = () => {
             if (this.isMinimapDragging) {
                 this.isMinimapDragging = false;
                 this.minimap.style.cursor = 'crosshair'; // Restore default
             }
-        });
+        };
+        window.addEventListener('mouseup', this._mouseUpHandler);
 
         // Click izquierdo
         this.canvas.addEventListener('mousedown', (e) => {
@@ -1872,7 +1877,15 @@ export class Game {
         // H o Space - Center on town center (ir al centro urbano)
         if (e.key === 'h' || e.key === 'H' || e.key === ' ') {
             e.preventDefault();
-            const tc = this.buildings.find(b => b.type === 'townCenter' && b.team === 'player');
+            let tc = null;
+            const bLen = this.buildings.length;
+            for (let i = 0; i < bLen; i++) {
+                const b = this.buildings[i];
+                if (b.type === 'townCenter' && b.team === 'player') {
+                    tc = b;
+                    break;
+                }
+            }
             if (tc) {
                 this.focusCamera(tc.x, tc.y);
 
@@ -2472,7 +2485,14 @@ export class Game {
         let baseType = unitType;
         if (dataLoader && dataLoader.isLoaded()) {
             const unitsForCiv = dataLoader.getUnitsForCivilization(this.civilizationId);
-            const unitData = unitsForCiv.find(u => u.id === unitType);
+            let unitData = null;
+            const uLen = unitsForCiv ? unitsForCiv.length : 0;
+            for (let i = 0; i < uLen; i++) {
+                if (unitsForCiv[i].id === unitType) {
+                    unitData = unitsForCiv[i];
+                    break;
+                }
+            }
             if (unitData) {
                 // If it's a unique unit (has baseUnit) use that, otherwise use its id
                 baseType = unitData.baseUnit || unitData.id;
@@ -5057,7 +5077,15 @@ export class Game {
 
             // Action 1: Focus Town Center
             actionsDiv.appendChild(createActionBtn('townCenter', 'Ir al Centro Urbano', 'Espacio', () => {
-                const tc = this.buildings.find(b => b.type === 'townCenter' && b.team === 'player');
+                let tc = null;
+                const bLen = this.buildings.length;
+                for (let i = 0; i < bLen; i++) {
+                    const b = this.buildings[i];
+                    if (b.type === 'townCenter' && b.team === 'player') {
+                        tc = b;
+                        break;
+                    }
+                }
                 if (tc) { this.focusCamera(tc.x, tc.y); }
                 else this.showNotification('No tienes Centro Urbano', 'error');
             }));
@@ -5604,7 +5632,14 @@ export class Game {
 
             for (let i = 0; i < entity.trainableUnits.length; i++) {
                 const unitType = entity.trainableUnits[i];
-                const unitData = unitsForCiv.find(u => u.id === unitType) || {};
+                let unitData = {};
+                const uLen = unitsForCiv ? unitsForCiv.length : 0;
+                for (let j = 0; j < uLen; j++) {
+                    if (unitsForCiv[j].id === unitType) {
+                        unitData = unitsForCiv[j];
+                        break;
+                    }
+                }
                 
                 const cost = CONFIG.UNIT_COSTS[unitType] || CONFIG.UNIT_COSTS.villager;
                 const canAfford = this.canAfford(cost);

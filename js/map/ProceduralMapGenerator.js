@@ -414,8 +414,10 @@ export class ProceduralMapGenerator {
 
     carvePath(x1, y1, x2, y2) {
         // Simple Bresenham line carving to ensure connectivity
-        let dx = Math.abs(x2 - x1);
-        let dy = Math.abs(y2 - y1);
+        let rawDx = x2 - x1;
+        let dx = rawDx < 0 ? -rawDx : rawDx;
+        let rawDy = y2 - y1;
+        let dy = rawDy < 0 ? -rawDy : rawDy;
         let sx = (x1 < x2) ? 1 : -1;
         let sy = (y1 < y2) ? 1 : -1;
         let err = dx - dy;

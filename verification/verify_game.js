@@ -16,9 +16,9 @@ const { chromium } = require('playwright');
   await mapSizes[0].click(); // Select small map for faster test
 
   // Wait for civ selection
-  await page.waitForSelector('.civilization-card');
-  const civs = await page.$$('.civilization-card');
-  await civs[0].click(); // Select first civ
+  await page.waitForSelector('.civ-option');
+  const civs = await page.$$('.civ-option');
+  await page.evaluate((el) => el.click(), civs[0]);
 
   // Wait for game to initialize
   await page.waitForTimeout(2000);
@@ -37,7 +37,7 @@ const { chromium } = require('playwright');
   });
 
   const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
-  require('fs').writeFileSync('/home/jules/verification/game_running.png', buffer);
+  require('fs').writeFileSync('/app/verification/game_running.png', buffer);
 
   console.log('Screenshot taken!');
   await browser.close();

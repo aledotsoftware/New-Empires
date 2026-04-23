@@ -19,7 +19,8 @@
         "bonuses": {
             "range": 1.3,
             "attackDamage": 1.15
-        }
+        },
+        "description": "Arquero de élite de Babilonia con gran alcance."
     },
     "technologyOverrides": {
         "astronomy": {

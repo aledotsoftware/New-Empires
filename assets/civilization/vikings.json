@@ -21,21 +21,24 @@
         "villager": {
             "name": "Aldeano Vikingo",
             "icon": "assets/icons/villager.png",
-            "gatherBonus": 1.1
+            "gatherBonus": 1.1,
+            "description": "Recolecta recursos y construye edificios."
         },
         "warrior": {
             "name": "Berserker",
             "icon": "assets/icons/vikings/berserker.png",
             "attack": 14,
             "hp": 100,
-            "speed": 60
+            "speed": 60,
+            "description": "Unidad de infanteria basica."
         },
         "archer": {
             "name": "Arquero Nordico",
             "icon": "assets/icons/archer.png",
             "attack": 10,
             "hp": 55,
-            "speed": 55
+            "speed": 55,
+            "description": "Unidad de rango basica."
         }
     },
     "buildingOverrides": {
@@ -66,7 +69,8 @@
             "maxHp": 1.2,
             "speed": 1.44,
             "attackSpeed": 1.5
-        }
+        },
+        "description": "Poderosa unidad de élite vikinga con gran fuerza de combate."
     },
     "uniqueTechnologies": [
         {

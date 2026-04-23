@@ -20,14 +20,16 @@
         "villager": {
             "name": "Campesino",
             "icon": "assets/icons/villager.png",
-            "gatherBonus": 1.1
+            "gatherBonus": 1.1,
+            "description": "Recolecta recursos y construye edificios."
         },
         "archer": {
             "name": "Ballestero Chino",
             "icon": "assets/icons/archer.png",
             "attack": 9,
             "hp": 65,
-            "speed": 50
+            "speed": 50,
+            "description": "Unidad de rango basica."
         }
     },
     "buildingOverrides": {
@@ -46,7 +48,8 @@
         "bonuses": {
             "attackSpeed": 1.5,
             "attackDamage": 1.2
-        }
+        },
+        "description": "Arquero chino equipado con una ballesta de repetición, dispara ráfagas rápidas."
     },
     "uniqueTechnologies": [
         {

@@ -9,7 +9,7 @@
     "bonuses": {
         "buildSpeed": 1.1,
         "buildingHp": 1.1,
-        "infantryAttack": 1.0,
+        "infantryAttack": 1,
         "gatherSpeed": 1.1,
         "startingResources": {
             "wood": 0,
@@ -22,21 +22,24 @@
         "villager": {
             "name": "Puric",
             "icon": "assets/icons/villager.png",
-            "gatherBonus": 1.1
+            "gatherBonus": 1.1,
+            "description": "Recolecta recursos y construye edificios."
         },
         "warrior": {
             "name": "Guerrero con Macana",
             "icon": "assets/icons/warrior.png",
             "attack": 11,
             "hp": 100,
-            "speed": 50
+            "speed": 50,
+            "description": "Unidad de infanteria basica."
         },
         "archer": {
             "name": "Hondero",
             "icon": "assets/icons/archer.png",
             "attack": 9,
             "hp": 55,
-            "speed": 55
+            "speed": 55,
+            "description": "Unidad de rango basica."
         }
     },
     "buildingOverrides": {
@@ -66,7 +69,8 @@
             "attackDamage": 1.25,
             "maxHp": 1.2,
             "speed": 1.1
-        }
+        },
+        "description": "Lancero inca de largo alcance. Muy eficaz contra infantería y caballería."
     },
     "uniqueTechnologies": [
         {

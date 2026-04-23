@@ -5,10 +5,10 @@
     "icon": "assets/icons/civs/sumerios.png",
     "color": "#D4A574",
     "bonuses": {
-        "buildSpeed": 1.20,
+        "buildSpeed": 1.2,
         "buildingHp": 1.15,
         "agricultureBonus": 1.25,
-        "woodGather": 1.10
+        "woodGather": 1.1
     },
     "uniqueUnit": {
         "id": "warCart",
@@ -20,7 +20,8 @@
             "attackDamage": 1.4,
             "speed": 1.5,
             "maxHp": 1.3
-        }
+        },
+        "description": "Robusto carro de guerra sumerio de gran movilidad y ataque cuerpo a cuerpo."
     },
     "technologyOverrides": {
         "mudBricks": {

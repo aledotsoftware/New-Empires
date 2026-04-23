@@ -20,7 +20,8 @@
             "armor": 1.6,
             "maxHp": 1.4,
             "attackDamage": 1.25
-        }
+        },
+        "description": "Caballeria pesada con armadura pesada, resistente a ataques cuerpo a cuerpo."
     },
     "technologyOverrides": {
         "fortification": {

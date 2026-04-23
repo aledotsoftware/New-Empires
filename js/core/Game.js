@@ -253,6 +253,11 @@ export class Game {
         // DECORACIONES DE TERRENO
         this.terrainDecorManager = new TerrainDecorManager(this);
 
+        // Palette: Preload civilization assets
+        if (assetLoader && dataLoader) {
+            assetLoader.preloadCivilizationAssets(this.civilizationId, dataLoader);
+        }
+
         // SISTEMA DE TECNOLOGÍAS
         this.techManager = new TechManager(this);
 
@@ -4318,7 +4323,14 @@ export class Game {
                 }
             }
 
-            this.ctx.fillText(iconStr, screenX + width / 2, screenY + height / 2);
+            // Don't draw if it's a path
+            if (iconStr && (iconStr.includes('/') || iconStr.includes('.'))) {
+                iconStr = '';
+            }
+
+            if (iconStr) {
+                this.ctx.fillText(iconStr, screenX + width / 2, screenY + height / 2);
+            }
         }
 
         // Palette: Accessible Invalid Feedback (High Contrast)
@@ -5089,7 +5101,8 @@ export class Game {
 
             let iconSrc = null;
             if (assetLoader) {
-                iconSrc = assetLoader.getSrc(entity.type);
+                // Use entity.icon if it exists (for civ overrides), fallback to type
+                iconSrc = assetLoader.getIconPath(entity.icon || entity.type);
             }
 
             if (iconSrc) {
@@ -5198,7 +5211,8 @@ export class Game {
 
                     // Icono de la unidad
                     const unitIcon = document.createElement('img');
-                    unitIcon.src = `assets/icons/${current.unitType}.png`;
+                    const iconPath = civilizationManager.getUnitIcon(current.unitType, this.civilizationId);
+                    unitIcon.src = assetLoader.getIconPath(iconPath);
                     unitIcon.alt = current.unitType;
                     unitIcon.style.width = '24px';
                     unitIcon.style.height = '24px';
@@ -5298,7 +5312,8 @@ export class Game {
 
                             // Icon
                             if (assetLoader) {
-                                const src = assetLoader.getSrc(item.unitType);
+                                const iconPath = civilizationManager.getUnitIcon(item.unitType, this.civilizationId);
+                                const src = assetLoader.getIconPath(iconPath);
                                 if (src) {
                                     const img = document.createElement('img');
                                     img.src = src;
@@ -5426,7 +5441,17 @@ export class Game {
 
                 // Icon
                 if (assetLoader) {
-                    const iconSrc = assetLoader.getSrc(type);
+                    // Try to get the specific icon for this unit/building type for the player's civilization
+                    let iconKey = type;
+                    if (civilizationManager) {
+                        // Check if it's a building or unit to use the right helper
+                        const isBuilding = CONFIG.BUILDING_SIZES[type] !== undefined;
+                        iconKey = isBuilding 
+                            ? civilizationManager.getBuildingIcon(type, this.civilizationId)
+                            : civilizationManager.getUnitIcon(type, this.civilizationId);
+                    }
+                    
+                    const iconSrc = assetLoader.getIconPath(iconKey);
                     if (iconSrc) {
                         const img = document.createElement('img');
                         img.src = iconSrc;
@@ -5521,7 +5546,7 @@ export class Game {
         // Helper para crear elementos
         const createIconElement = (key, fallback) => {
             if (assetLoader) {
-                const src = assetLoader.getSrc(key);
+                const src = assetLoader.getIconPath(key);
                 if (src) {
                     const img = document.createElement('img');
                     img.src = src;
@@ -5533,7 +5558,7 @@ export class Game {
             const span = document.createElement('span');
             span.textContent = fallback || '';
             return span;
-        }
+        };
 
         // Helper para crear elementos de costo (Legacy for internal cost text generation if needed)
         // Updated to use full names for better a11y text generation

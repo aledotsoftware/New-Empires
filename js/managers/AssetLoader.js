@@ -142,10 +142,63 @@ export class AssetLoader {
      */
     getIconPath(key) {
         if (!key) return '';
+        
+        // If it's already a path, return it
+        if (typeof key === 'string' && (key.startsWith('assets/') || key.startsWith('./assets/'))) {
+            return key;
+        }
+
         const src = this.getSrc(key);
-        // Avoid template string allocation if we have the src
         if (src) return src;
+        
+        // Fallback to default icon path if not found in map and not a path
         return 'assets/icons/' + key + '.png';
+    }
+
+    /**
+     * Pre-carga todos los assets específicos de una civilización
+     * @param {string} civId 
+     * @param {Object} dataLoader Instancia de DataLoader
+     */
+    async preloadCivilizationAssets(civId, dataLoader) {
+        if (!dataLoader) return;
+        
+        const civ = dataLoader.civilizations[civId];
+        if (!civ) return;
+
+        debugLogger.start(`Pre-cargando assets para ${civ.name}`, 'assets');
+        const promises = [];
+
+        // Overrides de edificios
+        if (civ.buildingOverrides) {
+            for (const type in civ.buildingOverrides) {
+                const icon = civ.buildingOverrides[type].icon;
+                if (icon && (icon.includes('/') || icon.includes('.'))) {
+                    promises.push(this.loadImage(icon, icon));
+                }
+            }
+        }
+
+        // Overrides de unidades
+        if (civ.unitOverrides) {
+            for (const type in civ.unitOverrides) {
+                const icon = civ.unitOverrides[type].icon;
+                if (icon && (icon.includes('/') || icon.includes('.'))) {
+                    promises.push(this.loadImage(icon, icon));
+                }
+            }
+        }
+
+        // Unidad única
+        if (civ.uniqueUnit && civ.uniqueUnit.icon) {
+            const icon = civ.uniqueUnit.icon;
+            if (icon && (icon.includes('/') || icon.includes('.'))) {
+                promises.push(this.loadImage(icon, icon));
+            }
+        }
+
+        await Promise.all(promises);
+        debugLogger.success(`Assets de ${civ.name} pre-cargados`, 'assets');
     }
 }
 

@@ -38,9 +38,10 @@ export class Particle {
         this.fadeRate = config.fadeRate || 1;
         this.shape = config.shape || 'circle';
         this.emoji = config.emoji || null;
+        this.text = config.text || null; // Palette: Proper text support
 
         // BOLT OPTIMIZATION: Pre-calculate font string
-        if (this.emoji) {
+        if (this.emoji || this.text) {
             const fontSize = (this.size + 0.5) | 0;
             this._cachedFont = `bold ${fontSize}px Arial`;
         } else {
@@ -74,14 +75,14 @@ export class Particle {
             state.alpha = this.alpha;
         }
 
-        if (this.emoji) {
+        if (this.emoji || this.text) {
             // BOLT OPTIMIZATION: Only set font if changed
             if (state.font !== this._cachedFont) {
                 ctx.font = this._cachedFont;
                 state.font = this._cachedFont;
             }
 
-            // Constant styles for emoji outline
+            // Constant styles for emoji/text outline
             // Palette: Outline for visibility against any background
             if (state.lineWidth !== 3) {
                 ctx.lineWidth = 3;
@@ -94,14 +95,15 @@ export class Particle {
                 state.strokeStyle = strokeColor;
             }
 
-            ctx.strokeText(this.emoji, screenX, screenY);
+            const content = this.emoji || this.text;
+            ctx.strokeText(content, screenX, screenY);
 
             // Palette: Fill with specific color
             if (state.fillStyle !== this.color) {
                 ctx.fillStyle = this.color;
                 state.fillStyle = this.color;
             }
-            ctx.fillText(this.emoji, screenX, screenY);
+            ctx.fillText(content, screenX, screenY);
 
         } else {
             if (state.fillStyle !== this.color) {
@@ -346,13 +348,13 @@ export class ParticleSystem {
         this.particles.push(shockwave2);
 
         // Explosión inicial (Flash)
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 15; i++) {
             this.particles.push(Particle.get(x, y, {
-                vx: (Math.random() - 0.5) * 80,
-                vy: (Math.random() - 0.5) * 80,
-                life: Math.random() * 0.4 + 0.1,
-                size: Math.random() * size * 0.6 + size * 0.3,
-                color: 'rgba(255, 150, 50, 0.9)',
+                vx: (Math.random() - 0.5) * 120,
+                vy: (Math.random() - 0.5) * 120,
+                life: Math.random() * 0.5 + 0.2,
+                size: Math.random() * size * 0.8 + size * 0.4,
+                color: Math.random() > 0.5 ? '#ffecb3' : '#ffcc80',
                 gravity: 0,
                 friction: 0.85,
                 fadeRate: 2.5,
@@ -689,15 +691,21 @@ export class ParticleSystem {
             const angle = (Math.PI * 2 / 8) * i;
             // BOLT OPTIMIZATION: Use Object Pool
             this.particles.push(Particle.get(x, y, {
-                vx: Math.cos(angle) * 100,
-                vy: Math.sin(angle) * 100,
-                life: 0.3,
+                vx: Math.cos(angle) * 80,
+                vy: Math.sin(angle) * 80,
+                life: 0.4,
                 size: 3,
                 color: '#48bb78',
                 gravity: 0,
-                friction: 0.9
+                friction: 0.85,
+                shape: 'circle',
+                fadeRate: 1.5
             }));
         }
+
+        const r = Ripple.get(x, y, '#48bb78');
+        r.maxSize = 25;
+        this.particles.push(r);
     }
 
     // Efecto de movimiento (Ripple)
@@ -738,7 +746,7 @@ export class ParticleSystem {
             vy: -40, // Move up
             life: 1.5,
             size: 14,
-            emoji: text, // Abusing emoji property for text
+            text: text, // Palette: proper text property
             color: color,
             gravity: 0, // No gravity, float straight up
             friction: 0.98,

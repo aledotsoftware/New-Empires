@@ -147,9 +147,9 @@ export class Entity {
         const screenX = this._screenX;
         const screenY = this._screenY;
         const barWidth = this.size * 2;
-        const barHeight = 4;
+        const barHeight = 5; // Palette: Slightly thicker for visibility
         const barX = screenX - barWidth / 2;
-        const barY = screenY - this.size - 10;
+        const barY = screenY - this.size - 12;
         ctx.rect(barX, barY, barWidth, barHeight);
     }
 
@@ -157,10 +157,13 @@ export class Entity {
         const screenX = this._screenX;
         const screenY = this._screenY;
         const barWidth = this.size * 2;
-        const barHeight = 4;
+        const barHeight = 5;
         const barX = screenX - barWidth / 2;
-        const barY = screenY - this.size - 10;
-        ctx.rect(barX, barY, barWidth * (this.hp / this.maxHp), barHeight);
+        const barY = screenY - this.size - 12;
+
+        // Ensure non-negative width
+        const hpRatio = Math.max(0, this.hp / this.maxHp);
+        ctx.rect(barX, barY, barWidth * hpRatio, barHeight);
     }
 
     getTeamColor() {
@@ -181,11 +184,11 @@ export class Entity {
         const screenX = this._screenX;
         const screenY = this._screenY;
         const barWidth = this.size * 2;
-        const barHeight = 4;
+        const barHeight = 5;
         const barX = screenX - barWidth / 2;
-        // Stack above HP bar (which is at -10 relative to top edge)
-        // Position at -16 (Top -16, Bottom -12) with 2px gap
-        const barY = screenY - this.size - 16;
+        // Stack above HP bar (which is at -12 relative to top edge)
+        // Position at -19 (Top -19, Bottom -14) with 2px gap
+        const barY = screenY - this.size - 19;
         ctx.rect(barX, barY, barWidth, barHeight);
     }
 
@@ -199,9 +202,9 @@ export class Entity {
         const screenX = this._screenX;
         const screenY = this._screenY;
         const barWidth = this.size * 2;
-        const barHeight = 4;
+        const barHeight = 5;
         const barX = screenX - barWidth / 2;
-        const barY = screenY - this.size - 16;
+        const barY = screenY - this.size - 19;
         ctx.rect(barX, barY, barWidth * progress, barHeight);
     }
 }

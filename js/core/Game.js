@@ -1598,7 +1598,12 @@ export class Game {
         }
 
         // Guardar referencias a las entidades (no copias)
-        this.controlGroups[groupNum] = [...this.selectedEntities];
+        const selLen = this.selectedEntities.length;
+        const newGrp = new Array(selLen);
+        for(let i = 0; i < selLen; i++) {
+            newGrp[i] = this.selectedEntities[i];
+        }
+        this.controlGroups[groupNum] = newGrp;
 
         const count = this.selectedEntities.length;
         const type = count === 1 ? this.selectedEntities[0].name : `${count} unidades`;

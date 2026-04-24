@@ -506,25 +506,20 @@ export class ProceduralMapGenerator {
     }
 
     smoothTerrain() {
-        const newTerrain = [];
-
+        // Pass 1: Eliminar montañas y bosques aislados
+        let tempTerrain = [];
         for (let y = 0; y < this.height; y++) {
-            newTerrain[y] = [];
+            tempTerrain[y] = [];
             for (let x = 0; x < this.width; x++) {
                 const currentType = this.terrainTypes[y][x];
 
-                // Solo suavizar montañas y bosques aislados
                 if (currentType === 'mountain' || currentType === 'forest') {
                     let matchingNeighbors = 0;
-
-                    // Chequear 8 vecinos
                     for (let dy = -1; dy <= 1; dy++) {
                         for (let dx = -1; dx <= 1; dx++) {
                             if (dx === 0 && dy === 0) continue;
-
                             const nx = x + dx;
                             const ny = y + dy;
-
                             if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
                                 if (this.terrainTypes[ny][nx] === currentType) {
                                     matchingNeighbors++;
@@ -532,21 +527,78 @@ export class ProceduralMapGenerator {
                             }
                         }
                     }
-
-                    // Si tiene menos de 4 vecinos del mismo tipo, convertir a pastizal
                     if (matchingNeighbors < 4) {
-                        newTerrain[y][x] = 'grassland';
+                        tempTerrain[y][x] = 'grassland';
                         this.heightmap[y][x] = 0.5;
                         continue;
                     }
                 }
+                tempTerrain[y][x] = currentType;
+            }
+        }
 
-                newTerrain[y][x] = currentType;
+        // Update terrain for second pass
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                this.terrainTypes[y][x] = tempTerrain[y][x];
+            }
+        }
+
+        // Pass 2: Rellenar huecos aislados de terreno transitable (ej. 1 tile de pastizal rodeado de montañas/agua)
+        const finalTerrain = [];
+        for (let y = 0; y < this.height; y++) {
+            finalTerrain[y] = [];
+            for (let x = 0; x < this.width; x++) {
+                const currentType = this.terrainTypes[y][x];
+
+                if (currentType !== 'mountain' && currentType !== 'water' && currentType !== 'forest') {
+                    let impassableNeighbors = 0;
+                    let impassableCounts = { 'mountain': 0, 'water': 0, 'forest': 0 };
+
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (dx === 0 && dy === 0) continue;
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                                const neighborType = this.terrainTypes[ny][nx];
+                                if (neighborType === 'mountain' || neighborType === 'water' || neighborType === 'forest') {
+                                    impassableNeighbors++;
+                                    impassableCounts[neighborType]++;
+                                }
+                            } else {
+                                impassableNeighbors++; // Treat edges as impassable
+                            }
+                        }
+                    }
+
+                    // Si está casi completamente rodeado (6+ de 8 vecinos) de bloques, cerrarlo
+                    if (impassableNeighbors >= 6) {
+                        // Find the most common impassable neighbor
+                        let dominantType = 'mountain';
+                        let maxCount = 0;
+                        for (const type in impassableCounts) {
+                            if (impassableCounts[type] > maxCount) {
+                                maxCount = impassableCounts[type];
+                                dominantType = type;
+                            }
+                        }
+
+                        finalTerrain[y][x] = dominantType;
+                        // Adjust height based on what we turned it into
+                        if (dominantType === 'mountain') this.heightmap[y][x] = 0.9;
+                        else if (dominantType === 'water') this.heightmap[y][x] = 0.1;
+                        // forest keeps current heightmap or slight bump
+
+                        continue;
+                    }
+                }
+                finalTerrain[y][x] = currentType;
             }
         }
 
         // Aplicar los cambios
-        this.terrainTypes = newTerrain;
+        this.terrainTypes = finalTerrain;
     }
 
     getTerrainFromNoise(elevation, temperature, moisture, mainBiome) {
@@ -791,7 +843,7 @@ export class ProceduralMapGenerator {
                 // Si cumple la distancia mínima (o no hay otros jugadores), calcular score compuesto
                 if (minDistToOthersSq >= minDistanceSq || this.playerStarts.length === 0) {
                     // Combinar distancia y espacio abierto (ponderar para que ambos importen)
-                    const score = (minDistToOthersSq === Infinity ? 0 : minDistToOthersSq) * 4 + openSpaceScore * openSpaceScore;
+                    const score = (minDistToOthersSq === Infinity ? 0 : Math.min(minDistToOthersSq, 10000)) * 10 + openSpaceScore * 50;
                     if (score > bestScore) {
                         bestScore = score;
                         bestPos = { x, y };
@@ -1059,7 +1111,7 @@ export class ProceduralMapGenerator {
     }
 
     isValidResourceCenter(cx, cy, type) {
-        if (cx < 0 || cx >= this.width || cy < 0 || cy >= this.height) return false;
+        if (cx < 4 || cx >= this.width - 4 || cy < 4 || cy >= this.height - 4) return false;
 
         const terrain = this.terrainTypes[cy][cx];
         if (terrain === 'water' || terrain === 'mountain') return false;
@@ -1071,8 +1123,26 @@ export class ProceduralMapGenerator {
         for (let res of this.resources) {
             const dx = cx - res.x;
             const dy = cy - res.y;
-            if ((dx * dx + dy * dy) < 25) return false; // 5 * 5 = 25 Distancia mínima entre clústers
+            if ((dx * dx + dy * dy) < 64) return false; // 8 * 8 = 64 Distancia mínima entre clústers
         }
+
+        // Choke-point heuristic: Evaluate a 7x7 area around cx, cy
+        let impassableCount = 0;
+        for (let dy = -3; dy <= 3; dy++) {
+            for (let dx = -3; dx <= 3; dx++) {
+                const nx = cx + dx;
+                const ny = cy + dy;
+                if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                    const t = this.terrainTypes[ny][nx];
+                    if (t === 'water' || t === 'mountain') {
+                        impassableCount++;
+                    }
+                } else {
+                    impassableCount++; // Map edges count as impassable
+                }
+            }
+        }
+        if (impassableCount >= 12) return false; // Reject if too many impassable tiles around (choke point)
 
         return true;
     }

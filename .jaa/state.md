@@ -8,3 +8,5 @@ Completed tracking optimizations and arrays
 - Implemented robust UI integration for dynamic descriptions, fixing tooltip elements (`.tooltip-desc`) in `Game.js` to ensure the localized descriptions or base descriptions are rendered for building variants and unit upgrades.
 - Enhanced the `assets/civilization/*.json` and `assets/technologies/base_technologies.json` definitions by translating and automatically calculating and appending explicit mathematical modifiers (e.g., "+15% Vel. Caballería", "+10% HP Edificios") to descriptions, ensuring maximum tactical clarity for players.
 - Removed array allocations (\`.filter\`, \`.splice\`, \`.push\`, \`.shift\`, etc.) from hot paths and core game loops, replacing them with manual iteration and pre-allocated arrays or in-place object pools to reduce Garbage Collection pressure.
+- Fixed a regression where restoring a saved game would leave the Fog Of War visual layer completely black until a native update cycle by ensuring `this._updateFOWBuffer()` is called during `loadState`.
+- Tested and validated SaveManager's ability to serialize and deserialize data correctly using the `js/tests/test_save_manager.mjs` script.

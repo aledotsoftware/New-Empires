@@ -828,6 +828,7 @@ export class Game {
                     this._fowBufferCtx.putImageData(this._fowImageData, 0, 0);
                 }
             }
+            this._updateFOWBuffer();
         }
 
         // 7. Refresh UI & Colors

@@ -813,6 +813,8 @@ export class Game {
             this.fow.visibleRanges = [];
             this.fow.isDirty = true;
 
+            // Restore visible cells calculation state by letting updateFOW() run with dirty flag
+
             // Rebuild base buffer if OffscreenCanvas/image data is available
             if (this._fowImageData32) {
                 const data32 = this._fowImageData32;

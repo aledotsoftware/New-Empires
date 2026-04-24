@@ -264,7 +264,7 @@ export class SaveManager {
             resourceNodes: serializedResourceNodes,
 
             // Tecnologías
-            researchedTechs: game.techManager?.researchedTechs || [],
+            researchedTechs: game.techManager?.researchedTechs ? Array.from(game.techManager.researchedTechs) : [],
 
             // Fog Of War
             fowGrid: serializedFowGrid

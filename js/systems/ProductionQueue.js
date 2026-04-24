@@ -165,6 +165,7 @@ export class ProductionQueue {
             const item = this.queue[i];
             serializedQueue.push({
                 unitType: item.unitType,
+                cost: item.cost,
                 remaining: item.remaining,
                 total: item.total
             });
@@ -186,7 +187,7 @@ export class ProductionQueue {
         for (const item of data.queue) {
             queue.queue.push({
                 unitType: item.unitType,
-                cost: {},  // El costo ya fue cobrado
+                cost: item.cost || {},
                 remaining: item.remaining,
                 total: item.total,
                 startTime: Date.now() - ((item.total - item.remaining) * 1000)

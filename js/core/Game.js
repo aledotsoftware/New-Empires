@@ -4043,11 +4043,13 @@ export class Game {
         if (!this.hoveredType) return;
 
         this.ctx.save();
-        this.ctx.strokeStyle = '#ffffff'; // White glow
-        this.ctx.lineWidth = 2;
+        this.ctx.strokeStyle = '#ffd700'; // Gold glow for better visibility
+        this.ctx.lineWidth = 3;
         // Pulse effect
-        const pulse = 0.6 + Math.sin(this.renderTime / 150) * 0.2;
+        const pulse = 0.7 + Math.sin(this.renderTime / 100) * 0.3; // Faster, stronger pulse
         this.ctx.globalAlpha = pulse;
+        this.ctx.shadowColor = '#ffd700';
+        this.ctx.shadowBlur = 10;
 
         this.ctx.beginPath();
 

@@ -469,6 +469,13 @@ export class SoundManager {
         setTimeout(() => this.playTone(600, 0.2, 'square', 0.15), 300);
     }
 
+    playError() {
+        if (!this.enabled) return;
+        // Harsh buzzer tone for negative feedback
+        this.playTone(150, 0.15, 'sawtooth', 0.2);
+        setTimeout(() => this.playTone(120, 0.2, 'sawtooth', 0.25), 150);
+    }
+
     playTone(frequency, duration, type = 'sine', vol = 0.1) {
         if (!this.audioContext) return;
 
@@ -593,7 +600,7 @@ export class SoundManager {
             if (!sound) {
                 // Fallback tone synthesis for error sound if it wasn't loaded from a file
                 if (key === 'error') {
-                    this.playTone(150, 0.2, 'sawtooth', 0.2);
+                    this.playError();
                     return Promise.resolve();
                 }
 

@@ -2278,14 +2278,14 @@ button:focus-visible,
 
 /* Shake Animation for Disabled Actions */
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
+    0%, 100% { transform: translateX(0); border-color: rgba(212, 175, 55, 0.5); }
+    25% { transform: translateX(-4px); border-color: #e53e3e; background: rgba(229, 62, 62, 0.3); }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-4px); }
 }
 
 .shake {
-    animation: shake 0.4s ease-in-out;
+    animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 /* Spinner for Start Button (fix for main.js) */
@@ -2380,11 +2380,13 @@ button:focus-visible,
 /* Palette: Resource Flash Error (Added to fix missing feedback) */
 @keyframes resourceFlashError {
     0%, 100% { color: var(--text-gold); transform: scale(1); }
-    50% { color: var(--blood-red-light); transform: scale(1.2); text-shadow: 0 0 8px var(--blood-red); }
+    20% { color: #ff6b6b; transform: scale(1.1); text-shadow: 0 0 10px #ff0000; }
+    50% { color: #e53e3e; transform: scale(1.2); text-shadow: 0 0 15px #e53e3e; }
+    80% { color: #ff6b6b; transform: scale(1.1); text-shadow: 0 0 10px #ff0000; }
 }
 
 .resource-flash-error {
-    animation: resourceFlashError 0.5s ease-in-out;
+    animation: resourceFlashError 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 /* ==========================================

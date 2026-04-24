@@ -21,8 +21,8 @@ export class Archer extends Unit {
             score -= 2000;
         }
 
-        // Penalización ligera por distancia (pueden disparar de lejos)
-        score -= distSq / 150;
+        // Penalización por distancia: Los arqueros no deben avanzar ciegamente descuidando su posición.
+        score -= distSq / 25;
 
         return score;
     }
@@ -55,8 +55,11 @@ export class Archer extends Unit {
 
             // Verificamos si podemos movernos (no estamos estuneados, etc.)
             // En este motor, el Unit base maneja todo en update()
-            // Si está muy cerca y no es un objetivo de recolección/movimiento forzado, Y no es un edificio:
-            if (distSq < minKiteDistSq && this.targetX === null && !this.attackTarget.isBuilding) {
+            // Solo kitear contra unidades cuerpo a cuerpo (no contra otros arqueros) para evitar bailes extraños,
+            // Y no kitear edificios.
+            const isMeleeTarget = this.attackTarget.type === 'warrior' || this.attackTarget.type === 'spearman' || this.attackTarget.type === 'cavalry' || this.attackTarget.type === 'villager';
+
+            if (distSq < minKiteDistSq && this.targetX === null && !this.attackTarget.isBuilding && isMeleeTarget) {
                 isKiting = true;
 
                 // Calcular vector de huida

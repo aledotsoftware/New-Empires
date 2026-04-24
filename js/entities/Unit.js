@@ -268,8 +268,8 @@ export class Unit extends Entity {
                     }
                     const allies = Unit._allyQueryCache;
 
-                    // Radio de separación pequeño (24px)
-                    allyGrid.query(this.x, this.y, 24, allies, true);
+                    // Radio de separación ajustado (30px) para acomodar a los nuevos rangos
+                    allyGrid.query(this.x, this.y, 30, allies, true);
 
                     let sepX = 0;
                     let sepY = 0;
@@ -283,8 +283,8 @@ export class Unit extends Entity {
                         const ady = this.y - ally.y;
                         const aDistSq = adx * adx + ady * ady;
 
-                        // Separar fuertemente si están casi superpuestos (< 24^2 = 576)
-                        if (aDistSq < 576 && aDistSq > 0.1) {
+                        // Separar fuertemente si están casi superpuestos (< 30^2 = 900)
+                        if (aDistSq < 900 && aDistSq > 0.1) {
                             const aDist = Math.sqrt(aDistSq);
                             sepX += (adx / aDist);
                             sepY += (ady / aDist);
@@ -293,8 +293,8 @@ export class Unit extends Entity {
                     }
 
                     if (sepCount > 0) {
-                        // Fuerza de separación suave
-                        const sepForce = (effectiveSpeed * deltaTime) * 0.5;
+                        // Aumentar la fuerza de separación para reducir los bloqueos drásticamente
+                        const sepForce = (effectiveSpeed * deltaTime) * 1.5;
                         moveX += (sepX / sepCount) * sepForce;
                         moveY += (sepY / sepCount) * sepForce;
                     }

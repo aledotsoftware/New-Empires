@@ -316,7 +316,10 @@ export class FormationManager {
             return pA - pB;
         });
 
-        let positions = this.getPositions(formationType, sortedUnits, center, spacing);
+        // Aumentar ligeramente el spacing base si tenemos muchas unidades grandes para evitar aglomeraciones que rompan pathing
+        const dynamicSpacing = spacing * 1.25;
+
+        let positions = this.getPositions(formationType, sortedUnits, center, dynamicSpacing);
 
         // Rotar las posiciones calculadas alrededor del centro según el ángulo
         if (angle !== 0) {

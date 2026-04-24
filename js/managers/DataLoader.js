@@ -221,7 +221,16 @@ export class DataLoader {
     }
 
     createUniqueUnit(uniqueUnitData) {
-        const baseUnit = this.baseData.units.find(u => u.id === uniqueUnitData.baseUnit);
+        // BOLT OPTIMIZATION: Replace .find with loop
+        let baseUnit = null;
+        const len = this.baseData.units.length;
+        for (let i = 0; i < len; i++) {
+            if (this.baseData.units[i].id === uniqueUnitData.baseUnit) {
+                baseUnit = this.baseData.units[i];
+                break;
+            }
+        }
+
         if (!baseUnit) {
             const availableUnitsIds = [];
             for (let i = 0; i < this.baseData.units.length; i++) {

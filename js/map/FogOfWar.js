@@ -178,6 +178,7 @@ static _numericSort(a, b) {
 
             const ranges = entity._fowCacheRanges;
             const buffers = this._rowBuffers;
+            const counts = this._rowCounts;
             // BOLT OPTIMIZATION: Use tracked count to avoid accessing undefined/old data in reused array
             const len = (entity._fowCacheCount !== undefined) ? entity._fowCacheCount : ranges.length;
 
@@ -185,18 +186,18 @@ static _numericSort(a, b) {
             for (let i = 0; i < len; i += 2) {
                 const r = ranges[i];
                 const packed = ranges[i + 1];
-                let count = this._rowCounts[r];
-                let buffer = this._rowBuffers[r];
+                let count = counts[r];
+                let buffer = buffers[r];
 
                 if (count >= buffer.length) {
                     const newBuffer = new Int32Array(buffer.length * 2);
                     newBuffer.set(buffer);
-                    this._rowBuffers[r] = newBuffer;
+                    buffers[r] = newBuffer;
                     buffer = newBuffer;
                 }
 
                 buffer[count] = packed;
-                this._rowCounts[r] = count + 1;
+                counts[r] = count + 1;
             }
             return;
         }

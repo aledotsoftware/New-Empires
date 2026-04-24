@@ -211,9 +211,9 @@ export class Game {
         this.idleVillagerIndex = 0; // Índice para el ciclo de aldeanos inactivos
 
         // Grupos de control (Ctrl+1-9 para guardar, 1-9 para seleccionar)
-        this.controlGroups = [];
+        this.controlGroups = new Array(10);
         for (let i = 0; i < 10; i++) {
-            this.controlGroups.push([]);
+            this.controlGroups[i] = [];
         }
 
         // Pointer Lock para múltiples monitores
@@ -575,8 +575,8 @@ export class Game {
         // Crear Centro Urbano inicial (jugador)
         const townCenter = new TownCenter(startX, startY, 'player'); if (typeof civilizationManager !== 'undefined') civilizationManager.applyBuildingBonuses(townCenter, this.civilizationId);
         this._cacheEntityTerrain(townCenter); // OPTIMIZATION
-        this.buildings.push(townCenter);
-        this.dropOffPoints.push(townCenter);
+        this.buildings[this.buildings.length] = townCenter;
+        this.dropOffPoints[this.dropOffPoints.length] = townCenter;
         this.townCenterCounts.player++;
         this._updateBuildingCount('townCenter', 1);
 
@@ -591,7 +591,7 @@ export class Game {
             const villager = new Villager(x, y, 'player');
             civilizationManager.applyUnitBonuses(villager, this.civilizationId);
             this._cacheEntityTerrain(villager); // OPTIMIZATION
-            this.units.push(villager);
+            this.units[this.units.length] = villager;
         }
 
         // Crear enemigos básicos
@@ -734,7 +734,7 @@ export class Game {
                 if (entity.team === 'player') {
                     this._updateBuildingCount(entity.type, 1);
                     if (entity.type === 'townCenter' || entity.type === 'storage' || entity.type === 'storageWood') {
-                        this.dropOffPoints.push(entity);
+                        this.dropOffPoints[this.dropOffPoints.length] = entity;
                     }
                 }
 
@@ -765,7 +765,7 @@ export class Game {
             this._cacheEntityTerrain(entity);
 
             // Add to main lists
-            list.push(entity);
+            list[list.length] = entity;
             if (grid) grid.add(entity);
         };
 
@@ -924,10 +924,12 @@ export class Game {
     }
 
     applyProceduralResources(generatedMap) {
-        this.resourceNodes = [];
+        const len = generatedMap.resources.length;
+        this.resourceNodes = new Array(len);
 
-        for (let res of generatedMap.resources) {
-            this.resourceNodes.push({
+        for (let i = 0; i < len; i++) {
+            const res = generatedMap.resources[i];
+            this.resourceNodes[i] = {
                 x: res.x * TILE_SIZE,
                 y: res.y * TILE_SIZE,
                 type: res.type,
@@ -938,7 +940,7 @@ export class Game {
                 // res.x and res.y are already grid coordinates from mapGenerator
                 _gridCol: res.x,
                 _gridRow: res.y
-            });
+            };
         }
 
         // Actualizar grid espacial con los nuevos recursos
@@ -986,7 +988,7 @@ export class Game {
 
             // Solo colocar si está lejos de ambas bases (mínimo 200 unidades, 200^2 = 40000)
             if (distSqPlayer > 40000 && distSqEnemy > 40000) {
-                this.resourceNodes.push({
+                this.resourceNodes[this.resourceNodes.length] = {
                     x, y,
                     type: resType.type,
                     amount: resType.amount,
@@ -994,7 +996,7 @@ export class Game {
                     // BOLT OPTIMIZATION: Pre-calculate grid coords for FOW check
                     _gridCol: (x / TILE_SIZE) | 0,
                     _gridRow: (y / TILE_SIZE) | 0
-                });
+                };
             } else {
                 // Reintentar esta iteración
                 i--;
@@ -2109,10 +2111,11 @@ export class Game {
 
                     // Palette: Add accessible feedback for missing resources
                     const missing = [];
+                    let mCount = 0;
                     for (let [resource, amount] of Object.entries(cost)) {
                         if (this.resources[resource] < amount) {
                             const diff = amount - this.resources[resource];
-                            missing.push(`${resource} (${diff})`);
+                            missing[mCount++] = `${resource} (${diff})`;
                         }
                     }
 
@@ -2312,7 +2315,7 @@ export class Game {
             civilizationManager.applyBuildingBonuses(building, this.civilizationId);
 
             this._cacheEntityTerrain(building); // OPTIMIZATION
-            this.buildings.push(building);
+            this.buildings[this.buildings.length] = building;
             this.buildingGrid.add(building);
 
             this._minimapDirty = true;
@@ -2328,7 +2331,7 @@ export class Game {
 
             // BOLT OPTIMIZATION: Add to drop-off cache
             if (building.type === 'townCenter' || building.type === 'storage' || building.type === 'storageWood') {
-                this.dropOffPoints.push(building);
+                this.dropOffPoints[this.dropOffPoints.length] = building;
             }
 
             // Reproducir sonido de inicio de construcción
@@ -2550,7 +2553,7 @@ export class Game {
             civilizationManager.applyUnitBonuses(unit, this.civilizationId);
 
             this._cacheEntityTerrain(unit); // OPTIMIZATION
-            this.units.push(unit);
+            this.units[this.units.length] = unit;
 
             if (soundManager) {
                 const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
@@ -5601,10 +5604,11 @@ export class Game {
         // Updated to use full names for better a11y text generation
         const getCostText = (cost) => {
             const parts = [];
+            let pCount = 0;
             for (const [res, amount] of Object.entries(cost)) {
-                if (amount > 0) parts.push(`${amount} ${res}`);
+                if (amount > 0) parts[pCount++] = `${amount} ${res}`;
             }
-            return parts.length > 0 ? `Costo: ${parts.join(', ')}` : '';
+            return pCount > 0 ? `Costo: ${parts.join(', ')}` : '';
         };
 
         // Si hay que renderizar vacío, comprobamos si ya estaba vacío
@@ -5804,10 +5808,11 @@ export class Game {
 
                             // Dynamically calculate missing resources based on current game state
                             const currentMissingResources = [];
+                            let cmrCount = 0;
                             if (buttonData.cost) {
                                 for (const [res, amount] of Object.entries(buttonData.cost)) {
                                     if (this.resources[res] < amount) {
-                                        currentMissingResources.push(`${res} (${Math.ceil(amount - this.resources[res])})`);
+                                        currentMissingResources[cmrCount++] = `${res} (${Math.ceil(amount - this.resources[res])})`;
                                     }
                                 }
                             }
@@ -5822,11 +5827,11 @@ export class Game {
                                     const resName = mr.split(' ')[0].trim();
                                     this.flashResource(resName); // Palette: Flash resource
 
-                                    if (mr.includes('food')) translated.push(mr.replace('food', 'Comida'));
-                                    else if (mr.includes('wood')) translated.push(mr.replace('wood', 'Madera'));
-                                    else if (mr.includes('gold')) translated.push(mr.replace('gold', 'Oro'));
-                                    else if (mr.includes('stone')) translated.push(mr.replace('stone', 'Piedra'));
-                                    else translated.push(mr);
+                                    if (mr.includes('food')) translated[i] = mr.replace('food', 'Comida');
+                                    else if (mr.includes('wood')) translated[i] = mr.replace('wood', 'Madera');
+                                    else if (mr.includes('gold')) translated[i] = mr.replace('gold', 'Oro');
+                                    else if (mr.includes('stone')) translated[i] = mr.replace('stone', 'Piedra');
+                                    else translated[i] = mr;
                                 }
                                 msg = `Falta: ${translated.join(', ')}`;
                             }
@@ -5923,7 +5928,7 @@ export class Game {
                             if (this.resources[res] < amount) {
                                 resSpan.style.color = 'var(--accent-red)';
                                 resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
-                                missingResources.push(`${res} (${amount - Math.floor(this.resources[res])})`);
+                                missingResources[missingResources.length] = `${res} (${amount - Math.floor(this.resources[res])})`;
                             } else {
                                 resSpan.setAttribute('aria-label', `${amount} ${res}`);
                             }
@@ -5958,8 +5963,8 @@ export class Game {
                         // Palette: Show specific missing resources
                         if (buttonData._missingResources && buttonData._missingResources.length > 0) {
                             // Translate resource names for better UX
-                            const translatedMissing = [];
                             const len = buttonData._missingResources.length;
+                            const translatedMissing = new Array(len);
                             for (let i = 0; i < len; i++) {
                                 const mr = buttonData._missingResources[i];
                                 let [name, amt] = mr.split(' (');
@@ -5968,7 +5973,7 @@ export class Game {
                                 else if (name === 'wood') name = 'madera';
                                 else if (name === 'gold') name = 'oro';
                                 else if (name === 'stone') name = 'piedra';
-                                translatedMissing.push(`${name} ${amt}`);
+                                translatedMissing[i] = `${name} ${amt}`;
                             }
                             errorDiv.textContent = ` Falta: ${translatedMissing.join(', ')}`;
                         } else {

@@ -758,7 +758,8 @@ export class ParticleSystem {
         // BOLT OPTIMIZATION: In-place removal to avoid Array allocation (GC pressure)
         // Reduces garbage collection by reusing the existing array
         let writeIdx = 0;
-        for (let i = 0; i < this.particles.length; i++) {
+        const len = this.particles.length;
+        for (let i = 0; i < len; i++) {
             const p = this.particles[i];
             if (p.update(deltaTime)) {
                 this.particles[writeIdx++] = p;
@@ -774,7 +775,8 @@ export class ParticleSystem {
         this.particles.length = writeIdx;
 
         writeIdx = 0;
-        for (let i = 0; i < this.projectiles.length; i++) {
+        const projLen = this.projectiles.length;
+        for (let i = 0; i < projLen; i++) {
             if (this.projectiles[i].update(deltaTime)) {
                 this.projectiles[writeIdx++] = this.projectiles[i];
             }
@@ -807,7 +809,8 @@ export class ParticleSystem {
         };
 
         // BOLT OPTIMIZATION: Standard loop avoids iterator allocation
-        for (let i = 0; i < this.particles.length; i++) {
+        const pLen = this.particles.length;
+        for (let i = 0; i < pLen; i++) {
             // BOLT OPTIMIZATION: Frustum culling
             // Skip particles outside viewport (with 50px margin)
             if (viewWidth && viewHeight) {

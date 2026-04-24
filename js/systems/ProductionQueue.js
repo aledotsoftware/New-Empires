@@ -45,13 +45,13 @@ export class ProductionQueue {
             return false;
         }
 
-        this.queue.push({
+        this.queue[this.queue.length] = {
             unitType,
             cost,
             remaining: productionTime,
             total: productionTime,
             startTime: Date.now()
-        });
+        };
 
         return true;
     }
@@ -160,15 +160,16 @@ export class ProductionQueue {
      * @returns {Object}
      */
     serialize() {
-        const serializedQueue = [];
-        for (let i = 0; i < this.queue.length; i++) {
+        const len = this.queue.length;
+        const serializedQueue = new Array(len);
+        for (let i = 0; i < len; i++) {
             const item = this.queue[i];
-            serializedQueue.push({
+            serializedQueue[i] = {
                 unitType: item.unitType,
                 cost: item.cost,
                 remaining: item.remaining,
                 total: item.total
-            });
+            };
         }
 
         return {
@@ -184,14 +185,18 @@ export class ProductionQueue {
      */
     static deserialize(data, building) {
         const queue = new ProductionQueue(building, data.maxSize);
-        for (const item of data.queue) {
-            queue.queue.push({
+        const qData = data.queue || [];
+        const len = qData.length;
+        queue.queue = new Array(len);
+        for (let i = 0; i < len; i++) {
+            const item = qData[i];
+            queue.queue[i] = {
                 unitType: item.unitType,
                 cost: item.cost || {},
                 remaining: item.remaining,
                 total: item.total,
                 startTime: Date.now() - ((item.total - item.remaining) * 1000)
-            });
+            };
         }
         return queue;
     }

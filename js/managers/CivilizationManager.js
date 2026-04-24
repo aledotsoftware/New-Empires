@@ -59,8 +59,13 @@ export class CivilizationManager {
             const base = civ.uniqueUnit.baseUnit;
             const unique = civ.uniqueUnit.id;
             if (building.trainableUnits && building.trainableUnits.includes(base)) {
-                // Reemplazar base con unidad única
-                building.trainableUnits = building.trainableUnits.map(u => u === base ? unique : u);
+                // BOLT OPTIMIZATION: Replace .map with in-place loop
+                const len = building.trainableUnits.length;
+                for (let i = 0; i < len; i++) {
+                    if (building.trainableUnits[i] === base) {
+                        building.trainableUnits[i] = unique;
+                    }
+                }
             }
         }
 

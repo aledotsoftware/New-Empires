@@ -19,7 +19,7 @@ export class TerrainDecorManager {
                 const terrain = generatedMap.terrainTypes[y][x];
 
                 // Add probability for decorations based on terrain using deterministic RNG
-                if (rng.next() < 0.08) {
+                if (rng.next() < 0.05) {
                     if (terrain === 'grassland') {
                         const roll = rng.next();
                         if (roll > 0.95) {

@@ -431,9 +431,9 @@ export class ProceduralMapGenerator {
             const wobbleY = this.rng.int(-1, 1);
 
             // Carve a circular radius to make a wider, smoother path
-            for(let py = -2; py <= 2; py++) {
-                for(let px = -2; px <= 2; px++) {
-                    if (px*px + py*py <= 5) { // Patrón más circular en vez de un cuadrado estricto
+            for(let py = -3; py <= 3; py++) {
+                for(let px = -3; px <= 3; px++) {
+                    if (px*px + py*py <= 10) { // Patrón más circular en vez de un cuadrado estricto
                         let nx = cx + px + wobbleX;
                         let ny = cy + py + wobbleY;
                         if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
@@ -533,8 +533,8 @@ export class ProceduralMapGenerator {
                         }
                     }
 
-                    // Si tiene menos de 3 vecinos del mismo tipo, convertir a pastizal
-                    if (matchingNeighbors < 3) {
+                    // Si tiene menos de 4 vecinos del mismo tipo, convertir a pastizal
+                    if (matchingNeighbors < 4) {
                         newTerrain[y][x] = 'grassland';
                         this.heightmap[y][x] = 0.5;
                         continue;
@@ -880,6 +880,12 @@ export class ProceduralMapGenerator {
                     }
 
                     if (!isOccupied) {
+                        if (config.type !== 'wood') {
+                            this.terrainTypes[fy][fx] = 'grassland';
+                            this.heightmap[fy][fx] = 0.5;
+                        } else {
+                            this.terrainTypes[fy][fx] = 'forest';
+                        }
                         this.resources.push({
                             x: fx, y: fy,
                             type: config.type,
@@ -918,7 +924,7 @@ export class ProceduralMapGenerator {
                 const cx = Math.floor(start.x + Math.cos(angle) * dist);
                 const cy = Math.floor(start.y + Math.sin(angle) * dist);
 
-                if (this.isValidResourceCenter(cx, cy)) {
+                if (this.isValidResourceCenter(cx, cy, config.type)) {
                     // Solo intentar colocar los que faltan
                     const remaining = config.count - placed;
                     const batchConfig = { ...config, count: remaining };
@@ -1026,7 +1032,7 @@ export class ProceduralMapGenerator {
             const cx = this.rng.int(10, this.width - 10);
             const cy = this.rng.int(10, this.height - 10);
 
-            if (this.isValidResourceCenter(cx, cy)) {
+            if (this.isValidResourceCenter(cx, cy, type)) {
                 let tooClose = false;
                 for (let start of this.playerStarts) {
                     const dx = cx - start.x;
@@ -1052,11 +1058,14 @@ export class ProceduralMapGenerator {
         }
     }
 
-    isValidResourceCenter(cx, cy) {
+    isValidResourceCenter(cx, cy, type) {
         if (cx < 0 || cx >= this.width || cy < 0 || cy >= this.height) return false;
 
         const terrain = this.terrainTypes[cy][cx];
         if (terrain === 'water' || terrain === 'mountain') return false;
+
+        // Prevent 'gold' and 'stone' from being spawned in 'forest' terrain
+        if ((type === 'gold' || type === 'stone') && terrain === 'forest') return false;
 
         // Verificar que el centro no esté muy cerca de otros recursos
         for (let res of this.resources) {

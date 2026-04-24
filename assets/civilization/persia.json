@@ -1,7 +1,7 @@
 {
     "civilizationId": "persia",
     "name": "Imperio Persa",
-    "description": "El mayor imperio de la antigüedad. Constructores de caminos, tolerantes y con un poderoso ejército.",
+    "description": "El mayor imperio de la antigüedad. Constructores de caminos, tolerantes y con un poderoso ejército. (Bonos: +15% Vel. Unidades)",
     "icon": "assets/icons/civs/persia.png",
     "iconEmoji": "👑",
     "color": "#800020",
@@ -21,7 +21,7 @@
             "attackDamage": 1.3,
             "armor": 1.25
         },
-        "description": "Infantería de élite persa que combina ataque a distancia y cuerpo a cuerpo."
+        "description": "Infantería de élite persa que combina ataque a distancia y cuerpo a cuerpo. (+50% HP, +30% Ataque, +25% Armor)"
     },
     "technologyOverrides": {
         "roads": {

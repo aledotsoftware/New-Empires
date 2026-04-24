@@ -1,7 +1,7 @@
 {
     "civilizationId": "romans",
     "name": "Imperio Romano",
-    "description": "Maestros de la construccion y la ingenieria. Sus edificios son mas resistentes y se construyen mas rapido.",
+    "description": "Maestros de la construccion y la ingenieria. Sus edificios son mas resistentes y se construyen mas rapido. (Bonos: +25% Vel. Construcción, +10% Ataque Infantería, +30% HP Edificios, +50 Piedra inicial)",
     "icon": "assets/icons/civs/romans.png",
     "color": "#c53030",
     "primaryColor": "#8b0000",
@@ -69,7 +69,7 @@
             "maxHp": 1.36,
             "speed": 1.11
         },
-        "description": "Infantería pesada líder de las legiones romanas."
+        "description": "Infantería pesada líder de las legiones romanas. (+25% Ataque, +36% HP, +11% Velocidad)"
     },
     "uniqueTechnologies": [
         {
@@ -78,7 +78,7 @@
             "icon": "assets/icons/tech_defense.png",
             "category": "ARCHITECTURE",
             "age": 20,
-            "description": "Tecnicas avanzadas de construccion romana con arcos y acueductos.",
+            "description": "Tecnicas avanzadas de construccion romana con arcos y acueductos. (+20% HP Edificios, +15% Vel. Construcción)",
             "cost": {
                 "wood": 200,
                 "stone": 200

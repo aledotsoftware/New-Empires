@@ -2027,6 +2027,9 @@ export class Game {
                     const infoEl = option.querySelector('.build-info');
                     if (infoEl && override.description) infoEl.textContent = override.description;
 
+                    const descEl = option.querySelector('.tooltip-desc');
+                    if (descEl && override.description) descEl.textContent = override.description;
+
                     const imgEl = option.querySelector('.build-icon img');
                     if (imgEl && override.icon && typeof assetLoader !== 'undefined') {
                         const fullPath = assetLoader.getIconPath(override.icon);
@@ -5660,7 +5663,10 @@ export class Game {
                     : unitType;
                 
                 const name = unitData.name || (unitType === 'villager' ? 'Aldeano' : unitType === 'warrior' ? 'Guerrero' : unitType);
-                const desc = unitData.description || 'Unidad de la civilización.';
+                let desc = unitData.description;
+                if (!desc) {
+                    desc = unitData.baseDescription || 'Unidad de la civilización.';
+                }
 
                 buttons.push({
                     iconKey: iconKey,

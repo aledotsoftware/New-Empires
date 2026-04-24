@@ -1,7 +1,7 @@
 {
     "civilizationId": "argentinians",
     "name": "República Argentina",
-    "description": "Nación orgullosa con gran capacidad agrícola y unidades aereas superiores.",
+    "description": "Nación orgullosa con gran capacidad agrícola y unidades aereas superiores. (Bonos: +10% Vel. Construcción, +20% Ataque Caballería, +15% Vel. Recolección, +100 Comida inicial)",
     "icon": "assets/icons/civs/argentinians.png",
     "color": "#75aadb",
     "primaryColor": "#75aadb",
@@ -70,7 +70,7 @@
             "speed": 1.44,
             "attackSpeed": 1.2
         },
-        "description": "Infanteria que lanza proyectiles explosivos. Eficaz contra edificios y grupos."
+        "description": "Infanteria que lanza proyectiles explosivos. Eficaz contra edificios y grupos. (+33% Ataque, +45% HP, +44% Velocidad, +20% Vel. Ataque)"
     },
     "uniqueTechnologies": [
         {
@@ -79,7 +79,7 @@
             "icon": "assets/icons/tech_economy.png",
             "category": "ECONOMY",
             "age": 18,
-            "description": "Maestria en la agricultura y ganaderia de las vastas llanuras.",
+            "description": "Maestria en la agricultura y ganaderia de las vastas llanuras. (+30% Vel. Comida)",
             "cost": {
                 "food": 300,
                 "wood": 150

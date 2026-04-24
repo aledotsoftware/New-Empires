@@ -20,7 +20,7 @@
             "range": 1.3,
             "attackDamage": 1.15
         },
-        "description": "Arquero de élite de Babilonia con gran alcance."
+        "description": "Arquero de élite de Babilonia con gran alcance. (+30% Range, +15% Ataque)"
     },
     "technologyOverrides": {
         "astronomy": {

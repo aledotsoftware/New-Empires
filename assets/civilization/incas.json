@@ -1,7 +1,7 @@
 {
     "civilizationId": "incas",
     "name": "Imperio Inca",
-    "description": "Nación de las montañas con fortalezas de piedra y guerreros adaptados a la altura.",
+    "description": "Nación de las montañas con fortalezas de piedra y guerreros adaptados a la altura. (Bonos: +10% Vel. Construcción, +10% Vel. Recolección, +10% HP Edificios, +100 Piedra inicial)",
     "icon": "assets/icons/civs/incas.png",
     "color": "#e6a100",
     "primaryColor": "#d4af37",
@@ -70,7 +70,7 @@
             "maxHp": 1.2,
             "speed": 1.1
         },
-        "description": "Lancero inca de largo alcance. Muy eficaz contra infantería y caballería."
+        "description": "Lancero inca de largo alcance. Muy eficaz contra infantería y caballería. (+25% Ataque, +20% HP, +10% Velocidad)"
     },
     "uniqueTechnologies": [
         {
@@ -79,7 +79,7 @@
             "icon": "assets/icons/tech_economy.png",
             "category": "ECONOMY",
             "age": 18,
-            "description": "Red de caminos que incrementa la velocidad de las unidades y eficiencia económica.",
+            "description": "Red de caminos que incrementa la velocidad de las unidades y eficiencia económica. (+10% Vel. Comida, +10% Vel. Madera, +10% Vel. Oro, +10% Vel. Piedra)",
             "cost": {
                 "stone": 200,
                 "food": 200

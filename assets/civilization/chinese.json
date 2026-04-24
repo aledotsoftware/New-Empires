@@ -1,7 +1,7 @@
 {
     "civilizationId": "chinese",
     "name": "Imperio Chino",
-    "description": "Una de las civilizaciones más antiguas, creadores de la pólvora y el papel.",
+    "description": "Una de las civilizaciones más antiguas, creadores de la pólvora y el papel. (Bonos: +10% Vel. Recolección, +10% HP Edificios, +50 Madera inicial, +50 Comida inicial, +50 Oro inicial, +50 Piedra inicial)",
     "icon": "assets/icons/civs/chinese.png",
     "color": "#d32f2f",
     "primaryColor": "#b71c1c",
@@ -49,7 +49,7 @@
             "attackSpeed": 1.5,
             "attackDamage": 1.2
         },
-        "description": "Arquero chino equipado con una ballesta de repetición, dispara ráfagas rápidas."
+        "description": "Arquero chino equipado con una ballesta de repetición, dispara ráfagas rápidas. (+50% Vel. Ataque, +20% Ataque)"
     },
     "uniqueTechnologies": [
         {
@@ -58,7 +58,7 @@
             "icon": "assets/icons/tech_defense.png",
             "category": "DEFENSE",
             "age": 18,
-            "description": "Incrementa la resistencia de todas las estructuras.",
+            "description": "Incrementa la resistencia de todas las estructuras. (+20% HP Edificios)",
             "cost": {
                 "stone": 300
             },

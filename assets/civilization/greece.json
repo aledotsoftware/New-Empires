@@ -1,7 +1,7 @@
 {
     "civilizationId": "greece",
     "name": "Grecia Antigua",
-    "description": "Cuna de la democracia, la filosofía y los Juegos Olímpicos. Maestros en infantería pesada.",
+    "description": "Cuna de la democracia, la filosofía y los Juegos Olímpicos. Maestros en infantería pesada. (Bonos: +20% Ataque Infantería)",
     "icon": "assets/icons/civs/greece.png",
     "iconEmoji": "⚡",
     "color": "#1E90FF",
@@ -21,7 +21,7 @@
             "maxHp": 1.3,
             "attackDamage": 1.2
         },
-        "description": "Infantería pesada de élite con lanza y escudo, mortal en formación."
+        "description": "Infantería pesada de élite con lanza y escudo, mortal en formación. (+50% Armor, +30% HP, +20% Ataque)"
     },
     "technologyOverrides": {
         "democracy": {

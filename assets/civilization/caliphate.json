@@ -1,7 +1,7 @@
 {
     "civilizationId": "caliphate",
     "name": "Califato Árabe",
-    "description": "Imperio de la Edad de Oro islámica. Expertos en ciencia, comercio y caballería ligera.",
+    "description": "Imperio de la Edad de Oro islámica. Expertos en ciencia, comercio y caballería ligera. (Bonos: +15% Vel. Caballería)",
     "icon": "assets/icons/civs/caliphate.png",
     "iconEmoji": "🌙",
     "color": "#006400",
@@ -21,7 +21,7 @@
             "attackDamage": 1.35,
             "armor": 1.15
         },
-        "description": "Caballería rápida experta en el combate cuerpo a cuerpo y a corta distancia."
+        "description": "Caballería rápida experta en el combate cuerpo a cuerpo y a corta distancia. (+40% Velocidad, +35% Ataque, +15% Armor)"
     },
     "technologyOverrides": {
         "algebra": {

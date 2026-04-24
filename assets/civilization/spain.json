@@ -21,7 +21,7 @@
             "armor": 1.3,
             "speed": 1.2
         },
-        "description": "Caballería española armada con armas de fuego."
+        "description": "Caballería española armada con armas de fuego. (+40% Ataque, +30% Armor, +20% Velocidad)"
     },
     "technologyOverrides": {
         "navigation": {

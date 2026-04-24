@@ -1,7 +1,7 @@
 {
     "civilizationId": "sumeria",
     "name": "Sumeria",
-    "description": "Cuna de la civilizacion. Los sumerios crearon sistemas de escritura, establecieron leyes y sentaron las bases de sociedades organizadas.",
+    "description": "Cuna de la civilizacion. Los sumerios crearon sistemas de escritura, establecieron leyes y sentaron las bases de sociedades organizadas. (Bonos: +20% Vel. Construcción, +15% HP Edificios, +25% Agricultura)",
     "icon": "assets/icons/civs/sumerios.png",
     "color": "#D4A574",
     "bonuses": {
@@ -21,7 +21,7 @@
             "speed": 1.5,
             "maxHp": 1.3
         },
-        "description": "Robusto carro de guerra sumerio de gran movilidad y ataque cuerpo a cuerpo."
+        "description": "Robusto carro de guerra sumerio de gran movilidad y ataque cuerpo a cuerpo. (+40% Ataque, +50% Velocidad, +30% HP)"
     },
     "technologyOverrides": {
         "mudBricks": {
@@ -90,7 +90,7 @@
             "icon": "assets/icons/tech_economy.png",
             "category": "ARCHITECTURE",
             "age": 21,
-            "description": "Una de las maravillas del mundo antiguo.",
+            "description": "Una de las maravillas del mundo antiguo. (+50% Vel. Comida)",
             "cost": {
                 "food": 500,
                 "wood": 300,

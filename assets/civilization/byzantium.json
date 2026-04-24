@@ -1,7 +1,7 @@
 {
     "civilizationId": "byzantium",
     "name": "Imperio Bizantino",
-    "description": "Herederos de Roma. Maestros de la diplomacia, el fuego griego y las defensas impenetrables.",
+    "description": "Herederos de Roma. Maestros de la diplomacia, el fuego griego y las defensas impenetrables. (Bonos: +20% HP Edificios)",
     "icon": "assets/icons/civs/byzantium.png",
     "iconEmoji": "🔱",
     "color": "#800080",
@@ -21,7 +21,7 @@
             "maxHp": 1.4,
             "attackDamage": 1.25
         },
-        "description": "Caballeria pesada con armadura pesada, resistente a ataques cuerpo a cuerpo."
+        "description": "Caballeria pesada con armadura pesada, resistente a ataques cuerpo a cuerpo. (+60% Armor, +40% HP, +25% Ataque)"
     },
     "technologyOverrides": {
         "fortification": {

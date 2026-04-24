@@ -1,7 +1,7 @@
 {
     "civilizationId": "mongols",
     "name": "Mongoles",
-    "description": "Civilizacion nomada de las estepas",
+    "description": "Civilizacion nomada de las estepas. (Bonos: +15% Vel. Unidades, +10% Vel. Caballería, +20% Ataque Caballería)",
     "icon": "assets/icons/civs/mongols.png",
     "color": "#8B4513",
     "bonuses": {
@@ -28,7 +28,7 @@
             "attackSpeed": 1.2,
             "speed": 1.4
         },
-        "description": "Arquero a caballo mongol de gran velocidad y daño."
+        "description": "Arquero a caballo mongol de gran velocidad y daño. (+30% Ataque, +20% Vel. Ataque, +40% Velocidad)"
     },
     "technologyOverrides": {
         "weaving": {
@@ -86,7 +86,7 @@
             "icon": "assets/icons/tech_military.png",
             "category": "MILITARY",
             "age": 20,
-            "description": "Tacticas de guerrilla y ataque rapido perfeccionadas en las estepas.",
+            "description": "Tacticas de guerrilla y ataque rapido perfeccionadas en las estepas. (+25% Velocidad Caballería, +15% Ataque Caballería)",
             "cost": {
                 "food": 300,
                 "gold": 200

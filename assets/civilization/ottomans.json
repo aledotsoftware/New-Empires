@@ -1,7 +1,7 @@
 {
     "civilizationId": "ottomans",
     "name": "Imperio Otomano",
-    "description": "Poderoso imperio islámico que unió Oriente y Occidente. Maestros de la pólvora y el asedio.",
+    "description": "Poderoso imperio islámico que unió Oriente y Occidente. Maestros de la pólvora y el asedio. (Bonos: +10% Vel. Construcción, +15% Ataque Infantería)",
     "icon": "assets/icons/civs/ottomans.png",
     "color": "#2e7d32",
     "primaryColor": "#1b5e20",
@@ -43,7 +43,7 @@
             "attackDamage": 1.5,
             "attackSpeed": 0.8
         },
-        "description": "Poderosa infantería de élite del Imperio Otomano equipada con mosquetes."
+        "description": "Poderosa infantería de élite del Imperio Otomano equipada con mosquetes. (+50% Ataque, -20% Vel. Ataque)"
     },
     "uniqueTechnologies": [
         {
@@ -52,7 +52,7 @@
             "icon": "assets/icons/tech_military.png",
             "category": "MILITARY",
             "age": 20,
-            "description": "Gran potencia de fuego para unidades de infantería y rango.",
+            "description": "Gran potencia de fuego para unidades de infantería y rango. (+25% Ataque Arquero, +15% Ataque Guerrero)",
             "cost": {
                 "gold": 300,
                 "food": 200

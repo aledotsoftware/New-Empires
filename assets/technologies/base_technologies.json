@@ -200,7 +200,7 @@
             "baseIcon": "assets/icons/stone.png",
             "category": "TOOLS",
             "age": 1,
-            "baseDescription": "Arte de tallar sílex para crear herramientas cortantes.",
+            "baseDescription": "Arte de tallar sílex para crear herramientas cortantes. (+10% Vel. Madera)",
             "cost": {
                 "food": 25
             },
@@ -236,7 +236,7 @@
             "baseIcon": "assets/icons/archer.png",
             "category": "MILITARY",
             "age": 3,
-            "baseDescription": "Invención del arco para caza y guerra.",
+            "baseDescription": "Invención del arco para caza y guerra. ( Rango de Ataque Arquero)",
             "cost": {
                 "food": 40,
                 "wood": 20
@@ -258,7 +258,7 @@
             "baseIcon": "assets/icons/warrior.png",
             "category": "TOOLS",
             "age": 4,
-            "baseDescription": "Pequeñas herramientas de piedra muy afiladas.",
+            "baseDescription": "Pequeñas herramientas de piedra muy afiladas. (+15% Vel. Comida)",
             "cost": {
                 "food": 50
             },
@@ -279,7 +279,7 @@
             "baseIcon": "assets/icons/food.png",
             "category": "AGRICULTURE",
             "age": 5,
-            "baseDescription": "Domesticación de los primeros animales.",
+            "baseDescription": "Domesticación de los primeros animales. (+25% Vel. Comida)",
             "cost": {
                 "food": 75
             },
@@ -298,7 +298,7 @@
             "baseIcon": "assets/icons/food.png",
             "category": "AGRICULTURE",
             "age": 6,
-            "baseDescription": "Cultivo de las primeras plantas.",
+            "baseDescription": "Cultivo de las primeras plantas. (+30% Vel. Comida)",
             "cost": {
                 "food": 100
             },
@@ -319,7 +319,7 @@
             "baseIcon": "assets/icons/storage.png",
             "category": "TOOLS",
             "age": 7,
-            "baseDescription": "Creación de recipientes de arcilla cocida.",
+            "baseDescription": "Creación de recipientes de arcilla cocida. (+20% Almacenamiento)",
             "cost": {
                 "food": 80,
                 "wood": 40
@@ -337,7 +337,7 @@
             "baseIcon": "assets/icons/tech_economy.png",
             "category": "ECONOMY",
             "age": 8,
-            "baseDescription": "Arte de tejer fibras para crear telas.",
+            "baseDescription": "Arte de tejer fibras para crear telas. (+400% HP Aldeano)",
             "cost": {
                 "food": 90
             },
@@ -382,7 +382,7 @@
             "baseIcon": "assets/icons/tech_economy.png",
             "category": "AGRICULTURE",
             "age": 10,
-            "baseDescription": "Sistemas de riego para cultivos.",
+            "baseDescription": "Sistemas de riego para cultivos. (+35% Vel. Comida)",
             "cost": {
                 "food": 120,
                 "wood": 60

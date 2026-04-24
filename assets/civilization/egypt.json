@@ -1,7 +1,7 @@
 {
     "civilizationId": "egypt",
     "name": "Antiguo Egipto",
-    "description": "El imperio de los faraones. Maestros en arquitectura monumental, agricultura del Nilo y conocimientos místicos.",
+    "description": "El imperio de los faraones. Maestros en arquitectura monumental, agricultura del Nilo y conocimientos místicos. (Bonos: +15% Vel. Construcción, +25% HP Edificios)",
     "icon": "assets/icons/civs/egypt.png",
     "iconEmoji": "🏺",
     "color": "#F4C430",
@@ -21,7 +21,7 @@
             "speed": 1.6,
             "range": 1.2
         },
-        "description": "Unidad rápida de asedio ligero, lanza flechas desde su carroza."
+        "description": "Unidad rápida de asedio ligero, lanza flechas desde su carroza. (+30% Ataque, +60% Velocidad, +20% Range)"
     },
     "technologyOverrides": {
         "stoneMasonry": {
@@ -54,7 +54,7 @@
             "icon": "assets/icons/tech_economy.png",
             "category": "ARCHITECTURE",
             "age": 20,
-            "description": "Técnicas monumentales de construcción.",
+            "description": "Técnicas monumentales de construcción. (+30% HP Edificios, +20% Vel. Construcción)",
             "cost": {
                 "stone": 400,
                 "gold": 200

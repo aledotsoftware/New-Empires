@@ -14,7 +14,7 @@ export class Cavalry extends Unit {
         this.hp = 120;
         this.attackDamage = 12;
         this.attackSpeed = 1.3;
-        this.attackRange = 40;
+        this.attackRange = 50;
         this.speed = 80;
         this.canAttack = true;
     }
@@ -32,11 +32,12 @@ export class Cavalry extends Unit {
             score -= 2000;
         }
 
-        // Less penalty for distance since they are fast
-        score -= distSq / 25;
+        // Less penalty for distance since they are fast, but still penalize
+        // highly distant targets to avoid chasing kites forever
+        score -= distSq / 10;
 
         if (this.hp < this.maxHp * 0.2) {
-            score -= distSq / 20;
+            score -= distSq / 10;
         }
 
         return score;

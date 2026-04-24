@@ -1,12 +1,20 @@
-Completed tracking optimizations and arrays
+# JAA Global System State
 
-- Fixed SaveManager & ProductionQueue regressions: Ensure cost is correctly stored/restored and researchedTechs Set is serialized properly.
-- Refined unit combat AI to improve spacing, target selection, and tactical responsiveness. Adjusted melee attack ranges, enhanced anti-clumping separation force, and eliminated awkward archer-to-archer kiting loops.
-- Improved macro pacing: Accelerated unit production times and added increased `maxCarry` to the `wheelbarrow` technology. Removed double population counting in Game.js.
-- Improved Procedural Map Generation: Widened connection paths between landmasses, smoothed terrain generation to remove micro-choke points, reduced visual clutter decorations, and ensured gold and stone resources spawn on clear, buildable terrain rather than inside forests.
-- Enhanced UX/UI Feedback: Upgraded visual and auditory feedback loops including a new `.shake` effect for invalid actions, distinct text rendering in `EffectsManager`, clearer HP/Production bars, and robust hover highlighting (`drawHoverHighlight`) for improved tactical clarity.
-- Implemented robust UI integration for dynamic descriptions, fixing tooltip elements (`.tooltip-desc`) in `Game.js` to ensure the localized descriptions or base descriptions are rendered for building variants and unit upgrades.
-- Enhanced the `assets/civilization/*.json` and `assets/technologies/base_technologies.json` definitions by translating and automatically calculating and appending explicit mathematical modifiers (e.g., "+15% Vel. Caballería", "+10% HP Edificios") to descriptions, ensuring maximum tactical clarity for players.
-- Removed array allocations (\`.filter\`, \`.splice\`, \`.push\`, \`.shift\`, etc.) from hot paths and core game loops, replacing them with manual iteration and pre-allocated arrays or in-place object pools to reduce Garbage Collection pressure.
-- Fixed a regression where restoring a saved game would leave the Fog Of War visual layer completely black until a native update cycle by ensuring `this._updateFOWBuffer()` is called during `loadState`.
-- Tested and validated SaveManager's ability to serialize and deserialize data correctly using the `js/tests/test_save_manager.mjs` script.
+Este archivo contiene el estado compartido entre todos los repositorios gestionados por JAA.
+Los agentes pueden leer este estado para entender el contexto de otros proyectos.
+
+## 🚀 ACTIVE MILESTONES
+- [JAA] Implementación de Jerarquía de Contexto (.jaa.md global) - **COMPLETADO**
+- [JAA] Sistema de Estado Global (system-state.md) - **EN PROCESO**
+- [GENERAL] Estandarización de agentes para todos los repositorios.
+
+## 📝 AGENT NOTES
+- **Vision Agent**: Reportando progreso en el diseño premium del dashboard.
+- **ErrorGuardian**: Monitoreando logs de error en producción.
+- **Strategist (Combat & AI)**: Completó mejoras en la IA de combate y toma de decisiones tácticas.
+  - Se incrementaron los rangos de ataque de unidades cuerpo a cuerpo (60-65) y arqueros (130) para mitigar aglomeraciones perjudiciales al pathfinding.
+  - Se calibraron las penalizaciones por distancia en la evaluación de objetivos (`evaluateTargetScore`), manteniendo la tenacidad sobre el objetivo actual pero evitando persecuciones infinitas a enemigos distantes.
+  - Se ajustó el multiplicador de contraunidades (ej. piqueros vs caballería, caballería vs arqueros) forzando que prioricen sus presas tácticas naturales.
+  - El kiting de los arqueros se perfeccionó, activándose al 80% de su rango máximo en lugar del ~60%, haciéndolos más efectivos defendiendo sus posiciones y penalizando perseguir a enemigos.
+  - El sistema de formaciones (`FormationManager.js`) se actualizó para situar consistentemente la caballería al frente/flancos, infantería en el medio y tiradores/civiles detrás.
+  - El espaciado de formaciones ahora escala dinámicamente según el tamaño del ejército (`spacing * (1.25 + (unidades / 50))`) para prevenir saturación espacial en grupos gigantes. Se actualizó `docs/sistemas/FORMATIONS.md` para reflejar esto.

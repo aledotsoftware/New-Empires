@@ -11,18 +11,24 @@ export class Archer extends Unit {
         // IA de Unidades: Mejora de decisiones para Arquero
         // Los arqueros deben priorizar a otros arqueros (counter-fire)
         // o a unidades frágiles. Nunca edificios si hay tropas cerca.
-        if (enemy.type === 'archer') {
+        if (enemy.type === 'spearman') {
+            score += 3000; // Counter spearmen strongly
+        } else if (enemy.type === 'archer') {
             score += 2000;
         } else if (enemy.type === 'villager') {
             score += 1200;
-        } else if (enemy.type === 'warrior' || enemy.type === 'spearman' || enemy.type === 'cavalry') {
+        } else if (enemy.type === 'warrior' || enemy.type === 'cavalry') {
             score += 500;
         } else if (enemy.isBuilding) {
             score -= 2000;
         }
 
         // Penalización por distancia: Los arqueros no deben avanzar ciegamente descuidando su posición.
-        score -= distSq / 25;
+        if (this.attackTarget === enemy) {
+            score -= distSq / 50;
+        } else {
+            score -= distSq / 15; // Increased penalty for unrelated targets to keep them firing at what is close
+        }
 
         return score;
     }
@@ -36,7 +42,7 @@ export class Archer extends Unit {
         this.hp = 60;
         this.attackDamage = 8;
         this.attackSpeed = 1.5;
-        this.attackRange = 100;
+        this.attackRange = 130;
         this.canAttack = true;
     }
 
@@ -50,8 +56,10 @@ export class Archer extends Unit {
             const dy = this.y - this.attackTarget.y;
             const distSq = dx * dx + dy * dy;
 
-            // Mantenemos distancia a un ~90% de nuestra attackRange para tener un margen seguro de disparo
-            const minKiteDistSq = this.attackRangeSq * 0.36;
+            // Mantenemos distancia para tener un margen seguro de disparo (80% de attackRange)
+            // attackRange = 130 -> 130^2 = 16900
+            // 0.64 * 16900 = 10816 (distancia de ~104)
+            const minKiteDistSq = this.attackRangeSq * 0.64;
 
             // Verificamos si podemos movernos (no estamos estuneados, etc.)
             // En este motor, el Unit base maneja todo en update()

@@ -303,21 +303,24 @@ export class FormationManager {
         // Arqueros en el medio y aldeanos u otras unidades frágiles al fondo.
         // Se muta localmente el array para asignar posiciones pero no se rompe la referencia externa.
         const typePriority = {
-            'warrior': 1,
-            'spearman': 1,
             'cavalry': 1,
-            'archer': 2,
-            'villager': 3
+            'warrior': 2,
+            'spearman': 2,
+            'archer': 3,
+            'villager': 4
         };
 
         const sortedUnits = [...units].sort((a, b) => {
-            const pA = typePriority[a.type] || 4;
-            const pB = typePriority[b.type] || 4;
+            const pA = typePriority[a.type] || 5;
+            const pB = typePriority[b.type] || 5;
             return pA - pB;
         });
 
-        // Aumentar ligeramente el spacing base si tenemos muchas unidades grandes para evitar aglomeraciones que rompan pathing
-        const dynamicSpacing = spacing * 1.25;
+        // Scale spacing dynamically to ensure large formations aren't tightly packed together,
+        // which would cause massive pathing agglomerations.
+        const unitsCount = sortedUnits.length;
+        const countFactor = 1.25 + (unitsCount / 50);
+        const dynamicSpacing = spacing * countFactor;
 
         let positions = this.getPositions(formationType, sortedUnits, center, dynamicSpacing);
 

@@ -450,16 +450,16 @@ export class SoundManager {
     playMilitaryComplete() {
         if (!this.enabled) return;
         // Fanfare for military completion
-        this.playTone(300, 0.1, 'sine', 0.1);
-        setTimeout(() => this.playTone(400, 0.15, 'sine', 0.1), 100);
-        setTimeout(() => this.playTone(500, 0.25, 'sine', 0.15), 250);
+        this.playTone(300, 0.1, 'triangle', 0.15);
+        setTimeout(() => this.playTone(400, 0.15, 'square', 0.1), 100);
+        setTimeout(() => this.playTone(500, 0.25, 'triangle', 0.15), 250);
     }
 
     playVillagerComplete() {
         if (!this.enabled) return;
         // Simple positive chime for villager
-        this.playTone(450, 0.1, 'sine', 0.1);
-        setTimeout(() => this.playTone(600, 0.15, 'sine', 0.1), 100);
+        this.playTone(450, 0.1, 'triangle', 0.12);
+        setTimeout(() => this.playTone(600, 0.15, 'sine', 0.12), 100);
     }
 
     playAlarm() {
@@ -635,7 +635,7 @@ export class SoundManager {
 
         // Synthesize a generic selection sound for better feedback
         if (entityType === 'villager' || entityType === 'warrior' || entityType === 'archer') {
-            this.playTone(350, 0.1, 'sine', 0.15);
+            this.playTone(350, 0.05, 'sine', 0.1);
         } else {
             this.playTone(200, 0.1, 'triangle', 0.15);
         }

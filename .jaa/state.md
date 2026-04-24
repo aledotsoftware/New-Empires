@@ -23,3 +23,9 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
   - Se mejoró la recolección de recursos en `isValidResourceCenter`. Se agregaron márgenes estrictos (4 tiles) hacia el borde del mapa para que los recursos siempre sean accesibles y se aumentó el espaciamiento mínimo entre cúmulos de recursos (de 5 a 8 tiles) para evitar bloqueos por acumulación.
   - Se agregó heurística de "choke-point" (cuello de botella) para impedir la aparición de minas de oro o piedra en áreas excesivamente estrechas rodeadas de agua o montaña.
   - Se reescribió `smoothTerrain` en dos pases (2-pass smoothing): El primero borra montañas/bosques aislados, y el segundo identifica tiles de terreno transitable (pastizal/tierra) encajonados (1 solo tile) y rodeados de terrenos impasables, eliminando zonas inútiles que antes generaban dead-ends para el A*.
+- **Bard (UX/Feedback)**: Mejoró el feedback visual y sonoro del juego sin afectar el rendimiento.
+  - Se agregó texto de daño (`createDamageText` en `EffectsManager.js`) que flota sobre las entidades al recibir ataques, centralizando el código en `Entity.js` para evitar duplicación.
+  - Se implementó un nuevo efecto de partículas radiales al generarse unidades (`createSpawnEffect` en `EffectsManager.js`), integrado en `Game.js`.
+  - Se afinó el diseño sonoro (`SoundManager.js`), reemplazando las ondas senoidales simples por osciladores más robustos (triangle/square) en las notificaciones de producción militar y civil.
+  - Se mejoró la acústica de selección genérica de unidades, haciéndola más corta y suave para evitar fatiga auditiva.
+  - Se corrigió la documentación (`docs/sistemas/PANEL_CONTROL.md`) para reflejar la estructura HTML correcta (`#commandPanel` en lugar del obsoleto `#unitControlPanel`).

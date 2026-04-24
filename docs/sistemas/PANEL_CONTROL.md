@@ -122,21 +122,18 @@ Al presionar B (o Q con aldeano seleccionado):
 |------------|---------|--------|
 | Renderizado del panel | `js/core/Game.js` | `updateActionsPanel()` |
 | Hotkeys | `js/core/Game.js` | `handleKeyPress()` |
-| Estilos | `control-panel.css` | - |
-| HTML | `index.html` | `#unitControlPanel` |
+| Estilos | `medieval-theme.css` | - |
+| HTML | `index.html` | `#commandPanel` |
 
 ### Estructura HTML
 
 ```html
-<div id="unitControlPanel">
-    <div class="panel-header">
-        <div class="entity-icon">🏰</div>
-        <div class="entity-info">
-            <div class="entity-name">Centro Urbano</div>
-            <div class="entity-hp">HP: 2000/2000</div>
-        </div>
+<div class="bottom-hud">
+    <div id="selectionPanel" class="premium-panel">
+        <!-- Contenido de selección (icono, hp, etc) -->
     </div>
-    <div id="actionsGrid" class="actions-grid">
+
+    <div id="commandPanel" class="premium-panel">
         <!-- Botones generados dinámicamente -->
     </div>
 </div>
@@ -286,8 +283,7 @@ En la consola del navegador:
 
 ```javascript
 // Verificar panel
-console.log('Panel:', !!document.getElementById('unitControlPanel'));
-console.log('Grid:', !!document.getElementById('actionsGrid'));
+console.log('Panel:', !!document.getElementById('commandPanel'));
 console.log('Botones:', document.querySelectorAll('.action-btn').length);
 
 // Ver entidad seleccionada

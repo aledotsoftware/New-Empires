@@ -728,6 +728,27 @@ export class ParticleSystem {
         this.particles.push(Ripple.get(x, y, '#4299e1'));
     }
 
+    // Efecto de creación de unidad
+    createSpawnEffect(x, y, color = '#48bb78') {
+        const r = Ripple.get(x, y, color);
+        r.maxSize = 25;
+        this.particles.push(r);
+
+        // Burst of square particles upward
+        for (let i = 0; i < 4; i++) {
+            this.particles.push(Particle.get(x, y, {
+                vx: (Math.random() - 0.5) * 30,
+                vy: -30 - Math.random() * 20,
+                life: 0.5 + Math.random() * 0.3,
+                size: 3 + Math.random() * 2,
+                color: color,
+                gravity: 10,
+                friction: 0.95,
+                shape: 'square'
+            }));
+        }
+    }
+
     // Efecto de enfoque de cámara (Palette)
     createFocusPing(x, y) {
         // Cyan ripple for focus
@@ -751,6 +772,21 @@ export class ParticleSystem {
             gravity: 0, // No gravity, float straight up
             friction: 0.98,
             fadeRate: 1.5
+        }));
+    }
+
+    createDamageText(x, y, amount) {
+        if (amount <= 0) return;
+        this.particles.push(Particle.get(x, y, {
+            vx: (Math.random() - 0.5) * 20, // More horizontal drift
+            vy: -50, // Move up faster
+            life: 1.0, // Shorter life
+            size: 16, // Slightly larger
+            text: `-${Math.round(amount)}`,
+            color: '#ff4444', // Red damage color
+            gravity: 10, // Slight gravity to arc
+            friction: 0.95,
+            fadeRate: 2.0
         }));
     }
 

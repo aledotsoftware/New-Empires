@@ -2407,9 +2407,9 @@ export class Game {
 
         // Tiempo de entrenamiento según tipo
         const TRAINING_TIMES = {
-            villager: 25,
-            warrior: 30,
-            archer: 35
+            villager: 20,
+            warrior: 24,
+            archer: 28
         };
         const trainingTime = TRAINING_TIMES[unitType] || 30;
 
@@ -2548,9 +2548,6 @@ export class Game {
 
             this._cacheEntityTerrain(unit); // OPTIMIZATION
             this.units.push(unit);
-
-            // Increment population synchronously to avoid frame-delay overpopulation
-            this.populationManager.addPopulation(1);
 
             if (soundManager) {
                 const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;

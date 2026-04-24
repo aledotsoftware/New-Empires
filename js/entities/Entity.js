@@ -67,6 +67,12 @@ export class Entity {
 
     takeDamage(amount, attacker = null) {
         this.hp -= amount;
+
+        if (typeof window !== 'undefined' && window.game && window.game.particleSystem) {
+            // Offset Y slightly based on entity size
+            window.game.particleSystem.createDamageText(this.x, this.y - this.size, amount);
+        }
+
         if (this.hp <= 0) {
             this.hp = 0;
             this.isDead = true;

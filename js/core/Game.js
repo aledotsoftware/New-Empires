@@ -2556,6 +2556,10 @@ export class Game {
             this._cacheEntityTerrain(unit); // OPTIMIZATION
             this.units[this.units.length] = unit;
 
+            if (this.particleSystem && this.particleSystem.createSpawnEffect) {
+                this.particleSystem.createSpawnEffect(unit.x, unit.y);
+            }
+
             if (soundManager) {
                 const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
                 soundManager.play(soundKey);

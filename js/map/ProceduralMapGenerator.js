@@ -791,7 +791,7 @@ export class ProceduralMapGenerator {
                 // Si cumple la distancia mínima (o no hay otros jugadores), calcular score compuesto
                 if (minDistToOthersSq >= minDistanceSq || this.playerStarts.length === 0) {
                     // Combinar distancia y espacio abierto (ponderar para que ambos importen)
-                    const score = (minDistToOthersSq === Infinity ? 0 : Math.sqrt(minDistToOthersSq)) * 2 + openSpaceScore;
+                    const score = (minDistToOthersSq === Infinity ? 0 : minDistToOthersSq) * 4 + openSpaceScore * openSpaceScore;
                     if (score > bestScore) {
                         bestScore = score;
                         bestPos = { x, y };

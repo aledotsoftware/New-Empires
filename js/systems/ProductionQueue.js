@@ -76,7 +76,12 @@ export class ProductionQueue {
         if (index < 0 || index >= this.queue.length) {
             return null;
         }
-        return this.queue.splice(index, 1)[0];
+        const cancelled = this.queue[index];
+        for (let i = index; i < this.queue.length - 1; i++) {
+            this.queue[i] = this.queue[i + 1];
+        }
+        this.queue.length--;
+        return cancelled;
     }
 
     /**
@@ -95,7 +100,12 @@ export class ProductionQueue {
 
         if (current.remaining <= 0) {
             // Unidad completada, remover de la cola y retornar
-            return this.queue.shift();
+            const completed = this.queue[0];
+            for (let i = 1; i < this.queue.length; i++) {
+                this.queue[i - 1] = this.queue[i];
+            }
+            this.queue.length--;
+            return completed;
         }
 
         return null;
@@ -127,7 +137,10 @@ export class ProductionQueue {
      * @returns {Array}
      */
     getQueue() {
-        return [...this.queue];
+        const len = this.queue.length;
+        const q = new Array(len);
+        for(let i = 0; i < len; i++) q[i] = this.queue[i];
+        return q;
     }
 
     /**
@@ -135,7 +148,9 @@ export class ProductionQueue {
      * @returns {Array} Items cancelados
      */
     clear() {
-        const cancelled = [...this.queue];
+        const len = this.queue.length;
+        const cancelled = new Array(len);
+        for(let i = 0; i < len; i++) cancelled[i] = this.queue[i];
         this.queue = [];
         return cancelled;
     }

@@ -25,9 +25,9 @@ El sistema de cola de producción permite a los edificios productores (Centro Ur
 
 | Unidad | Tiempo | Costo |
 |--------|--------|-------|
-| Aldeano | 25 segundos | 50🌾 |
-| Guerrero | 30 segundos | 60🌾 + 20💰 |
-| Arquero | 35 segundos | 50🌾 + 25💰 |
+| Aldeano | 20 segundos | 50🌾 |
+| Guerrero | 24 segundos | 60🌾 + 20💰 |
+| Arquero | 28 segundos | 50🌾 + 25💰 |
 
 ---
 

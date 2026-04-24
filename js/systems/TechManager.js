@@ -458,6 +458,7 @@ Object.assign(TECHNOLOGIES, {
                     u.speed *= 1.15;
                     u.maxHp = Math.floor(u.maxHp * 1.25);
                     u.hp = Math.min(u.hp * 1.25, u.maxHp);
+                    u.maxCarry += 5;
                 }
             }
         }

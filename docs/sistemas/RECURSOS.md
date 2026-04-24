@@ -103,9 +103,9 @@ Población: 3/5
 
 | Unidad | 🌾 | 🪵 | 💰 | Tiempo |
 |--------|----|----|----|----|
-| Aldeano | 50 | - | - | 25s |
-| Guerrero | 60 | - | 20 | 30s |
-| Arquero | 50 | 25 | 40 | 35s |
+| Aldeano | 50 | - | - | 20s |
+| Guerrero | 60 | - | 20 | 24s |
+| Arquero | 50 | 25 | 40 | 28s |
 
 ---
 

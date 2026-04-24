@@ -157,6 +157,13 @@ const positions = FORMATIONS.circle(units, center, 60);
 
 ## 🎯 Estrategias de Uso
 
+### Organización Automática
+El sistema de formaciones posiciona automáticamente las unidades según su rol y durabilidad para maximizar su efectividad en combate:
+1. **Caballería (`cavalry`)**: Prioridad 1. Se ubica siempre al frente o en los extremos para liderar cargas o flanquear.
+2. **Infantería (`warrior`, `spearman`)**: Prioridad 2. Protege el frente, formando un muro sólido para absorber el daño directo.
+3. **A distancia (`archer`)**: Prioridad 3. Se posiciona detrás de la línea de infantería para disparar con seguridad.
+4. **Civiles (`villager`)**: Prioridad 4. Se ubica en la retaguardia para máxima protección.
+
 ### Ataque
 1. **Wedge** para cargar contra formaciones enemigas
 2. **Line** para maximizar unidades en combate simultáneo
@@ -180,13 +187,15 @@ const positions = FORMATIONS.circle(units, center, 60);
 
 | Parámetro | Default | Descripción |
 |-----------|---------|-------------|
-| `spacing` | 40px | Distancia entre unidades |
+| `spacing` | 40px | Distancia base entre unidades |
 | `radius` (circle) | 60px | Radio del círculo |
 | `spread` | 80px | Dispersión máxima |
 
+*Nota: El `spacing` base escala dinámicamente con la cantidad de unidades (`spacing * (1.25 + (unidades / 50))`) para prevenir aglomeraciones que rompan el pathfinding en ejércitos grandes.*
+
 ### Ejemplo con Spacing Custom
 ```javascript
-formationManager.applyFormation('line', units, center, 60); // 60px de espacio
+formationManager.applyFormation('line', units, center, 60); // 60px de espacio base
 ```
 
 ---

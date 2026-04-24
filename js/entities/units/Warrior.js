@@ -47,7 +47,7 @@ export class Warrior extends Unit {
         this.hp = 100;
         this.attackDamage = 10;
         this.attackSpeed = 1.2;
-        this.attackRange = 45;
+        this.attackRange = 60;
         this.canAttack = true;
     }
 }

@@ -14,7 +14,7 @@ export class Cavalry extends Unit {
         this.hp = 120;
         this.attackDamage = 12;
         this.attackSpeed = 1.3;
-        this.attackRange = 50;
+        this.attackRange = 60;
         this.speed = 80;
         this.canAttack = true;
     }
@@ -23,18 +23,21 @@ export class Cavalry extends Unit {
         let score = baseScore;
 
         if (enemy.type === 'archer') {
-            score += 2500;
+            score += 4000; // Fast units should hunt archers
         } else if (enemy.type === 'villager') {
-            score += 800;
+            score += 1500;
         } else if (enemy.type === 'spearman') {
-            score -= 1000; // Avoid spearmen!
+            score -= 3000; // Severely avoid spearmen!
         } else if (enemy.isBuilding) {
             score -= 2000;
         }
 
-        // Less penalty for distance since they are fast, but still penalize
-        // highly distant targets to avoid chasing kites forever
-        score -= distSq / 10;
+        // Less penalty for distance since they are fast, but stick to target slightly more
+        if (this.attackTarget === enemy) {
+            score -= distSq / 80;
+        } else {
+            score -= distSq / 15;
+        }
 
         if (this.hp < this.maxHp * 0.2) {
             score -= distSq / 10;

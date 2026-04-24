@@ -1,4 +1,6 @@
 import { saveManager } from './js/managers/SaveManager.js';
+window.saveManager = saveManager;
+// from './js/managers/SaveManager.js';
 import { dataLoader } from './js/managers/DataLoader.js';
 import { civilizationManager } from './js/managers/CivilizationManager.js';
 import { TechManager, TECHNOLOGIES } from './js/systems/TechManager.js';
@@ -577,6 +579,7 @@ function saveGame() {
 /**
  * Carga la última partida guardada
  */
+window.loadGame = loadGame;
 function loadGame() {
     if (!saveManager) {
         updateSaveStatus(' Sistema de guardado no disponible', 'error');
@@ -1005,6 +1008,7 @@ function closeBuildMenu() {
 /**
  * Inicia una nueva partida
  */
+window.startGame = startGame;
 function startGame(civId, mapConfig, loadedState = null, enemyCivId = null) {
     debugLogger.start('Iniciando nuevo juego', 'game');
     
@@ -1049,6 +1053,7 @@ function startGame(civId, mapConfig, loadedState = null, enemyCivId = null) {
 
     // Crear instancia del juego ahora que el contenedor es visible
     game = new Game(civId, enemyCivId, mapConfig);
+    window.game = game;
     game.showConfirmation = showConfirmation;
 
 

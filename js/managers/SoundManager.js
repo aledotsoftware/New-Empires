@@ -469,6 +469,13 @@ export class SoundManager {
         setTimeout(() => this.playTone(600, 0.2, 'square', 0.15), 300);
     }
 
+    playClick() {
+        if (!this.enabled) return;
+        // A short, crisp tick sound using a very short triangle wave
+        this.playTone(800, 0.02, 'triangle', 0.1);
+        setTimeout(() => this.playTone(1200, 0.03, 'sine', 0.05), 10);
+    }
+
     playError() {
         if (!this.enabled) return;
         // Harsh buzzer tone for negative feedback
@@ -601,6 +608,10 @@ export class SoundManager {
                 // Fallback tone synthesis for error sound if it wasn't loaded from a file
                 if (key === 'error') {
                     this.playError();
+                    return Promise.resolve();
+                }
+                if (key === 'click') {
+                    this.playClick();
                     return Promise.resolve();
                 }
 

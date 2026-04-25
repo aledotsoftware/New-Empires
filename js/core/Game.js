@@ -6115,6 +6115,11 @@ export class Game {
         const container = this.uiElements.notifications || document.getElementById('notifications');
         if (!container) return; // Defensive check
 
+        // Centralized error sound
+        if (type === 'error' && typeof soundManager !== 'undefined' && soundManager && typeof soundManager.playError === 'function') {
+            soundManager.playError();
+        }
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.setAttribute('role', 'status');

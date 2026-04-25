@@ -39,7 +39,8 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
   - Se afinó el diseño sonoro (`SoundManager.js`), reemplazando las ondas senoidales simples por osciladores más robustos (triangle/square) en las notificaciones de producción militar y civil.
   - Se mejoró la acústica de selección genérica de unidades, haciéndola más corta y suave para evitar fatiga auditiva.
   - Se corrigió la documentación (`docs/sistemas/PANEL_CONTROL.md`) para reflejar la estructura HTML correcta (`#commandPanel` en lugar del obsoleto `#unitControlPanel`).
-
+  - Se implementaron sonidos sintetizados de error (`playError()`) en `SoundManager.js` que se activan automáticamente siempre que se usa `showNotification(..., 'error')` en `Game.js` para proveer feedback auditivo robusto en acciones denegadas.
+  - Se agregó un sintetizador de clic (`playClick()`) como fallback para botones y acciones UI que dependían de un asset no cargado.
 - **Sentinel (Stability & Save/Load)**: Mejoró la fiabilidad del sistema de guardado y carga.
   - Se corrigió la omisión de `enemyCivilizationId` en `SaveManager.js` y `Game.js` durante la serialización, validación y carga del estado del juego, impidiendo que el oponente desapareciera al cargar una partida.
   - Se actualizó la documentación de `SAVE_SYSTEM.md` para reflejar que la "Carga completa de partida guardada" ya está implementada y es funcional.

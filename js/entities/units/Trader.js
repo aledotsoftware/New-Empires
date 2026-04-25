@@ -39,7 +39,13 @@ export class Trader extends Unit {
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
                     // Oro ganado basado en la distancia
-                    this.carryingGold = Math.max(10, Math.floor(distance / 50));
+                    let goldAmount = Math.max(10, Math.floor(distance / 50));
+
+                    if (game && game.modifiers && game.modifiers.tradeBonus) {
+                        goldAmount = Math.floor(goldAmount * game.modifiers.tradeBonus);
+                    }
+
+                    this.carryingGold = goldAmount;
                 }
             } else if (this.homeMarket) {
                 // Volver al mercado propio

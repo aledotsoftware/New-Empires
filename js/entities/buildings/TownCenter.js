@@ -35,6 +35,18 @@ export class TownCenter extends Building {
         super.update(deltaTime, game);
         if (this.isUnderConstruction || this.isDead) return null;
 
+        // Collect passive tax income every second if modifier > 1
+        if (this.team === 'player' && game && game.modifiers && game.modifiers.taxCollection > 1) {
+            if (!this.taxTimer) this.taxTimer = 0;
+            this.taxTimer += deltaTime;
+            if (this.taxTimer >= 1.0) {
+                // Determine raw tax rate dynamically from modifier logic. Let's say +10% adds 0.1 gold per second per TC.
+                const taxRate = game.modifiers.taxCollection - 1;
+                game.resources.gold += taxRate;
+                this.taxTimer = 0;
+            }
+        }
+
         const completed = this.productionQueue.update(deltaTime);
         return completed;
     }

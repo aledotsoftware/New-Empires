@@ -260,6 +260,9 @@ export class SaveManager {
             // Cámara
             camera: { x: game.camera.x, y: game.camera.y },
 
+            // Modificadores de tecnología
+            modifiers: game.modifiers ? { ...game.modifiers } : undefined,
+
             // Mapa
             mapConfig: game.mapConfig,
             seed: game.mapConfig?.seed,

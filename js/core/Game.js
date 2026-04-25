@@ -133,6 +133,16 @@ export class Game {
         this.civilizationId = civId;
         this.civilization = civilizationManager.getCivilization(civId);
 
+        // Global modifiers for specific tech effects
+        this.modifiers = {
+            unitProduction: 1,
+            villagerProduction: 1,
+            taxCollection: 1,
+            allTechCost: 1,
+            tradeBonus: 1,
+            healingSpeed: 1
+        };
+
         // Aplicar tema visual de civilización al body
         if (this.civilizationId) {
             document.body.className = `theme-${this.civilizationId}`;
@@ -800,6 +810,10 @@ export class Game {
             if (this.techManager.applyResearchedEffects) {
                 this.techManager.applyResearchedEffects();
             }
+        }
+
+        if (state.modifiers) {
+            this.modifiers = state.modifiers;
         }
 
         // 6. Restore Fog Of War
@@ -2487,7 +2501,16 @@ export class Game {
             warrior: 24,
             archer: 28
         };
-        const trainingTime = TRAINING_TIMES[unitType] || 30;
+        let trainingTime = TRAINING_TIMES[unitType] || 30;
+
+        // Apply production modifiers
+        if (this.modifiers) {
+            if (unitType === 'villager') {
+                if (this.modifiers.villagerProduction) trainingTime /= this.modifiers.villagerProduction;
+            } else {
+                if (this.modifiers.unitProduction) trainingTime /= this.modifiers.unitProduction;
+            }
+        }
 
         // Deducir recursos inmediatamente
         for (let [resource, amount] of Object.entries(cost)) {

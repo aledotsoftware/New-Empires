@@ -89,14 +89,19 @@ export class Priest extends Unit {
         const distSq = dx * dx + dy * dy;
 
         if (distSq <= this.attackRangeSq && this.attackCooldown <= 0) {
-            target.hp += this.healAmount;
+            let actualHeal = this.healAmount;
+            if (game && game.modifiers && game.modifiers.healingSpeed) {
+                actualHeal = Math.floor(actualHeal * game.modifiers.healingSpeed);
+            }
+
+            target.hp += actualHeal;
             if (target.hp > target.maxHp) target.hp = target.maxHp;
 
             this.attackCooldown = 1 / this.attackSpeed;
 
             // Palette: Visual Feedback for Heal
             if (game && game.particleSystem) {
-                game.particleSystem.createFloatingText(target.x, target.y - target.size / 2, `+${this.healAmount}`, '#4caf50');
+                game.particleSystem.createFloatingText(target.x, target.y - target.size / 2, `+${actualHeal}`, '#4caf50');
             }
         }
     }

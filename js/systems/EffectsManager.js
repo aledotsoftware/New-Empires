@@ -84,12 +84,12 @@ export class Particle {
 
             // Constant styles for emoji/text outline
             // Palette: Outline for visibility against any background
-            if (state.lineWidth !== 3) {
-                ctx.lineWidth = 3;
-                state.lineWidth = 3;
+            if (state.lineWidth !== 4) {
+                ctx.lineWidth = 4;
+                state.lineWidth = 4;
             }
 
-            const strokeColor = 'rgba(0,0,0,0.8)';
+            const strokeColor = 'rgba(0,0,0,1.0)';
             if (state.strokeStyle !== strokeColor) {
                 ctx.strokeStyle = strokeColor;
                 state.strokeStyle = strokeColor;

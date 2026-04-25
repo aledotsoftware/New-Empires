@@ -2244,16 +2244,13 @@ export class Game {
                         soundManager.play('error');
                     }
 
-                    // Notification feedback
-                    const missing = option.getAttribute('aria-label').split(' - Insuficiente: ')[1];
-                    const msg = missing ? `Recursos insuficientes: ${missing}` : 'Recursos insuficientes';
-                    this.showNotification(msg, 'error');
-
                     // Palette: Visual feedback for resources
+                    let msg = 'Recursos insuficientes';
                     const type = option.dataset.building;
                     if (type && CONFIG.COSTS[type]) {
-                        this.flashMissingResources(CONFIG.COSTS[type]);
+                        msg = this.flashMissingResources(CONFIG.COSTS[type]);
                     }
+                    this.showNotification(msg, 'error');
 
                     return;
                 }
@@ -2316,8 +2313,8 @@ export class Game {
 
         const cost = CONFIG.COSTS[this.buildMode];
         if (!this.canAfford(cost)) {
-            this.showNotification('Recursos insuficientes', 'error');
-            this.flashMissingResources(cost);
+            const msg = this.flashMissingResources(cost);
+            this.showNotification(msg, 'error');
             return;
         }
 
@@ -2464,8 +2461,8 @@ export class Game {
         const cost = CONFIG.UNIT_COSTS[unitType];
 
         if (!this.canAfford(cost)) {
-            this.showNotification('Recursos insuficientes', 'error');
-            this.flashMissingResources(cost);
+            const msg = this.flashMissingResources(cost);
+            this.showNotification(msg, 'error');
             return;
         }
 
@@ -2522,8 +2519,8 @@ export class Game {
         const cost = CONFIG.UNIT_COSTS[unitType];
 
         if (!this.canAfford(cost)) {
-            this.showNotification('Recursos insuficientes', 'error');
-            this.flashMissingResources(cost);
+            const msg = this.flashMissingResources(cost);
+            this.showNotification(msg, 'error');
             return;
         }
 
@@ -6192,7 +6189,7 @@ export class Game {
 
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.setAttribute('role', 'status');
+        notification.setAttribute('role', type === 'error' ? 'alert' : 'status');
 
         // Palette: Interactive Notification
         if (location) {
@@ -6355,11 +6352,19 @@ export class Game {
     }
 
     flashMissingResources(cost) {
+        const missing = [];
         for (let [resource, amount] of Object.entries(cost)) {
             if (this.resources[resource] < amount) {
                 this.flashResource(resource);
+                let name = resource;
+                if (name === 'food') name = 'Comida';
+                else if (name === 'wood') name = 'Madera';
+                else if (name === 'gold') name = 'Oro';
+                else if (name === 'stone') name = 'Piedra';
+                missing.push(`${name} (${Math.ceil(amount - this.resources[resource])})`);
             }
         }
+        return missing.length > 0 ? `Falta: ${missing.join(', ')}` : 'Recursos insuficientes';
     }
 
     /**

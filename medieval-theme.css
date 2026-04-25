@@ -1987,7 +1987,9 @@ body.theme-mayans {
 .notification-text {
     flex: 1;
     color: var(--text-light);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .notification-close-btn {
@@ -2110,15 +2112,20 @@ body.theme-mayans {
    17. FOCUS Y ACCESIBILIDAD
    ========================================== */
 :focus-visible {
-    outline: 2px solid var(--gold);
-    outline-offset: 2px;
+    outline: 3px solid var(--gold-bright);
+    outline-offset: 3px;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
 
 button:focus-visible,
-[role="button"]:focus-visible {
-    outline: 2px solid var(--gold);
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.3);
+[role="button"]:focus-visible,
+.resource-item:focus-visible,
+.build-option:focus-visible,
+.notification.clickable:focus-visible {
+    outline: 3px solid var(--gold-bright);
+    outline-offset: 3px;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), inset 0 0 8px rgba(255, 215, 0, 0.3);
+    border-color: var(--gold-bright);
 }
 
 /* ==========================================
@@ -2292,14 +2299,15 @@ button:focus-visible,
 
 /* Shake Animation for Disabled Actions */
 @keyframes shake {
-    0%, 100% { transform: translateX(0); border-color: rgba(212, 175, 55, 0.5); }
-    25% { transform: translateX(-4px); border-color: #e53e3e; background: rgba(229, 62, 62, 0.3); }
-    50% { transform: translateX(4px); }
-    75% { transform: translateX(-4px); }
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
+    40% { transform: translateX(6px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
+    60% { transform: translateX(-4px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
+    80% { transform: translateX(4px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
 }
 
 .shake {
-    animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 /* Spinner for Start Button (fix for main.js) */
@@ -2393,14 +2401,15 @@ button:focus-visible,
 
 /* Palette: Resource Flash Error (Added to fix missing feedback) */
 @keyframes resourceFlashError {
-    0%, 100% { color: var(--text-gold); transform: scale(1); }
-    20% { color: #ff6b6b; transform: scale(1.1); text-shadow: 0 0 10px #ff0000; }
-    50% { color: #e53e3e; transform: scale(1.2); text-shadow: 0 0 15px #e53e3e; }
-    80% { color: #ff6b6b; transform: scale(1.1); text-shadow: 0 0 10px #ff0000; }
+    0%, 100% { color: var(--text-gold); transform: scale(1); background: transparent; }
+    20% { color: #ff6b6b; transform: scale(1.1); text-shadow: 0 0 10px #ff0000; background: rgba(229, 62, 62, 0.2); }
+    50% { color: #e53e3e; transform: scale(1.2); text-shadow: 0 0 15px #e53e3e; background: rgba(229, 62, 62, 0.4); border-radius: 4px; box-shadow: 0 0 10px rgba(229, 62, 62, 0.5); }
+    80% { color: #ff6b6b; transform: scale(1.1); text-shadow: 0 0 10px #ff0000; background: rgba(229, 62, 62, 0.2); }
 }
 
 .resource-flash-error {
-    animation: resourceFlashError 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    animation: resourceFlashError 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    z-index: 10;
 }
 
 /* ==========================================

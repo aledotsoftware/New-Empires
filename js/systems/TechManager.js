@@ -1147,7 +1147,9 @@ export class TechManager {
                     // SECURITY: Whitelist of allowed stats to prevent prototype pollution or method overwriting
                     const ALLOWED_STATS = [
                         'hp', 'maxHp', 'speed', 'attackDamage', 'attackRange', 'attackSpeed',
-                        'defense', 'carryCapacity', 'gatherSpeed', 'lineOfSight'
+                        'defense', 'maxCarry', 'gatherMultiplier', 'gatherGoldMultiplier',
+                        'gatherFoodMultiplier', 'gatherWoodMultiplier', 'gatherStoneMultiplier',
+                        'lineOfSight'
                     ];
 
                     for (let [unitType, stats] of Object.entries(eff.unitStats)) {
@@ -1165,7 +1167,8 @@ export class TechManager {
 
                                     // Heuristic: keys containing 'max' or 'hp' are additive if value is small integer
                                     const keyLower = statKey.toLowerCase();
-                                    if ((keyLower.includes('max') || keyLower.includes('hp') || keyLower.includes('damage')) && Number.isInteger(val) && Math.abs(val) <= 100) {
+                                    const absVal = val < 0 ? -val : val;
+                                    if ((keyLower.includes('max') || keyLower.includes('hp') || keyLower.includes('damage')) && Number.isInteger(val) && absVal <= 100) {
                                         u[statKey] = (u[statKey] || 0) + val;
                                     } else if (typeof val === 'number') {
                                         u[statKey] = (u[statKey] || 0) * val;

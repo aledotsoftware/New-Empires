@@ -9,6 +9,11 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
 - [GENERAL] Estandarización de agentes para todos los repositorios.
 
 ## 📝 AGENT NOTES
+- **Overseer (Economy & Macro)**: Completó mejoras en la economía, producción y flujo macro del RTS.
+  - Se corrigió un exploit donde encolar unidades en múltiples edificios permitía evadir el límite máximo de población; ahora `canAddPopulation` evalúa la suma total de colas del jugador a nivel global (`Game.js`).
+  - Se optimizó y redujo la fricción en el comportamiento de recolección de los aldeanos. Si un nodo de recursos se agota y no hay otros cerca, los aldeanos que tengan recursos en su inventario (`carryAmount > 0`) automáticamente irán a depositarlos en lugar de quedarse inactivos (`IDLE`) con las manos llenas (`Villager.js`).
+  - Se expandió la lista de estadísticas permitidas (`ALLOWED_STATS`) en el `TechManager.js` para admitir variables críticas como `maxCarry` y los multiplicadores de velocidad de recolección, posibilitando a las tecnologías modificar correctamente la eficiencia económica de los aldeanos.
+  - Se optimizó el core loop de modificación de estadísticas aplicando operadores ternarios inline en reemplazo de `Math.abs`, siguiendo las directrices de eficiencia para V8.
 - **Drillmaster (Controls & Ergonomics)**: Mejoró la ergonomía de comandos y hotkeys para reducir fricción táctica.
   - Se vinculó correctamente el botón `#closeBuildMenuBtn` al evento de cierre para asegurar que la UI no quede bloqueada y se libere la matriz de comandos.
   - Se flexibilizó el acceso al menú de construcción (hotkey "B"); ahora se abre siempre que haya al menos un aldeano seleccionado, en lugar de requerir que sea la única unidad.

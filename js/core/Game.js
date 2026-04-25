@@ -1420,6 +1420,53 @@ export class Game {
         }
     }
 
+    selectPreviousIdleVillager() {
+        const len = this.units.length;
+        if (len === 0) return;
+        let foundVillager = null;
+
+        if (this.idleVillagerIndex >= len) {
+            this.idleVillagerIndex = 0;
+        }
+
+        // Loop backwards
+        for (let i = 1; i <= len; i++) {
+            let idx = this.idleVillagerIndex - i;
+            if (idx < 0) {
+                // Ensure correct positive modulo logic
+                idx = (idx % len + len) % len;
+            }
+
+            const unit = this.units[idx];
+
+            if (unit.type === 'villager' && unit.team === 'player' && unit.state === 'IDLE') {
+                foundVillager = unit;
+                this.idleVillagerIndex = idx;
+                break;
+            }
+        }
+
+        if (!foundVillager) {
+            this.showNotification('No hay aldeanos inactivos', 'info');
+            return;
+        }
+
+        // Palette: Visual feedback on the button if visible
+        if (this.uiElements.idleVillagerBtn && !this.uiElements.idleVillagerBtn.classList.contains('hidden')) {
+            this.uiElements.idleVillagerBtn.classList.add('active-key');
+            setTimeout(() => this.uiElements.idleVillagerBtn.classList.remove('active-key'), 150);
+        }
+
+        // Seleccionar el aldeano
+        this.selectedEntities.length = 0;
+        this.selectedEntities[0] = foundVillager;
+        this.updateSelectionPanel();
+        this.updateActionsPanel();
+
+        // Centrar cámara
+        this.focusCamera(foundVillager.x, foundVillager.y);
+    }
+
     selectNextIdleVillager() {
         // BOLT OPTIMIZATION: In-place iteration to find the next idle villager
         // Avoids O(N) array allocation and writes per TAB press (~20x faster)
@@ -1837,7 +1884,11 @@ export class Game {
         if (e.key === 'Tab') {
             e.preventDefault();
             if (this.enableIdleVillagerCycle) {
-                this.selectNextIdleVillager();
+                if (e.shiftKey) {
+                    this.selectPreviousIdleVillager();
+                } else {
+                    this.selectNextIdleVillager();
+                }
             }
             return;
         }
@@ -1960,6 +2011,7 @@ export class Game {
 
             if (selectedUnits.length > 1 && formationManager) {
                 const formation = formationManager.cycleFormation();
+                this.showNotification(`Formación: ${formation}`, 'info');
 
                 // Calcular centro del grupo
                 let centerX = 0, centerY = 0;
@@ -5685,8 +5737,8 @@ export class Game {
                 iconKey: 'workshop',
                 iconFallback: '️',
                 label: 'Erigir Estructura',
-                description: 'Diseñar los cimientos de la civilización',
-                hotkey: 'Q',
+                description: 'Diseñar los cimientos de la civilización (Atajo secundario: B)',
+                hotkey: 'Q/B',
                 action: () => this.openBuildMenu(),
                 enabled: true
             });

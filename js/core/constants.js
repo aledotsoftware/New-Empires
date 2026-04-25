@@ -24,15 +24,15 @@ export const MAP_SIZES = {
 
 // Gameplay Tips for Loading/Empty States
 export const GAMEPLAY_TIPS = [
-    "Usa [Tab] para encontrar aldeanos inactivos rápidamente.",
-    "Construye casas para aumentar tu límite de población.",
-    "El Centro Urbano puede crear aldeanos y servir de refugio.",
+    "Usa [Tab] para encontrar aldeanos inactivos rápidamente, o [Shift] + [Tab] para ir atrás.",
+    "Haz Doble Click en una unidad para seleccionar todas las del mismo tipo.",
+    "Presiona [B] con un aldeano seleccionado para abrir el menú de construcción.",
+    "Usa [F] para ciclar formaciones al tener múltiples unidades seleccionadas.",
     "Mantén tus recursos bajos gastándolos en unidades y mejoras.",
     "Explora el mapa para encontrar recursos adicionales.",
-    "Construye murallas para proteger tu economía de ataques.",
-    "Las mejoras económicas se pagan solas a largo plazo.",
-    "Usa [Shift] + Click para poner órdenes en cola.",
-    "Usa [Ctrl] + [1-9] para crear grupos de unidades.",
+    "Usa la coma [,] para seleccionar a todo tu ejército rápidamente.",
+    "Usa [Shift] + Click para añadir unidades a tu selección actual.",
+    "Usa [Ctrl] + [1-9] para guardar grupos, y [1-9] para seleccionarlos.",
     "Presiona [H] o [Espacio] para volver a tu Centro Urbano."
 ];
 

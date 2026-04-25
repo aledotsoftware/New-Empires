@@ -4598,6 +4598,14 @@ export class Game {
         this.minimapCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
         this.minimapCtx.fillRect(camX, camY, camW, camH);
 
+        // Crosshair for better spatial targeting
+        this.minimapCtx.beginPath();
+        this.minimapCtx.moveTo(camX + camW/2 - 5, camY + camH/2);
+        this.minimapCtx.lineTo(camX + camW/2 + 5, camY + camH/2);
+        this.minimapCtx.moveTo(camX + camW/2, camY + camH/2 - 5);
+        this.minimapCtx.lineTo(camX + camW/2, camY + camH/2 + 5);
+        this.minimapCtx.stroke();
+
         this.minimapCtx.restore();
     }
 
@@ -5229,14 +5237,16 @@ export class Game {
                 hpText.className = 'hp-text'; // BOLT OPTIMIZATION: Added class for query
                 hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
                 hpText.style.marginBottom = '2px';
-                hpText.style.fontSize = '0.8rem';
+                hpText.style.fontSize = '0.85rem';
+                hpText.style.fontWeight = 'bold';
                 hpContainer.appendChild(hpText);
             }
 
             const hpBar = document.createElement('div');
             hpBar.className = 'health-bar';
-            hpBar.style.height = '6px';
+            hpBar.style.height = '8px';
             hpBar.style.background = 'rgba(255, 255, 255, 0.2)';
+            hpBar.style.border = '1px solid #1a1510';
             hpBar.setAttribute('role', 'progressbar');
             hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
             hpBar.setAttribute('aria-valuemin', '0');
@@ -5834,6 +5844,14 @@ export class Game {
 
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');
+
+                        let isPopError = buttonData.error && (buttonData.error.includes('población') || buttonData.error.includes('Población'));
+                        if (isPopError) {
+                            btn.classList.add('pop-blocked');
+                        } else {
+                            btn.classList.add('res-blocked');
+                        }
+
                         btn.setAttribute('aria-disabled', 'true');
                         // Palette: Reactive Disabled Feedback
                         btn.onclick = (e) => {

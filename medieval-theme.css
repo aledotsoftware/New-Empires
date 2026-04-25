@@ -1199,6 +1199,16 @@ body.theme-mayans {
     border-color: rgba(92, 77, 61, 0.4);
 }
 
+.action-btn.disabled.res-blocked {
+    background: linear-gradient(180deg, rgba(197, 48, 48, 0.4) 0%, rgba(197, 48, 48, 0.6) 100%);
+    border-color: rgba(197, 48, 48, 0.6);
+}
+
+.action-btn.disabled.pop-blocked {
+    background: linear-gradient(180deg, rgba(221, 107, 32, 0.4) 0%, rgba(221, 107, 32, 0.6) 100%);
+    border-color: rgba(221, 107, 32, 0.6);
+}
+
 /* Patrón visual para slots vacíos */
 .action-btn.disabled .btn-icon:empty::before {
     content: '·';
@@ -2226,6 +2236,10 @@ button:focus-visible,
 
 .text-dark {
     color: var(--text-dark);
+}
+
+.text-error {
+    color: #fc8181;
 }
 
 .bg-stone {

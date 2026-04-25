@@ -37,16 +37,16 @@ export const EMOJI_FALLBACKS = {
     food: '🌾',
     gold: '💎',
     stone: '🪨',
-    house: '🏠',
-    barracks: '⚔️',
-    townCenter: '🏰',
+    house: '🛖',
+    barracks: '🎪',
+    townCenter: '🏛️',
     storage: '📦',
     storageWood: '🌲',
     market: '🏪',
     temple: '⛪',
     workshop: '🔨',
     villager: '👷',
-    warrior: '⚔️',
+    warrior: '🗡️',
     archer: '🏹'
 };
 

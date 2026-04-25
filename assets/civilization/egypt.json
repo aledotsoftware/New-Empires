@@ -88,5 +88,14 @@
                 "healingSpeed": 1.5
             }
         }
-    ]
+    ],
+    "lore": "Children of the Nile, builders of the eternal pyramids. A civilization blessed with immense wealth and divine rulership.",
+    "campaignSeed": "Unify Upper and Lower Egypt, command the annual floods for agricultural supremacy, and construct monuments to guarantee immortality.",
+    "unitOverrides": {
+        "villager": {
+            "name": "Fellah",
+            "icon": "assets/icons/villager.png",
+            "description": "Egyptian farmer and laborer"
+        }
+    }
 }

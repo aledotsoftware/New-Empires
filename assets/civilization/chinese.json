@@ -69,5 +69,14 @@
                 "buildingHp": 1.2
             }
         }
-    ]
+    ],
+    "lore": "An ancient and enduring civilization, pioneers of gunpowder, paper, and monumental defenses like the Great Wall.",
+    "campaignSeed": "Defend the Middle Kingdom from northern invaders, centralize power, and revolutionize warfare with early gunpowder technology.",
+    "technologyOverrides": {
+        "chemistry": {
+            "name": "Gunpowder Discovery",
+            "icon": "assets/icons/science.png",
+            "description": "Early explosive powders"
+        }
+    }
 }

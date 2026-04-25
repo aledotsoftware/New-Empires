@@ -86,5 +86,14 @@
                 "goldGather": 1.2
             }
         }
-    ]
+    ],
+    "lore": "A vast network of trade, science, and faith spanning deserts and oases. They excel in rapid expansion and economic prosperity.",
+    "campaignSeed": "Unite the desert tribes, establish lucrative trade routes, and protect the golden age of science and culture from external crusades.",
+    "unitOverrides": {
+        "warrior": {
+            "name": "Ghulam",
+            "icon": "assets/icons/warrior.png",
+            "description": "Slave soldiers of the Caliphate"
+        }
+    }
 }

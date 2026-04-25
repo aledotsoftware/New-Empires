@@ -66,5 +66,14 @@
                 "researchSpeed": 1.15
             }
         }
-    ]
+    ],
+    "lore": "A jewel of the ancient world, Babylon is a center of science, astronomy, and monumental architecture like the Hanging Gardens.",
+    "campaignSeed": "Rebuild the glorious empire, outsmarting rival Mesopotamian city-states through advanced technology, diplomacy, and impenetrable walls.",
+    "unitOverrides": {
+        "villager": {
+            "name": "Babylonian Builder",
+            "icon": "assets/icons/villager.png",
+            "description": "Skilled worker of Mesopotamia"
+        }
+    }
 }

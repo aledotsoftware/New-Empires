@@ -341,7 +341,7 @@ Object.assign(TECHNOLOGIES, {
     horseColar: {
         id: 'horseColar',
         name: 'Doma de Caballos',
-        icon: 'assets/icons/Caballeria_Exploracion_aoe2DE.webp',
+        icon: 'assets/icons/villager.png',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 17,
         description: 'Domesticación del caballo.',
@@ -358,7 +358,7 @@ Object.assign(TECHNOLOGIES, {
     plow: {
         id: 'plow',
         name: 'Arado',
-        icon: 'assets/icons/FarmDE.webp',
+        icon: 'assets/icons/house.png',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 18,
         description: 'Arado para agricultura intensiva.',
@@ -394,7 +394,7 @@ Object.assign(TECHNOLOGIES, {
     sailBoat: {
         id: 'sailBoat',
         name: 'Barco de Vela',
-        icon: 'assets/icons/Carabela_Icono-DE.webp',
+        icon: 'assets/icons/villager.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 20,
         description: 'Navegación con vela para comercio.',
@@ -411,7 +411,7 @@ Object.assign(TECHNOLOGIES, {
     doubleBitAxe: {
         id: 'doubleBitAxe',
         name: 'Hacha de Doble Filo',
-        icon: 'assets/icons/Lumber_camp_aoe2de.webp',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 21,
         description: 'Hacha de bronce con doble filo.',
@@ -427,7 +427,7 @@ Object.assign(TECHNOLOGIES, {
     goldMining: {
         id: 'goldMining',
         name: 'Minería de Oro',
-        icon: 'assets/icons/GoldMiningDE.webp',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.ECONOMY,
         age: 21,
         description: 'Técnicas avanzadas de extracción de oro.',
@@ -573,7 +573,7 @@ Object.assign(TECHNOLOGIES, {
     bowSaw: {
         id: 'bowSaw',
         name: 'Sierra de Arco',
-        icon: 'assets/icons/Lumber_camp_aoe2de.webp',
+        icon: 'assets/icons/workshop.png',
         category: TECH_CATEGORIES.TOOLS,
         age: 26,
         description: 'Sierra mejorada para corte de madera.',
@@ -691,7 +691,7 @@ Object.assign(TECHNOLOGIES, {
     heavyPlow: {
         id: 'heavyPlow',
         name: 'Arado Pesado',
-        icon: 'assets/icons/FarmDE.webp',
+        icon: 'assets/icons/house.png',
         category: TECH_CATEGORIES.AGRICULTURE,
         age: 28,
         description: 'Arado pesado para tierras difíciles.',
@@ -707,7 +707,7 @@ Object.assign(TECHNOLOGIES, {
     stirrup: {
         id: 'stirrup',
         name: 'Estribo',
-        icon: 'assets/icons/Jinete_aoe2DE.webp',
+        icon: 'assets/icons/villager.png',
         category: TECH_CATEGORIES.MILITARY,
         age: 28,
         description: 'Estribo para mejor control en caballería.',

@@ -71,5 +71,14 @@
                 }
             }
         }
-    ]
+    ],
+    "lore": "A rising gunpowder empire that straddles the crossroads of the world, fielding elite Janissaries and devastating siege artillery.",
+    "campaignSeed": "Transition from nomadic ghazis to a sedentary empire, breaching the walls of the world's greatest cities with revolutionary cannons.",
+    "technologyOverrides": {
+        "blacksmith": {
+            "name": "Gunpowder Mastery",
+            "icon": "assets/icons/tech_military.png",
+            "description": "Advanced gunpowder weapons"
+        }
+    }
 }

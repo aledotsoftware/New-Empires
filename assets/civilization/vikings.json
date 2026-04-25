@@ -94,5 +94,14 @@
                 }
             }
         }
-    ]
+    ],
+    "lore": "Fierce seafarers and warriors from the frozen north. They raid coastal settlements with devastating speed before disappearing back into the sea.",
+    "campaignSeed": "Lead a great heathen army to conquer foreign shores, establishing earldoms and plundering riches to win the favor of the gods.",
+    "technologyOverrides": {
+        "sailing": {
+            "name": "Longship Navigation",
+            "icon": "assets/icons/tech_economy.png",
+            "description": "Mastery of the seas"
+        }
+    }
 }

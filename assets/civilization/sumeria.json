@@ -109,5 +109,14 @@
                 "villagerMaxHp": 20
             }
         }
-    ]
+    ],
+    "lore": "The cradle of civilization. Sumerians built the first cities, invented writing, and mastered agriculture between the great rivers.",
+    "campaignSeed": "Defend the fertile crescent from raiding barbarians, establish the first written laws, and build monuments that will touch the heavens.",
+    "unitOverrides": {
+        "villager": {
+            "name": "Sumerian Farmer",
+            "icon": "assets/icons/villager.png",
+            "description": "Early agricultural worker"
+        }
+    }
 }

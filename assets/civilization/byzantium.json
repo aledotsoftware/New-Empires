@@ -81,5 +81,14 @@
                 "taxCollection": 1.15
             }
         }
-    ]
+    ],
+    "lore": "The surviving eastern half of the Roman Empire, boasting impregnable walls, heavy cataphracts, and cunning diplomacy.",
+    "campaignSeed": "Hold the line against relentless sieges from multiple fronts, preserving the light of antiquity in the impregnable city of Constantinople.",
+    "unitOverrides": {
+        "warrior": {
+            "name": "Cataphract",
+            "icon": "assets/icons/warrior.png",
+            "description": "Heavily armored cavalry"
+        }
+    }
 }

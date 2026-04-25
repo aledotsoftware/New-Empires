@@ -86,5 +86,14 @@
                 "unitMaxHp": 1.1
             }
         }
-    ]
+    ],
+    "lore": "A coalition of fiercely independent city-states, bound by shared culture, Olympic traditions, and heavily armored hoplites.",
+    "campaignSeed": "Repel the massive invasions of eastern empires through tactical superiority, then spread Hellenic culture across the known world.",
+    "unitOverrides": {
+        "warrior": {
+            "name": "Hoplite",
+            "icon": "assets/icons/warrior.png",
+            "description": "Greek citizen-soldier"
+        }
+    }
 }

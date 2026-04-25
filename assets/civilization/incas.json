@@ -97,5 +97,14 @@
                 }
             }
         }
-    ]
+    ],
+    "lore": "The children of the sun, rulers of the harsh Andes mountains. They built an empire connected by an incredible network of roads and stone fortresses.",
+    "campaignSeed": "Expand the Tawantinsuyu through diplomacy and military might, adapting to the high altitudes and fortifying the mountain passes.",
+    "technologyOverrides": {
+        "masonry": {
+            "name": "Ashlar Masonry",
+            "icon": "assets/icons/tech_defense.png",
+            "description": "Perfect stone fitting without mortar"
+        }
+    }
 }

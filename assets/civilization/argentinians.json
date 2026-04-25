@@ -94,5 +94,14 @@
                 "villagerMaxHp": 15
             }
         }
-    ]
+    ],
+    "lore": "A proud nation emerging from the vast Pampas, excelling in cavalry and agricultural resilience during their fight for independence.",
+    "campaignSeed": "Lead the independence movement across the Andes, utilizing guerrilla cavalry tactics to liberate the continent from colonial rule.",
+    "technologyOverrides": {
+        "cavalry_tactics": {
+            "name": "Gaucho Horsemanship",
+            "icon": "assets/icons/tech_military.png",
+            "description": "Advanced riding skills"
+        }
+    }
 }

@@ -82,5 +82,14 @@
                 "warriorHp": 1.2
             }
         }
-    ]
+    ],
+    "lore": "An expansive empire of kings, combining the strengths of countless conquered nations into a massive, diverse military machine.",
+    "campaignSeed": "Build an empire that spans from the Mediterranean to the Indus, utilizing vast wealth to assemble the immortal guard and crush any rebellion.",
+    "unitOverrides": {
+        "warrior": {
+            "name": "Immortal",
+            "icon": "assets/icons/warrior.png",
+            "description": "Elite heavy infantry of Persia"
+        }
+    }
 }

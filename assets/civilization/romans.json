@@ -93,5 +93,14 @@
                 "buildSpeed": 1.15
             }
         }
-    ]
+    ],
+    "lore": "Disciplined and relentless, the Roman Empire expands through superior engineering, unyielding legions, and brilliant logistics.",
+    "campaignSeed": "Expand the borders of the Republic against Gaulish tribes and Carthaginian rivals, laying down roads and fortresses to secure the Pax Romana.",
+    "technologyOverrides": {
+        "architecture": {
+            "name": "Roman Engineering",
+            "icon": "assets/icons/tech_defense.png",
+            "description": "Mastery of concrete and arches"
+        }
+    }
 }

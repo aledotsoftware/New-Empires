@@ -105,5 +105,7 @@
                 }
             }
         }
-    ]
+    ],
+    "lore": "Nomads of the vast steppes, the Mongols are born in the saddle. Their mastery of horse archery and mobility makes them a terrifying force that strikes like lightning.",
+    "campaignSeed": "Unify the divided tribes under a single banner and sweep across the continent, adapting to the warfare of sedentary empires while maintaining nomadic speed."
 }

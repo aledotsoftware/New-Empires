@@ -190,9 +190,9 @@ En el menú de configuración puedes ajustar:
 ║  └─ Q-B          → Hotkeys del panel                     ║
 ╠══════════════════════════════════════════════════════════╣
 ║  CONSTRUCCIÓN (en modo build)                             ║
-║  ├─ H → Casa      C → Centro     K → Cuartel             ║
-║  ├─ D → Depósito  L → Dep.Made   M → Mercado             ║
-║  └─ T → Templo    W → Taller     ESC → Cancelar          ║
+║  ├─ Q → Casa      E → Centro     W → Cuartel             ║
+║  ├─ R → Depósito  T → Dep.Made   Y → Mercado             ║
+║  └─ U → Templo    I → Taller     ESC → Cancelar          ║
 ╚══════════════════════════════════════════════════════════╝
 ```
 

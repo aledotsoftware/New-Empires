@@ -1098,6 +1098,16 @@ export class Game {
             this.handleRightClick();
         });
 
+        // Close build menu button
+        const closeBuildMenuBtn = document.getElementById('closeBuildMenuBtn');
+        if (closeBuildMenuBtn) {
+            closeBuildMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.buildMode = null;
+                this.closeBuildMenu();
+            });
+        }
+
         // Teclado (keydown)
         document.addEventListener('keydown', (e) => {
             this.keysPressed[e.key.toLowerCase()] = true;
@@ -1855,7 +1865,7 @@ export class Game {
 
         // B - Build menu
         // B is now handled by the hotkey map or specifically below if no hotkey action applies
-        if ((e.key === 'b' || e.key === 'B') && this.selectedEntities.length === 1 && this.selectedEntities[0].type === 'villager') {
+        if ((e.key === 'b' || e.key === 'B') && this.selectedEntities.some(e => e.type === 'villager')) {
             this.openBuildMenu();
         }
 
@@ -4987,6 +4997,15 @@ export class Game {
 
         this.lastSelectionStateKey = stateKey;
         this.lastSelectionIdKey = idKey; // Update ID key
+
+        // Onboarding Notifications (Palette)
+        if (this.selectedEntities.some(e => e.type === 'villager') && !this._hasShownBuildTip) {
+            this.showNotification('Aldeano. Presiona Q o B para construir', 'info');
+            this._hasShownBuildTip = true;
+        } else if (this.selectedEntities.filter(e => e.isUnit && e.type !== 'villager').length > 1 && !this._hasShownFormationTip) {
+            this.showNotification('Múltiples unidades. Presiona F para formación', 'info');
+            this._hasShownFormationTip = true;
+        }
 
         // Limpiar contenido previo
         while (content.firstChild) {

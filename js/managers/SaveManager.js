@@ -66,6 +66,7 @@ export class SaveManager {
 
             debugLogger.info('Partida cargada', 'save', {
                 civilizationId: state.civilizationId,
+                enemyCivilizationId: state.enemyCivilizationId,
                 timestamp: new Date(state.timestamp).toLocaleString()
             });
 
@@ -104,6 +105,7 @@ export class SaveManager {
                 version: state.version,
                 timestamp: state.timestamp,
                 civilizationId: state.civilizationId,
+                enemyCivilizationId: state.enemyCivilizationId,
                 gameTime: state.gameTime,
                 population: state.units?.length || 0,
                 buildings: state.buildings?.length || 0
@@ -133,7 +135,7 @@ export class SaveManager {
 
         // Required top-level fields
         const requiredFields = [
-            'version', 'timestamp', 'civilizationId', 'gameTime',
+            'version', 'timestamp', 'civilizationId', 'enemyCivilizationId', 'gameTime',
             'resources', 'units', 'buildings', 'enemies', 'resourceNodes'
         ];
 
@@ -148,6 +150,8 @@ export class SaveManager {
         if (typeof state.civilizationId !== 'string') return false;
         // Sentinel: Prevent path traversal/injection in civilizationId
         if (!/^[a-zA-Z0-9]+$/.test(state.civilizationId)) return false;
+        if (typeof state.enemyCivilizationId !== 'string') return false;
+        if (!/^[a-zA-Z0-9]+$/.test(state.enemyCivilizationId)) return false;
 
         if (typeof state.resources !== 'object') return false;
         if (!Array.isArray(state.units)) return false;
@@ -245,6 +249,7 @@ export class SaveManager {
             version: this.VERSION,
             timestamp: Date.now(),
             civilizationId: game.civilizationId,
+            enemyCivilizationId: game.enemyCivilizationId,
             gameTime: Date.now() - game.gameStartTime,
 
             // Recursos

@@ -624,6 +624,7 @@ export class Game {
 
         // 1. Restore Scalars
         this.civilizationId = state.civilizationId || this.civilizationId;
+        this.enemyCivilizationId = state.enemyCivilizationId || this.enemyCivilizationId;
         // Recalculate start time so that (now - startTime) equals saved gameTime
         this.gameStartTime = Date.now() - (state.gameTime || 0);
 

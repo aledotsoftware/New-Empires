@@ -621,21 +621,21 @@ export class ProceduralMapGenerator {
         m = Math.max(0, Math.min(1, m));
 
         // 1. Manejo de agua (siempre en elevaciones bajas)
-        if (elevation < 0.25 + (m * 0.05) && this.style !== 'arena') {
+        if (elevation < 0.20 + (m * 0.05) && this.style !== 'arena') {
             if (t < 0.2) return 'water'; // Agua helada (o hielo si existiese)
             if (m > 0.8 && t > 0.6 && mainBiome === 'swamp') return 'swamp';
             return 'water';
         }
 
         // 2. Manejo de montañas (siempre en elevaciones altas)
-        if (elevation > 0.75 - (t * 0.05)) {
+        if (elevation > 0.80 - (t * 0.05)) {
             if (t < 0.35) return 'snow'; // Montañas nevadas
             if (t > 0.8 && mainBiome === 'volcanic') return 'volcanic';
             return 'mountain';
         }
 
         // 3. Manejo de colinas (transición hacia montañas)
-        if (elevation > 0.6 - (t * 0.05)) {
+        if (elevation > 0.65 - (t * 0.05)) {
             if (t < 0.2) return 'snow';
             if (t < 0.4) return 'tundra';
             return 'hill';
@@ -904,19 +904,21 @@ export class ProceduralMapGenerator {
 
     placeCluster(centerX, centerY, config, playerId) {
         let placed = 0;
-        let forceAttempts = 0;
-        const maxForceAttempts = config.count * 10;
 
-        // Intentar colocar recursos agrupados en espiral o aleatorio cercano
-        while (placed < config.count && forceAttempts < maxForceAttempts) {
-            forceAttempts++;
+        // Spiral variables for dense packing
+        let x = 0;
+        let y = 0;
+        let dx = 0;
+        let dy = -1;
 
-            // Distancia y ángulo para clúster (muy juntos)
-            const angle = this.rng.next() * Math.PI * 2;
-            const dist = this.rng.range(0, 3 + (placed / 2)); // Se expanden a medida que crece el clúster
+        // We check a max number of tiles in spiral to prevent infinite loop if map is full
+        const maxTilesToCheck = config.count * 10;
+        let tilesChecked = 0;
 
-            const fx = Math.floor(centerX + Math.cos(angle) * dist);
-            const fy = Math.floor(centerY + Math.sin(angle) * dist);
+        while (placed < config.count && tilesChecked < maxTilesToCheck) {
+            const fx = centerX + x;
+            const fy = centerY + y;
+            tilesChecked++;
 
             // Verificar bordes del mapa
             if (fx >= 0 && fx < this.width && fy >= 0 && fy < this.height) {
@@ -948,7 +950,17 @@ export class ProceduralMapGenerator {
                     }
                 }
             }
+
+            // Move to next tile in spiral
+            if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
+                const temp = dx;
+                dx = -dy;
+                dy = temp;
+            }
+            x += dx;
+            y += dy;
         }
+
         return placed;
     }
 
@@ -1134,7 +1146,7 @@ export class ProceduralMapGenerator {
                 const ny = cy + dy;
                 if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
                     const t = this.terrainTypes[ny][nx];
-                    if (t === 'water' || t === 'mountain') {
+                    if (t === 'water' || t === 'mountain' || t === 'forest') {
                         impassableCount++;
                     }
                 } else {
@@ -1142,7 +1154,7 @@ export class ProceduralMapGenerator {
                 }
             }
         }
-        if (impassableCount >= 12) return false; // Reject if too many impassable tiles around (choke point)
+        if (impassableCount >= 20) return false; // Reject if too many impassable tiles around (choke point)
 
         return true;
     }

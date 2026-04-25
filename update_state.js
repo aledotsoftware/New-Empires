@@ -1,17 +1,19 @@
 const fs = require('fs');
+
 const stateFile = '.jaa/state.md';
-let state = fs.readFileSync(stateFile, 'utf8');
+let stateContent = fs.readFileSync(stateFile, 'utf8');
 
-const note = `- **Drillmaster (Controls & Ergonomics)**: Mejoró la ergonomía de comandos y hotkeys para reducir fricción táctica.
-  - Se vinculó correctamente el botón \`#closeBuildMenuBtn\` al evento de cierre para asegurar que la UI no quede bloqueada y se libere la matriz de comandos.
-  - Se flexibilizó el acceso al menú de construcción (hotkey "B"); ahora se abre siempre que haya al menos un aldeano seleccionado, en lugar de requerir que sea la única unidad.
-  - Se implementó un sistema de "onboarding silencioso" que detecta y sugiere hotkeys contextualmente (ej. al seleccionar un aldeano por primera vez sugiere "Q/B", o "F" al seleccionar grupos militares).
-  - Se corrigió la documentación \`docs/sistemas/HOTKEYS.md\` para que el resumen visual (QWERTY) coincida estrictamente con las implementaciones de los edificios en el código real.`;
+const cartographerNotes = `- **Cartographer (Map Generation)**: Completó mejoras en la distribución de terrenos y recursos procedurales.
+  - Se modificaron los umbrales de elevación en \`getTerrainFromNoise\` (\`ProceduralMapGenerator.js\`) para expandir áreas abiertas, reduciendo montañas (umbral 0.80), colinas (0.65) y agua (0.20), lo que minimiza cuellos de botella naturales y facilita la navegación.
+  - Se reemplazó el algoritmo aleatorio de \`placeCluster\` por un espiral cuadrado denso, garantizando que los clústeres de recursos (como oro y piedra) se generen como bloques compactos y contiguos, mejorando la legibilidad y el pathfinding de las unidades.
+  - Se endureció la heurística de cuellos de botella en \`isValidResourceCenter\`, agregando \`forest\` a los terrenos evaluados y aumentando el umbral de rechazo a 20 tiles en un área 7x7, lo que previene que los recursos se generen atrapados entre bosques y montañas.
+  - Se redujo drásticamente el "visual clutter" en \`TerrainDecor.js\` disminuyendo la probabilidad base de aparición de decoraciones menores (flores, hojas, etc.) del 5% al 2%, mejorando el rendimiento de renderizado y la lectura táctica del terreno.`;
 
-if (state.includes('**Drillmaster')) {
-    console.log('Drillmaster notes already present.');
-} else {
-    state = state.replace('## 📝 AGENT NOTES', '## 📝 AGENT NOTES\n' + note);
-    fs.writeFileSync(stateFile, state);
-    console.log('State updated.');
-}
+// Replace the old Cartographer notes
+stateContent = stateContent.replace(
+  /- \*\*Cartographer \(Map Generation\)\*\*: Completó mejoras en la distribución de terrenos y recursos procedurales\.\n(  - .*\n)+/g,
+  cartographerNotes + '\n'
+);
+
+fs.writeFileSync(stateFile, stateContent);
+console.log('State updated');

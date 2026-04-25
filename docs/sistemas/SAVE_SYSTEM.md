@@ -251,7 +251,7 @@ exportGameToFile();
 
 ## 🔮 Futuras Mejoras
 
-- [ ] Carga completa de partida guardada
+- [x] Carga completa de partida guardada
 - [ ] Múltiples slots de guardado
 - [ ] Guardado automático (cada 5 min)
 - [ ] Preview de guardado con minimapa
@@ -261,7 +261,7 @@ exportGameToFile();
 
 ## ⚠️ Limitaciones Actuales
 
-1. **Carga completa** aún no implementada (solo muestra info)
+1. **Carga completa** implementada.
 2. **Un solo slot** de guardado en localStorage
 3. **Sin compresión** - archivos pueden ser grandes
 4. **Versión fija** - sin migración entre versiones

@@ -88,7 +88,11 @@ export class Villager extends Unit {
                     }
 
                     if (!this.currentResourceNode) {
-                        this.state = 'IDLE';
+                        if (this.carryAmount > 0) {
+                            this.findDropOffAndGo(game);
+                        } else {
+                            this.state = 'IDLE';
+                        }
                     }
                     break;
                 }
@@ -184,7 +188,11 @@ export class Villager extends Unit {
                         }
 
                         if (!this.currentResourceNode) {
-                            this.state = 'IDLE';
+                            if (this.carryAmount > 0) {
+                                this.findDropOffAndGo(game);
+                            } else {
+                                this.state = 'IDLE';
+                            }
                         }
                     }
                 }

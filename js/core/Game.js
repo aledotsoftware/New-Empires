@@ -2417,7 +2417,16 @@ export class Game {
             return;
         }
 
-        if (!this.populationManager.canAddPopulation(1, building.productionQueue.length)) {
+        let totalQueuedUnits = 0;
+        const bLen = this.buildings.length;
+        for (let i = 0; i < bLen; i++) {
+            const b = this.buildings[i];
+            if (b.team === building.team && b.productionQueue) {
+                totalQueuedUnits += b.productionQueue.length;
+            }
+        }
+
+        if (!this.populationManager.canAddPopulation(1, totalQueuedUnits)) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
             this.flashResource('population');
             return;
@@ -2466,7 +2475,16 @@ export class Game {
             return;
         }
 
-        if (!this.populationManager.canAddPopulation()) {
+        let totalQueuedUnits = 0;
+        const bLen = this.buildings.length;
+        for (let i = 0; i < bLen; i++) {
+            const b = this.buildings[i];
+            if (b.team === building.team && b.productionQueue) {
+                totalQueuedUnits += b.productionQueue.length;
+            }
+        }
+
+        if (!this.populationManager.canAddPopulation(1, totalQueuedUnits)) {
             this.showNotification('Límite de población alcanzado', 'error');
             this.flashResource('population');
             return;

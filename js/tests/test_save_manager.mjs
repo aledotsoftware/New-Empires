@@ -8,6 +8,7 @@ function mockGame() {
         resourceNodes: [{ type: 'wood', x: 100, y: 100, amount: 500, radius: 20 }],
         fow: { grid: new Uint8Array([0, 1, 2]) },
         civilizationId: 'test_civ',
+        enemyCivilizationId: 'test_enemy',
         gameStartTime: Date.now() - 50000,
         resources: { wood: 100, food: 100, gold: 0, stone: 0 },
         populationManager: { population: 1, maxPopulation: 10 },

@@ -84,10 +84,11 @@ export class AssetLoader {
         debugLogger.start('Cargando assets gráficos', 'assets');
         debugLogger.time('Carga de assets', 'assets');
 
-        const promises = [];
-        for (let i = 0; i < assetsToLoad.length; i++) {
+        const len = assetsToLoad.length;
+        const promises = new Array(len);
+        for (let i = 0; i < len; i++) {
             const asset = assetsToLoad[i];
-            promises.push(this.loadImage(asset.key, asset.src));
+            promises[i] = this.loadImage(asset.key, asset.src);
         }
         await Promise.all(promises);
 
@@ -167,14 +168,20 @@ export class AssetLoader {
         if (!civ) return;
 
         debugLogger.start(`Pre-cargando assets para ${civ.name}`, 'assets');
-        const promises = [];
+        let count = 0;
+        if (civ.buildingOverrides) count += Object.keys(civ.buildingOverrides).length;
+        if (civ.unitOverrides) count += Object.keys(civ.unitOverrides).length;
+        if (civ.uniqueUnit && civ.uniqueUnit.icon) count += 1;
+
+        const promises = new Array(count);
+        let pIndex = 0;
 
         // Overrides de edificios
         if (civ.buildingOverrides) {
             for (const type in civ.buildingOverrides) {
                 const icon = civ.buildingOverrides[type].icon;
                 if (icon && (icon.includes('/') || icon.includes('.'))) {
-                    promises.push(this.loadImage(icon, icon));
+                    promises[pIndex++] = this.loadImage(icon, icon);
                 }
             }
         }
@@ -184,7 +191,7 @@ export class AssetLoader {
             for (const type in civ.unitOverrides) {
                 const icon = civ.unitOverrides[type].icon;
                 if (icon && (icon.includes('/') || icon.includes('.'))) {
-                    promises.push(this.loadImage(icon, icon));
+                    promises[pIndex++] = this.loadImage(icon, icon);
                 }
             }
         }
@@ -193,9 +200,10 @@ export class AssetLoader {
         if (civ.uniqueUnit && civ.uniqueUnit.icon) {
             const icon = civ.uniqueUnit.icon;
             if (icon && (icon.includes('/') || icon.includes('.'))) {
-                promises.push(this.loadImage(icon, icon));
+                promises[pIndex++] = this.loadImage(icon, icon);
             }
         }
+        promises.length = pIndex;
 
         await Promise.all(promises);
         debugLogger.success(`Assets de ${civ.name} pre-cargados`, 'assets');

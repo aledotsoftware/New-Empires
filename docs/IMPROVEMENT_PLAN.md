@@ -241,6 +241,11 @@ export const GAMEPLAY = {
 };
 ```
 
+### 4.5 Evitar GC con loops manuales
+**Archivo**: `js/core/Game.js`, `js/managers/AssetLoader.js`
+
+Reemplazar llamadas a `Array.prototype.slice`, `Array.prototype.filter`, `Array.prototype.some` en los hot paths y pre-alojar arrays en vez de usar `Array.prototype.push`.
+
 **Estado**: [ ] Completado
 
 ---

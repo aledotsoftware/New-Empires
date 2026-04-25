@@ -1001,7 +1001,15 @@ export class TechManager {
             }
         }
 
-        if (!this.game.canAfford(tech.cost)) return false;
+        // Aplicar allTechCost al verificar si puede pagarlo
+        const actualCost = { ...tech.cost };
+        if (this.game && this.game.modifiers && this.game.modifiers.allTechCost) {
+            for (const res in actualCost) {
+                actualCost[res] = Math.floor(actualCost[res] * this.game.modifiers.allTechCost);
+            }
+        }
+
+        if (!this.game.canAfford(actualCost)) return false;
         return true;
     }
 
@@ -1061,9 +1069,13 @@ export class TechManager {
 
         const tech = TECHNOLOGIES[techId];
 
-        // Pagar costo
+        // Pagar costo (aplicando allTechCost modifier)
         for (let [res, amount] of Object.entries(tech.cost)) {
-            this.game.resources[res] -= amount;
+            let actualCost = amount;
+            if (this.game && this.game.modifiers && this.game.modifiers.allTechCost) {
+                actualCost = Math.floor(actualCost * this.game.modifiers.allTechCost);
+            }
+            this.game.resources[res] -= actualCost;
         }
 
         // Añadir a cola
@@ -1113,6 +1125,18 @@ export class TechManager {
     }
 
     applyResearchedEffects() {
+        // Reset modifiers before applying all researched effects to avoid compounding exponentially
+        if (this.game) {
+            this.game.modifiers = {
+                unitProduction: 1,
+                villagerProduction: 1,
+                taxCollection: 1,
+                allTechCost: 1,
+                tradeBonus: 1,
+                healingSpeed: 1
+            };
+        }
+
         for (const techId of this.researchedTechs) {
             this.applyTechEffects(techId);
         }
@@ -1132,6 +1156,25 @@ export class TechManager {
                 tech.apply(this.game);
             } else if (tech && tech.effects) {
                 const eff = tech.effects;
+
+                // Modificadores globales en el juego
+                if (!this.game.modifiers) {
+                    this.game.modifiers = {
+                        unitProduction: 1,
+                        villagerProduction: 1,
+                        taxCollection: 1,
+                        allTechCost: 1,
+                        tradeBonus: 1,
+                        healingSpeed: 1
+                    };
+                }
+
+                if (eff.unitProduction) this.game.modifiers.unitProduction *= eff.unitProduction;
+                if (eff.villagerProduction) this.game.modifiers.villagerProduction *= eff.villagerProduction;
+                if (eff.taxCollection) this.game.modifiers.taxCollection *= eff.taxCollection;
+                if (eff.allTechCost) this.game.modifiers.allTechCost *= eff.allTechCost;
+                if (eff.tradeBonus) this.game.modifiers.tradeBonus *= eff.tradeBonus;
+                if (eff.healingSpeed) this.game.modifiers.healingSpeed *= eff.healingSpeed;
 
                 // Gather rate multipliers
                 if (eff.gatherRates) {

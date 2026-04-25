@@ -1813,7 +1813,11 @@ export class Game {
                                 } else if (entity.productionQueue.queue && Array.isArray(entity.productionQueue.queue)) {
                                     // BOLT OPTIMIZATION: Avoid splice by saving the reference and clearing
                                     const q = entity.productionQueue.queue;
-                                    cancelledItems = q.slice();
+                                    const qLen = q.length;
+                                    cancelledItems = new Array(qLen);
+                                    for (let i = 0; i < qLen; i++) {
+                                        cancelledItems[i] = q[i];
+                                    }
                                     q.length = 0;
                                 }
 
@@ -5098,10 +5102,20 @@ export class Game {
         this.lastSelectionIdKey = idKey; // Update ID key
 
         // Onboarding Notifications (Palette)
-        if (this.selectedEntities.some(e => e.type === 'villager') && !this._hasShownBuildTip) {
+        // BOLT OPTIMIZATION: Manual loop to avoid intermediate array allocations
+        let hasVillager = false;
+        let combatUnitCount = 0;
+        const selLen = this.selectedEntities.length;
+        for (let i = 0; i < selLen; i++) {
+            const e = this.selectedEntities[i];
+            if (e.type === 'villager') hasVillager = true;
+            if (e.isUnit && e.type !== 'villager') combatUnitCount++;
+        }
+
+        if (hasVillager && !this._hasShownBuildTip) {
             this.showNotification('Aldeano. Presiona Q o B para construir', 'info');
             this._hasShownBuildTip = true;
-        } else if (this.selectedEntities.filter(e => e.isUnit && e.type !== 'villager').length > 1 && !this._hasShownFormationTip) {
+        } else if (combatUnitCount > 1 && !this._hasShownFormationTip) {
             this.showNotification('Múltiples unidades. Presiona F para formación', 'info');
             this._hasShownFormationTip = true;
         }

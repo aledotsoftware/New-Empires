@@ -101,10 +101,17 @@ export class ProductionQueue {
         if (current.remaining <= 0) {
             // Unidad completada, remover de la cola y retornar
             const completed = this.queue[0];
+            const excessTime = -current.remaining;
             for (let i = 1; i < this.queue.length; i++) {
                 this.queue[i - 1] = this.queue[i];
             }
             this.queue.length--;
+
+            // Carry over excess time to the next unit, if any
+            if (this.queue.length > 0) {
+                this.queue[0].remaining -= excessTime;
+            }
+
             return completed;
         }
 

@@ -4698,7 +4698,7 @@ export class Game {
             const unit = this.units[i];
             const x = (unit.x * scale) | 0;
             const y = (unit.y * scale) | 0;
-            this.minimapCtx.rect(x - 1, y - 1, 2, 2);
+            this.minimapCtx.rect(x - 1, y - 1, 3, 3);
         }
         this.minimapCtx.fill();
 
@@ -4726,7 +4726,7 @@ export class Game {
 
             const x = (enemy.x * scale) | 0;
             const y = (enemy.y * scale) | 0;
-            this.minimapCtx.rect(x - 1, y - 1, 2, 2);
+            this.minimapCtx.rect(x - 1, y - 1, 3, 3);
         }
         this.minimapCtx.fill();
 
@@ -4746,8 +4746,8 @@ export class Game {
         this.minimapCtx.shadowBlur = 4;
 
         // Border
-        this.minimapCtx.strokeStyle = '#e8d48b'; // var(--text-gold)
-        this.minimapCtx.lineWidth = 1.5;
+        this.minimapCtx.strokeStyle = '#ffffff'; // White for better contrast
+        this.minimapCtx.lineWidth = 2.5;
         this.minimapCtx.strokeRect(camX, camY, camW, camH);
 
         // Subtle Fill (Lens effect)
@@ -5416,16 +5416,16 @@ export class Game {
                 hpText.className = 'hp-text'; // BOLT OPTIMIZATION: Added class for query
                 hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
                 hpText.style.marginBottom = '2px';
-                hpText.style.fontSize = '0.85rem';
-                hpText.style.fontWeight = 'bold';
+                hpText.style.fontSize = '0.95rem';
+                hpText.style.fontWeight = '900';
                 hpContainer.appendChild(hpText);
             }
 
             const hpBar = document.createElement('div');
             hpBar.className = 'health-bar';
-            hpBar.style.height = '8px';
+            hpBar.style.height = '12px';
             hpBar.style.background = 'rgba(255, 255, 255, 0.2)';
-            hpBar.style.border = '1px solid #1a1510';
+            hpBar.style.border = '1px solid rgba(0, 0, 0, 0.8)';
             hpBar.setAttribute('role', 'progressbar');
             hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
             hpBar.setAttribute('aria-valuemin', '0');
@@ -5440,7 +5440,7 @@ export class Game {
             if (entity.isUnderConstruction) {
                 hpFill.style.background = '#3182ce'; // Construction Blue
             } else if (hpPercent < 25) {
-                hpFill.style.background = '#c53030'; // Red
+                hpFill.style.background = '#e53e3e'; // Red
             } else if (hpPercent < 50) {
                 hpFill.style.background = '#ecc94b'; // Yellow
             } else {
@@ -6047,10 +6047,12 @@ export class Game {
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');
 
-                        let isPopError = buttonData.error && (buttonData.error.includes('población') || buttonData.error.includes('Población'));
-                        // Evaluar popFull basado en la variable de arriba
-                        const popFull = !this.populationManager.canAddPopulation(1, totalQueuedUnits);
-                        if (isPopError || popFull) {
+                        let isPopError = buttonData.error && (buttonData.error.includes('población') || buttonData.error.includes('Población') || buttonData.error.includes('Límite de población'));
+                        let isQueueError = buttonData.error && buttonData.error.includes('Cola de producción');
+
+                        if (isPopError) {
+                            btn.classList.add('pop-blocked');
+                        } else if (isQueueError) {
                             btn.classList.add('pop-blocked');
                         } else {
                             btn.classList.add('res-blocked');

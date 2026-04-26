@@ -213,6 +213,9 @@ export class Villager extends Unit {
                     if (game && game.civilizationId) {
                         buildSpeed *= civilizationManager.getBuildSpeed(game.civilizationId);
                     }
+                    if (game && game.modifiers && game.modifiers.buildSpeed) {
+                        buildSpeed *= game.modifiers.buildSpeed;
+                    }
                     this.buildTarget.hp += buildSpeed * deltaTime;
 
                     // Sonido de trabajo periódico

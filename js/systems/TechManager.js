@@ -1082,9 +1082,14 @@ export class TechManager {
         let finalResearchTime = tech.researchTime;
 
         // Aplicar bonificación de velocidad de investigación si existe
+        let speedMult = 1;
         if (this.game && this.game.civilization && this.game.civilization.bonuses && this.game.civilization.bonuses.researchSpeed) {
-            finalResearchTime /= this.game.civilization.bonuses.researchSpeed;
+            speedMult *= this.game.civilization.bonuses.researchSpeed;
         }
+        if (this.game && this.game.modifiers && this.game.modifiers.researchSpeed) {
+            speedMult *= this.game.modifiers.researchSpeed;
+        }
+        finalResearchTime /= speedMult;
 
         this.researchQueue.push({
             techId: techId,
@@ -1133,7 +1138,22 @@ export class TechManager {
                 taxCollection: 1,
                 allTechCost: 1,
                 tradeBonus: 1,
-                healingSpeed: 1
+                healingSpeed: 1,
+                researchSpeed: 1,
+                siegeDamage: 1,
+                shipDamage: 1,
+                goldGather: 1,
+                buildingHp: 1,
+                buildSpeed: 1,
+                unitMaxHp: 1,
+                infantryArmor: 1,
+                infantryDamage: 1,
+                unitSpeed: 1,
+                warriorDamage: 1,
+                warriorHp: 1,
+                cavalryDamage: 1,
+                villagerMaxHp: 0,
+                lineOfSight: 1
             };
         }
 
@@ -1165,7 +1185,22 @@ export class TechManager {
                         taxCollection: 1,
                         allTechCost: 1,
                         tradeBonus: 1,
-                        healingSpeed: 1
+                        healingSpeed: 1,
+                        researchSpeed: 1,
+                        siegeDamage: 1,
+                        shipDamage: 1,
+                        goldGather: 1,
+                        buildingHp: 1,
+                        buildSpeed: 1,
+                        unitMaxHp: 1,
+                        infantryArmor: 1,
+                        infantryDamage: 1,
+                        unitSpeed: 1,
+                        warriorDamage: 1,
+                        warriorHp: 1,
+                        cavalryDamage: 1,
+                        villagerMaxHp: 0,
+                        lineOfSight: 1
                     };
                 }
 
@@ -1175,6 +1210,21 @@ export class TechManager {
                 if (eff.allTechCost) this.game.modifiers.allTechCost *= eff.allTechCost;
                 if (eff.tradeBonus) this.game.modifiers.tradeBonus *= eff.tradeBonus;
                 if (eff.healingSpeed) this.game.modifiers.healingSpeed *= eff.healingSpeed;
+                if (eff.researchSpeed) this.game.modifiers.researchSpeed *= eff.researchSpeed;
+                if (eff.siegeDamage) this.game.modifiers.siegeDamage *= eff.siegeDamage;
+                if (eff.shipDamage) this.game.modifiers.shipDamage *= eff.shipDamage;
+                if (eff.goldGather) this.game.modifiers.goldGather *= eff.goldGather;
+                if (eff.buildingHp) this.game.modifiers.buildingHp *= eff.buildingHp;
+                if (eff.buildSpeed) this.game.modifiers.buildSpeed *= eff.buildSpeed;
+                if (eff.unitMaxHp) this.game.modifiers.unitMaxHp *= eff.unitMaxHp;
+                if (eff.infantryArmor) this.game.modifiers.infantryArmor *= eff.infantryArmor;
+                if (eff.infantryDamage) this.game.modifiers.infantryDamage *= eff.infantryDamage;
+                if (eff.unitSpeed) this.game.modifiers.unitSpeed *= eff.unitSpeed;
+                if (eff.warriorDamage) this.game.modifiers.warriorDamage *= eff.warriorDamage;
+                if (eff.warriorHp) this.game.modifiers.warriorHp *= eff.warriorHp;
+                if (eff.cavalryDamage) this.game.modifiers.cavalryDamage *= eff.cavalryDamage;
+                if (eff.villagerMaxHp) this.game.modifiers.villagerMaxHp += eff.villagerMaxHp;
+                if (eff.lineOfSight) this.game.modifiers.lineOfSight *= eff.lineOfSight;
 
                 // Gather rate multipliers
                 if (eff.gatherRates) {
@@ -1192,7 +1242,7 @@ export class TechManager {
                         'hp', 'maxHp', 'speed', 'attackDamage', 'attackRange', 'attackSpeed',
                         'defense', 'maxCarry', 'gatherMultiplier', 'gatherGoldMultiplier',
                         'gatherFoodMultiplier', 'gatherWoodMultiplier', 'gatherStoneMultiplier',
-                        'lineOfSight'
+                        'lineOfSight', 'maxHpMultiplier'
                     ];
 
                     for (let [unitType, stats] of Object.entries(eff.unitStats)) {

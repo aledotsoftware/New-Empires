@@ -366,7 +366,14 @@ export class Game {
         this.lastActionsStateKey = '';
         this.lastSelectionStateKey = '';
         this.lastSelectionIdKey = ''; // OPTIMIZATION: Track structural changes vs state changes
-        this.lastResources = { ...this.resources }; // Palette: Track for animations
+        this.lastResources = { ...this.resources };
+        this.resourceTranslations = {
+            'food': 'Comida',
+            'wood': 'Madera',
+            'gold': 'Oro',
+            'stone': 'Piedra',
+            'population': 'Población'
+        }; // Palette: Track for animations
 
         // BOLT OPTIMIZATION: Track rendered values to avoid redundant DOM writes
         this._lastRenderedPopulation = -1;
@@ -1902,7 +1909,7 @@ export class Game {
                             buttons[btnIndex].classList.remove('shake');
                             void buttons[btnIndex].offsetWidth;
                             buttons[btnIndex].classList.add('shake');
-                            if (typeof soundManager !== 'undefined' && soundManager) soundManager.playError();
+                            if (typeof soundManager !== 'undefined' && soundManager) soundManager.play('error');
                         }
                     }
                 }
@@ -2221,7 +2228,7 @@ export class Game {
                         else if (src.includes('stone')) resource = 'stone';
 
                         if (resource && cost[resource] && this.resources[resource] < cost[resource]) {
-                            span.style.color = 'var(--accent-red)';
+                            span.style.color = 'var(--blood-red-light)';
                         }
                     }
                 }
@@ -2250,7 +2257,7 @@ export class Game {
                         if (!option.querySelector('.build-warning')) {
                             const warning = document.createElement('div');
                             warning.className = 'build-warning';
-                            warning.style.color = 'var(--accent-red)';
+                            warning.style.color = 'var(--blood-red-light)';
                             warning.style.fontSize = '0.8rem';
                             warning.style.marginTop = '4px';
                             warning.style.fontWeight = 'bold';
@@ -5890,6 +5897,17 @@ export class Game {
                     desc = unitData.baseDescription || 'Unidad de la civilización.';
                 }
 
+                // Add modifiers to description explicitly
+                if (unitData.modifiers && Object.keys(unitData.modifiers).length > 0) {
+                    const mods = [];
+                    for (const [modKey, modVal] of Object.entries(unitData.modifiers)) {
+                        mods.push(`${modKey}: ${modVal > 0 ? '+' : ''}${modVal}`);
+                    }
+                    if (mods.length > 0) {
+                         desc += ` [${mods.join(', ')}]`;
+                    }
+                }
+
                 buttons.push({
                     iconKey: iconKey,
                     iconFallback: '',
@@ -6053,11 +6071,10 @@ export class Game {
                                     const resName = mr.split(' ')[0].trim();
                                     this.flashResource(resName); // Palette: Flash resource
 
-                                    if (mr.includes('food')) translated[i] = mr.replace('food', 'Comida');
-                                    else if (mr.includes('wood')) translated[i] = mr.replace('wood', 'Madera');
-                                    else if (mr.includes('gold')) translated[i] = mr.replace('gold', 'Oro');
-                                    else if (mr.includes('stone')) translated[i] = mr.replace('stone', 'Piedra');
-                                    else translated[i] = mr;
+                                    let [name, amt] = mr.split(' (');
+                                    amt = '(' + amt;
+                                    name = this.resourceTranslations[name] || name;
+                                    translated[i] = `${name} ${amt}`;
                                 }
                                 msg = `Falta: ${translated.join(', ')}`;
                             }
@@ -6152,7 +6169,7 @@ export class Game {
 
                             // Palette: Highlight missing resources
                             if (this.resources[res] < amount) {
-                                resSpan.style.color = 'var(--accent-red)';
+                                resSpan.style.color = 'var(--blood-red-light)';
                                 resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
                                 missingResources[missingResources.length] = `${res} (${amount - Math.floor(this.resources[res])})`;
                             } else {
@@ -6171,7 +6188,7 @@ export class Game {
                     if (!buttonData.enabled && buttonData.error) {
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'tooltip-error';
-                        errorDiv.style.color = 'var(--accent-red)';
+                        errorDiv.style.color = 'var(--blood-red-light)';
                         errorDiv.style.marginTop = '4px';
                         errorDiv.style.fontSize = '0.75rem';
                         errorDiv.style.fontWeight = 'bold';
@@ -6181,7 +6198,7 @@ export class Game {
                         // Fallback for legacy items without explicit error
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'tooltip-error';
-                        errorDiv.style.color = 'var(--accent-red)';
+                        errorDiv.style.color = 'var(--blood-red-light)';
                         errorDiv.style.marginTop = '4px';
                         errorDiv.style.fontSize = '0.75rem';
                         errorDiv.style.fontWeight = 'bold';
@@ -6195,10 +6212,7 @@ export class Game {
                                 const mr = buttonData._missingResources[i];
                                 let [name, amt] = mr.split(' (');
                                 amt = '(' + amt;
-                                if (name === 'food') name = 'comida';
-                                else if (name === 'wood') name = 'madera';
-                                else if (name === 'gold') name = 'oro';
-                                else if (name === 'stone') name = 'piedra';
+                                name = this.resourceTranslations[name] || name;
                                 translatedMissing[i] = `${name} ${amt}`;
                             }
                             errorDiv.textContent = ` Falta: ${translatedMissing.join(', ')}`;
@@ -6299,8 +6313,8 @@ export class Game {
         if (!container) return; // Defensive check
 
         // Centralized error sound
-        if (type === 'error' && typeof soundManager !== 'undefined' && soundManager && typeof soundManager.playError === 'function') {
-            soundManager.playError();
+        if (type === 'error' && typeof soundManager !== 'undefined' && soundManager && typeof soundManager.play === 'function') {
+            soundManager.play('error');
         }
 
         const notification = document.createElement('div');
@@ -6472,11 +6486,7 @@ export class Game {
         for (let [resource, amount] of Object.entries(cost)) {
             if (this.resources[resource] < amount) {
                 this.flashResource(resource);
-                let name = resource;
-                if (name === 'food') name = 'Comida';
-                else if (name === 'wood') name = 'Madera';
-                else if (name === 'gold') name = 'Oro';
-                else if (name === 'stone') name = 'Piedra';
+                const name = this.resourceTranslations[resource] || resource;
                 missing.push(`${name} (${Math.ceil(amount - this.resources[resource])})`);
             }
         }

@@ -302,14 +302,29 @@ export class SaveManager {
 
         // Propiedades específicas de unidades
         if (entity.isUnit) {
-            return {
+            const uData = {
                 ...base,
                 state: entity.state,
                 speed: entity.speed,
                 attackDamage: entity.attackDamage,
                 carryAmount: entity.carryAmount || 0,
-                carryType: entity.carryType || null
+                carryType: entity.carryType || null,
+                targetX: entity.targetX,
+                targetY: entity.targetY
             };
+
+            if (entity.type === 'villager') {
+                if (entity.currentResourceNode) {
+                    uData.resourceTargetX = entity.currentResourceNode.x;
+                    uData.resourceTargetY = entity.currentResourceNode.y;
+                }
+                if (entity.buildTarget) {
+                    uData.buildTargetX = entity.buildTarget.x;
+                    uData.buildTargetY = entity.buildTarget.y;
+                }
+            }
+
+            return uData;
         }
 
         // Propiedades específicas de edificios

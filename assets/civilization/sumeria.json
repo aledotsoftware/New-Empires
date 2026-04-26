@@ -109,5 +109,28 @@
                 "villagerMaxHp": 20
             }
         }
-    ]
+    ],
+    "lore": "Los inventores de la civilización misma en la cuenca fértil de Mesopotamia. Los sumerios idearon la escritura cuneiforme, la rueda y la agricultura a gran escala, organizándose en prósperas ciudades-estado protegidas por imponentes zigurats.",
+    "campaignSeeds": [
+        {
+            "title": "La Épica de Gilgamesh",
+            "description": "Defiende la gran ciudad de Uruk contra monstruos míticos y potencias rivales mediante la construcción masiva de murallas."
+        },
+        {
+            "title": "Las Guerras del Agua",
+            "description": "Controla los sistemas de irrigación críticos y la fertilidad de las tierras de cultivo disputadas entre las ciudades-estado primitivas."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Campesino Sumerio",
+            "icon": "assets/icons/villager.png",
+            "description": "Maestro en la construcción de canales de riego."
+        },
+        "warrior": {
+            "name": "Guerrero con Hacha",
+            "icon": "assets/icons/warrior.png",
+            "description": "Feroz infantería de las ciudades-estado."
+        }
+    }
 }

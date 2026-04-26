@@ -82,5 +82,28 @@
                 "warriorHp": 1.2
             }
         }
-    ]
+    ],
+    "lore": "Conocido como el Imperio Aqueménida, Persia gobernó desde el Indo hasta el Mediterráneo con una administración tolerante e infraestructuras impresionantes como el Camino Real. Su ejército incluye contingentes de todas las naciones subyugadas.",
+    "campaignSeeds": [
+        {
+            "title": "Las Conquistas de Ciro",
+            "description": "Construye un vasto imperio anexionando reinos vecinos no mediante la aniquilación, sino integrando sus fortalezas económicas y militares."
+        },
+        {
+            "title": "La Supresión de las Revueltas Jónicas",
+            "description": "Moviliza masivos ejércitos terrestres y flotas aliadas para aplastar las rebeliones en las franjas occidentales del imperio."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Súbdito del Imperio",
+            "icon": "assets/icons/villager.png",
+            "description": "Recolecta recursos y construye caminos."
+        },
+        "warrior": {
+            "name": "Infantería de Mimbre",
+            "icon": "assets/icons/warrior.png",
+            "description": "Guerrero ligero armado de escudo de mimbre."
+        }
+    }
 }

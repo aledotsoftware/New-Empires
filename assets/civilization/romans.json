@@ -93,5 +93,16 @@
                 "buildSpeed": 1.15
             }
         }
+    ],
+    "lore": "Desde una pequeña república en el Tíber hasta amos del mundo conocido, el Imperio Romano destaca por su organización implacable, asimilación cultural y una destreza en ingeniería civil y militar que les permite romanizar cada rincón conquistado.",
+    "campaignSeeds": [
+        {
+            "title": "Las Guerras Púnicas",
+            "description": "Lucha por la supremacía del Mediterráneo desarrollando tu incipiente poder naval y enfrentando las astutas tácticas enemigas."
+        },
+        {
+            "title": "La Conquista de la Galia",
+            "description": "Utiliza campamentos fortificados y asedios sistemáticos para someter a feroces tribus confederadas bajo el estandarte del águila romana."
+        }
     ]
 }

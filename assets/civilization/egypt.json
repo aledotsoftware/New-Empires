@@ -88,5 +88,28 @@
                 "healingSpeed": 1.5
             }
         }
-    ]
+    ],
+    "lore": "El don del Nilo, una civilización antigua obsesionada con la vida después de la muerte y la grandeza monumental. Gobernados por faraones considerados dioses en la tierra, los egipcios construyeron estructuras que desafían el paso del tiempo.",
+    "campaignSeeds": [
+        {
+            "title": "La Unificación de las Dos Tierras",
+            "description": "Lidera los ejércitos del Alto Egipto para conquistar el Bajo Egipto y establecer la primera gran dinastía."
+        },
+        {
+            "title": "El Conflicto con los Hicsos",
+            "description": "Adopta la tecnología de los carros de guerra de los invasores y expúlsalos para reclamar la soberanía del valle del Nilo."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Fellah",
+            "icon": "assets/icons/villager.png",
+            "description": "Campesino que cultiva a las orillas del Nilo."
+        },
+        "warrior": {
+            "name": "Guarda del Faraón",
+            "icon": "assets/icons/warrior.png",
+            "description": "Infantería encargada de la protección del reino."
+        }
+    }
 }

@@ -71,5 +71,16 @@
                 }
             }
         }
+    ],
+    "lore": "Surgiendo como un beylicato en Anatolia, el Imperio Otomano se expandió rápidamente hacia Europa y Asia, fusionando las tradiciones nómadas turcas con el legado bizantino y las innovaciones islámicas, especialmente en el uso masivo de armas de fuego y artillería pesada.",
+    "campaignSeeds": [
+        {
+            "title": "La Caída de Constantinopla",
+            "description": "Utiliza ingenieros de asedio y enormes cañones de bombardeo para derribar murallas consideradas impenetrables durante mil años."
+        },
+        {
+            "title": "El Avance en los Balcanes",
+            "description": "Expande tus fronteras en Europa mediante campañas sistemáticas y la incorporación de jenízaros de élite."
+        }
     ]
 }

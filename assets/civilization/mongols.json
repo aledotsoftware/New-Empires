@@ -105,5 +105,16 @@
                 }
             }
         }
+    ],
+    "lore": "Guerreros nómadas forjados en las duras estepas asiáticas, cuya maestría en la equitación y el tiro con arco montado no tiene paralelo. Su sed de conquista los llevó a crear el mayor imperio de tierra contigua de la historia.",
+    "campaignSeeds": [
+        {
+            "title": "La Unificación de las Tribus",
+            "description": "Somete y une a las tribus nómadas disidentes bajo un solo estandarte mediante movilidad y tácticas de hostigamiento."
+        },
+        {
+            "title": "La Marcha hacia el Oeste",
+            "description": "Lanza campañas relámpago contra imperios asentados, utilizando artillería capturada y velocidad abrumadora para desmantelar reinos enteros."
+        }
     ]
 }

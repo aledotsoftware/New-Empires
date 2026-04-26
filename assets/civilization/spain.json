@@ -87,5 +87,28 @@
                 "tradeBonus": 1.3
             }
         }
-    ]
+    ],
+    "lore": "Forjados en los siglos de la Reconquista, los españoles son guerreros y navegantes movidos por la cruz y el oro. Su sed de exploración los llevó a descubrir nuevos mundos y construir un imperio donde el sol nunca se ponía.",
+    "campaignSeeds": [
+        {
+            "title": "La Conquista del Nuevo Mundo",
+            "description": "Desembarca en tierras desconocidas con recursos limitados, forja alianzas locales y derroca imperios nativos enteros."
+        },
+        {
+            "title": "La Defensa del Imperio Global",
+            "description": "Protege las Flotas de Indias y los puertos coloniales de las incursiones de corsarios y potencias rivales."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Colono",
+            "icon": "assets/icons/villager.png",
+            "description": "Listo para forjar una nueva vida."
+        },
+        "warrior": {
+            "name": "Rodeleros",
+            "icon": "assets/icons/warrior.png",
+            "description": "Infantería armada con espada y escudo redondo."
+        }
+    }
 }

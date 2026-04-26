@@ -69,5 +69,16 @@
                 "buildingHp": 1.2
             }
         }
+    ],
+    "lore": "El Imperio del Centro, una civilización de inventores, burócratas y estrategas. Con una historia que se remonta a milenios, China ha perfeccionado el arte de la guerra con pólvora y el dominio administrativo de grandes poblaciones.",
+    "campaignSeeds": [
+        {
+            "title": "La Consolidación de Qin",
+            "description": "Somete a los Reinos Combatientes rivales mediante asedios implacables y comienza la construcción de la Gran Muralla."
+        },
+        {
+            "title": "Las Incursiones del Norte",
+            "description": "Defiende el imperio de las incesantes tribus nómadas utilizando ballestas de repetición y tácticas de desgaste."
+        }
     ]
 }

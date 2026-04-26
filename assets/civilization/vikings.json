@@ -94,5 +94,16 @@
                 }
             }
         }
+    ],
+    "lore": "Procedentes de los fiordos gélidos del norte de Europa, los vikingos son exploradores intrépidos, comerciantes y saqueadores temidos. Sus veloces drakkars les permiten atacar desde el mar con una rapidez letal.",
+    "campaignSeeds": [
+        {
+            "title": "Las Incursiones del Gran Ejército Pagano",
+            "description": "Abandona tu tierra natal y establece campamentos de asedio en los reinos sajones, utilizando tu feroz infantería en asaltos implacables."
+        },
+        {
+            "title": "El Descubrimiento de Vinlandia",
+            "description": "Navega más allá de los mares conocidos hacia el oeste para establecer colonias remotas mientras luchas contra las duras condiciones y los habitantes nativos."
+        }
     ]
 }

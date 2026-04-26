@@ -105,5 +105,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Guerrero ligero armado de escudo de mimbre."
         }
-    }
+    },
+    "primaryColor": "#4B0082",
+    "secondaryColor": "#FFD700"
 }

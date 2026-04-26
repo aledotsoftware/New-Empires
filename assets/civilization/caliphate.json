@@ -114,5 +114,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Infantería armada con la tradicional espada curva."
         }
-    }
+    },
+    "primaryColor": "#004000",
+    "secondaryColor": "#FFDF00"
 }

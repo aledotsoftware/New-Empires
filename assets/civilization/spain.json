@@ -110,5 +110,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Infantería armada con espada y escudo redondo."
         }
-    }
+    },
+    "primaryColor": "#e3000f",
+    "secondaryColor": "#ffffff"
 }

@@ -111,5 +111,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Infantería encargada de la protección del reino."
         }
-    }
+    },
+    "primaryColor": "#B8860B",
+    "secondaryColor": "#00BFFF"
 }

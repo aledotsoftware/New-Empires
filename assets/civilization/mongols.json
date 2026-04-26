@@ -116,5 +116,7 @@
             "title": "La Marcha hacia el Oeste",
             "description": "Lanza campañas relámpago contra imperios asentados, utilizando artillería capturada y velocidad abrumadora para desmantelar reinos enteros."
         }
-    ]
+    ],
+    "primaryColor": "#5C4033",
+    "secondaryColor": "#FF4500"
 }

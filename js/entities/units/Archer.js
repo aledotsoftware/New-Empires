@@ -120,17 +120,9 @@ export class Archer extends Unit {
                         this.attackCooldown -= deltaTime;
                     }
 
-                    // Desvincular temporalmente el objetivo para que super.update() no nos devuelva hacia el enemigo
-                    const tempTarget = this.attackTarget;
-                    const tempExplicit = this.explicitTarget;
-                    this.attackTarget = null;
-                    this.explicitTarget = false;
-
-                    super.update(deltaTime, game);
-
-                    // Restaurar objetivo
-                    this.attackTarget = tempTarget;
-                    this.explicitTarget = tempExplicit;
+                    // No llamamos a super.update() aquí para evitar que scanForEnemies nos devuelva al objetivo original
+                    // Solo actualizamos el timer de IA que super.update normalmente maneja
+                    this.aiTimer -= deltaTime;
                 }
             }
         }

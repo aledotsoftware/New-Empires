@@ -178,11 +178,11 @@ export class Unit extends Entity {
 
             // Target Stickiness: Evitar cambiar de objetivo constantemente si ya estamos peleando
             if (this.attackTarget === enemy) {
-                // Si el objetivo está fuera de nuestro rango de ataque actual, reducimos masivamente el "stickiness"
+                // Si el objetivo está fuera de nuestro rango de ataque actual, penalizamos el "stickiness"
                 // Esto permite que las unidades cuerpo a cuerpo en la 2da o 3ra fila cambien rápidamente
                 // a otros enemigos más cercanos en lugar de quedarse atascadas intentando llegar al original.
                 if (distSq > this.attackRangeSq) {
-                    score += 100; // Muy poco stickiness, cambiará fácilmente a un objetivo en rango
+                    score -= 500; // Penalización para que suelten el objetivo si huye y cambien a otro más cercano
                 } else {
                     score += 2000; // Fuerte stickiness si ya lo estamos golpeando
                 }
@@ -299,7 +299,19 @@ export class Unit extends Entity {
 
                     if (sepCount > 0) {
                         // Aumentar la fuerza de separación para reducir los bloqueos drásticamente
-                        const sepForce = (effectiveSpeed * deltaTime) * 1.5;
+                        let sepForce = (effectiveSpeed * deltaTime) * 1.5;
+
+                        // IA Táctica: Reducir drásticamente la fuerza de separación cuando estamos cerca del objetivo de ataque
+                        // Esto permite que las unidades cuerpo a cuerpo se acerquen lo suficiente para atacar sin empujarse entre ellas
+                        if (this.attackTarget) {
+                            const dxTarget = this.x - this.attackTarget.x;
+                            const dyTarget = this.y - this.attackTarget.y;
+                            const distTargetSq = dxTarget * dxTarget + dyTarget * dyTarget;
+                            if (distTargetSq < this.attackRangeSq * 1.5) {
+                                sepForce *= 0.2; // Reducir un 80% la fuerza de separación
+                            }
+                        }
+
                         moveX += (sepX / sepCount) * sepForce;
                         moveY += (sepY / sepCount) * sepForce;
                     }

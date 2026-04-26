@@ -1928,9 +1928,13 @@ export class Game {
 
                     if (destroyedCount > 0) {
                         this.showNotification(`${type} destruido(s)`, 'info');
-                        // Feedback auditivo (usamos error como sonido de destrucción por ahora)
+                        // Feedback auditivo de destrucción de edificio
                         if (soundManager) {
-                            soundManager.play('error');
+                            if (typeof soundManager.playBuildingDestroyed === 'function') {
+                                soundManager.playBuildingDestroyed();
+                            } else {
+                                soundManager.play('error');
+                            }
                         }
                         this.selectedEntities.length = 0;
                         this.updateSelectionPanel();
@@ -3121,8 +3125,12 @@ export class Game {
                         // Use building.size which represents radius, multiplying by 2 for full diameter.
                         this.particleSystem.createBuildingCollapseEffect(building.x, building.y, building.size * 2);
                     }
-                    if (soundManager && typeof soundManager.playExplosion === 'function') {
-                        soundManager.playExplosion();
+                    if (soundManager) {
+                        if (typeof soundManager.playBuildingDestroyed === 'function') {
+                            soundManager.playBuildingDestroyed();
+                        } else if (typeof soundManager.playExplosion === 'function') {
+                            soundManager.playExplosion();
+                        }
                     }
                     building._collapseProcessed = true;
                 }

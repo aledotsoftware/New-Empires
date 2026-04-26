@@ -14,7 +14,7 @@ export class Spearman extends Unit {
         this.hp = 90;
         this.attackDamage = 9;
         this.attackSpeed = 1.1;
-        this.attackRange = 65;
+        this.attackRange = 75; // Increased slightly to reduce frontline traffic jams
         this.speed = 48;
         this.canAttack = true;
     }
@@ -30,20 +30,20 @@ export class Spearman extends Unit {
             score -= 2000;
         }
 
-        // Stick to target lightly, otherwise penalize distance
+        // Distance penalty to prevent endless chasing
         if (this.attackTarget === enemy) {
-            // Drop Aggro: Si el objetivo huye demasiado lejos, aplicar una fuerte penalización
-            if (distSq > 150 * 150) {
-                score -= distSq / 5;
+            // Drop Aggro aggressively if the target moves out of immediate attack range
+            if (distSq > this.attackRangeSq * 1.5) {
+                score -= distSq / 2;
             } else {
-                score -= distSq / 50;
+                score += 1000;
             }
         } else {
-            score -= distSq / 5;
+            score -= distSq / 10;
         }
 
         if (this.hp < this.maxHp * 0.2) {
-            score -= distSq / 5;
+            score -= distSq / 2;
         }
 
         return score;

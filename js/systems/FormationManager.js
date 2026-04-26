@@ -9,6 +9,7 @@
 export const FORMATIONS = {
     /**
      * Formación en línea horizontal
+     * Si la línea es muy grande, hace wrap en varias filas.
      * @param {Array} units - Unidades a posicionar
      * @param {Object} center - Centro de la formación {x, y}
      * @param {number} spacing - Espacio entre unidades (px)
@@ -16,22 +17,30 @@ export const FORMATIONS = {
      */
     line: (units, center, spacing = 40) => {
         const count = units.length;
-        const positions = new Array(count); // BOLT OPTIMIZATION: Pre-allocate array
+        const positions = new Array(count);
 
         if (count === 0) return positions;
 
-        // La primera unidad en el centro exacto
-        positions[0] = { x: center.x, y: center.y };
+        // Limitar el ancho máximo de la línea (ej. 10 unidades por fila)
+        const maxCols = Math.min(count, Math.max(10, Math.ceil(Math.sqrt(count) * 1.5)));
+        const rows = Math.ceil(count / maxCols);
 
-        for (let i = 1; i < count; i++) {
-            // Alternar izquierda/derecha
-            const side = i % 2 === 0 ? 1 : -1;
-            // El nivel de distancia desde el centro
-            const level = Math.ceil(i / 2);
+        // Adjust center Y to balance the block
+        const startY = center.y - ((rows - 1) * spacing) / 2;
+
+        for (let i = 0; i < count; i++) {
+            const row = Math.floor(i / maxCols);
+            const colIndex = i % maxCols;
+
+            // How many units in this specific row?
+            const colsInThisRow = (row === rows - 1) ? (count % maxCols || maxCols) : maxCols;
+
+            // Re-center each row individually
+            const startX = center.x - ((colsInThisRow - 1) * spacing) / 2;
 
             positions[i] = {
-                x: center.x + (level * spacing * side),
-                y: center.y
+                x: startX + colIndex * spacing,
+                y: startY + row * spacing
             };
         }
         return positions;
@@ -319,7 +328,8 @@ export class FormationManager {
         // Scale spacing dynamically to ensure large formations aren't tightly packed together,
         // which would cause massive pathing agglomerations.
         const unitsCount = sortedUnits.length;
-        const countFactor = 1.25 + (unitsCount / 50);
+        // Cap the count factor to avoid completely breaking the formation's visual coherency
+        const countFactor = Math.min(2.5, 1.25 + (unitsCount / 50));
         const dynamicSpacing = spacing * countFactor;
 
         let positions = this.getPositions(formationType, sortedUnits, center, dynamicSpacing);

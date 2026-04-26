@@ -20,24 +20,22 @@ export class Warrior extends Unit {
             score -= 3000; // Stronger penalty so they don't attack buildings if troops are around
         }
 
-        // Penalización por distancia para evitar perseguir infinitamente a arqueros que kittean,
-        // pero reducimos la penalización si el enemigo es nuestro objetivo actual para darle "stickiness"
-        // y evitar que cambie de objetivo constantemente mientras persigue.
+        // Distance penalty to prevent endless chasing of kiting units
+        // and force switching to closer targets if the current one runs away.
         if (this.attackTarget === enemy) {
-            // Drop Aggro: Si el objetivo huye demasiado lejos, aplicar una fuerte penalización
-            if (distSq > 150 * 150) {
-                score -= distSq / 5;
+            // Drop Aggro aggressively if the target moves out of immediate attack range
+            if (distSq > this.attackRangeSq * 1.5) {
+                score -= distSq / 2; // Strong penalty to force target switch
             } else {
-                score -= distSq / 50; // Menor penalización si ya lo estamos persiguiendo
+                score += 1000; // Stick to target if it's right in front of us
             }
         } else {
-            score -= distSq / 5; // Penalización mayor para nuevos objetivos lejanos
+            score -= distSq / 10;
         }
 
-        // If HP is low, avoid retreating for now, just fight to the death as warriors do,
-        // or prioritize closer targets even more to avoid moving while dying
+        // Fight to the death if low HP, stick to closest things
         if (this.hp < this.maxHp * 0.2) {
-            score -= distSq / 5;
+            score -= distSq / 2;
         }
 
         return score;
@@ -52,7 +50,7 @@ export class Warrior extends Unit {
         this.hp = 100;
         this.attackDamage = 10;
         this.attackSpeed = 1.2;
-        this.attackRange = 70; // Aumentado ligeramente (+10) para ensanchar el frente de combate y reducir atascos
+        this.attackRange = 80; // Aumentado ligeramente para ensanchar el frente de combate y reducir atascos
         this.canAttack = true;
     }
 }

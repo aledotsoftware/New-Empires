@@ -81,5 +81,28 @@
                 "taxCollection": 1.15
             }
         }
-    ]
+    ],
+    "lore": "El Imperio Romano de Oriente, centrado en la inexpugnable ciudad de Constantinopla, es un faro de la cristiandad ortodoxa y la cultura helenística en un mundo asediado por las invasiones. Sus imponentes murallas y la astucia diplomática son sus mejores defensas.",
+    "campaignSeeds": [
+        {
+            "title": "Las Guerras de Justiniano",
+            "description": "Reconquista los territorios perdidos de Occidente y restaura la gloria del antiguo Imperio Romano utilizando tu superior caballería pesada."
+        },
+        {
+            "title": "El Asedio de Constantinopla",
+            "description": "Sobrevive a ataques masivos defendiendo las Murallas de Teodosio con el mortífero fuego griego."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Ciudadano Bizantino",
+            "icon": "assets/icons/villager.png",
+            "description": "Recolecta recursos en las provincias del imperio."
+        },
+        "warrior": {
+            "name": "Escudero",
+            "icon": "assets/icons/warrior.png",
+            "description": "Infantería protegida lista para la defensa."
+        }
+    }
 }

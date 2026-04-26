@@ -37,14 +37,19 @@
     },
     "buildingOverrides": {
         "townCenter": {
-            "name": "Gran Mezquita",
-            "icon": "assets/icons/temple.png",
-            "description": "Centro religioso y administrativo."
+            "name": "Palacio del Califa",
+            "icon": "assets/icons/townCenter.png",
+            "description": "El gran centro de gobierno y comercio."
         },
         "market": {
             "name": "Zoco",
             "icon": "assets/icons/market.png",
             "description": "Mercado tradicional árabe."
+        },
+        "temple": {
+            "name": "Madrasa",
+            "icon": "assets/icons/temple.png",
+            "description": "Centro de estudio y religión."
         }
     },
     "uniqueTechnologies": [
@@ -86,5 +91,28 @@
                 "goldGather": 1.2
             }
         }
-    ]
+    ],
+    "lore": "Un vasto imperio surgido de las arenas del desierto, uniendo diversas culturas bajo la bandera de la fe islámica. Los califatos florecieron como centros de comercio, aprendizaje y ciencia, conectando el Este y el Oeste.",
+    "campaignSeeds": [
+        {
+            "title": "La Expansión Omeya",
+            "description": "Lidera rápidos ejércitos de caballería ligera desde la Península Arábiga hasta el norte de África e Iberia en un tiempo récord."
+        },
+        {
+            "title": "La Edad de Oro de Bagdad",
+            "description": "Protege y expande las rutas comerciales de la Ruta de la Seda mientras defiendes tu capital de las invasiones nómadas."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Beduino",
+            "icon": "assets/icons/villager.png",
+            "description": "Habituado al desierto, experto en recolección."
+        },
+        "warrior": {
+            "name": "Guerrero con Cimitarra",
+            "icon": "assets/icons/warrior.png",
+            "description": "Infantería armada con la tradicional espada curva."
+        }
+    }
 }

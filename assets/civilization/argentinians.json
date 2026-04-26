@@ -94,5 +94,16 @@
                 "villagerMaxHp": 15
             }
         }
+    ],
+    "lore": "Nacidos de la lucha por la independencia en el extremo sur del mundo, los argentinos forjaron su identidad en las vastas llanuras de las Pampas y las escarpadas montañas de los Andes. Su espíritu indomable se refleja en su caballería ligera y en su capacidad para aprovechar los recursos de la tierra fértil.",
+    "campaignSeeds": [
+        {
+            "title": "El Cruce de los Andes",
+            "description": "Lidera al Ejército de los Andes en una épica travesía a través de las montañas nevadas para liberar los territorios vecinos."
+        },
+        {
+            "title": "La Defensa del Río de la Plata",
+            "description": "Resiste invasiones extranjeras utilizando fortificaciones estratégicas y una marina incipiente pero valiente."
+        }
     ]
 }

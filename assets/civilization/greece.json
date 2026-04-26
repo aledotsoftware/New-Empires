@@ -86,5 +86,28 @@
                 "unitMaxHp": 1.1
             }
         }
-    ]
+    ],
+    "lore": "Una tierra de ciudades-estado ferozmente independientes unidas por una lengua, religión e ideales culturales comunes. Los griegos son maestros de la filosofía, el arte naval y la formación falange, dominando el Mediterráneo.",
+    "campaignSeeds": [
+        {
+            "title": "La Liga de Delos",
+            "description": "Forja una poderosa flota trirreme y defiende las costas de la Hélade contra la abrumadora amenaza imperial desde el este."
+        },
+        {
+            "title": "La Guerra del Peloponeso",
+            "description": "Compite por la hegemonía de Grecia en un conflicto prolongado donde el poder marítimo se enfrenta a la supremacía terrestre."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Ilota",
+            "icon": "assets/icons/villager.png",
+            "description": "Trabaja la tierra para la ciudad-estado."
+        },
+        "warrior": {
+            "name": "Hoplita",
+            "icon": "assets/icons/warrior.png",
+            "description": "Infantería pesada ciudadana, base del ejército."
+        }
+    }
 }

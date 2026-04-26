@@ -66,5 +66,28 @@
                 "researchSpeed": 1.15
             }
         }
-    ]
+    ],
+    "lore": "Situada entre los ríos Tigris y Éufrates, Babilonia es una metrópolis de esplendor arquitectónico y sabiduría antigua. Sus altos muros y la legendaria Puerta de Ishtar protegen a los eruditos que descifran los secretos del cosmos, sentando las bases de la astronomía y las matemáticas.",
+    "campaignSeeds": [
+        {
+            "title": "La Ascensión de Hammurabi",
+            "description": "Unifica las ciudades-estado de Mesopotamia bajo un solo código de leyes y expande tu imperio mediante conquistas militares e ingeniería."
+        },
+        {
+            "title": "La Reconstrucción del Zigurat",
+            "description": "Acumula recursos vastos y defiende tus fronteras mientras construyes la torre más alta jamás vista en honor a los dioses."
+        }
+    ],
+    "unitOverrides": {
+        "villager": {
+            "name": "Artesano Babilónico",
+            "icon": "assets/icons/villager.png",
+            "description": "Recolecta recursos y erige los grandes monumentos."
+        },
+        "warrior": {
+            "name": "Lancero de la Ciudad",
+            "icon": "assets/icons/warrior.png",
+            "description": "Infantería que patrulla las calles y murallas."
+        }
+    }
 }

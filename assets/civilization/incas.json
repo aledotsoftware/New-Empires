@@ -46,17 +46,17 @@
         "townCenter": {
             "name": "Ushnu",
             "icon": "assets/icons/townCenter.png",
-            "description": "Centro ceremonial y administrativo inca"
+            "description": "Centro administrativo y religioso."
         },
         "house": {
             "name": "Kancha",
             "icon": "assets/icons/house.png",
-            "description": "Vivienda andina"
+            "description": "Conjunto de viviendas rectangulares."
         },
         "barracks": {
             "name": "Kallanka",
             "icon": "assets/icons/barracks.png",
-            "description": "Estructura militar y de alojamiento"
+            "description": "Gran salón para albergar soldados."
         }
     },
     "uniqueUnit": {
@@ -96,6 +96,17 @@
                     "stone": 1.1
                 }
             }
+        }
+    ],
+    "lore": "Hijos del sol y señores de los Andes, los incas han forjado un imperio vertical en terrenos casi inhóspitos. Sin la rueda ni la escritura, gestionan un vasto territorio a través de una increíble red de caminos y fuertes de piedra ensamblados con precisión milimétrica.",
+    "campaignSeeds": [
+        {
+            "title": "La Expansión de Pachacútec",
+            "description": "Somete a los señoríos rivales y expande el Tahuantinsuyo utilizando una red de caminos estratégicos y abastecimiento impecable."
+        },
+        {
+            "title": "La Resistencia en Vilcabamba",
+            "description": "Retírate a las fortalezas de la jungla y utiliza tácticas de guerrilla para resistir a un enemigo tecnológicamente superior."
         }
     ]
 }

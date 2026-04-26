@@ -621,21 +621,21 @@ export class ProceduralMapGenerator {
         m = Math.max(0, Math.min(1, m));
 
         // 1. Manejo de agua (siempre en elevaciones bajas)
-        if (elevation < 0.20 && this.style !== 'arena') {
+        if (elevation < 0.15 && this.style !== 'arena') {
             if (t < 0.2) return 'water'; // Agua helada (o hielo si existiese)
             if (m > 0.8 && t > 0.6 && mainBiome === 'swamp') return 'swamp';
             return 'water';
         }
 
         // 2. Manejo de montañas (siempre en elevaciones altas)
-        if (elevation > 0.80) {
+        if (elevation > 0.85) {
             if (t < 0.35) return 'snow'; // Montañas nevadas
             if (t > 0.8 && mainBiome === 'volcanic') return 'volcanic';
             return 'mountain';
         }
 
         // 3. Manejo de colinas (transición hacia montañas)
-        if (elevation > 0.65) {
+        if (elevation > 0.70) {
             if (t < 0.2) return 'snow';
             if (t < 0.4) return 'tundra';
             return 'hill';
@@ -650,19 +650,19 @@ export class ProceduralMapGenerator {
             return 'tundra';
         } else if (t < 0.4) {
             // Frío de transición
-            if (m > 0.65) return 'forest';
+            if (m > 0.7) return 'forest';
             // Prevenir desierto tan cerca de zonas nevadas si la humedad es muy baja
             if (m < 0.3) return 'grassland';
             return 'tundra';
         } else if (t < 0.65) {
             // Templado (banda intermedia obligatoria más amplia para evitar transiciones abruptas)
-            if (m > 0.65) return 'forest';
+            if (m > 0.7) return 'forest';
             // Prevenir desierto tan cerca de zonas frías
             if (m < 0.2) return 'grassland';
             return 'grassland';
         } else if (t < 0.8) {
             // Templado/Cálido
-            if (m > 0.65) return 'forest';
+            if (m > 0.7) return 'forest';
             if (m < 0.2) return 'desert';
             return 'grassland';
         } else {
@@ -1156,10 +1156,9 @@ export class ProceduralMapGenerator {
         }
 
         // Choke-point heuristic: Evaluate a 7x7 area around cx, cy
-        // Reducimos área de check a 5x5 y somos más permisivos con choke points para recursos
         let impassableCount = 0;
-        for (let dy = -2; dy <= 2; dy++) {
-            for (let dx = -2; dx <= 2; dx++) {
+        for (let dy = -3; dy <= 3; dy++) {
+            for (let dx = -3; dx <= 3; dx++) {
                 const nx = cx + dx;
                 const ny = cy + dy;
                 if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
@@ -1172,7 +1171,7 @@ export class ProceduralMapGenerator {
                 }
             }
         }
-        if (impassableCount >= 12) return false; // Reject if too many impassable tiles around (choke point)
+        if (impassableCount >= 20) return false; // Reject if too many impassable tiles around (choke point)
 
         return true;
     }

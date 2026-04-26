@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  await page.goto(`http://localhost:8080/index.html`);
+  await page.goto(`http://localhost:3000/index.html`);
 
   // Wait for the start button and click it
   await page.waitForSelector('#startButton');

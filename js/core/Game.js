@@ -4903,8 +4903,8 @@ export class Game {
         this.minimapCtx.shadowBlur = 4;
 
         // Border
-        this.minimapCtx.strokeStyle = '#ffffff'; // White for better contrast
-        this.minimapCtx.lineWidth = 2.5;
+        this.minimapCtx.strokeStyle = '#ffd700'; // Gold for better visibility
+        this.minimapCtx.lineWidth = 3.0;
         this.minimapCtx.strokeRect(camX, camY, camW, camH);
 
         // Subtle Fill (Lens effect)
@@ -5566,6 +5566,7 @@ export class Game {
                 statusText.style.color = '#ecc94b'; // Yellow/Gold
                 statusText.style.marginBottom = '2px';
                 statusText.style.fontWeight = 'bold';
+                statusText.style.textShadow = '1px 1px 2px black';
                 statusText.textContent = ` Alzando estructura: ${Math.floor(hpPercent)}%`;
                 hpContainer.appendChild(statusText);
             } else {
@@ -5575,6 +5576,7 @@ export class Game {
                 hpText.style.marginBottom = '2px';
                 hpText.style.fontSize = '0.95rem';
                 hpText.style.fontWeight = '900';
+                hpText.style.textShadow = '1px 1px 2px black';
                 hpContainer.appendChild(hpText);
             }
 
@@ -5582,7 +5584,8 @@ export class Game {
             hpBar.className = 'health-bar';
             hpBar.style.height = '12px';
             hpBar.style.background = 'rgba(255, 255, 255, 0.2)';
-            hpBar.style.border = '1px solid rgba(0, 0, 0, 0.8)';
+            hpBar.style.border = '1px solid black';
+            hpBar.style.boxShadow = '0 0 5px rgba(0,0,0,0.8)';
             hpBar.setAttribute('role', 'progressbar');
             hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
             hpBar.setAttribute('aria-valuemin', '0');
@@ -6377,6 +6380,7 @@ export class Game {
                         errorDiv.style.marginTop = '4px';
                         errorDiv.style.fontSize = '0.75rem';
                         errorDiv.style.fontWeight = 'bold';
+                        errorDiv.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
                         errorDiv.textContent = ` ${buttonData.error}`;
                         tooltipDiv.appendChild(errorDiv);
                     } else if (!buttonData.enabled && buttonData.cost && !this.canAfford(buttonData.cost)) {
@@ -6387,6 +6391,7 @@ export class Game {
                         errorDiv.style.marginTop = '4px';
                         errorDiv.style.fontSize = '0.75rem';
                         errorDiv.style.fontWeight = 'bold';
+                        errorDiv.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
 
                         // Palette: Show specific missing resources
                         if (buttonData._missingResources && buttonData._missingResources.length > 0) {

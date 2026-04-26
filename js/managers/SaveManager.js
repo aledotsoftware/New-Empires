@@ -159,6 +159,7 @@ export class SaveManager {
         if (!Array.isArray(state.enemies)) return false;
         if (!Array.isArray(state.resourceNodes)) return false;
         if (state.fowGrid !== undefined && !Array.isArray(state.fowGrid)) return false;
+        if (state.researchQueue !== undefined && !Array.isArray(state.researchQueue)) return false;
 
         // Optional: Validate resource structure (prevent negative values or NaN)
         const resourceKeys = ['wood', 'food', 'gold', 'stone'];
@@ -277,6 +278,7 @@ export class SaveManager {
 
             // Tecnologías
             researchedTechs: game.techManager?.researchedTechs ? Array.from(game.techManager.researchedTechs) : [],
+            researchQueue: game.techManager?.researchQueue ? [...game.techManager.researchQueue] : [],
 
             // Fog Of War
             fowGrid: serializedFowGrid

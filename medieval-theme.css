@@ -1193,20 +1193,23 @@ body.theme-mayans {
 
 /* Botones deshabilitados/vacíos */
 .action-btn.disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
     background: linear-gradient(180deg, var(--stone-dark) 0%, var(--stone-darkest) 100%);
-    border-color: rgba(92, 77, 61, 0.4);
+    border-color: rgba(92, 77, 61, 0.6);
+    filter: grayscale(0.5);
 }
 
 .action-btn.disabled.res-blocked {
-    background: linear-gradient(180deg, rgba(197, 48, 48, 0.4) 0%, rgba(197, 48, 48, 0.6) 100%);
-    border-color: rgba(197, 48, 48, 0.6);
+    background: linear-gradient(180deg, rgba(197, 48, 48, 0.5) 0%, rgba(197, 48, 48, 0.7) 100%);
+    border-color: rgba(197, 48, 48, 0.8);
+    filter: grayscale(0); /* Remove grayscale for error visibility */
 }
 
 .action-btn.disabled.pop-blocked {
-    background: linear-gradient(180deg, rgba(221, 107, 32, 0.4) 0%, rgba(221, 107, 32, 0.6) 100%);
-    border-color: rgba(221, 107, 32, 0.6);
+    background: linear-gradient(180deg, rgba(221, 107, 32, 0.5) 0%, rgba(221, 107, 32, 0.7) 100%);
+    border-color: rgba(221, 107, 32, 0.8);
+    filter: grayscale(0); /* Remove grayscale for error visibility */
 }
 
 /* Patrón visual para slots vacíos */
@@ -2509,11 +2512,12 @@ button:focus-visible,
 
 .skip-link:focus {
     top: 0;
-    outline: 2px solid var(--gold-bright);
-    outline-offset: -4px;
+    outline: 4px solid var(--gold-bright);
+    outline-offset: -2px;
     box-shadow:
         var(--shadow-strong),
-        0 0 20px rgba(201, 162, 39, 0.4);
+        0 0 25px rgba(201, 162, 39, 0.8),
+        inset 0 0 10px rgba(201, 162, 39, 0.4);
 }
 
 /* ==========================================

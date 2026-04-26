@@ -2369,7 +2369,7 @@ export class Game {
 
                     // Auditory feedback (if soundManager exists)
                     if (soundManager) {
-                        soundManager.play('error');
+                        soundManager.play('resourceError');
                     }
 
                     // Palette: Visual feedback for resources
@@ -6121,7 +6121,12 @@ export class Game {
                             btn.classList.add('shake');
 
                             if (soundManager) {
-                                soundManager.play('error');
+                                // Dynamic auditory feedback for different block reasons
+                                if (isPopError || isQueueError) {
+                                    soundManager.play('error'); // Regular error
+                                } else {
+                                    soundManager.play('resourceError'); // Hollow thunk for resource blocked
+                                }
                             }
 
                             // Show why it's disabled
@@ -6432,10 +6437,13 @@ export class Game {
         const iconDiv = document.createElement('div');
         iconDiv.className = 'notification-icon';
 
-        // Use image asset with alt text for accessibility
+        // Accessibility: Hide icon from screen readers as role announces the state
+        iconDiv.setAttribute('aria-hidden', 'true');
+
+        // Use image asset
         const img = document.createElement('img');
         img.src = `assets/icons/${iconFiles[type] || 'info.png'}`;
-        img.alt = type === 'success' ? 'Éxito' : type === 'error' ? 'Error' : 'Información';
+        img.alt = ''; // Empty alt because of aria-hidden
         img.style.width = '24px';
         img.style.height = '24px';
         img.style.objectFit = 'contain';
@@ -6443,7 +6451,7 @@ export class Game {
         // Add error handler for image loading failure
         img.onerror = () => {
             img.style.display = 'none';
-            iconDiv.textContent = type === 'success' ? '' : type === 'error' ? '' : 'ℹ️';
+            iconDiv.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
         };
 
         iconDiv.appendChild(img);
@@ -6474,6 +6482,11 @@ export class Game {
         notification.appendChild(textDiv);
         notification.appendChild(closeBtn);
         notification.appendChild(progressContainer);
+
+        // Limit to 5 max notifications
+        while (container.children.length >= 5) {
+            container.removeChild(container.firstChild);
+        }
 
         container.appendChild(notification);
 

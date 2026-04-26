@@ -805,10 +805,15 @@ export class Game {
         }
 
         // 5. Restore Techs
-        if (state.researchedTechs && this.techManager) {
-            this.techManager.researchedTechs = new Set(state.researchedTechs);
-            if (this.techManager.applyResearchedEffects) {
-                this.techManager.applyResearchedEffects();
+        if (this.techManager) {
+            if (state.researchedTechs) {
+                this.techManager.researchedTechs = new Set(state.researchedTechs);
+                if (this.techManager.applyResearchedEffects) {
+                    this.techManager.applyResearchedEffects();
+                }
+            }
+            if (state.researchQueue) {
+                this.techManager.researchQueue = state.researchQueue;
             }
         }
 

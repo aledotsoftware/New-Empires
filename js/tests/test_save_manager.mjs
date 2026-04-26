@@ -14,7 +14,7 @@ function mockGame() {
         populationManager: { population: 1, maxPopulation: 10 },
         camera: { x: 0, y: 0 },
         mapConfig: { width: 50, height: 50, seed: 123 },
-        techManager: { researchedTechs: new Set(['tech1']) }
+        techManager: { researchedTechs: new Set(['tech1']), researchQueue: [{techId: 'tech2', timer: 10}] }
     };
 }
 
@@ -34,6 +34,11 @@ async function testSaveManager() {
     // Techs should be array
     if (!Array.isArray(serialized.researchedTechs) || serialized.researchedTechs[0] !== 'tech1') {
         throw new Error("Researched techs not serialized to array correctly");
+    }
+
+    // researchQueue should be explicitly serialized
+    if (!Array.isArray(serialized.researchQueue) || serialized.researchQueue.length !== 1 || serialized.researchQueue[0].techId !== 'tech2') {
+        throw new Error("Research queue not serialized to array correctly");
     }
 
     console.log("SaveManager serialization logic is valid!");

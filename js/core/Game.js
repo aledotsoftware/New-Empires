@@ -2350,7 +2350,6 @@ export class Game {
         switch (this.buildMode) {
             case 'house':
                 building = new House(centerX, centerY, 'player');
-                this.populationManager.increaseMaxPopulation(CONFIG.HOUSE_POPULATION_INCREASE);
                 break;
             case 'barracks':
                 building = new Barracks(centerX, centerY, 'player');
@@ -2453,6 +2452,36 @@ export class Game {
     }
 
     /**
+     * Entrena unidad distribuyendo carga en edificios del mismo tipo que estén en el grupo de selección
+     * @param {string} unitType - Tipo de unidad
+     */
+    trainUnitDistributed(unitType) {
+        // Encontrar el edificio seleccionado que puede entrenar esto con menos cola
+        let bestBuilding = null;
+        let minQueue = Infinity;
+
+        const selLen = this.selectedEntities.length;
+        for (let i = 0; i < selLen; i++) {
+            const ent = this.selectedEntities[i];
+            if (ent.isBuilding && ent.team === 'player' && !ent.isUnderConstruction) {
+                if (ent.trainableUnits && ent.trainableUnits.includes(unitType)) {
+                    const queueLen = ent.productionQueue ? ent.productionQueue.length : 0;
+                    if (queueLen < minQueue && (!ent.productionQueue || !ent.productionQueue.isFull())) {
+                        minQueue = queueLen;
+                        bestBuilding = ent;
+                    }
+                }
+            }
+        }
+
+        if (bestBuilding) {
+            this.trainUnit(unitType, bestBuilding);
+        } else {
+            this.showNotification('No hay edificios seleccionados con capacidad en la cola para esta unidad.', 'error');
+        }
+    }
+
+    /**
      * Encola una unidad para entrenamiento
      * @param {string} unitType - Tipo de unidad
      * @param {Building} building - Edificio que entrena
@@ -2505,12 +2534,7 @@ export class Game {
         }
 
         // Tiempo de entrenamiento según tipo
-        const TRAINING_TIMES = {
-            villager: 20,
-            warrior: 24,
-            archer: 28
-        };
-        let trainingTime = TRAINING_TIMES[unitType] || 30;
+        let trainingTime = CONFIG.UNIT_TRAINING_TIMES[unitType] || 30;
 
         // Apply production modifiers
         if (this.modifiers) {
@@ -2917,7 +2941,7 @@ export class Game {
                 if (building.team === 'player') {
                     this._updateBuildingCount(building.type, -1);
 
-                    if (building.type === 'house') {
+                    if (building.type === 'house' && !building.isUnderConstruction) {
                         this.populationManager.decreaseMaxPopulation(CONFIG.HOUSE_POPULATION_INCREASE);
                         this._forceUIUpdate = true;
                     }
@@ -5823,7 +5847,7 @@ export class Game {
                     description: desc,
                     hotkey: hotkeys[i] || 'Q',
                     cost: cost,
-                    action: () => this.trainUnit(unitType, this.selectedEntities[0]),
+                    action: () => this.trainUnitDistributed(unitType),
                     enabled: enabled,
                     error: error
                 });

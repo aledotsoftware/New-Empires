@@ -228,6 +228,18 @@ export const CONFIG = {
         trader: { food: 50, gold: 40, wood: 25 }
     },
 
+    // Tiempos de entrenamiento de unidades (en segundos)
+    UNIT_TRAINING_TIMES: {
+        villager: 20,
+        warrior: 24,
+        archer: 28,
+        trader: 28,
+        spearman: 22,
+        cavalry: 32,
+        scout: 18,
+        priest: 35
+    },
+
     // Velocidades de recolección (por segundo)
     GATHER_RATES: {
         wood: 10,

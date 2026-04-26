@@ -1984,7 +1984,13 @@ export class Game {
                             buttons[btnIndex].classList.remove('shake');
                             void buttons[btnIndex].offsetWidth;
                             buttons[btnIndex].classList.add('shake');
-                            if (typeof soundManager !== 'undefined' && soundManager) soundManager.play('error');
+                            if (typeof soundManager !== 'undefined' && soundManager) {
+                                if (buttons[btnIndex].classList.contains('res-blocked')) {
+                                    soundManager.play('resourceError');
+                                } else {
+                                    soundManager.play('error');
+                                }
+                            }
                         }
                     }
                 }
@@ -2390,7 +2396,7 @@ export class Game {
 
     openBuildMenu() {
         const menu = document.getElementById('buildMenu');
-        this.lastFocusedElement = document.activeElement;
+        FocusManager.saveFocus();
 
         menu.classList.remove('hidden');
 
@@ -2451,15 +2457,7 @@ export class Game {
     closeBuildMenu() {
         FocusManager.releaseTrap();
         document.getElementById('buildMenu').classList.add('hidden');
-
-        // Restaurar foco al canvas para continuar jugando
-        // Preferimos el canvas sobre el último elemento (que podría ser un botón de UI)
-        // para que el jugador pueda usar atajos inmediatamente
-        if (this.canvas) {
-            this.canvas.focus();
-        } else if (this.lastFocusedElement) {
-            this.lastFocusedElement.focus();
-        }
+        FocusManager.restoreFocus();
         this.lastFocusedElement = null;
     }
 
@@ -3406,16 +3404,20 @@ export class Game {
         // Palette: Toggle Overlay and Focus
         if (overlay) {
             if (this._isPaused) {
+                FocusManager.saveFocus();
                 overlay.classList.remove('hidden');
                 // Trap focus or just focus the button
                 if (resumeBtn) {
                     // Wait for UI to update visibility
-                    setTimeout(() => resumeBtn.focus(), 50);
+                    setTimeout(() => {
+                        FocusManager.trapFocus(overlay);
+                        resumeBtn.focus();
+                    }, 50);
                 }
             } else {
+                FocusManager.releaseTrap();
                 overlay.classList.add('hidden');
-                // Return focus to canvas
-                if (this.canvas) this.canvas.focus();
+                FocusManager.restoreFocus();
             }
         }
 
@@ -6230,53 +6232,24 @@ export class Game {
                             void btn.offsetWidth; // Force reflow
                             btn.classList.add('shake');
 
-                            if (soundManager) {
-                                // Dynamic auditory feedback for different block reasons
-                                if (isPopError || isQueueError) {
-                                    soundManager.play('error'); // Regular error
-                                } else {
-                                    soundManager.play('resourceError'); // Hollow thunk for resource blocked
-                                }
-                            }
-
-                            // Show why it's disabled
-                            let msg = buttonData.error || 'Acción no disponible';
-
-                            // Dynamically calculate missing resources based on current game state
-                            const currentMissingResources = [];
-                            let cmrCount = 0;
-                            if (buttonData.cost) {
-                                for (const [res, amount] of Object.entries(buttonData.cost)) {
-                                    if (this.resources[res] < amount) {
-                                        currentMissingResources[cmrCount++] = `${res} (${Math.ceil(amount - this.resources[res])})`;
+                            // Use unified missing resources flash which also plays sound
+                            if (buttonData.cost && !this.canAfford(buttonData.cost)) {
+                                const msg = this.flashMissingResources(buttonData.cost);
+                                this.showNotification(msg, 'error');
+                            } else {
+                                if (soundManager) {
+                                    if (isPopError || isQueueError) {
+                                        soundManager.play('error');
+                                    } else {
+                                        soundManager.play('resourceError');
                                     }
                                 }
-                            }
-
-                            if (currentMissingResources.length > 0) {
-                                // Translate for display if raw strings
-                                const translated = [];
-                                const len = currentMissingResources.length;
-                                for (let i = 0; i < len; i++) {
-                                    const mr = currentMissingResources[i];
-                                    // Extract resource name to flash it
-                                    const resName = mr.split(' ')[0].trim();
-                                    this.flashResource(resName); // Palette: Flash resource
-
-                                    let [name, amt] = mr.split(' (');
-                                    amt = '(' + amt;
-                                    name = this.resourceTranslations[name] || name;
-                                    translated[i] = `${name} ${amt}`;
+                                let msg = buttonData.error || 'Acción no disponible';
+                                if (msg.includes('población') || msg.includes('Población')) {
+                                    this.flashResource('population');
                                 }
-                                msg = `Falta: ${translated.join(', ')}`;
+                                this.showNotification(msg, 'error');
                             }
-
-                            // Palette: Flash population if that's the error
-                            if (msg.includes('población') || msg.includes('Población')) {
-                                this.flashResource('population');
-                            }
-
-                            this.showNotification(msg, 'error');
                         };
                     } else {
                         btn.onclick = buttonData.action;

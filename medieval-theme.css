@@ -2315,10 +2315,10 @@ button:focus-visible,
 /* Shake Animation for Disabled Actions */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-10px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
-    40% { transform: translateX(10px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
-    60% { transform: translateX(-6px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
-    80% { transform: translateX(6px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
+    20% { transform: translateX(-10px) scale(1.02); }
+    40% { transform: translateX(10px) scale(1.02); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
 }
 
 .shake {

@@ -34,7 +34,12 @@ export class Cavalry extends Unit {
 
         // Less penalty for distance since they are fast, but stick to target slightly more
         if (this.attackTarget === enemy) {
-            score -= distSq / 80;
+            // Drop Aggro: Si el objetivo huye demasiado lejos, aplicar una fuerte penalización
+            if (distSq > 200 * 200) { // La caballería persigue un poco más lejos
+                score -= distSq / 15;
+            } else {
+                score -= distSq / 80;
+            }
         } else {
             score -= distSq / 15;
         }

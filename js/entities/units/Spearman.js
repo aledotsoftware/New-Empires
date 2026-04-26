@@ -32,7 +32,12 @@ export class Spearman extends Unit {
 
         // Stick to target lightly, otherwise penalize distance
         if (this.attackTarget === enemy) {
-            score -= distSq / 50;
+            // Drop Aggro: Si el objetivo huye demasiado lejos, aplicar una fuerte penalización
+            if (distSq > 150 * 150) {
+                score -= distSq / 5;
+            } else {
+                score -= distSq / 50;
+            }
         } else {
             score -= distSq / 5;
         }

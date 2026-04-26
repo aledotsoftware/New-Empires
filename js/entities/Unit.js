@@ -178,9 +178,14 @@ export class Unit extends Entity {
 
             // Target Stickiness: Evitar cambiar de objetivo constantemente si ya estamos peleando
             if (this.attackTarget === enemy) {
-                // Dynamically reduce stickiness if the enemy is successfully fleeing (e.g. kiting archers)
-                const isFleeing = distSq > 150 * 150;
-                score += isFleeing ? 500 : 2000;
+                // Si el objetivo está fuera de nuestro rango de ataque actual, reducimos masivamente el "stickiness"
+                // Esto permite que las unidades cuerpo a cuerpo en la 2da o 3ra fila cambien rápidamente
+                // a otros enemigos más cercanos en lugar de quedarse atascadas intentando llegar al original.
+                if (distSq > this.attackRangeSq) {
+                    score += 100; // Muy poco stickiness, cambiará fácilmente a un objetivo en rango
+                } else {
+                    score += 2000; // Fuerte stickiness si ya lo estamos golpeando
+                }
             }
 
             // Delegar la evaluación táctica a las subclases

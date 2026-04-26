@@ -60,11 +60,20 @@ export class Unit extends Entity {
             if (this.attackTarget.isDead) {
                 this.attackTarget = null;
             } else {
-                // BOLT OPTIMIZATION: Stop moving if already in attack range
-                // Reduces expensive collision checks and improves ranged unit behavior (kiting/spacing)
-                // BOLT OPTIMIZATION: Use cached squared range
-                this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRangeSq);
-                this.tryAttack(this.attackTarget, deltaTime, game);
+                const dx = this.x - this.attackTarget.x;
+                const dy = this.y - this.attackTarget.y;
+                const distSq = dx * dx + dy * dy;
+
+                // Stop silly chases: Drop target if it runs too far, unless explicitly ordered to attack it
+                if (!this.explicitTarget && distSq > 250 * 250) {
+                    this.attackTarget = null;
+                } else {
+                    // BOLT OPTIMIZATION: Stop moving if already in attack range
+                    // Reduces expensive collision checks and improves ranged unit behavior (kiting/spacing)
+                    // BOLT OPTIMIZATION: Use cached squared range
+                    this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRangeSq);
+                    this.tryAttack(this.attackTarget, deltaTime, game);
+                }
             }
         }
         else if (this.gatherTarget && this.canGather) {
@@ -164,17 +173,18 @@ export class Unit extends Entity {
                 continue;
             }
 
+            const dx = this.x - enemy.x;
+            const dy = this.y - enemy.y;
+            const distSq = dx * dx + dy * dy;
+
             // Puntuación base
             let score = 0;
 
             // Prioridad absoluta a quien nos ataca
             if (isUnderAttackByThisEnemy) {
-                score += 10000; // Aumento masivo para asegurar reacción inmediata y persistente ante atacantes directos
+                // Aumento masivo, pero distance-aware para no perseguir atacantes lejanos ignorando el frente
+                score += 10000 - (distSq / 10);
             }
-
-            const dx = this.x - enemy.x;
-            const dy = this.y - enemy.y;
-            const distSq = dx * dx + dy * dy;
 
             // Target Stickiness: Evitar cambiar de objetivo constantemente si ya estamos peleando
             if (this.attackTarget === enemy) {
@@ -307,9 +317,13 @@ export class Unit extends Entity {
                             const dxTarget = this.x - this.attackTarget.x;
                             const dyTarget = this.y - this.attackTarget.y;
                             const distTargetSq = dxTarget * dxTarget + dyTarget * dyTarget;
-                            if (distTargetSq < this.attackRangeSq * 1.5) {
-                                sepForce *= 0.2; // Reducir un 80% la fuerza de separación
+
+                            sepForce *= 0.3; // Base reduction when in combat mode
+                            if (distTargetSq < this.attackRangeSq * 2.0) {
+                                sepForce *= 0.1; // Reduce extremely when getting in range
                             }
+                        } else if (this.targetX !== null) {
+                            sepForce *= 0.5; // Reduce separation when just marching
                         }
 
                         moveX += (sepX / sepCount) * sepForce;

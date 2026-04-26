@@ -25,11 +25,10 @@ export class Archer extends Unit {
 
         // Penalización por distancia: Los arqueros no deben avanzar ciegamente descuidando su posición.
         if (this.attackTarget === enemy) {
-            // Drop Aggro: Los arqueros no deben romper formaciones defensivas persiguiendo demasiado lejos
-            if (distSq > 160 * 160) {
-                score -= distSq / 2; // Penalización muy fuerte para que suelten el objetivo
+            if (distSq > this.attackRangeSq) {
+                score -= distSq / 2; // Drop target strongly if it runs out of range
             } else {
-                score -= distSq / 50;
+                score += 1000; // Stick if in range
             }
         } else {
             score -= distSq / 15; // Increased penalty for unrelated targets to keep them firing at what is close
@@ -61,10 +60,10 @@ export class Archer extends Unit {
             const dy = this.y - this.attackTarget.y;
             const distSq = dx * dx + dy * dy;
 
-            // Mantenemos distancia para tener un margen seguro de disparo (80% de attackRange)
+            // Restrict kiting to extreme close ranges so archers hold their ground in formations longer
             // attackRange = 130 -> 130^2 = 16900
-            // 0.64 * 16900 = 10816 (distancia de ~104)
-            const minKiteDistSq = this.attackRangeSq * 0.64;
+            // 0.25 * 16900 = 4225 (distancia de ~65, close to melee range)
+            const minKiteDistSq = this.attackRangeSq * 0.25;
 
             // Verificamos si podemos movernos (no estamos estuneados, etc.)
             // En este motor, el Unit base maneja todo en update()

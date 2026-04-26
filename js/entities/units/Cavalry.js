@@ -14,7 +14,7 @@ export class Cavalry extends Unit {
         this.hp = 120;
         this.attackDamage = 12;
         this.attackSpeed = 1.3;
-        this.attackRange = 60;
+        this.attackRange = 75; // Increased slightly to reduce frontline traffic jams
         this.speed = 80;
         this.canAttack = true;
     }
@@ -32,20 +32,20 @@ export class Cavalry extends Unit {
             score -= 2000;
         }
 
-        // Less penalty for distance since they are fast, but stick to target slightly more
+        // Distance penalty to prevent endless chasing
         if (this.attackTarget === enemy) {
-            // Drop Aggro: Si el objetivo huye demasiado lejos, aplicar una fuerte penalización
-            if (distSq > 200 * 200) { // La caballería persigue un poco más lejos
-                score -= distSq / 15;
+            // Drop Aggro aggressively if the target moves out of immediate attack range
+            if (distSq > this.attackRangeSq * 1.5) {
+                score -= distSq / 5; // Less severe penalty for cavalry since they are fast
             } else {
-                score -= distSq / 80;
+                score += 1000;
             }
         } else {
-            score -= distSq / 15;
+            score -= distSq / 10;
         }
 
         if (this.hp < this.maxHp * 0.2) {
-            score -= distSq / 10;
+            score -= distSq / 5;
         }
 
         return score;

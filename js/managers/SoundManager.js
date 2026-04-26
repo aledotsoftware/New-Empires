@@ -646,9 +646,9 @@ export class SoundManager {
 
         // Synthesize a generic selection sound for better feedback
         if (entityType === 'villager' || entityType === 'warrior' || entityType === 'archer') {
-            this.playTone(350, 0.05, 'sine', 0.1);
+            this.playTone(400, 0.05, 'sine', 0.08);
         } else {
-            this.playTone(200, 0.1, 'triangle', 0.15);
+            this.playTone(250, 0.1, 'triangle', 0.12);
         }
 
         // Mapear el tipo de entidad al sonido correspondiente (ej: villager -> selectVillager)

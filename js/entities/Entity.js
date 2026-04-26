@@ -70,7 +70,7 @@ export class Entity {
 
         if (typeof window !== 'undefined' && window.game && window.game.particleSystem) {
             // Offset Y slightly based on entity size
-            window.game.particleSystem.createDamageText(this.x, this.y - this.size, amount);
+            window.game.particleSystem.createDamageText(this.x, this.y - this.size - 10, amount);
         }
 
         if (this.hp <= 0) {

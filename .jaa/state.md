@@ -44,3 +44,8 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
 - **Sentinel (Stability & Save/Load)**: Mejoró la fiabilidad del sistema de guardado y carga.
   - Se corrigió la omisión de `enemyCivilizationId` en `SaveManager.js` y `Game.js` durante la serialización, validación y carga del estado del juego, impidiendo que el oponente desapareciera al cargar una partida.
   - Se actualizó la documentación de `SAVE_SYSTEM.md` para reflejar que la "Carga completa de partida guardada" ya está implementada y es funcional.
+- **Bard (UX/Feedback) [Update]**: Afinó el feedback sonoro y visual táctico en el juego sin dañar FPS.
+  - El sonido `playError()` y la animación CSS `.shake` ahora se activan correctamente no solo al hacer click en acciones deshabilitadas sino también al accionar sus correspondientes hotkeys en el teclado.
+  - La posición del texto de daño flotante fue corregida para que flote 10 pixeles más arriba dependiendo del tamaño de la entidad afectada, incrementando legibilidad en combates cerrados (`Entity.js`).
+  - Las partículas de flechas incendiarias usan un abanico de colores y luminosidades de fuego más alto para que el proyectil resalte más.
+  - Los tonos sintetizados en `SoundManager.js` fueron revisados para un `playError` más contundente usando osciladores cuadrados en secuencia en lugar de tonos dentados.

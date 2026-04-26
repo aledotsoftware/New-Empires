@@ -203,9 +203,9 @@ En el menú de configuración puedes ajustar:
 ## 💡 Tips de Productividad
 
 ### Selección Eficiente
-1. **Doble click** en una unidad selecciona todas las del mismo tipo en pantalla
-2. **Shift + Click** para añadir unidades específicas
-3. **Ctrl + número** para guardar grupo (futuro)
+1. **Doble click** en una unidad selecciona todas las del mismo tipo en pantalla. Usa **Shift + Doble click** para añadirlas a la selección actual.
+2. **Shift + Click** o **Shift + Arrastrar** para añadir múltiples unidades a la selección actual sin perder las previas.
+3. **Ctrl + número (1-9)** para guardar grupo, luego presiona el número para seleccionarlos. Usa **Shift + número** para añadirlos a la selección actual.
 
 ### Navegación Rápida
 1. Usa **Espacio** para volver rápidamente a tu base
@@ -223,7 +223,6 @@ En el menú de configuración puedes ajustar:
 
 En futuras versiones:
 - [ ] Rebindear teclas
-- [ ] Grupos de control (Ctrl + 1-9)
 - [ ] Macros personalizados
 - [ ] Perfil de hotkeys
 

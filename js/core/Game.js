@@ -1113,7 +1113,7 @@ export class Game {
         this.canvas.addEventListener('mouseup', (e) => {
             if (e.button === 0) {
                 if (this.isDragging) {
-                    this.selectEntities();
+                    this.selectEntities(e.shiftKey);
                     this.isDragging = false;
                 }
             }
@@ -1317,13 +1317,15 @@ export class Game {
         return closest;
     }
 
-    selectEntities() {
+    selectEntities(addMode = false) {
         const minX = Math.min(this.dragStart.x, this.mouse.worldX);
         const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
         const minY = Math.min(this.dragStart.y, this.mouse.worldY);
         const maxY = Math.max(this.dragStart.y, this.mouse.worldY);
 
-        this.selectedEntities.length = 0;
+        if (!addMode) {
+            this.selectedEntities.length = 0;
+        }
 
         // Si es un click simple (área muy pequeña), seleccionar la entidad más cercana
         const dx = this.dragStart.x - this.mouse.worldX;
@@ -1338,7 +1340,13 @@ export class Game {
             const closest = this.getEntityAt(this.mouse.worldX, this.mouse.worldY);
 
             if (closest) {
-                this.selectedEntities[0] = closest;
+                if (addMode) {
+                    if (!this.selectedEntities.includes(closest)) {
+                        this.selectedEntities.push(closest);
+                    }
+                } else {
+                    this.selectedEntities[0] = closest;
+                }
 
                 // Reproducir sonido y efecto visual de selección
                 if (soundManager) {
@@ -1370,14 +1378,20 @@ export class Game {
 
             // Filter results
             const len = cache.length;
-            let selCount = 0;
+            let selCount = addMode ? this.selectedEntities.length : 0;
             for (let i = 0; i < len; i++) {
                 const entity = cache[i];
                 if (entity.team !== 'player') continue;
 
                 if (entity.x >= minX && entity.x <= maxX &&
                     entity.y >= minY && entity.y <= maxY) {
-                    this.selectedEntities[selCount++] = entity;
+                    if (addMode) {
+                        if (!this.selectedEntities.includes(entity)) {
+                            this.selectedEntities[selCount++] = entity;
+                        }
+                    } else {
+                        this.selectedEntities[selCount++] = entity;
+                    }
                 }
             }
             this.selectedEntities.length = selCount;
@@ -1415,8 +1429,10 @@ export class Game {
             }
 
             const len = cache.length;
-            this.selectedEntities.length = 0;
-            let visibleCount = 0;
+            if (!e.shiftKey) {
+                this.selectedEntities.length = 0;
+            }
+            let visibleCount = this.selectedEntities.length;
             const camX = this.camera.x;
             const camY = this.camera.y;
             const viewW = this.viewWidth;
@@ -1427,7 +1443,13 @@ export class Game {
                 if (u.team === 'player' && u.type === type && !u.isDead) {
                     if (u.x >= camX && u.x <= camX + viewW &&
                         u.y >= camY && u.y <= camY + viewH) {
-                        this.selectedEntities[visibleCount++] = u;
+                        if (e.shiftKey) {
+                            if (!this.selectedEntities.includes(u)) {
+                                this.selectedEntities[visibleCount++] = u;
+                            }
+                        } else {
+                            this.selectedEntities[visibleCount++] = u;
+                        }
                     }
                 }
             }
@@ -1540,6 +1562,18 @@ export class Game {
     }
 
     handleRightClick() {
+        if (this.buildMode) {
+            this.buildMode = null;
+            this.closeBuildMenu();
+            return;
+        }
+
+        const buildMenu = document.getElementById('buildMenu');
+        if (buildMenu && !buildMenu.classList.contains('hidden')) {
+            this.closeBuildMenu();
+            return;
+        }
+
         if (this.selectedEntities.length === 0) return;
 
         // BOLT OPTIMIZATION: Use Spatial Grid find() instead of O(N) loops
@@ -1963,8 +1997,8 @@ export class Game {
                 e.preventDefault();
                 this.saveControlGroup(numKey);
                 return;
-            } else if (!e.altKey && !e.shiftKey) {
-                // 1-9 sin modificadores: Seleccionar grupo
+            } else if (!e.altKey) {
+                // 1-9 (con o sin Shift): Seleccionar grupo
                 this.selectControlGroup(numKey, e.shiftKey);
                 return;
             }
@@ -1989,7 +2023,11 @@ export class Game {
                 return;
             }
 
-            this.closeBuildMenu(); // Asegurar que el menú se cierre
+            const buildMenu = document.getElementById('buildMenu');
+            if (buildMenu && !buildMenu.classList.contains('hidden')) {
+                this.closeBuildMenu();
+                return;
+            }
 
             // 2. Palette: Deselect entities if nothing else is active
             if (this.selectedEntities.length > 0) {
@@ -2097,8 +2135,24 @@ export class Game {
                 centerY /= selectedUnits.length;
 
                 // Aplicar formación
-                formationManager.applyFormation(formation, selectedUnits, { x: centerX, y: centerY });
+                let angle = 0;
+                if (hasMovingUnits) {
+                    // Compute average current position to get angle of movement towards the new target center
+                    let currentX = 0, currentY = 0;
+                    for (const unit of selectedUnits) {
+                        currentX += unit.x;
+                        currentY += unit.y;
+                    }
+                    currentX /= selectedUnits.length;
+                    currentY /= selectedUnits.length;
+                    angle = Math.atan2(centerY - currentY, centerX - currentX);
+                }
+
+                formationManager.applyFormation(formation, selectedUnits, { x: centerX, y: centerY }, formationManager.spacing, angle);
+
+                // Show notification only after setting the formation successfully
                 this.showNotification(`Formación: ${formation}`, 'info');
+
                 e.preventDefault();
                 return;
             } else {

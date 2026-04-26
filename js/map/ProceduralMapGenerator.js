@@ -521,7 +521,7 @@ export class ProceduralMapGenerator {
                             const nx = x + dx;
                             const ny = y + dy;
                             if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
-                                if (this.terrainTypes[ny][nx] === currentType) {
+                                if (this.terrainTypes[ny] && this.terrainTypes[ny][nx] === currentType) {
                                     matchingNeighbors++;
                                 }
                             }
@@ -561,7 +561,7 @@ export class ProceduralMapGenerator {
                             const nx = x + dx;
                             const ny = y + dy;
                             if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
-                                const neighborType = this.terrainTypes[ny][nx];
+                                const neighborType = this.terrainTypes[ny] ? this.terrainTypes[ny][nx] : null;
                                 if (neighborType === 'mountain' || neighborType === 'water' || neighborType === 'forest') {
                                     impassableNeighbors++;
                                     impassableCounts[neighborType]++;
@@ -650,19 +650,19 @@ export class ProceduralMapGenerator {
             return 'tundra';
         } else if (t < 0.4) {
             // Frío de transición
-            if (m > 0.6) return 'forest';
+            if (m > 0.65) return 'forest';
             // Prevenir desierto tan cerca de zonas nevadas si la humedad es muy baja
             if (m < 0.3) return 'grassland';
             return 'tundra';
         } else if (t < 0.65) {
             // Templado (banda intermedia obligatoria más amplia para evitar transiciones abruptas)
-            if (m > 0.6) return 'forest';
+            if (m > 0.65) return 'forest';
             // Prevenir desierto tan cerca de zonas frías
             if (m < 0.2) return 'grassland';
             return 'grassland';
         } else if (t < 0.8) {
             // Templado/Cálido
-            if (m > 0.6) return 'forest';
+            if (m > 0.65) return 'forest';
             if (m < 0.2) return 'desert';
             return 'grassland';
         } else {
@@ -808,7 +808,7 @@ export class ProceduralMapGenerator {
                 const y = this.rng.int(20, this.height - 20);
 
                 // Verificar que sea construible
-                if (this.terrainTypes[y][x] === 'water' || this.terrainTypes[y][x] === 'mountain') {
+                if (y < 0 || y >= this.height || x < 0 || x >= this.width || !this.terrainTypes[y] || this.terrainTypes[y][x] === 'water' || this.terrainTypes[y][x] === 'mountain') {
                     continue;
                 }
 
@@ -843,7 +843,7 @@ export class ProceduralMapGenerator {
                 // Si cumple la distancia mínima (o no hay otros jugadores), calcular score compuesto
                 if (minDistToOthersSq >= minDistanceSq || this.playerStarts.length === 0) {
                     // Combinar distancia y espacio abierto (ponderar para que ambos importen)
-                    const score = (minDistToOthersSq === Infinity ? 0 : Math.min(minDistToOthersSq, 10000)) * 10 + openSpaceScore * 50;
+                    const score = (minDistToOthersSq === Infinity ? 0 : Math.min(minDistToOthersSq, 2500)) * 10 + openSpaceScore * 100;
                     if (score > bestScore) {
                         bestScore = score;
                         bestPos = { x, y };
@@ -1087,7 +1087,7 @@ export class ProceduralMapGenerator {
         const amount = type === 'gold' ? 1500 : type === 'stone' ? 1200 : type === 'wood' ? 800 : 700;
 
         // Ensure better minimum spacing based on resource type to distribute them more evenly
-        const minSpacingSq = type === 'gold' || type === 'stone' ? 225 : 100; // 15^2 or 10^2
+        const minSpacingSq = type === 'gold' || type === 'stone' ? 144 : 81; // 15^2 or 10^2
 
         const numClusters = Math.ceil(count / clusterSize);
         let clustersPlaced = 0;
@@ -1152,13 +1152,14 @@ export class ProceduralMapGenerator {
         for (let res of this.resources) {
             const dx = cx - res.x;
             const dy = cy - res.y;
-            if ((dx * dx + dy * dy) < 144) return false; // 12 * 12 = 144 Distancia mínima entre clústers
+            if ((dx * dx + dy * dy) < 64) return false; // 12 * 12 = 144 Distancia mínima entre clústers
         }
 
         // Choke-point heuristic: Evaluate a 7x7 area around cx, cy
+        // Reducimos área de check a 5x5 y somos más permisivos con choke points para recursos
         let impassableCount = 0;
-        for (let dy = -3; dy <= 3; dy++) {
-            for (let dx = -3; dx <= 3; dx++) {
+        for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
                 const nx = cx + dx;
                 const ny = cy + dy;
                 if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
@@ -1171,7 +1172,7 @@ export class ProceduralMapGenerator {
                 }
             }
         }
-        if (impassableCount >= 20) return false; // Reject if too many impassable tiles around (choke point)
+        if (impassableCount >= 12) return false; // Reject if too many impassable tiles around (choke point)
 
         return true;
     }

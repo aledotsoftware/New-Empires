@@ -2115,6 +2115,7 @@ body.theme-mayans {
     outline: 3px solid var(--gold-bright);
     outline-offset: 3px;
     box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    transition: outline 0.1s ease, box-shadow 0.1s ease;
 }
 
 button:focus-visible,
@@ -2126,6 +2127,7 @@ button:focus-visible,
     outline-offset: 3px;
     box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), inset 0 0 8px rgba(255, 215, 0, 0.3);
     border-color: var(--gold-bright);
+    transition: outline 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
 }
 
 /* ==========================================

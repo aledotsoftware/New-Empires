@@ -572,8 +572,8 @@ export class ProceduralMapGenerator {
                         }
                     }
 
-                    // Si está casi completamente rodeado (6+ de 8 vecinos) de bloques, cerrarlo
-                    if (impassableNeighbors >= 6) {
+                    // Si está casi completamente rodeado (5+ de 8 vecinos) de bloques, cerrarlo
+                    if (impassableNeighbors >= 5) {
                         // Find the most common impassable neighbor
                         let dominantType = 'mountain';
                         let maxCount = 0;
@@ -621,21 +621,21 @@ export class ProceduralMapGenerator {
         m = Math.max(0, Math.min(1, m));
 
         // 1. Manejo de agua (siempre en elevaciones bajas)
-        if (elevation < 0.20 + (m * 0.05) && this.style !== 'arena') {
+        if (elevation < 0.20 && this.style !== 'arena') {
             if (t < 0.2) return 'water'; // Agua helada (o hielo si existiese)
             if (m > 0.8 && t > 0.6 && mainBiome === 'swamp') return 'swamp';
             return 'water';
         }
 
         // 2. Manejo de montañas (siempre en elevaciones altas)
-        if (elevation > 0.80 - (t * 0.05)) {
+        if (elevation > 0.80) {
             if (t < 0.35) return 'snow'; // Montañas nevadas
             if (t > 0.8 && mainBiome === 'volcanic') return 'volcanic';
             return 'mountain';
         }
 
         // 3. Manejo de colinas (transición hacia montañas)
-        if (elevation > 0.65 - (t * 0.05)) {
+        if (elevation > 0.65) {
             if (t < 0.2) return 'snow';
             if (t < 0.4) return 'tundra';
             return 'hill';
@@ -1086,6 +1086,9 @@ export class ProceduralMapGenerator {
         const clusterSize = type === 'wood' ? 6 : type === 'food' ? 4 : type === 'gold' ? 4 : 3;
         const amount = type === 'gold' ? 1500 : type === 'stone' ? 1200 : type === 'wood' ? 800 : 700;
 
+        // Ensure better minimum spacing based on resource type to distribute them more evenly
+        const minSpacingSq = type === 'gold' || type === 'stone' ? 225 : 100; // 15^2 or 10^2
+
         const numClusters = Math.ceil(count / clusterSize);
         let clustersPlaced = 0;
         const maxAttempts = numClusters * 20;
@@ -1104,6 +1107,20 @@ export class ProceduralMapGenerator {
                     if ((dx * dx + dy * dy) < 625) { // 25 * 25 = 625
                         tooClose = true;
                         break;
+                    }
+                }
+
+                // Check distance to other resources of the same type to ensure distribution
+                if (!tooClose) {
+                    for (let res of this.resources) {
+                        if (res.type === type) {
+                            const dx = cx - res.x;
+                            const dy = cy - res.y;
+                            if ((dx * dx + dy * dy) < minSpacingSq) {
+                                tooClose = true;
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -1135,7 +1152,7 @@ export class ProceduralMapGenerator {
         for (let res of this.resources) {
             const dx = cx - res.x;
             const dy = cy - res.y;
-            if ((dx * dx + dy * dy) < 64) return false; // 8 * 8 = 64 Distancia mínima entre clústers
+            if ((dx * dx + dy * dy) < 144) return false; // 12 * 12 = 144 Distancia mínima entre clústers
         }
 
         // Choke-point heuristic: Evaluate a 7x7 area around cx, cy

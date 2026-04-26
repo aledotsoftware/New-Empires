@@ -149,9 +149,9 @@ export class SaveManager {
         // Validate types for critical fields
         if (typeof state.civilizationId !== 'string') return false;
         // Sentinel: Prevent path traversal/injection in civilizationId
-        if (!/^[a-zA-Z0-9]+$/.test(state.civilizationId)) return false;
+        if (!/^[a-zA-Z0-9_]+$/.test(state.civilizationId)) return false;
         if (typeof state.enemyCivilizationId !== 'string') return false;
-        if (!/^[a-zA-Z0-9]+$/.test(state.enemyCivilizationId)) return false;
+        if (!/^[a-zA-Z0-9_]+$/.test(state.enemyCivilizationId)) return false;
 
         if (typeof state.resources !== 'object') return false;
         if (!Array.isArray(state.units)) return false;

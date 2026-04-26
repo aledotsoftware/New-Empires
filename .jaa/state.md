@@ -9,6 +9,10 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
 - [GENERAL] Estandarización de agentes para todos los repositorios.
 
 ## 📝 AGENT NOTES
+- **Lorekeeper (Civilizations & Content)**: Completó la auditoría y expansión de las civilizaciones, lore, semillas de campaña y datos faltantes.
+  - Se añadieron `primaryColor` y `secondaryColor` faltantes a 9 civilizaciones (Babilonia, Bizancio, Califato, Egipto, Grecia, Mongoles, Persia, España y Sumeria) garantizando coherencia en la UI y colores de equipo (`assets/civilization/*.json`).
+  - Se verificó programáticamente que todos los `icon` referenciados, los bloques de `lore` y las `campaignSeeds` existen en todas las civilizaciones, asegurando que están listas para futuras integraciones de contenido y campañas.
+
 - **Overseer (Economy & Macro)**: Completó mejoras en la economía, producción y flujo macro del RTS.
   - Se corrigió un exploit donde encolar unidades en múltiples edificios permitía evadir el límite máximo de población; ahora `canAddPopulation` evalúa la suma total de colas del jugador a nivel global (`Game.js`).
   - Se optimizó y redujo la fricción en el comportamiento de recolección de los aldeanos. Si un nodo de recursos se agota y no hay otros cerca, los aldeanos que tengan recursos en su inventario (`carryAmount > 0`) automáticamente irán a depositarlos en lugar de quedarse inactivos (`IDLE`) con las manos llenas (`Villager.js`).

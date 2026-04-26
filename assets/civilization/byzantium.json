@@ -104,5 +104,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Infantería protegida lista para la defensa."
         }
-    }
+    },
+    "primaryColor": "#4B006E",
+    "secondaryColor": "#FFD700"
 }

@@ -132,5 +132,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Feroz infantería de las ciudades-estado."
         }
-    }
+    },
+    "primaryColor": "#8B4513",
+    "secondaryColor": "#4682B4"
 }

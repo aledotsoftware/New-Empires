@@ -89,5 +89,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Infantería que patrulla las calles y murallas."
         }
-    }
+    },
+    "primaryColor": "#300055",
+    "secondaryColor": "#FFD700"
 }

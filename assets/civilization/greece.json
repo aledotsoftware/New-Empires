@@ -109,5 +109,7 @@
             "icon": "assets/icons/warrior.png",
             "description": "Infantería pesada ciudadana, base del ejército."
         }
-    }
+    },
+    "primaryColor": "#003f5c",
+    "secondaryColor": "#ffffff"
 }

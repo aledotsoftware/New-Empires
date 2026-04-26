@@ -727,6 +727,19 @@ export class Game {
                 if (eData.state) entity.state = eData.state;
                 if (eData.carryAmount) entity.carryAmount = eData.carryAmount;
                 if (eData.carryType) entity.carryType = eData.carryType;
+                if (eData.targetX !== undefined && eData.targetX !== null) entity.targetX = eData.targetX;
+                if (eData.targetY !== undefined && eData.targetY !== null) entity.targetY = eData.targetY;
+
+                if (entity.type === 'villager') {
+                    if (eData.resourceTargetX !== undefined && eData.resourceTargetX !== null) {
+                        entity._savedResourceTargetX = eData.resourceTargetX;
+                        entity._savedResourceTargetY = eData.resourceTargetY;
+                    }
+                    if (eData.buildTargetX !== undefined && eData.buildTargetX !== null) {
+                        entity._savedBuildTargetX = eData.buildTargetX;
+                        entity._savedBuildTargetY = eData.buildTargetY;
+                    }
+                }
             }
 
             // Building specifics
@@ -808,6 +821,23 @@ export class Game {
         if (state.buildings) {
             for (const b of state.buildings) {
                  restoreEntity(b, this.buildings, this.buildingGrid);
+            }
+        }
+
+        // 4.5 Reconnect Unit targets
+        for (let i = 0; i < this.units.length; i++) {
+            const u = this.units[i];
+            if (u.type === 'villager') {
+                if (u._savedResourceTargetX !== undefined) {
+                    u.currentResourceNode = this.resourceNodes.find(r => r.x === u._savedResourceTargetX && r.y === u._savedResourceTargetY) || null;
+                    delete u._savedResourceTargetX;
+                    delete u._savedResourceTargetY;
+                }
+                if (u._savedBuildTargetX !== undefined) {
+                    u.buildTarget = this.buildings.find(b => b.x === u._savedBuildTargetX && b.y === u._savedBuildTargetY) || null;
+                    delete u._savedBuildTargetX;
+                    delete u._savedBuildTargetY;
+                }
             }
         }
 
@@ -5996,7 +6026,7 @@ export class Game {
                 hotkey: 'Q/B',
                 action: () => this.openBuildMenu(),
                 enabled: true
-            });
+            };
         } else if (entity.trainableUnits && entity.trainableUnits.length > 0) {
             // BOLT OPTIMIZATION: Dynamic production buttons
             const unitsForCiv = (typeof dataLoader !== 'undefined' && dataLoader.isLoaded()) 
@@ -6056,7 +6086,7 @@ export class Game {
                     action: () => this.trainUnitDistributed(unitType),
                     enabled: enabled,
                     error: error
-                });
+                };
             }
         }
 
@@ -6099,7 +6129,7 @@ export class Game {
                     cost: tech.cost,
                     action: () => this.techManager.startResearch(tech.id),
                     enabled: canAfford
-                });
+                };
             }
         }
 
@@ -6113,7 +6143,7 @@ export class Game {
             action: () => this.deleteSelectedEntities(),
             enabled: true,
             isDestructive: true
-        });
+        };
 
         // OPTIMIZATION: Reuse DOM elements
         const gridButtons = Array.from(grid.children);

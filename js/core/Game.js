@@ -2640,7 +2640,7 @@ export class Game {
         }
 
         if (!this.populationManager.canAddPopulation(1, totalQueuedUnits)) {
-            this.showNotification('Límite de población alcanzado', 'error');
+            this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
             this.flashResource('population');
             return;
         }
@@ -5856,7 +5856,16 @@ export class Game {
         // --- LÓGICA DE GENERACIÓN DE BOTONES ---
         // (Movemos la lógica de botones aquí para calcular el hash antes de tocar el DOM)
 
-        const popFull = !this.populationManager.canAddPopulation();
+        let totalQueuedUnits = 0;
+        const bLen = this.buildings.length;
+        for (let i = 0; i < bLen; i++) {
+            const b = this.buildings[i];
+            if (b.team === 'player' && b.productionQueue) {
+                totalQueuedUnits += b.productionQueue.length;
+            }
+        }
+
+        const popFull = !this.populationManager.canAddPopulation(1, totalQueuedUnits);
 
         if (entity.type === 'villager') {
             buttons.push({
@@ -5887,11 +5896,14 @@ export class Game {
                 
                 const cost = CONFIG.UNIT_COSTS[unitType] || CONFIG.UNIT_COSTS.villager;
                 const canAfford = this.canAfford(cost);
-                const enabled = canAfford && !popFull;
+                // Also verify if the current building's production queue is full
+                const queueFull = entity.productionQueue ? entity.productionQueue.isFull() : false;
+                const enabled = canAfford && !popFull && !queueFull;
                 
                 let error = null;
                 if (!canAfford) error = 'Recursos insuficientes';
                 else if (popFull) error = 'Límite de población alcanzado';
+                else if (queueFull) error = 'Cola de producción llena (máx 5)';
 
                 const iconKey = (typeof civilizationManager !== 'undefined' && civilizationManager) 
                     ? civilizationManager.getUnitIcon(unitType, this.civilizationId) 

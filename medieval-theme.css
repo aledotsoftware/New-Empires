@@ -1191,6 +1191,12 @@ body.theme-mayans {
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
+/* Accesibilidad y Cero Ambigüedad */
+.action-btn:focus-visible {
+    outline: 3px solid var(--gold-bright) !important;
+    outline-offset: 2px;
+}
+
 /* Botones deshabilitados/vacíos */
 .action-btn.disabled {
     opacity: 0.6;
@@ -1206,14 +1212,14 @@ body.theme-mayans {
     background: linear-gradient(180deg, rgba(197, 48, 48, 0.5) 0%, rgba(197, 48, 48, 0.7) 100%);
     border-color: rgba(197, 48, 48, 0.8);
     filter: grayscale(0); /* Remove grayscale for error visibility */
-    box-shadow: inset 0 0 10px rgba(197, 48, 48, 0.4);
+    box-shadow: inset 0 0 15px rgba(197, 48, 48, 0.8), 0 0 8px rgba(197, 48, 48, 0.6);
 }
 
 .action-btn.disabled.pop-blocked {
     background: linear-gradient(180deg, rgba(221, 107, 32, 0.5) 0%, rgba(221, 107, 32, 0.7) 100%);
     border-color: rgba(221, 107, 32, 0.8);
     filter: grayscale(0); /* Remove grayscale for error visibility */
-    box-shadow: inset 0 0 10px rgba(221, 107, 32, 0.4);
+    box-shadow: inset 0 0 15px rgba(221, 107, 32, 0.8), 0 0 8px rgba(221, 107, 32, 0.6);
 }
 
 /* Patrón visual para slots vacíos */
@@ -2309,10 +2315,10 @@ button:focus-visible,
 /* Shake Animation for Disabled Actions */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
-    40% { transform: translateX(6px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
-    60% { transform: translateX(-4px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
-    80% { transform: translateX(4px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
+    20% { transform: translateX(-10px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
+    40% { transform: translateX(10px) scale(1.02); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.4); box-shadow: 0 0 12px rgba(229, 62, 62, 0.6); }
+    60% { transform: translateX(-6px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
+    80% { transform: translateX(6px); border-color: var(--blood-red); background: rgba(229, 62, 62, 0.2); }
 }
 
 .shake {

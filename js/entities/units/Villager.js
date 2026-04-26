@@ -223,8 +223,18 @@ export class Villager extends Unit {
                     }
 
                     if (this.buildTarget.hp >= this.buildTarget.constructionMaxHp) {
+                        const wasUnderConstruction = this.buildTarget.isUnderConstruction;
                         this.buildTarget.hp = this.buildTarget.constructionMaxHp;
                         this.buildTarget.isUnderConstruction = false;
+
+                        if (wasUnderConstruction && this.buildTarget.type === 'house' && this.buildTarget.team === 'player') {
+                            const activeGame = game || (typeof window !== 'undefined' && window.game);
+                            if (activeGame && activeGame.populationManager) {
+                                activeGame.populationManager.increaseMaxPopulation(CONFIG.HOUSE_POPULATION_INCREASE);
+                                activeGame._forceUIUpdate = true;
+                            }
+                        }
+
                         this.state = 'IDLE';
                         this.buildTarget = null;
 

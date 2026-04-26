@@ -44,7 +44,7 @@
 | **A / ←** | Mover cámara izquierda |
 | **S / ↓** | Mover cámara abajo |
 | **D / →** | Mover cámara derecha |
-| **Espacio** | Centrar en Centro Urbano |
+| **Espacio / H** | Centrar en Centro Urbano |
 
 ### Selección Rápida
 
@@ -52,6 +52,7 @@
 |-------|--------|
 | **Tab** | Siguiente aldeano inactivo |
 | **Shift + Tab** | Anterior aldeano inactivo |
+| **,** | Seleccionar todo el ejército |
 
 ### Grupos de Control
 
@@ -183,8 +184,9 @@ En el menú de configuración puedes ajustar:
 ╠══════════════════════════════════════════════════════════╣
 ║  TECLADO                                                  ║
 ║  ├─ WASD/Flechas → Mover cámara                          ║
-║  ├─ Espacio      → Ir a Centro Urbano                    ║
+║  ├─ Espacio/H    → Ir a Centro Urbano                    ║
 ║  ├─ Tab          → Siguiente aldeano inactivo            ║
+║  ├─ ,            → Seleccionar todo el ejército          ║
 ║  ├─ B            → Menú de construcción                  ║
 ║  ├─ ESC          → Cancelar/Cerrar                       ║
 ║  └─ Q-B          → Hotkeys del panel                     ║

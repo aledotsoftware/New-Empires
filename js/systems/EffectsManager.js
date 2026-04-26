@@ -578,17 +578,17 @@ export class ParticleSystem {
                 // Flaming arrow effect: Orange/Red core, yellowish sparks
                 const r = Math.random();
                 if (r > 0.6) {
-                    trailColor = `rgba(255, ${Math.random() * 100 + 100}, 20, 0.9)`; // Fuego intenso
+                    trailColor = `rgba(255, ${Math.random() * 80 + 60}, 10, 0.9)`; // Brighter Red/Orange
                     shape = 'circle';
-                    size = Math.random() * 5 + 3;
+                    size = Math.random() * 6 + 4;
                     gravity = -15; // El fuego sube ligeramente
                 } else if (r > 0.3) {
-                    trailColor = `rgba(255, 200, 50, 0.8)`; // Chispas amarillas
+                    trailColor = `rgba(255, 180, 20, 0.8)`; // Brighter yellow/orange sparks
                     shape = 'square';
-                    size = Math.random() * 3 + 2;
+                    size = Math.random() * 4 + 2;
                     gravity = -5;
                 } else {
-                    trailColor = `rgba(100, 100, 100, 0.6)`; // Humo sutil detrás de la flecha
+                    trailColor = `rgba(150, 100, 100, 0.6)`; // Dark red/grey smoke
                     shape = 'circle';
                     size = Math.random() * 6 + 4;
                     gravity = -5;
@@ -781,9 +781,9 @@ export class ParticleSystem {
             vx: (Math.random() - 0.5) * 20, // More horizontal drift
             vy: -50, // Move up faster
             life: 1.0, // Shorter life
-            size: 16, // Slightly larger
+            size: 20, // Slightly larger
             text: `-${Math.round(amount)}`,
-            color: '#ff4444', // Red damage color
+            color: '#ff6b6b', // Red damage color
             gravity: 10, // Slight gravity to arc
             friction: 0.95,
             fadeRate: 2.0

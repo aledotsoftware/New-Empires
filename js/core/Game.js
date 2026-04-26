@@ -1878,14 +1878,27 @@ export class Game {
                 const actionsGrid = document.getElementById('commandPanel');
                 if (actionsGrid) {
                     const buttons = actionsGrid.querySelectorAll('.action-btn');
-                    if (buttons[btnIndex] && !buttons[btnIndex].classList.contains('disabled')) {
-                        // Palette: Visual feedback for hotkey
-                        buttons[btnIndex].classList.add('active-key');
-                        setTimeout(() => buttons[btnIndex].classList.remove('active-key'), 150);
+                    if (buttons[btnIndex]) {
+                        if (!buttons[btnIndex].classList.contains('disabled')) {
+                            // Palette: Visual feedback for hotkey
+                            buttons[btnIndex].classList.add('active-key');
+                            setTimeout(() => buttons[btnIndex].classList.remove('active-key'), 150);
 
-                        buttons[btnIndex].click();
-                        e.preventDefault();
-                        return; // Stop processing other keys
+                            buttons[btnIndex].click();
+                            e.preventDefault();
+                            return; // Stop processing other keys
+                        } else if (buttons[btnIndex].onclick) {
+                            // Si está deshabilitado pero tiene evento click (mostrará error via onclick)
+                            buttons[btnIndex].click();
+                            e.preventDefault();
+                            return;
+                        } else if (buttons[btnIndex].hasAttribute('aria-label') && !buttons[btnIndex].getAttribute('aria-label').startsWith('Ranura vac')) {
+                            // Deshabilitado genérico (shake manual)
+                            buttons[btnIndex].classList.remove('shake');
+                            void buttons[btnIndex].offsetWidth;
+                            buttons[btnIndex].classList.add('shake');
+                            if (typeof soundManager !== 'undefined' && soundManager) soundManager.playError();
+                        }
                     }
                 }
             }

@@ -2089,6 +2089,10 @@ export class Game {
 
         // H o Space - Center on town center (ir al centro urbano)
         if (e.key === 'h' || e.key === 'H' || e.key === ' ') {
+            // Permitir que el espacio active botones de UI si tienen el foco
+            if (e.key === ' ' && document.activeElement && ['BUTTON', 'INPUT', 'A', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
             e.preventDefault();
             let tc = null;
             const bLen = this.buildings.length;
@@ -5205,7 +5209,7 @@ export class Game {
                     this.uiElements.idleVillagerBtn.style.display = 'flex';
 
                     if (!this._hasShownIdleVillagerTip) {
-                        this.showNotification('Tienes aldeanos inactivos. Presiona TAB para seleccionarlos', 'info');
+                        this.showNotification('💡 TIP: Tienes aldeanos inactivos. Presiona TAB para seleccionarlos', 'info');
                         this._hasShownIdleVillagerTip = true;
                     }
                 }
@@ -5360,13 +5364,13 @@ export class Game {
         }
 
         if (hasVillager && !this._hasShownBuildTip) {
-            this.showNotification('Aldeano. Presiona Q o B para construir', 'info');
+            this.showNotification('💡 TIP: Presiona Q o B para construir', 'info');
             this._hasShownBuildTip = true;
         } else if (combatUnitCount > 1 && !this._hasShownFormationTip) {
-            this.showNotification('Múltiples unidades. Presiona F para formación', 'info');
+            this.showNotification('💡 TIP: Múltiples unidades. Presiona F para formación', 'info');
             this._hasShownFormationTip = true;
         } else if (hasProductionBuilding && !this._hasShownProductionTip) {
-            this.showNotification('Usa atajos (Q, W...) para producir rápidamente', 'info');
+            this.showNotification('💡 TIP: Usa atajos (Q, W, E...) para producir rápidamente', 'info');
             this._hasShownProductionTip = true;
         }
 

@@ -370,9 +370,12 @@ export class FormationManager {
      * @returns {string} Nueva formación
      */
     cycleFormation() {
-        const formationNames = Object.keys(FORMATIONS);
-        const currentIndex = formationNames.indexOf(this.currentFormation);
-        this.currentFormation = formationNames[(currentIndex + 1) % formationNames.length];
+        // Reducir fricción: Solo ciclar entre las formaciones más útiles/comunes
+        const cycleOrder = ['line', 'box', 'spread', 'wedge', 'staggered', 'circle'];
+        let currentIndex = cycleOrder.indexOf(this.currentFormation);
+
+
+        this.currentFormation = cycleOrder[(currentIndex + 1) % cycleOrder.length];
         return this.currentFormation;
     }
 

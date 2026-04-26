@@ -25,7 +25,12 @@ export class Archer extends Unit {
 
         // Penalización por distancia: Los arqueros no deben avanzar ciegamente descuidando su posición.
         if (this.attackTarget === enemy) {
-            score -= distSq / 50;
+            // Drop Aggro: Los arqueros no deben romper formaciones defensivas persiguiendo demasiado lejos
+            if (distSq > 160 * 160) {
+                score -= distSq / 2; // Penalización muy fuerte para que suelten el objetivo
+            } else {
+                score -= distSq / 50;
+            }
         } else {
             score -= distSq / 15; // Increased penalty for unrelated targets to keep them firing at what is close
         }

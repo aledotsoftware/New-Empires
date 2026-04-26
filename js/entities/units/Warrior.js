@@ -24,7 +24,12 @@ export class Warrior extends Unit {
         // pero reducimos la penalización si el enemigo es nuestro objetivo actual para darle "stickiness"
         // y evitar que cambie de objetivo constantemente mientras persigue.
         if (this.attackTarget === enemy) {
-            score -= distSq / 50; // Menor penalización si ya lo estamos persiguiendo
+            // Drop Aggro: Si el objetivo huye demasiado lejos, aplicar una fuerte penalización
+            if (distSq > 150 * 150) {
+                score -= distSq / 5;
+            } else {
+                score -= distSq / 50; // Menor penalización si ya lo estamos persiguiendo
+            }
         } else {
             score -= distSq / 5; // Penalización mayor para nuevos objetivos lejanos
         }
@@ -47,7 +52,7 @@ export class Warrior extends Unit {
         this.hp = 100;
         this.attackDamage = 10;
         this.attackSpeed = 1.2;
-        this.attackRange = 60;
+        this.attackRange = 70; // Aumentado ligeramente (+10) para ensanchar el frente de combate y reducir atascos
         this.canAttack = true;
     }
 }

@@ -47,7 +47,13 @@ export const EMOJI_FALLBACKS = {
     workshop: '🔨',
     villager: '👷',
     warrior: '🗡️',
-    archer: '🏹'
+    archer: '🏹',
+    skull: '💀',
+    tech_economy: '⚙️',
+    tech_military: '⚔️',
+    tech_defense: '🛡️',
+    science: '🔬',
+    population: '👥'
 };
 
 /**

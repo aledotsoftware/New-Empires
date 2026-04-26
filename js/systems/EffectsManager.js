@@ -686,7 +686,7 @@ export class ParticleSystem {
     }
 
     // Efecto de selección
-    createSelectionPing(x, y) {
+    createSelectionPing(x, y, color = '#48bb78') {
         for (let i = 0; i < 8; i++) {
             const angle = (Math.PI * 2 / 8) * i;
             // BOLT OPTIMIZATION: Use Object Pool
@@ -695,7 +695,7 @@ export class ParticleSystem {
                 vy: Math.sin(angle) * 80,
                 life: 0.4,
                 size: 3,
-                color: '#48bb78',
+                color: color,
                 gravity: 0,
                 friction: 0.85,
                 shape: 'circle',
@@ -703,7 +703,7 @@ export class ParticleSystem {
             }));
         }
 
-        const r = Ripple.get(x, y, '#48bb78');
+        const r = Ripple.get(x, y, color);
         r.maxSize = 25;
         this.particles.push(r);
     }

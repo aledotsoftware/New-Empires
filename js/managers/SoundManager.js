@@ -419,6 +419,49 @@ export class SoundManager {
         oscillator.stop(now + 0.3);
     }
 
+    playBuildingDestroyed() {
+        if (!this.enabled) return;
+        // Deep rumble for building collapse
+        if (this.audioContext) {
+            const now = this.audioContext.currentTime;
+
+            // Low freq oscillator for rumble
+            const osc1 = this.audioContext.createOscillator();
+            const gain1 = this.audioContext.createGain();
+            osc1.type = 'square';
+            osc1.frequency.setValueAtTime(100, now);
+            osc1.frequency.exponentialRampToValueAtTime(20, now + 0.6);
+
+            gain1.gain.setValueAtTime(this.volume * 0.4, now);
+            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+
+            osc1.connect(gain1);
+            gain1.connect(this.audioContext.destination);
+
+            // Noise/crunch
+            const osc2 = this.audioContext.createOscillator();
+            const gain2 = this.audioContext.createGain();
+            osc2.type = 'sawtooth';
+            osc2.frequency.setValueAtTime(150, now);
+            osc2.frequency.exponentialRampToValueAtTime(10, now + 0.4);
+
+            gain2.gain.setValueAtTime(this.volume * 0.2, now);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+            osc2.connect(gain2);
+            gain2.connect(this.audioContext.destination);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.6);
+            osc2.stop(now + 0.4);
+        } else {
+            // Fallback to Tone
+            this.playTone(80, 0.4, 'square', 0.3);
+            setTimeout(() => this.playTone(60, 0.3, 'sawtooth', 0.2), 100);
+        }
+    }
+
     playGather(resourceType) {
         if (!this.enabled) return;
 

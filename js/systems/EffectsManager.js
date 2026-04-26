@@ -425,6 +425,25 @@ export class ParticleSystem {
                 shape: 'square'
             }));
         }
+
+        // Fuego residual (Partículas brillantes subiendo lentamente)
+        for (let i = 0; i < 15; i++) {
+            this.particles.push(Particle.get(
+                x + (Math.random() - 0.5) * size * 0.8,
+                y + (Math.random() - 0.5) * size * 0.8,
+                {
+                    vx: (Math.random() - 0.5) * 40,
+                    vy: -Math.random() * 80 - 30,
+                    life: Math.random() * 1.5 + 0.8,
+                    size: Math.random() * 8 + 4,
+                    color: Math.random() > 0.5 ? '#e53e3e' : '#dd6b20', // Rojo o Naranja
+                    gravity: -30, // Flotan hacia arriba fuertemente (aire caliente)
+                    friction: 0.96,
+                    fadeRate: 1.2,
+                    shape: 'circle'
+                }
+            ));
+        }
     }
 
     // Efectos base semánticos añadidos para cumplimiento del AI Reviewer (Bard)
@@ -777,16 +796,20 @@ export class ParticleSystem {
 
     createDamageText(x, y, amount) {
         if (amount <= 0) return;
+
+        // Critical hits or big damage can be larger
+        const isBigHit = amount > 20;
+
         this.particles.push(Particle.get(x, y, {
-            vx: (Math.random() - 0.5) * 20, // More horizontal drift
-            vy: -50, // Move up faster
-            life: 1.0, // Shorter life
-            size: 20, // Slightly larger
+            vx: (Math.random() - 0.5) * 30, // More horizontal spread
+            vy: -60 - Math.random() * 20, // Move up faster and varied
+            life: isBigHit ? 1.5 : 1.2, // Slightly longer life for readability
+            size: isBigHit ? 24 : 18, // Dynamic size based on damage
             text: `-${Math.round(amount)}`,
-            color: '#ff6b6b', // Red damage color
-            gravity: 10, // Slight gravity to arc
-            friction: 0.95,
-            fadeRate: 2.0
+            color: isBigHit ? '#e53e3e' : '#fc8181', // Deeper red for big hits
+            gravity: 15, // A bit more gravity for a nice arc
+            friction: 0.92,
+            fadeRate: 1.5 // Fade out a bit slower
         }));
     }
 

@@ -1744,19 +1744,24 @@ export class Game {
             }
         }
 
-        // Centrar cámara en el grupo
-        if (aliveEntities.length > 0) {
-            let centerX = 0, centerY = 0;
-            for (const entity of aliveEntities) {
-                centerX += entity.x;
-                centerY += entity.y;
-            }
-            centerX /= aliveEntities.length;
-            centerY /= aliveEntities.length;
+        // Centrar cámara en el grupo (solo en doble toque rápido)
+        const now = Date.now();
+        if (this._lastGroupSelectTime && this._lastGroupSelectNum === groupNum && (now - this._lastGroupSelectTime) < 500) {
+            if (aliveEntities.length > 0) {
+                let centerX = 0, centerY = 0;
+                for (const entity of aliveEntities) {
+                    centerX += entity.x;
+                    centerY += entity.y;
+                }
+                centerX /= aliveEntities.length;
+                centerY /= aliveEntities.length;
 
-            this.camera.x = centerX - this.viewWidth / 2;
-            this.camera.y = centerY - this.viewHeight / 2;
+                this.focusCamera(centerX, centerY);
+            }
         }
+
+        this._lastGroupSelectTime = now;
+        this._lastGroupSelectNum = groupNum;
 
         this.updateSelectionInfo();
     }
@@ -1954,7 +1959,11 @@ export class Game {
         // B - Build menu
         // B is now handled by the hotkey map or specifically below if no hotkey action applies
         if ((e.key === 'b' || e.key === 'B') && this.selectedEntities.some(e => e.type === 'villager')) {
-            this.openBuildMenu();
+            if (isBuildMenuOpen) {
+                this.closeBuildMenu();
+            } else {
+                this.openBuildMenu();
+            }
         }
 
         // ESC - Cancel y liberar pointer lock
@@ -2029,8 +2038,14 @@ export class Game {
 
             const key = e.key.toLowerCase();
             if (buildingMap[key]) {
-                this.buildMode = buildingMap[key];
-                this.closeBuildMenu();
+                // Dispatch click on the UI element to reuse standard logic, feedback and validations
+                const optionBtn = buildMenu.querySelector(`.build-option[data-building="${buildingMap[key]}"]`);
+                if (optionBtn) {
+                    optionBtn.click();
+                } else {
+                    this.buildMode = buildingMap[key];
+                    this.closeBuildMenu();
+                }
             }
         }
 
@@ -2049,11 +2064,20 @@ export class Game {
                 const formation = formationManager.cycleFormation();
                 this.showNotification(`Formación: ${formation}`, 'info');
 
-                // Calcular centro del grupo
+                // Calcular centro del grupo basándonos en su destino si se están moviendo,
+                // o en su posición actual si están quietos.
                 let centerX = 0, centerY = 0;
+                let hasMovingUnits = false;
+
                 for (const unit of selectedUnits) {
-                    centerX += unit.x;
-                    centerY += unit.y;
+                    if (unit.targetX !== null && unit.targetY !== null) {
+                        centerX += unit.targetX;
+                        centerY += unit.targetY;
+                        hasMovingUnits = true;
+                    } else {
+                        centerX += unit.x;
+                        centerY += unit.y;
+                    }
                 }
                 centerX /= selectedUnits.length;
                 centerY /= selectedUnits.length;
@@ -5008,6 +5032,11 @@ export class Game {
                     this.uiElements.idleVillagerBtn.classList.remove('hidden');
                     // Ensure proper flex display (overriding CSS class hidden)
                     this.uiElements.idleVillagerBtn.style.display = 'flex';
+
+                    if (!this._hasShownIdleVillagerTip) {
+                        this.showNotification('Tienes aldeanos inactivos. Presiona TAB para seleccionarlos', 'info');
+                        this._hasShownIdleVillagerTip = true;
+                    }
                 }
                 if (this.uiElements.idleVillagerCount) {
                     this.uiElements.idleVillagerCount.textContent = idleCount;
@@ -5154,12 +5183,20 @@ export class Game {
             if (e.isUnit && e.type !== 'villager') combatUnitCount++;
         }
 
+        let hasProductionBuilding = false;
+        if (this.selectedEntities.length === 1 && this.selectedEntities[0].isBuilding && this.selectedEntities[0].trainableUnits && this.selectedEntities[0].trainableUnits.length > 0) {
+            hasProductionBuilding = true;
+        }
+
         if (hasVillager && !this._hasShownBuildTip) {
             this.showNotification('Aldeano. Presiona Q o B para construir', 'info');
             this._hasShownBuildTip = true;
         } else if (combatUnitCount > 1 && !this._hasShownFormationTip) {
             this.showNotification('Múltiples unidades. Presiona F para formación', 'info');
             this._hasShownFormationTip = true;
+        } else if (hasProductionBuilding && !this._hasShownProductionTip) {
+            this.showNotification('Usa atajos (Q, W...) para producir rápidamente', 'info');
+            this._hasShownProductionTip = true;
         }
 
         // Limpiar contenido previo

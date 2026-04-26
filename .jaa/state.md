@@ -53,3 +53,6 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
   - La posición del texto de daño flotante fue corregida para que flote 10 pixeles más arriba dependiendo del tamaño de la entidad afectada, incrementando legibilidad en combates cerrados (`Entity.js`).
   - Las partículas de flechas incendiarias usan un abanico de colores y luminosidades de fuego más alto para que el proyectil resalte más.
   - Los tonos sintetizados en `SoundManager.js` fueron revisados para un `playError` más contundente usando osciladores cuadrados en secuencia en lugar de tonos dentados.
+- Extendido y corregido sistema de modificadores globales (Global Modifiers) en `TechManager.js` para que soporten efectos listados en archivos JSON de tecnologías (por ejemplo, `buildingHp`, `unitMaxHp`, `siegeDamage`, etc.).
+- Actualizado el método de _spawnUnit de `Game.js` para aplicar estos modificadores a la nueva unidad construida.
+- El objeto `modifiers` está serializado en `SaveManager.js`, por lo que los valores se conservarán correctamente.

@@ -2502,6 +2502,12 @@ export class Game {
             // Aplicar bonificaciones de civilización
             civilizationManager.applyBuildingBonuses(building, this.civilizationId);
 
+            // Apply global modifiers for buildings
+            if (this.modifiers && this.modifiers.buildingHp) {
+                building.maxHp = Math.floor(building.maxHp * this.modifiers.buildingHp);
+                building.constructionMaxHp = building.maxHp;
+            }
+
             this._cacheEntityTerrain(building); // OPTIMIZATION
             this.buildings[this.buildings.length] = building;
             this.buildingGrid.add(building);
@@ -2791,6 +2797,55 @@ export class Game {
             unit.baseType = baseType;
 
             civilizationManager.applyUnitBonuses(unit, this.civilizationId);
+
+            // Apply global modifiers
+            if (this.modifiers) {
+                if (this.modifiers.unitMaxHp) {
+                    unit.maxHp = Math.floor(unit.maxHp * this.modifiers.unitMaxHp);
+                    unit.hp = unit.maxHp;
+                }
+                if (this.modifiers.unitSpeed) {
+                    unit.speed = Math.floor(unit.speed * this.modifiers.unitSpeed);
+                }
+                if (this.modifiers.lineOfSight) {
+                    unit.visionRadius = Math.floor(unit.visionRadius * this.modifiers.lineOfSight);
+                }
+
+                if (baseType === 'villager' && this.modifiers.villagerMaxHp) {
+                    unit.maxHp += this.modifiers.villagerMaxHp;
+                    unit.hp = unit.maxHp;
+                }
+                if (baseType === 'villager' && this.modifiers.goldGather) {
+                    unit.gatherGoldMultiplier = (unit.gatherGoldMultiplier || 1) * this.modifiers.goldGather;
+                }
+                if (baseType === 'warrior' || baseType === 'spearman') {
+                    if (this.modifiers.warriorHp) {
+                        unit.maxHp = Math.floor(unit.maxHp * this.modifiers.warriorHp);
+                        unit.hp = unit.maxHp;
+                    }
+                    if (this.modifiers.warriorDamage) {
+                        unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.warriorDamage);
+                    }
+                    if (this.modifiers.infantryArmor) {
+                        unit.defense = (unit.defense || 1) * this.modifiers.infantryArmor;
+                    }
+                    if (this.modifiers.infantryDamage) {
+                        unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.infantryDamage);
+                    }
+                }
+                if (baseType === 'cavalry' || baseType === 'scout') {
+                    if (this.modifiers.cavalryDamage) {
+                        unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.cavalryDamage);
+                    }
+                }
+
+                if (unit.attackDamage && this.modifiers.siegeDamage && (unit.type === 'catapult' || unit.type === 'batteringRam' || unit.type === 'trebuchet')) {
+                     unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.siegeDamage);
+                }
+                if (unit.attackDamage && this.modifiers.shipDamage && (unit.type === 'galley' || unit.type === 'warship')) {
+                     unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.shipDamage);
+                }
+            }
 
             this._cacheEntityTerrain(unit); // OPTIMIZATION
             this.units[this.units.length] = unit;

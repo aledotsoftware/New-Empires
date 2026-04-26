@@ -436,6 +436,10 @@ export class Unit extends Entity {
         if (distSq <= attackRangeSq && this.attackCooldown <= 0) {
             let damage = this.attackDamage;
 
+            if (target.defense && target.defense > 1) {
+                damage /= target.defense;
+            }
+
             // Combat Triangle / Bonus System
             // Usamos baseType de la unidad (ej. kamayuk es spearman) si type original no está mapeado
             const myType = COMBAT_BONUSES[this.type] ? this.type : (this.baseType || this.type);

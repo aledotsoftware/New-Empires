@@ -53,7 +53,8 @@ export const TERRAIN_TYPES = {
         name: 'Bosque',
         color: '#2e7d32',
         buildable: false,  // No se puede construir
-        movementSpeed: 0.7,  // -30% velocidad
+        movementSpeed: 0,  // Impassable para simular árboles
+        impassable: true,
         combatBonus: {
             archer: 1.1  // +10% defensa para arqueros
         },

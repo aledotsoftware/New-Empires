@@ -689,7 +689,7 @@ export class Game {
                     _gridCol: (r.x / TILE_SIZE) | 0,
                     _gridRow: (r.y / TILE_SIZE) | 0
                 };
-                this.resourceNodes.push(node);
+                this.resourceNodes[this.resourceNodes.length] = node;
                 if (this.resourceGrid && node.amount > 0) {
                     this.resourceGrid.add(node);
                 }
@@ -1052,15 +1052,15 @@ export class Game {
             const y = startY + rng.next() * 200 - 100;
             const enemy = new Warrior(x, y, 'enemy'); if (typeof civilizationManager !== 'undefined') civilizationManager.applyUnitBonuses(enemy, this.enemyCivilizationId || 'vikings');
             this._cacheEntityTerrain(enemy); // OPTIMIZATION
-            this.enemies.push(enemy);
+            this.enemies[this.enemies.length] = enemy;
         }
 
         // Enemy town center
         const enemyTC = new TownCenter(startX, startY, 'enemy'); if (typeof civilizationManager !== 'undefined') civilizationManager.applyBuildingBonuses(enemyTC, this.enemyCivilizationId || 'vikings');
         this._cacheEntityTerrain(enemyTC); // OPTIMIZATION
-        this.buildings.push(enemyTC);
+        this.buildings[this.buildings.length] = enemyTC;
         this.buildingGrid.add(enemyTC);
-        this.dropOffPoints.push(enemyTC);
+        this.dropOffPoints[this.dropOffPoints.length] = enemyTC;
         this.townCenterCounts.enemy++;
     }
 
@@ -1342,7 +1342,7 @@ export class Game {
             if (closest) {
                 if (addMode) {
                     if (!this.selectedEntities.includes(closest)) {
-                        this.selectedEntities.push(closest);
+                        this.selectedEntities[this.selectedEntities.length] = closest;
                     }
                 } else {
                     this.selectedEntities[0] = closest;
@@ -2006,7 +2006,17 @@ export class Game {
 
         // B - Build menu
         // B is now handled by the hotkey map or specifically below if no hotkey action applies
-        if ((e.key === 'b' || e.key === 'B') && this.selectedEntities.some(e => e.type === 'villager')) {
+        let hasVillager = false;
+        if (e.key === 'b' || e.key === 'B') {
+            const selLen = this.selectedEntities.length;
+            for (let i = 0; i < selLen; i++) {
+                if (this.selectedEntities[i].type === 'villager') {
+                    hasVillager = true;
+                    break;
+                }
+            }
+        }
+        if ((e.key === 'b' || e.key === 'B') && hasVillager) {
             if (isBuildMenuOpen) {
                 this.closeBuildMenu();
             } else {
@@ -5978,7 +5988,7 @@ export class Game {
         const popFull = !this.populationManager.canAddPopulation(1, totalQueuedUnits);
 
         if (entity.type === 'villager') {
-            buttons.push({
+            buttons[buttons.length] = {
                 iconKey: 'workshop',
                 iconFallback: '️',
                 label: 'Erigir Estructura',
@@ -6029,14 +6039,14 @@ export class Game {
                 if (unitData.modifiers && Object.keys(unitData.modifiers).length > 0) {
                     const mods = [];
                     for (const [modKey, modVal] of Object.entries(unitData.modifiers)) {
-                        mods.push(`${modKey}: ${modVal > 0 ? '+' : ''}${modVal}`);
+                        mods[mods.length] = `${modKey}: ${modVal > 0 ? '+' : ''}${modVal}`;
                     }
                     if (mods.length > 0) {
                          desc += ` [${mods.join(', ')}]`;
                     }
                 }
 
-                buttons.push({
+                buttons[buttons.length] = {
                     iconKey: iconKey,
                     iconFallback: '',
                     label: `Convocar ${name}`,
@@ -6080,7 +6090,7 @@ export class Game {
                 const currentLen = buttons.length;
                 const nextHotkey = currentLen < hotkeys.length ? hotkeys[currentLen] : '';
 
-                buttons.push({
+                buttons[buttons.length] = {
                     iconKey: techIconKey,
                     iconFallback: tech.icon || techFallback,
                     label: tech.name,
@@ -6094,7 +6104,7 @@ export class Game {
         }
 
         // Palette: Add Destroy Button for all player entities
-        buttons.push({
+        buttons[buttons.length] = {
             iconKey: 'skull', // Will fallback
             iconFallback: '',
             label: 'Destruir',
@@ -6632,7 +6642,7 @@ export class Game {
             if (this.resources[resource] < amount) {
                 this.flashResource(resource);
                 const name = this.resourceTranslations[resource] || resource;
-                missing.push(`${name} (${Math.ceil(amount - this.resources[resource])})`);
+                missing[missing.length] = `${name} (${Math.ceil(amount - this.resources[resource])})`;
             }
         }
         if (missing.length > 0 && typeof soundManager !== 'undefined' && soundManager.playAlarm) {

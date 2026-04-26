@@ -1346,7 +1346,8 @@ export class Game {
                 }
 
                 if (this.particleSystem && typeof this.particleSystem.createSelectionPing === 'function') {
-                    this.particleSystem.createSelectionPing(closest.x, closest.y);
+                    const pingColor = closest.team === 'player' ? '#48bb78' : (closest.team === 'neutral' ? '#4299e1' : '#c53030');
+                    this.particleSystem.createSelectionPing(closest.x, closest.y, pingColor);
                 }
             }
         } else {
@@ -6047,7 +6048,9 @@ export class Game {
                         btn.classList.add('disabled');
 
                         let isPopError = buttonData.error && (buttonData.error.includes('población') || buttonData.error.includes('Población'));
-                        if (isPopError) {
+                        // Evaluar popFull basado en la variable de arriba
+                        const popFull = !this.populationManager.canAddPopulation(1, totalQueuedUnits);
+                        if (isPopError || popFull) {
                             btn.classList.add('pop-blocked');
                         } else {
                             btn.classList.add('res-blocked');
@@ -6506,6 +6509,13 @@ export class Game {
                 this.flashResource(resource);
                 const name = this.resourceTranslations[resource] || resource;
                 missing.push(`${name} (${Math.ceil(amount - this.resources[resource])})`);
+            }
+        }
+        if (missing.length > 0 && typeof soundManager !== 'undefined' && soundManager.playAlarm) {
+            // Trigger auditory feedback periodically
+            if (!this._lastAlarmTime || Date.now() - this._lastAlarmTime > 2000) {
+                soundManager.playAlarm();
+                this._lastAlarmTime = Date.now();
             }
         }
         return missing.length > 0 ? `Falta: ${missing.join(', ')}` : 'Recursos insuficientes';

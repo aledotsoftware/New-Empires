@@ -150,12 +150,13 @@ static _numericSort(a, b) {
 
         const spans = [];
         const gridRadiusSq = gridRadius * gridRadius;
+        let spansCount = 0;
 
         for (let dy = -gridRadius; dy <= gridRadius; dy++) {
             const term = gridRadiusSq - dy * dy;
             if (term >= 0) {
                 const span = Math.floor(Math.sqrt(term));
-                spans.push({ dy, span });
+                spans[spansCount++] = { dy, span };
             }
         }
 

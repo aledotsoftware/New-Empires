@@ -246,7 +246,7 @@ export const GAMEPLAY = {
 
 Reemplazar llamadas a `Array.prototype.slice`, `Array.prototype.filter`, `Array.prototype.some` en los hot paths y pre-alojar arrays en vez de usar `Array.prototype.push`.
 
-**Estado**: [ ] Completado
+**Estado**: [x] Completado
 
 ---
 

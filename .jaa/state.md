@@ -56,3 +56,5 @@ Los agentes pueden leer este estado para entender el contexto de otros proyectos
 - Extendido y corregido sistema de modificadores globales (Global Modifiers) en `TechManager.js` para que soporten efectos listados en archivos JSON de tecnologías (por ejemplo, `buildingHp`, `unitMaxHp`, `siegeDamage`, etc.).
 - Actualizado el método de _spawnUnit de `Game.js` para aplicar estos modificadores a la nueva unidad construida.
 - El objeto `modifiers` está serializado en `SaveManager.js`, por lo que los valores se conservarán correctamente.
+## 📝 AGENT NOTES
+- **Bolt (Performance)**: Validated Phase 4 optimization implementations. Verified all code logic via verification scripts, achieving substantial performance boosts through array methods to loops migration, avoiding runtime garbage collection overhead.

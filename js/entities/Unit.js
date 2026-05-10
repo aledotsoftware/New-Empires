@@ -48,47 +48,58 @@ export class Unit extends Entity {
     update(deltaTime, game) {
         this.aiTimer -= deltaTime;
 
-        if (this.canAttack && this.aiTimer <= 0) {
-            // Continously scan for better targets unless the player explicitly right-clicked an enemy
-            if (!this.explicitTarget) {
-                this.scanForEnemies(game);
-            }
-            this.aiTimer = this.aiCheckInterval;
-        }
+        if (this.targetX !== null && this.explicitTarget) {
+            // If explicitTarget is true and we have a target location, we MUST prioritize moving there (e.g. retreating or marching).
+            // This prevents units from getting stuck attacking when explicitly ordered to move.
+            this.attackTarget = null; // Clear aggro
 
-        if (this.attackTarget) {
-            if (this.attackTarget.isDead) {
-                this.attackTarget = null;
-            } else {
-                const dx = this.x - this.attackTarget.x;
-                const dy = this.y - this.attackTarget.y;
-                const distSq = dx * dx + dy * dy;
-
-                // Stop silly chases: Drop target if it runs too far, unless explicitly ordered to attack it
-                if (!this.explicitTarget && distSq > 250 * 250) {
-                    this.attackTarget = null;
-                } else {
-                    // BOLT OPTIMIZATION: Stop moving if already in attack range
-                    // Reduces expensive collision checks and improves ranged unit behavior (kiting/spacing)
-                    // BOLT OPTIMIZATION: Use cached squared range
-                    this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRangeSq);
-                    this.tryAttack(this.attackTarget, deltaTime, game);
-                }
-            }
-        }
-        else if (this.gatherTarget && this.canGather) {
-            if (this.gatherTarget.amount <= 0) {
-                this.gatherTarget = null;
-            } else {
-                this.moveTowardsTarget(this.gatherTarget.x, this.gatherTarget.y, deltaTime, game);
-                this.tryGather(this.gatherTarget, deltaTime, game);
-            }
-        }
-        else if (this.targetX !== null) {
-            // OPTIMIZATION: moveTowardsTarget returns true if arrived, avoiding redundant dist calc
             if (this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game)) {
                 this.targetX = null;
                 this.targetY = null;
+            }
+        } else {
+            if (this.canAttack && this.aiTimer <= 0) {
+                // Continously scan for better targets unless the player explicitly right-clicked an enemy
+                if (!this.explicitTarget) {
+                    this.scanForEnemies(game);
+                }
+                this.aiTimer = this.aiCheckInterval;
+            }
+
+            if (this.attackTarget) {
+                if (this.attackTarget.isDead) {
+                    this.attackTarget = null;
+                } else {
+                    const dx = this.x - this.attackTarget.x;
+                    const dy = this.y - this.attackTarget.y;
+                    const distSq = dx * dx + dy * dy;
+
+                    // Stop silly chases: Drop target if it runs too far, unless explicitly ordered to attack it
+                    if (!this.explicitTarget && distSq > 250 * 250) {
+                        this.attackTarget = null;
+                    } else {
+                        // BOLT OPTIMIZATION: Stop moving if already in attack range
+                        // Reduces expensive collision checks and improves ranged unit behavior (kiting/spacing)
+                        // BOLT OPTIMIZATION: Use cached squared range
+                        this.moveTowardsTarget(this.attackTarget.x, this.attackTarget.y, deltaTime, game, this.attackRangeSq);
+                        this.tryAttack(this.attackTarget, deltaTime, game);
+                    }
+                }
+            }
+            else if (this.gatherTarget && this.canGather) {
+                if (this.gatherTarget.amount <= 0) {
+                    this.gatherTarget = null;
+                } else {
+                    this.moveTowardsTarget(this.gatherTarget.x, this.gatherTarget.y, deltaTime, game);
+                    this.tryGather(this.gatherTarget, deltaTime, game);
+                }
+            }
+            else if (this.targetX !== null) {
+                // Attack-Move fallback or non-explicit move
+                if (this.moveTowardsTarget(this.targetX, this.targetY, deltaTime, game)) {
+                    this.targetX = null;
+                    this.targetY = null;
+                }
             }
         }
 
@@ -319,8 +330,8 @@ export class Unit extends Entity {
                             const distTargetSq = dxTarget * dxTarget + dyTarget * dyTarget;
 
                             sepForce *= 0.3; // Base reduction when in combat mode
-                            if (distTargetSq < this.attackRangeSq * 2.0) {
-                                sepForce *= 0.1; // Reduce extremely when getting in range
+                            if (distTargetSq < this.attackRangeSq * 1.5) {
+                                sepForce *= 0.2; // 80% reduction when getting close, prevents melee deadlocks
                             }
                         } else if (this.targetX !== null) {
                             sepForce *= 0.5; // Reduce separation when just marching

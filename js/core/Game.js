@@ -75,7 +75,7 @@ export class Game {
                     data32.fill(color, curr, mStart);
                 }
                 // Advance current past this mask
-                curr = Math.max(curr, mEnd + 1);
+                curr = curr > mEnd + 1 ? curr : mEnd + 1;
                 tempM += 2;
             }
 
@@ -155,8 +155,8 @@ export class Game {
         // Configuración del mapa procedural
         this.mapConfig = mapConfig || {
             seed: Date.now(),
-            width: Math.floor(CONFIG.CANVAS_WIDTH / TILE_SIZE),
-            height: Math.floor(CONFIG.CANVAS_HEIGHT / TILE_SIZE),
+            width: (CONFIG.CANVAS_WIDTH / TILE_SIZE) | 0,
+            height: (CONFIG.CANVAS_HEIGHT / TILE_SIZE) | 0,
             numPlayers: 2,
             biome: 'grassland',
             style: 'continental'
@@ -315,7 +315,7 @@ export class Game {
                 return _colorBuf32[0];
             };
 
-            const exploredAlpha = Math.floor(CONFIG.VISION.EXPLORED_OPACITY * 255);
+            const exploredAlpha = (CONFIG.VISION.EXPLORED_OPACITY * 255) | 0;
             this._fowColorLUT[FOW_STATES.HIDDEN] = getInt32Color(0, 0, 0, 255);
             this._fowColorLUT[FOW_STATES.EXPLORED] = getInt32Color(0, 0, 0, exploredAlpha);
             this._fowColorLUT[FOW_STATES.VISIBLE] = getInt32Color(0, 0, 0, 0);
@@ -535,8 +535,8 @@ export class Game {
 
         // Resize terrain buffer (1.5x viewport to allow scrolling without immediate re-render)
         if (this._terrainBufferCanvas) {
-            this._terrainBufferCanvas.width = Math.floor(this.viewWidth * 1.5);
-            this._terrainBufferCanvas.height = Math.floor(this.viewHeight * 1.5);
+            this._terrainBufferCanvas.width = (this.viewWidth * 1.5) | 0;
+            this._terrainBufferCanvas.height = (this.viewHeight * 1.5) | 0;
             // Invalidate buffer
             this._terrainBufferRect.x = -99999;
         }
@@ -1348,10 +1348,10 @@ export class Game {
     }
 
     selectEntities(addMode = false) {
-        const minX = Math.min(this.dragStart.x, this.mouse.worldX);
-        const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
-        const minY = Math.min(this.dragStart.y, this.mouse.worldY);
-        const maxY = Math.max(this.dragStart.y, this.mouse.worldY);
+        const minX = this.dragStart.x < this.mouse.worldX ? this.dragStart.x : this.mouse.worldX;
+        const maxX = this.dragStart.x > this.mouse.worldX ? this.dragStart.x : this.mouse.worldX;
+        const minY = this.dragStart.y < this.mouse.worldY ? this.dragStart.y : this.mouse.worldY;
+        const maxY = this.dragStart.y > this.mouse.worldY ? this.dragStart.y : this.mouse.worldY;
 
         if (!addMode) {
             this.selectedEntities.length = 0;
@@ -1371,7 +1371,7 @@ export class Game {
 
             if (closest) {
                 if (addMode) {
-                    if (!this.selectedEntities.includes(closest)) {
+                    if (this.selectedEntities.indexOf(closest) === -1) {
                         this.selectedEntities[this.selectedEntities.length] = closest;
                     }
                 } else {
@@ -1416,7 +1416,7 @@ export class Game {
                 if (entity.x >= minX && entity.x <= maxX &&
                     entity.y >= minY && entity.y <= maxY) {
                     if (addMode) {
-                        if (!this.selectedEntities.includes(entity)) {
+                        if (this.selectedEntities.indexOf(entity) === -1) {
                             this.selectedEntities[selCount++] = entity;
                         }
                     } else {
@@ -1474,7 +1474,7 @@ export class Game {
                     if (u.x >= camX && u.x <= camX + viewW &&
                         u.y >= camY && u.y <= camY + viewH) {
                         if (e.shiftKey) {
-                            if (!this.selectedEntities.includes(u)) {
+                            if (this.selectedEntities.indexOf(u) === -1) {
                                 this.selectedEntities[visibleCount++] = u;
                             }
                         } else {
@@ -1809,7 +1809,7 @@ export class Game {
         if (addToSelection) {
             // Añadir al grupo actual
             for (const entity of aliveEntities) {
-                if (!this.selectedEntities.includes(entity)) {
+                if (this.selectedEntities.indexOf(entity) === -1) {
                     this.selectedEntities[this.selectedEntities.length] = entity;
                 }
             }
@@ -2096,7 +2096,7 @@ export class Game {
         // H o Space - Center on town center (ir al centro urbano)
         if (e.key === 'h' || e.key === 'H' || e.key === ' ') {
             // Permitir que el espacio active botones de UI si tienen el foco
-            if (e.key === ' ' && document.activeElement && ['BUTTON', 'INPUT', 'A', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+            if (e.key === ' ' && document.activeElement && (document.activeElement.tagName === 'BUTTON' || document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'A' || document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'TEXTAREA')) {
                 return;
             }
             e.preventDefault();
@@ -2118,7 +2118,7 @@ export class Game {
                     const btns = content.querySelectorAll('button');
                     for (let btn of btns) {
                         // Check if it's the TC button (by icon or text)
-                        if (btn.innerHTML.includes('townCenter') || btn.textContent.includes('Centro Urbano')) {
+                        if (btn.innerHTML.indexOf('townCenter') !== -1 || btn.textContent.indexOf('Centro Urbano') !== -1) {
                             btn.classList.add('active-key');
                             setTimeout(() => btn.classList.remove('active-key'), 150);
                             break;
@@ -2281,7 +2281,7 @@ export class Game {
                     const imgEl = option.querySelector('.build-icon img');
                     if (imgEl && override.icon && typeof assetLoader !== 'undefined') {
                         const fullPath = assetLoader.getIconPath(override.icon);
-                        if (!imgEl.src.includes(fullPath)) imgEl.src = fullPath;
+                        if (imgEl.src.indexOf(fullPath) === -1) imgEl.src = fullPath;
                     }
                 }
             }
@@ -2337,10 +2337,10 @@ export class Game {
                     if (img) {
                         const src = img.src.toLowerCase();
                         let resource = null;
-                        if (src.includes('wood')) resource = 'wood';
-                        else if (src.includes('food')) resource = 'food';
-                        else if (src.includes('gold')) resource = 'gold';
-                        else if (src.includes('stone')) resource = 'stone';
+                        if (src.indexOf('wood') !== -1) resource = 'wood';
+                        else if (src.indexOf('food') !== -1) resource = 'food';
+                        else if (src.indexOf('gold') !== -1) resource = 'gold';
+                        else if (src.indexOf('stone') !== -1) resource = 'stone';
 
                         if (resource && cost[resource] && this.resources[resource] < cost[resource]) {
                             span.style.color = 'var(--blood-red-light)';
@@ -2550,7 +2550,7 @@ export class Game {
 
             // Apply global modifiers for buildings
             if (this.modifiers && this.modifiers.buildingHp) {
-                building.maxHp = Math.floor(building.maxHp * this.modifiers.buildingHp);
+                building.maxHp = (building.maxHp * this.modifiers.buildingHp) | 0;
                 building.constructionMaxHp = building.maxHp;
             }
 
@@ -2621,7 +2621,7 @@ export class Game {
         for (let i = 0; i < selLen; i++) {
             const ent = this.selectedEntities[i];
             if (ent.isBuilding && ent.team === 'player' && !ent.isUnderConstruction) {
-                if (ent.trainableUnits && ent.trainableUnits.includes(unitType)) {
+                if (ent.trainableUnits && ent.trainableUnits.indexOf(unitType) !== -1) {
                     const queueLen = ent.productionQueue ? ent.productionQueue.length : 0;
                     if (queueLen < minQueue && (!ent.productionQueue || !ent.productionQueue.isFull())) {
                         minQueue = queueLen;
@@ -2656,7 +2656,7 @@ export class Game {
         }
 
         // Verificar si el edificio puede entrenar la unidad antes de cobrar
-        if (!building.trainableUnits || !building.trainableUnits.includes(unitType)) {
+        if (!building.trainableUnits || building.trainableUnits.indexOf(unitType) === -1) {
             this.showNotification('Este edificio no puede entrenar esta unidad', 'error');
             return;
         }
@@ -2847,14 +2847,14 @@ export class Game {
             // Apply global modifiers
             if (this.modifiers) {
                 if (this.modifiers.unitMaxHp) {
-                    unit.maxHp = Math.floor(unit.maxHp * this.modifiers.unitMaxHp);
+                    unit.maxHp = (unit.maxHp * this.modifiers.unitMaxHp) | 0;
                     unit.hp = unit.maxHp;
                 }
                 if (this.modifiers.unitSpeed) {
-                    unit.speed = Math.floor(unit.speed * this.modifiers.unitSpeed);
+                    unit.speed = (unit.speed * this.modifiers.unitSpeed) | 0;
                 }
                 if (this.modifiers.lineOfSight) {
-                    unit.visionRadius = Math.floor(unit.visionRadius * this.modifiers.lineOfSight);
+                    unit.visionRadius = (unit.visionRadius * this.modifiers.lineOfSight) | 0;
                 }
 
                 if (baseType === 'villager' && this.modifiers.villagerMaxHp) {
@@ -2866,30 +2866,30 @@ export class Game {
                 }
                 if (baseType === 'warrior' || baseType === 'spearman') {
                     if (this.modifiers.warriorHp) {
-                        unit.maxHp = Math.floor(unit.maxHp * this.modifiers.warriorHp);
+                        unit.maxHp = (unit.maxHp * this.modifiers.warriorHp) | 0;
                         unit.hp = unit.maxHp;
                     }
                     if (this.modifiers.warriorDamage) {
-                        unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.warriorDamage);
+                        unit.attackDamage = (unit.attackDamage * this.modifiers.warriorDamage) | 0;
                     }
                     if (this.modifiers.infantryArmor) {
                         unit.defense = (unit.defense || 1) * this.modifiers.infantryArmor;
                     }
                     if (this.modifiers.infantryDamage) {
-                        unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.infantryDamage);
+                        unit.attackDamage = (unit.attackDamage * this.modifiers.infantryDamage) | 0;
                     }
                 }
                 if (baseType === 'cavalry' || baseType === 'scout') {
                     if (this.modifiers.cavalryDamage) {
-                        unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.cavalryDamage);
+                        unit.attackDamage = (unit.attackDamage * this.modifiers.cavalryDamage) | 0;
                     }
                 }
 
                 if (unit.attackDamage && this.modifiers.siegeDamage && (unit.type === 'catapult' || unit.type === 'batteringRam' || unit.type === 'trebuchet')) {
-                     unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.siegeDamage);
+                     unit.attackDamage = (unit.attackDamage * this.modifiers.siegeDamage) | 0;
                 }
                 if (unit.attackDamage && this.modifiers.shipDamage && (unit.type === 'galley' || unit.type === 'warship')) {
-                     unit.attackDamage = Math.floor(unit.attackDamage * this.modifiers.shipDamage);
+                     unit.attackDamage = (unit.attackDamage * this.modifiers.shipDamage) | 0;
                 }
             }
 
@@ -3312,8 +3312,8 @@ export class Game {
             if (!showBadge && this.terrainMap) {
                 // Ensure we use the correct tile size (TILE_SIZE is imported, this.tileSize might be undefined)
                 const tileSize = typeof this.tileSize !== 'undefined' ? this.tileSize : (this.terrainMap.invTileSize ? 1/this.terrainMap.invTileSize : 20);
-                const targetCol = Math.floor(this.mouse.worldX / tileSize);
-                const targetRow = Math.floor(this.mouse.worldY / tileSize);
+                const targetCol = (this.mouse.worldX / tileSize) | 0;
+                const targetRow = (this.mouse.worldY / tileSize) | 0;
 
                 // Only check bounds if within map
                 if (targetCol >= 0 && targetCol < this.terrainMap.cols && targetRow >= 0 && targetRow < this.terrainMap.rows) {
@@ -3474,8 +3474,8 @@ export class Game {
         // Palette: Populate Game Over Stats
         const stats = document.getElementById('gameOverStats');
         if (stats) {
-            const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
-            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const elapsedSeconds = ((Date.now() - this.gameStartTime) / 1000) | 0;
+            const minutes = ((elapsedSeconds / 60) | 0).toString().padStart(2, '0');
             const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
 
             stats.innerHTML = '';
@@ -3508,7 +3508,7 @@ export class Game {
             popLabel.className = 'text-medium'; // Use existing theme class
 
             const popValue = document.createElement('span');
-            popValue.textContent = `${Math.floor(this.populationManager.getPopulation())}`;
+            popValue.textContent = `${this.populationManager.getPopulation() | 0}`;
             popValue.className = 'text-light'; // Use existing theme class
             popValue.style.fontWeight = 'bold';
 
@@ -3566,7 +3566,7 @@ export class Game {
             c.className = 'confetti';
             c.setAttribute('aria-hidden', 'true');
             c.style.left = Math.random() * 100 + '%';
-            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.background = colors[(Math.random() * colors.length) | 0];
             c.style.animationDuration = (Math.random() * 2 + 3) + 's';
             c.style.animationDelay = (Math.random() * 2) + 's';
             container.appendChild(c);
@@ -3747,8 +3747,8 @@ export class Game {
         const centerX = this.camera.x + viewW / 2;
         const centerY = this.camera.y + viewH / 2;
 
-        const newX = (Math.floor((centerX - bufferW / 2) / TILE_SIZE) * TILE_SIZE);
-        const newY = (Math.floor((centerY - bufferH / 2) / TILE_SIZE) * TILE_SIZE);
+        const newX = (((centerX - bufferW / 2) / TILE_SIZE) | 0) * TILE_SIZE;
+        const newY = (((centerY - bufferH / 2) / TILE_SIZE) | 0) * TILE_SIZE;
 
         this._terrainBufferRect.x = newX;
         this._terrainBufferRect.y = newY;
@@ -4580,10 +4580,10 @@ export class Game {
         this.ctx.strokeRect(startX, startY, width, height);
 
         // Palette: Live Selection Count Badge
-        const minX = Math.min(this.dragStart.x, this.mouse.worldX);
-        const maxX = Math.max(this.dragStart.x, this.mouse.worldX);
-        const minY = Math.min(this.dragStart.y, this.mouse.worldY);
-        const maxY = Math.max(this.dragStart.y, this.mouse.worldY);
+        const minX = this.dragStart.x < this.mouse.worldX ? this.dragStart.x : this.mouse.worldX;
+        const maxX = this.dragStart.x > this.mouse.worldX ? this.dragStart.x : this.mouse.worldX;
+        const minY = this.dragStart.y < this.mouse.worldY ? this.dragStart.y : this.mouse.worldY;
+        const maxY = this.dragStart.y > this.mouse.worldY ? this.dragStart.y : this.mouse.worldY;
         const widthW = maxX - minX;
         const heightW = maxY - minY;
 
@@ -4618,7 +4618,7 @@ export class Game {
             this.ctx.font = 'bold 12px "Inter", sans-serif';
             const text = `${count}`;
             const metrics = this.ctx.measureText(text);
-            const badgeW = Math.max(20, metrics.width + 10);
+            const badgeW = 20 > metrics.width + 10 ? 20 : metrics.width + 10;
             const badgeH = 20;
 
             // Background
@@ -4681,14 +4681,14 @@ export class Game {
         }
 
         if (!drawn) {
-            const fontSize = Math.min(width, height) * 0.2;
+            const fontSize = (width < height ? width : height) * 0.2;
             this.ctx.font = `${fontSize}px sans-serif`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
             this.ctx.fillStyle = 'rgba(212, 175, 55, 0.4)';
             this.ctx.strokeRect(screenX, screenY, width, height);
 
-            const iconFontSize = Math.min(width, height) * 0.6;
+            const iconFontSize = (width < height ? width : height) * 0.6;
             this.ctx.font = `${iconFontSize}px Arial`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
@@ -4708,7 +4708,7 @@ export class Game {
             }
 
             // Don't draw if it's a path
-            if (iconStr && (iconStr.includes('/') || iconStr.includes('.'))) {
+            if (iconStr && (iconStr.indexOf('/') !== -1 || iconStr.indexOf('.') !== -1)) {
                 iconStr = '';
             }
 
@@ -4719,7 +4719,7 @@ export class Game {
 
         // Palette: Accessible Invalid Feedback (High Contrast)
         if (!isPlaceable) {
-            const symbolSize = Math.min(width, height) * 0.8;
+            const symbolSize = (width < height ? width : height) * 0.8;
             this.ctx.font = `bold ${symbolSize}px Arial`;
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'middle';
@@ -4819,7 +4819,7 @@ export class Game {
 
             const x = building.x * scale;
             const y = building.y * scale;
-            const size = Math.max(4, building.size * scale * 2);
+            const size = 4 > building.size * scale * 2 ? 4 : building.size * scale * 2;
 
             if (building.image && building.image.complete) {
                 ctx.drawImage(building.image, x - size / 2, y - size / 2, size, size);
@@ -5032,8 +5032,8 @@ export class Game {
             const el = this.uiElements[`${key}Count`];
             if (!el) continue;
 
-            const currentVal = Math.floor(this.resources[key]);
-            const lastVal = Math.floor(this.lastResources[key] || 0);
+            const currentVal = this.resources[key] | 0;
+            const lastVal = (this.lastResources[key] || 0) | 0;
 
             // BOLT OPTIMIZATION: Only update DOM text if value changed or forced
             // Reduces Layout thrashing and DOM calls by ~90% for these elements
@@ -5060,7 +5060,7 @@ export class Game {
 
         // Actualizar población
         // BOLT OPTIMIZATION: Only write if changed
-        const currentPop = Math.floor(this.populationManager.getPopulation());
+        const currentPop = this.populationManager.getPopulation() | 0;
         if (forceUpdate || this._lastRenderedPopulation !== currentPop) {
             if (this.uiElements.currentPopulation) this.uiElements.currentPopulation.textContent = currentPop;
             this._lastRenderedPopulation = currentPop;
@@ -5169,11 +5169,11 @@ export class Game {
         }
 
         // Actualizar tiempo de juego
-        const elapsedSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+        const elapsedSeconds = ((Date.now() - this.gameStartTime) / 1000) | 0;
 
         // BOLT OPTIMIZATION: Only calculate string and update DOM if seconds changed
         if (forceUpdate || this._lastRenderedSeconds !== elapsedSeconds) {
-            const minutes = Math.floor(elapsedSeconds / 60).toString().padStart(2, '0');
+            const minutes = ((elapsedSeconds / 60) | 0).toString().padStart(2, '0');
             const seconds = (elapsedSeconds % 60).toString().padStart(2, '0');
             const timeStr = `${minutes}:${seconds}`;
 
@@ -5254,11 +5254,11 @@ export class Game {
             // Include HP, state, and progress in state key
             let prodKey = '';
             if (qLen > 0) {
-                const prog = Math.floor(ent.productionQueue.getProgress() * 100);
+                const prog = (ent.productionQueue.getProgress() * 100) | 0;
                 prodKey = `:prod${qLen}:${prog}`;
             }
             // BOLT OPTIMIZATION: Floor HP to avoid DOM thrashing on fractional damage/regen
-            stateKey = `single:${ent.id}:${Math.floor(ent.hp)}:${ent.state}${prodKey}`;
+            stateKey = `single:${ent.id}:${ent.hp | 0}:${ent.state}${prodKey}`;
         } else {
             idKey = `multi:${this.selectedEntities.length}`;
             stateKey = `multi:${this.selectedEntities.length}`;
@@ -5302,9 +5302,9 @@ export class Game {
 
                 if (hpText) {
                     if (ent.isUnderConstruction) {
-                        hpText.textContent = ` Alzando estructura: ${Math.floor(hpPercent)}%`;
+                        hpText.textContent = ` Alzando estructura: ${hpPercent | 0}%`;
                     } else {
-                        hpText.textContent = `HP: ${Math.floor(ent.hp)}/${ent.maxHp}`;
+                        hpText.textContent = `HP: ${ent.hp | 0}/${ent.maxHp}`;
                     }
                 }
 
@@ -5435,7 +5435,7 @@ export class Game {
 
             // Pick a random tip initiallly
             if (!this.lastSelectionStateKey.startsWith('empty')) {
-                this.currentTipIndex = Math.floor(Math.random() * GAMEPLAY_TIPS.length);
+                this.currentTipIndex = (Math.random() * GAMEPLAY_TIPS.length) | 0;
                 this.lastTipTime = Date.now();
             }
             // Palette: Tip of the Moment
@@ -5578,7 +5578,7 @@ export class Game {
             } else {
                 const hpText = document.createElement('div');
                 hpText.className = 'hp-text'; // BOLT OPTIMIZATION: Added class for query
-                hpText.textContent = `HP: ${Math.floor(entity.hp)}/${entity.maxHp}`;
+                hpText.textContent = `HP: ${entity.hp | 0}/${entity.maxHp}`;
                 hpText.style.marginBottom = '2px';
                 hpText.style.fontSize = '0.95rem';
                 hpText.style.fontWeight = '900';
@@ -5593,7 +5593,7 @@ export class Game {
             hpBar.style.border = '1px solid black';
             hpBar.style.boxShadow = '0 0 5px rgba(0,0,0,0.8)';
             hpBar.setAttribute('role', 'progressbar');
-            hpBar.setAttribute('aria-valuenow', Math.floor(entity.hp));
+            hpBar.setAttribute('aria-valuenow', entity.hp | 0);
             hpBar.setAttribute('aria-valuemin', '0');
             hpBar.setAttribute('aria-valuemax', entity.maxHp);
             hpBar.setAttribute('aria-label', entity.isUnderConstruction ? `Erigiendo ${entity.name}` : `Salud de ${entity.name}`);
@@ -6163,7 +6163,10 @@ export class Game {
         };
 
         // OPTIMIZATION: Reuse DOM elements
-        const gridButtons = Array.from(grid.children);
+        const gridButtons = [];
+        for (let i = 0; i < grid.children.length; i++) {
+            gridButtons[i] = grid.children[i];
+        }
 
         for (let i = 0; i < 15; i++) {
             const btn = gridButtons[i];
@@ -6213,8 +6216,8 @@ export class Game {
                     if (!buttonData.enabled) {
                         btn.classList.add('disabled');
 
-                        let isPopError = buttonData.error && (buttonData.error.includes('población') || buttonData.error.includes('Población') || buttonData.error.includes('Límite de población'));
-                        let isQueueError = buttonData.error && buttonData.error.includes('Cola de producción');
+                        let isPopError = buttonData.error && (buttonData.error.indexOf('población') !== -1 || buttonData.error.indexOf('Población') !== -1 || buttonData.error.indexOf('Límite de población') !== -1);
+                        let isQueueError = buttonData.error && buttonData.error.indexOf('Cola de producción') !== -1;
 
                         if (isPopError) {
                             btn.classList.add('pop-blocked');
@@ -6245,7 +6248,7 @@ export class Game {
                                     }
                                 }
                                 let msg = buttonData.error || 'Acción no disponible';
-                                if (msg.includes('población') || msg.includes('Población')) {
+                                if (msg.indexOf('población') !== -1 || msg.indexOf('Población') !== -1) {
                                     this.flashResource('population');
                                 }
                                 this.showNotification(msg, 'error');
@@ -6336,7 +6339,7 @@ export class Game {
                             if (this.resources[res] < amount) {
                                 resSpan.style.color = 'var(--blood-red-light)';
                                 resSpan.setAttribute('aria-label', `${amount} ${res} (Insuficiente)`);
-                                missingResources[missingResources.length] = `${res} (${amount - Math.floor(this.resources[res])})`;
+                                missingResources[missingResources.length] = `${res} (${amount - (this.resources[res] | 0)})`;
                             } else {
                                 resSpan.setAttribute('aria-label', `${amount} ${res}`);
                             }

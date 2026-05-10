@@ -16,7 +16,7 @@ export class Particle {
     }
 
     static release(p) {
-        this.pool.push(p);
+        this.pool[this.pool.length] = p;
     }
 
     constructor(x, y, config = {}) {
@@ -142,7 +142,7 @@ export class Ripple {
     }
 
     static release(p) {
-        this.pool.push(p);
+        this.pool[this.pool.length] = p;
     }
 
     constructor(x, y, color = '#48bb78') {
@@ -340,12 +340,12 @@ export class ParticleSystem {
         // Shockwave expansiva
         const shockwave = Ripple.get(x, y, 'rgba(200, 180, 150, 0.5)');
         shockwave.maxSize = size * 2.5;
-        this.particles.push(shockwave);
+        this.particles[this.particles.length] = shockwave;
 
         // Segunda shockwave más rápida y brillante
         const shockwave2 = Ripple.get(x, y, 'rgba(255, 200, 100, 0.7)');
         shockwave2.maxSize = size * 1.5;
-        this.particles.push(shockwave2);
+        this.particles[this.particles.length] = shockwave2;
 
         // Explosión inicial (Flash)
         for (let i = 0; i < 15; i++) {
@@ -724,34 +724,34 @@ export class ParticleSystem {
 
         const r = Ripple.get(x, y, color);
         r.maxSize = 25;
-        this.particles.push(r);
+        this.particles[this.particles.length] = r;
     }
 
     // Efecto de movimiento (Ripple)
     createMoveRipple(x, y) {
-        this.particles.push(Ripple.get(x, y));
+        this.particles[this.particles.length] = Ripple.get(x, y);
     }
 
     // Efecto de ataque (Ripple Rojo)
     createAttackRipple(x, y) {
-        this.particles.push(Ripple.get(x, y, '#c53030'));
+        this.particles[this.particles.length] = Ripple.get(x, y, '#c53030');
     }
 
     // Efecto de recolección (Ripple Dorado)
     createGatherRipple(x, y) {
-        this.particles.push(Ripple.get(x, y, '#ecc94b'));
+        this.particles[this.particles.length] = Ripple.get(x, y, '#ecc94b');
     }
 
     // Efecto de construcción (Ripple Azul)
     createBuildRipple(x, y) {
-        this.particles.push(Ripple.get(x, y, '#4299e1'));
+        this.particles[this.particles.length] = Ripple.get(x, y, '#4299e1');
     }
 
     // Efecto de creación de unidad
     createSpawnEffect(x, y, color = '#48bb78') {
         const r = Ripple.get(x, y, color);
         r.maxSize = 25;
-        this.particles.push(r);
+        this.particles[this.particles.length] = r;
 
         // Burst of square particles upward
         for (let i = 0; i < 4; i++) {
@@ -771,11 +771,11 @@ export class ParticleSystem {
     // Efecto de enfoque de cámara (Palette)
     createFocusPing(x, y) {
         // Cyan ripple for focus
-        this.particles.push(Ripple.get(x, y, '#4299e1'));
+        this.particles[this.particles.length] = Ripple.get(x, y, '#4299e1');
         // Smaller secondary ripple for emphasis
         const r = Ripple.get(x, y, '#ffffff');
         r.maxSize = 15;
-        this.particles.push(r);
+        this.particles[this.particles.length] = r;
     }
 
     // Efecto de texto flotante (Palette)

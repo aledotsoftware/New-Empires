@@ -706,7 +706,7 @@ export class SoundManager {
         }
 
         // Mapear el tipo de entidad al sonido correspondiente (ej: villager -> selectVillager)
-        const soundKey = `select${entityType.charAt(0).toUpperCase() + entityType.slice(1)}`;
+        const soundKey = `select${entityType.charAt(0).toUpperCase() + entityType.substring(1)}`;
 
         // Intentar reproducir el sonido específico
         if (this.sounds[soundKey]) {

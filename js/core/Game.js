@@ -3730,12 +3730,13 @@ export class Game {
                             entRow = (ent.y * fowInvTileSize) | 0;
                         }
 
-                        // Bounds check (clamping)
-                        if (entCol < 0) entCol = 0; else if (entCol >= fowCols) entCol = fowCols - 1;
-                        if (entRow < 0) entRow = 0; else if (entRow >= fowRows) entRow = fowRows - 1;
-
-                        if (fowGrid[entRow * fowCols + entCol] !== fowVisibleState) {
-                            continue; // Hidden
+                        // Bounds check - if outside grid, treat as hidden
+                        if (entCol >= 0 && entCol < fowCols && entRow >= 0 && entRow < fowRows) {
+                            if (fowGrid[entRow * fowCols + entCol] !== fowVisibleState) {
+                                continue; // Hidden
+                            }
+                        } else {
+                            continue; // Outside grid is hidden
                         }
                     }
 

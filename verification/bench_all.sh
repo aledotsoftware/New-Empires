@@ -6,3 +6,4 @@ node verification/bench_fow.js
 node verification/bench_array_methods.js
 node verification/bench_unit_pred.js
 node verification/bench_circle.js
+node verification/bench_effects.js

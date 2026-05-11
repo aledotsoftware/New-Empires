@@ -97,7 +97,9 @@ export class Game {
 
         // Optimized distance check
         const dx = entity.x - game.mouse.worldX;
+        if (Math.abs(dx) > entity.size) return false;
         const dy = entity.y - game.mouse.worldY;
+        if (Math.abs(dy) > entity.size) return false;
         // Check against entity size squared (hitbox)
         return (dx * dx + dy * dy) < (entity.size * entity.size);
     }
@@ -107,7 +109,9 @@ export class Game {
         // Check approximate collision
         const checkRadius = entity.size / 2 + 20;
         const dx = entity.x - game.mouse.worldX;
+        if (Math.abs(dx) > checkRadius) return false;
         const dy = entity.y - game.mouse.worldY;
+        if (Math.abs(dy) > checkRadius) return false;
         return (dx * dx + dy * dy) < (checkRadius * checkRadius);
     }
 
@@ -124,7 +128,9 @@ export class Game {
         }
 
         const dx = entity.x - game.mouse.worldX;
+        if (Math.abs(dx) > entity.radius) return false;
         const dy = entity.y - game.mouse.worldY;
+        if (Math.abs(dy) > entity.radius) return false;
         return (dx * dx + dy * dy) < (entity.radius * entity.radius);
     }
 
@@ -1335,7 +1341,10 @@ export class Game {
             }
 
             const dx = entity.x - worldX;
+            if (Math.abs(dx) > entity.size) continue;
             const dy = entity.y - worldY;
+            if (Math.abs(dy) > entity.size) continue;
+
             const distSq = dx * dx + dy * dy;
             const sizeSq = entity.size * entity.size;
 
@@ -2901,7 +2910,7 @@ export class Game {
             }
 
             if (soundManager) {
-                const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.slice(1)}`;
+                const soundKey = `create${unitType.charAt(0).toUpperCase() + unitType.substring(1)}`;
                 soundManager.play(soundKey);
             }
 
@@ -5659,7 +5668,7 @@ export class Game {
                     // Nombre y tiempo
                     const unitInfo = document.createElement('div');
                     unitInfo.style.flex = '1';
-                    unitInfo.textContent = current.unitType.charAt(0).toUpperCase() + current.unitType.slice(1);
+                    unitInfo.textContent = current.unitType.charAt(0).toUpperCase() + current.unitType.substring(1);
                     currentDiv.appendChild(unitInfo);
 
                     // Tiempo restante

@@ -210,7 +210,7 @@ export class ParticleSystem {
             const angle = (Math.PI * 2 / count) * i + Math.random() * 0.3;
             const speed = Math.random() * 150 + 50;
             // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 life: Math.random() * 0.5 + 0.5,
@@ -227,7 +227,7 @@ export class ParticleSystem {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 200 + 100;
             // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 life: Math.random() * 0.3 + 0.2,
@@ -245,7 +245,7 @@ export class ParticleSystem {
             const isLeaf = Math.random() > 0.5;
             const angle = (Math.random() - 0.5) * Math.PI; // Hacia arriba
             const speed = Math.random() * 30 + 15;
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 10, y + (Math.random() - 0.5) * 10, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * 10, y + (Math.random() - 0.5) * 10, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 20,
                 life: Math.random() * 0.5 + 0.3,
@@ -258,7 +258,7 @@ export class ParticleSystem {
             }));
         }
         for (let i = 0; i < 3; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * 20, y, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * 20, y, {
                 vx: (Math.random() - 0.5) * 100,
                 vy: (Math.random() - 0.5) * 50 - 50,
                 life: Math.random() * 0.5 + 0.2,
@@ -271,7 +271,7 @@ export class ParticleSystem {
         }
 
         for (let i = 0; i < 5; i++) {
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 50,
                 vy: -Math.random() * 100 - 50,
                 life: Math.random() * 0.6 + 0.4,
@@ -290,7 +290,7 @@ export class ParticleSystem {
             const isDust = Math.random() > 0.3;
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 25 + 10;
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 15,
                 life: Math.random() * 0.5 + 0.2,
@@ -303,7 +303,7 @@ export class ParticleSystem {
             }));
         }
         for (let i = 0; i < 5; i++) {
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 50,
                 vy: -Math.random() * 100 - 50,
                 life: Math.random() * 0.6 + 0.4,
@@ -321,7 +321,7 @@ export class ParticleSystem {
         for (let i = 0; i < 3; i++) {
             const angle = (Math.random() - 0.5) * Math.PI;
             const speed = Math.random() * 20 + 10;
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 15,
                 life: Math.random() * 0.4 + 0.2,
@@ -349,7 +349,7 @@ export class ParticleSystem {
 
         // Explosión inicial (Flash)
         for (let i = 0; i < 15; i++) {
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 120,
                 vy: (Math.random() - 0.5) * 120,
                 life: Math.random() * 0.5 + 0.2,
@@ -376,7 +376,7 @@ export class ParticleSystem {
                 'rgba(80, 70, 60, 0.9)'
             ];
 
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 0.6, y + (Math.random() - 0.5) * size * 0.6, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size * 0.6, y + (Math.random() - 0.5) * size * 0.6, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 30, // Tendencia a subir lentamente
                 life: Math.random() * 2.5 + 1.0,
@@ -395,7 +395,7 @@ export class ParticleSystem {
             const angle = (Math.random() - 0.5) * Math.PI; // Hacia arriba
             const speed = Math.random() * 250 + 120;
 
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 0.6, y + (Math.random() - 0.5) * size * 0.6, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size * 0.6, y + (Math.random() - 0.5) * size * 0.6, {
                 vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 80,
                 vy: Math.sin(angle) * speed - 200,
                 life: Math.random() * 2.0 + 0.8,
@@ -413,7 +413,7 @@ export class ParticleSystem {
             const angle = (Math.random() - 0.5) * Math.PI; // Hacia arriba
             const speed = Math.random() * 300 + 150;
 
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 250,
                 life: Math.random() * 1.5 + 0.5,
@@ -428,7 +428,7 @@ export class ParticleSystem {
 
         // Fuego residual (Partículas brillantes subiendo lentamente)
         for (let i = 0; i < 15; i++) {
-            this.particles.push(Particle.get(
+            this.particles[this.particles.length] = Particle.get(
                 x + (Math.random() - 0.5) * size * 0.8,
                 y + (Math.random() - 0.5) * size * 0.8,
                 {
@@ -452,7 +452,7 @@ export class ParticleSystem {
         for (let i = 0; i < numParticles; i++) {
             const angle = (Math.random() - 0.5) * Math.PI;
             const speed = Math.random() * 40 + 10;
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 30, // Sube lentamente
                 life: Math.random() * 2.5 + 1.0,
@@ -471,7 +471,7 @@ export class ParticleSystem {
         for (let i = 0; i < numParticles; i++) {
             const angle = (Math.random() - 0.5) * Math.PI;
             const speed = Math.random() * 75 + 25;
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 60, // Sube rápidamente
                 life: Math.random() * 1.5 + 0.6,
@@ -488,7 +488,7 @@ export class ParticleSystem {
     createDebrisEffect(x, y, size = 60) {
         // Bard: Add dynamic dust with debris for a more satisfying crunch
         for (let i = 0; i < 12; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: (Math.random() - 0.5) * 220,
                 vy: (Math.random() - 0.5) * 160 - 100,
                 life: Math.random() * 1.8 + 0.7,
@@ -501,7 +501,7 @@ export class ParticleSystem {
         }
         // Dust cloud accompanying debris
         for (let i = 0; i < 10; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size, y + (Math.random() - 0.5) * size, {
                 vx: (Math.random() - 0.5) * 50,
                 vy: (Math.random() - 0.5) * 50,
                 life: Math.random() * 2.0 + 0.8,
@@ -516,7 +516,7 @@ export class ParticleSystem {
 
         // Bard: Polvo volando cuando cae un edificio
         for (let i = 0; i < 20; i++) {
-            this.particles.push(Particle.get(x + (Math.random() - 0.5) * size * 1.5, y + size * 0.2, {
+            this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * size * 1.5, y + size * 0.2, {
                 vx: (Math.random() - 0.5) * 140, // Explosión lateral
                 vy: -Math.random() * 40 - 15,
                 life: Math.random() * 2.5 + 1.2,
@@ -529,7 +529,7 @@ export class ParticleSystem {
             }));
         }
         for (let i = 0; i < 5; i++) {
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 50,
                 vy: -Math.random() * 100 - 50,
                 life: Math.random() * 0.6 + 0.4,
@@ -621,7 +621,7 @@ export class ParticleSystem {
                 gravity = 5; // Caen ligeramente
             }
 
-            this.particles.push(Particle.get(px + (Math.random() - 0.5) * (isFlaming ? 10 : 4), py + (Math.random() - 0.5) * (isFlaming ? 10 : 4), {
+            this.particles[this.particles.length] = Particle.get(px + (Math.random() - 0.5) * (isFlaming ? 10 : 4), py + (Math.random() - 0.5) * (isFlaming ? 10 : 4), {
                 vx: dx * 0.1 + (Math.random() - 0.5) * (isFlaming ? 20 : 10),
                 vy: dy * 0.1 + (Math.random() - 0.5) * (isFlaming ? 20 : 10),
                 life: baseLife + lifeOffset,
@@ -641,7 +641,7 @@ export class ParticleSystem {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 20 + 10;
             // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 10,
                 life: Math.random() * 0.4 + 0.2,
@@ -654,7 +654,7 @@ export class ParticleSystem {
             }));
         }
         for (let i = 0; i < 5; i++) {
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 50,
                 vy: -Math.random() * 100 - 50,
                 life: Math.random() * 0.6 + 0.4,
@@ -673,7 +673,7 @@ export class ParticleSystem {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 100 + 30;
             // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 50,
                 life: Math.random() * 0.4 + 0.3,
@@ -691,7 +691,7 @@ export class ParticleSystem {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 50 + 20;
             // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed - 30,
                 life: Math.random() * 0.8 + 0.5,
@@ -709,7 +709,7 @@ export class ParticleSystem {
         for (let i = 0; i < 8; i++) {
             const angle = (Math.PI * 2 / 8) * i;
             // BOLT OPTIMIZATION: Use Object Pool
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: Math.cos(angle) * 80,
                 vy: Math.sin(angle) * 80,
                 life: 0.4,
@@ -755,7 +755,7 @@ export class ParticleSystem {
 
         // Burst of square particles upward
         for (let i = 0; i < 4; i++) {
-            this.particles.push(Particle.get(x, y, {
+            this.particles[this.particles.length] = Particle.get(x, y, {
                 vx: (Math.random() - 0.5) * 30,
                 vy: -30 - Math.random() * 20,
                 life: 0.5 + Math.random() * 0.3,
@@ -781,7 +781,7 @@ export class ParticleSystem {
     // Efecto de texto flotante (Palette)
     createFloatingText(x, y, text, color = '#fff') {
         // BOLT OPTIMIZATION: Use Object Pool
-        this.particles.push(Particle.get(x, y, {
+        this.particles[this.particles.length] = Particle.get(x, y, {
             vx: (Math.random() - 0.5) * 10, // Slight horizontal drift
             vy: -40, // Move up
             life: 1.5,
@@ -800,7 +800,7 @@ export class ParticleSystem {
         // Critical hits or big damage can be larger
         const isBigHit = amount > 20;
 
-        this.particles.push(Particle.get(x, y, {
+        this.particles[this.particles.length] = Particle.get(x, y, {
             vx: (Math.random() - 0.5) * 30, // More horizontal spread
             vy: -60 - Math.random() * 20, // Move up faster and varied
             life: isBigHit ? 1.5 : 1.2, // Slightly longer life for readability

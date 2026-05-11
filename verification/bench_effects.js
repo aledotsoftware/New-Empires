@@ -1,4 +1,4 @@
-const assert = require('assert');
+import assert from 'assert';
 
 function baselineUpdate(particles, deltaTime) {
     let writeIdx = 0;
@@ -59,7 +59,7 @@ console.timeEnd('Baseline');
 console.time('Optimized');
 for(let i=0; i<iterations; i++) {
     let p = [];
-    for (let j=0; j<n; j++) p.push(new Particle());
+    for (let j=0; j<n; j++) { p[p.length] = new Particle(); }
     optimizedUpdate(p, 0.1);
 }
 console.timeEnd('Optimized');

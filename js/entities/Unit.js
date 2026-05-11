@@ -74,7 +74,7 @@ export class Unit extends Entity {
                     const dy = this.y - this.attackTarget.y;
 
                     // Stop silly chases: Drop target if it runs too far, unless explicitly ordered to attack it
-                    if (!this.explicitTarget && (Math.abs(dx) > 250 || Math.abs(dy) > 250 || dx * dx + dy * dy > 62500)) { // 250 * 250 = 62500
+                    if (!this.explicitTarget && (dx * dx + dy * dy > 62500)) { // 250 * 250 = 62500
                         this.attackTarget = null;
                     } else {
                         const distSq = dx * dx + dy * dy;
@@ -114,9 +114,7 @@ export class Unit extends Entity {
         // Kept !isDead because units can die during the current frame update loop.
         if (!entity.isDead) {
             const dx = unit.x - entity.x;
-            if (Math.abs(dx) > 200) return false;
             const dy = unit.y - entity.y;
-            if (Math.abs(dy) > 200) return false;
             return (dx * dx + dy * dy) < AGGRO_RADIUS_SQ;
         }
         return false;
@@ -188,10 +186,9 @@ export class Unit extends Entity {
 
             const dx = this.x - enemy.x;
             const dy = this.y - enemy.y;
-            if (Math.abs(dx) > 200) continue;
-            if (Math.abs(dy) > 200) continue;
 
             const distSq = dx * dx + dy * dy;
+            if (distSq >= AGGRO_RADIUS_SQ) continue;
 
             // Puntuación base
             let score = 0;
@@ -458,9 +455,7 @@ export class Unit extends Entity {
 
     tryAttack(target, deltaTime, game) {
         const dx = this.x - target.x;
-        if (Math.abs(dx) > this.attackRange) return;
         const dy = this.y - target.y;
-        if (Math.abs(dy) > this.attackRange) return;
 
         const distSq = dx * dx + dy * dy;
         // BOLT OPTIMIZATION: Use cached squared range

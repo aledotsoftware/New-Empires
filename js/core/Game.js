@@ -95,11 +95,9 @@ export class Game {
             return false;
         }
 
-        // Optimized distance check
+        // Optimized distance check (benchmarks show dx*dx + dy*dy is faster than branching with Math.abs)
         const dx = entity.x - game.mouse.worldX;
-        if (Math.abs(dx) > entity.size) return false;
         const dy = entity.y - game.mouse.worldY;
-        if (Math.abs(dy) > entity.size) return false;
         // Check against entity size squared (hitbox)
         return (dx * dx + dy * dy) < (entity.size * entity.size);
     }
@@ -109,9 +107,7 @@ export class Game {
         // Check approximate collision
         const checkRadius = entity.size / 2 + 20;
         const dx = entity.x - game.mouse.worldX;
-        if (Math.abs(dx) > checkRadius) return false;
         const dy = entity.y - game.mouse.worldY;
-        if (Math.abs(dy) > checkRadius) return false;
         return (dx * dx + dy * dy) < (checkRadius * checkRadius);
     }
 
@@ -128,9 +124,7 @@ export class Game {
         }
 
         const dx = entity.x - game.mouse.worldX;
-        if (Math.abs(dx) > entity.radius) return false;
         const dy = entity.y - game.mouse.worldY;
-        if (Math.abs(dy) > entity.radius) return false;
         return (dx * dx + dy * dy) < (entity.radius * entity.radius);
     }
 
@@ -1341,9 +1335,7 @@ export class Game {
             }
 
             const dx = entity.x - worldX;
-            if (Math.abs(dx) > entity.size) continue;
             const dy = entity.y - worldY;
-            if (Math.abs(dy) > entity.size) continue;
 
             const distSq = dx * dx + dy * dy;
             const sizeSq = entity.size * entity.size;

@@ -1,10 +1,12 @@
-const { chromium } = require('playwright');
+import fs from 'fs';
+import { chromium } from 'playwright';
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
+  await page.setViewportSize({ width: 1920, height: 1080 });
 
-  await page.goto(`http://localhost:8080/index.html`);
+  await page.goto(`http://localhost:3000/index.html`);
 
   // Wait for the start button and click it
   await page.waitForSelector('#startButton');
@@ -18,7 +20,7 @@ const { chromium } = require('playwright');
   // Wait for civ selection
   await page.waitForSelector('.civ-option');
   const civs = await page.$$('.civ-option');
-  await civs[0].click(); // Select first civ
+  await page.evaluate((el) => el.click(), civs[0]); // Select first civ
 
   // Wait for game to initialize
   await page.waitForTimeout(2000);
@@ -37,7 +39,7 @@ const { chromium } = require('playwright');
   });
 
   const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
-  require('fs').writeFileSync('/app/verification/game_running.png', buffer);
+  fs.writeFileSync('/app/verification/game_running.png', buffer);
 
   console.log('Screenshot taken!');
   await browser.close();

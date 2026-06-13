@@ -1,4 +1,5 @@
-const { chromium } = require('playwright');
+import fs from 'fs';
+import { chromium } from 'playwright';
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -37,7 +38,7 @@ const { chromium } = require('playwright');
   });
 
   const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
-  require('fs').writeFileSync('/app/verification/game_running.png', buffer);
+  fs.writeFileSync('/app/verification/game_running.png', buffer);
 
   console.log('Screenshot taken!');
   await browser.close();

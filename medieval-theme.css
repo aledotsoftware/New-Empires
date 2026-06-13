@@ -1104,6 +1104,60 @@ body.theme-mayans {
     line-height: 1.3;
 }
 
+/* Palette: Health bar styles */
+.hp-container {
+    margin-bottom: 6px;
+    width: 100%;
+}
+
+.hp-text {
+    font-size: 0.95rem;
+    font-weight: 900;
+    margin-bottom: 2px;
+    text-shadow: 1px 1px 2px black;
+    color: white;
+}
+
+.health-bar {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid black;
+    box-shadow: 0 0 5px rgba(0,0,0,0.8);
+    width: 100%;
+}
+
+.health-fill {
+    height: 100%;
+    transition: width 0.2s ease-out, background-color 0.2s ease;
+}
+
+/* Production bar styles */
+.production-container {
+    margin-top: 8px;
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    padding-top: 8px;
+}
+
+.production-time {
+    font-size: 0.8rem;
+    color: #48bb78;
+    text-shadow: 1px 1px 2px black;
+}
+
+.production-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.production-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4299e1, #48bb78);
+    transition: width 0.1s ease;
+}
+
 /* Estado vacío */
 .selection-empty-state {
     display: flex;

@@ -409,7 +409,11 @@ export class Game {
             idleVillagerCount: document.getElementById('idleVillagerCount'),
             selectionContent: document.getElementById('selectionContent'),
             commandPanel: document.getElementById('commandPanel'),
-            notifications: document.getElementById('notifications')
+            notifications: document.getElementById('notifications'),
+            buildMenu: document.getElementById('buildMenu'),
+            popTooltip: document.getElementById('popTooltip'),
+            pauseOverlay: document.getElementById('pauseOverlay'),
+            resumeOverlayBtn: document.getElementById('resumeOverlayBtn')
         };
 
         // Palette: Attach listener for Idle Villager button
@@ -1599,7 +1603,7 @@ export class Game {
             return;
         }
 
-        const buildMenu = document.getElementById('buildMenu');
+        const buildMenu = this.uiElements.buildMenu || document.getElementById('buildMenu');
         if (buildMenu && !buildMenu.classList.contains('hidden')) {
             this.closeBuildMenu();
             return;
@@ -1950,7 +1954,7 @@ export class Game {
 
         // Hotkeys para botones del panel de control (grid 3x5)
         // Funciona siempre que el menú de construcción NO está abierto
-        const buildMenu = document.getElementById('buildMenu');
+        const buildMenu = this.uiElements.buildMenu || document.getElementById('buildMenu');
         const isBuildMenuOpen = buildMenu && !buildMenu.classList.contains('hidden');
 
         if (!isBuildMenuOpen) {
@@ -1965,7 +1969,8 @@ export class Game {
                 const btnIndex = hotkeyActions[key];
                 const actionsGrid = document.getElementById('commandPanel');
                 if (actionsGrid) {
-                    const buttons = actionsGrid.querySelectorAll('.action-btn');
+                    if (!this._actionBtnsCache) this._actionBtnsCache = actionsGrid.getElementsByClassName('action-btn');
+                    const buttons = this._actionBtnsCache;
                     if (buttons[btnIndex]) {
                         if (!buttons[btnIndex].classList.contains('disabled')) {
                             // Palette: Visual feedback for hotkey
@@ -2074,7 +2079,7 @@ export class Game {
                 return;
             }
 
-            const buildMenu = document.getElementById('buildMenu');
+            const buildMenu = this.uiElements.buildMenu || document.getElementById('buildMenu');
             if (buildMenu && !buildMenu.classList.contains('hidden')) {
                 this.closeBuildMenu();
                 return;
@@ -2258,7 +2263,8 @@ export class Game {
         // BOLT OPTIMIZATION: Use cached building counts (O(1)) and live DOM collection
         // Replaces O(N_buildings * M_options) with O(M_options)
         // Using getElementsByClassName for live collection (safer than caching static NodeList)
-        const buildOptions = document.getElementsByClassName('build-option');
+        if (!this._buildOptionsCache) this._buildOptionsCache = document.getElementsByClassName('build-option');
+        const buildOptions = this._buildOptionsCache;
 
         // Use cached length for slightly better performance in loop
         const len = buildOptions.length;
@@ -2408,7 +2414,8 @@ export class Game {
         this.updateBuildMenuState();
 
         // Setup build options handlers
-        const buildOptions = document.querySelectorAll('.build-option');
+        if (!this._buildOptionsCacheQS) this._buildOptionsCacheQS = document.querySelectorAll('.build-option');
+        const buildOptions = this._buildOptionsCacheQS;
         const buildOptionsLen = buildOptions.length;
         for (let i = 0; i < buildOptionsLen; i++) {
             const option = buildOptions[i];
@@ -2457,7 +2464,7 @@ export class Game {
 
     closeBuildMenu() {
         FocusManager.releaseTrap();
-        document.getElementById('buildMenu').classList.add('hidden');
+        if (this.uiElements.buildMenu) this.uiElements.buildMenu.classList.add('hidden'); else document.getElementById('buildMenu').classList.add('hidden');
         FocusManager.restoreFocus();
         this.lastFocusedElement = null;
     }
@@ -5075,7 +5082,7 @@ export class Game {
         }
 
         // Palette: Detailed Population Tooltip
-        const popTooltip = document.getElementById('popTooltip');
+        const popTooltip = this.uiElements.popTooltip || document.getElementById('popTooltip');
         if (popTooltip) {
             let villagers = 0;
             let totalUnits = 0;
@@ -5187,7 +5194,7 @@ export class Game {
         this._forceUIUpdate = false;
 
         // Palette: Real-time update for build menu
-        const buildMenu = document.getElementById('buildMenu');
+        const buildMenu = this.uiElements.buildMenu || document.getElementById('buildMenu');
         if (buildMenu && !buildMenu.classList.contains('hidden')) {
             this.updateBuildMenuState();
         }
@@ -5508,7 +5515,11 @@ export class Game {
 
             // Action 3: Idle Villager (Conditional)
             let idleCount = 0;
-            for (let i = 0; i < this.units.length; i++) { if (this.units[i].type === 'villager' && this.units[i].state === 'IDLE') idleCount++; }
+            const unitsLen = this.units.length;
+            for (let i = 0; i < unitsLen; i++) {
+                const u = this.units[i];
+                if (u.type === 'villager' && u.state === 'IDLE') idleCount++;
+            }
 
             if (idleCount > 0) {
                 actionsDiv.appendChild(createActionBtn('villager', `Aldeano Inactivo (${idleCount})`, 'Tab',

@@ -1,4 +1,4 @@
-const assert = require('assert');
+import assert from 'assert';
 
 console.log("Mock implementation to verify the fixes.");
 // TechManager applyResearchedEffects correctly resets all modifiers now.

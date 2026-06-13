@@ -1,11 +1,13 @@
-const { chromium } = require('playwright');
+import fs from 'fs';
+import { chromium } from 'playwright';
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
+  await page.setViewportSize({ width: 1920, height: 1080 });
 
   // Increase timeout to wait for game load and map generation
-  await page.goto('http://localhost:8080', { timeout: 60000 });
+  await page.goto('http://localhost:3000', { timeout: 60000 });
 
   // Wait a bit more for map generation to fully finish
   await page.waitForTimeout(5000);

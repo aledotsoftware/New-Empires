@@ -1,5 +1,6 @@
-const { chromium } = require('playwright');
-const fs = require('fs');
+import fs from 'fs';
+import { chromium } from 'playwright';
+
 
 (async () => {
     const browser = await chromium.launch({ headless: true });
@@ -20,7 +21,7 @@ const fs = require('fs');
     await page.waitForTimeout(1000);
 
     console.log("Clicking Mongols civ");
-    await page.click('#civGrid > div:first-child');
+    await page.evaluate(() => document.querySelector('#civGrid > div:first-child').click());
 
     console.log("Waiting for canvas to be visible");
     await page.waitForSelector('#gameCanvas', { state: 'visible' });
@@ -37,7 +38,7 @@ const fs = require('fs');
     });
 
     const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-    fs.writeFileSync('/home/jules/verification/decorations_map.png', base64Data, 'base64');
+    fs.writeFileSync('/app/verification/decorations_map.png', base64Data, 'base64');
 
     console.log("Done");
     await browser.close();

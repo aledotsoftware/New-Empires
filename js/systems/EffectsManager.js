@@ -219,7 +219,7 @@ export class ParticleSystem {
                 gravity: 100,
                 friction: 0.96,
                 shape: Math.random() > 0.5 ? 'circle' : 'square'
-            }));
+            });
         }
 
         // Partículas secundarias (chispas)
@@ -235,7 +235,7 @@ export class ParticleSystem {
                 color: '#ffd700',
                 gravity: 50,
                 friction: 0.98
-            }));
+            });
         }
     }
 
@@ -255,7 +255,7 @@ export class ParticleSystem {
                 friction: 0.95,
                 shape: isLeaf ? 'circle' : 'square',
                 fadeRate: 1.2
-            }));
+            });
         }
         for (let i = 0; i < 3; i++) {
             this.particles[this.particles.length] = Particle.get(x + (Math.random() - 0.5) * 20, y, {
@@ -267,7 +267,7 @@ export class ParticleSystem {
                 gravity: 150,
                 friction: 0.96,
                 shape: 'square'
-            }));
+            });
         }
 
         for (let i = 0; i < 5; i++) {
@@ -280,7 +280,7 @@ export class ParticleSystem {
                 gravity: -20,
                 friction: 0.95,
                 fadeRate: 1.5
-            }));
+            });
         }
     }
 
@@ -300,7 +300,7 @@ export class ParticleSystem {
                 friction: 0.92,
                 shape: isDust ? 'circle' : 'square',
                 fadeRate: 1.5
-            }));
+            });
         }
         for (let i = 0; i < 5; i++) {
             this.particles[this.particles.length] = Particle.get(x, y, {
@@ -312,7 +312,7 @@ export class ParticleSystem {
                 gravity: -20,
                 friction: 0.95,
                 fadeRate: 1.5
-            }));
+            });
         }
     }
 
@@ -331,7 +331,7 @@ export class ParticleSystem {
                 friction: 0.94,
                 shape: 'circle',
                 fadeRate: 1.5
-            }));
+            });
         }
     }
 
@@ -359,7 +359,7 @@ export class ParticleSystem {
                 friction: 0.85,
                 fadeRate: 2.5,
                 shape: 'circle'
-            }));
+            });
         }
 
         // Gran nube de polvo expansiva
@@ -386,7 +386,7 @@ export class ParticleSystem {
                 friction: 0.92,
                 fadeRate: 0.8,
                 shape: 'circle'
-            }));
+            });
         }
 
         // Escombros pesados volando (pedazos de piedra/madera)
@@ -404,7 +404,7 @@ export class ParticleSystem {
                 gravity: 500, // Caen muy rápido (peso)
                 friction: 0.97,
                 shape: 'square'
-            }));
+            });
         }
 
         // Chispas adicionales de la destrucción
@@ -423,7 +423,7 @@ export class ParticleSystem {
                 friction: 0.95,
                 fadeRate: 1.5,
                 shape: 'square'
-            }));
+            });
         }
 
         // Fuego residual (Partículas brillantes subiendo lentamente)
@@ -442,7 +442,7 @@ export class ParticleSystem {
                     fadeRate: 1.2,
                     shape: 'circle'
                 }
-            ));
+            );
         }
     }
 
@@ -462,7 +462,7 @@ export class ParticleSystem {
                 friction: 0.92,
                 fadeRate: 0.6,
                 shape: 'circle'
-            }));
+            });
         }
     }
 
@@ -481,7 +481,7 @@ export class ParticleSystem {
                 friction: 0.88,
                 fadeRate: 1.8,
                 shape: Math.random() > 0.5 ? 'circle' : 'square' // Variedad para fuego
-            }));
+            });
         }
     }
 
@@ -497,7 +497,7 @@ export class ParticleSystem {
                 gravity: 250,
                 friction: 0.95,
                 shape: 'square'
-            }));
+            });
         }
         // Dust cloud accompanying debris
         for (let i = 0; i < 10; i++) {
@@ -511,7 +511,7 @@ export class ParticleSystem {
                 friction: 0.85,
                 shape: 'circle',
                 fadeRate: 1.0
-            }));
+            });
         }
 
         // Bard: Polvo volando cuando cae un edificio
@@ -526,7 +526,7 @@ export class ParticleSystem {
                 friction: 0.86,
                 shape: 'circle',
                 fadeRate: 1.0
-            }));
+            });
         }
         for (let i = 0; i < 5; i++) {
             this.particles[this.particles.length] = Particle.get(x, y, {
@@ -538,7 +538,7 @@ export class ParticleSystem {
                 gravity: -20,
                 friction: 0.95,
                 fadeRate: 1.5
-            }));
+            });
         }
     }
 
@@ -631,7 +631,7 @@ export class ParticleSystem {
                 friction: 0.94,
                 fadeRate: 1.8,
                 shape: shape
-            }));
+            });
         }
     }
 
@@ -651,7 +651,7 @@ export class ParticleSystem {
                 friction: 0.95,
                 shape: Math.random() > 0.5 ? 'circle' : 'square',
                 fadeRate: 1.5
-            }));
+            });
         }
         for (let i = 0; i < 5; i++) {
             this.particles[this.particles.length] = Particle.get(x, y, {
@@ -663,7 +663,7 @@ export class ParticleSystem {
                 gravity: -20,
                 friction: 0.95,
                 fadeRate: 1.5
-            }));
+            });
         }
     }
 
@@ -681,7 +681,7 @@ export class ParticleSystem {
                 color: `rgb(${150 + Math.random() * 50}, ${20 + Math.random() * 20}, ${20 + Math.random() * 20})`,
                 gravity: 200,
                 friction: 0.95
-            }));
+            });
         }
     }
 
@@ -700,7 +700,7 @@ export class ParticleSystem {
                 gravity: 30,
                 friction: 0.97,
                 fadeRate: 0.7
-            }));
+            });
         }
     }
 
@@ -719,7 +719,7 @@ export class ParticleSystem {
                 friction: 0.85,
                 shape: 'circle',
                 fadeRate: 1.5
-            }));
+            });
         }
 
         const r = Ripple.get(x, y, color);
@@ -764,7 +764,7 @@ export class ParticleSystem {
                 gravity: 10,
                 friction: 0.95,
                 shape: 'square'
-            }));
+            });
         }
     }
 
@@ -791,7 +791,7 @@ export class ParticleSystem {
             gravity: 0, // No gravity, float straight up
             friction: 0.98,
             fadeRate: 1.5
-        }));
+        });
     }
 
     createDamageText(x, y, amount) {
@@ -810,7 +810,7 @@ export class ParticleSystem {
             gravity: 15, // A bit more gravity for a nice arc
             friction: 0.92,
             fadeRate: 1.5 // Fade out a bit slower
-        }));
+        });
     }
 
     update(deltaTime) {

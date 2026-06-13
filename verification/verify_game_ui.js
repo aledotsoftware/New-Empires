@@ -1,10 +1,11 @@
-const { chromium } = require('playwright');
+import fs from 'fs';
+import { chromium } from 'playwright';
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  await page.goto(`http://localhost:8080/index.html`);
+  await page.goto(`http://localhost:3000/index.html`);
 
   await page.waitForSelector('#startButton');
   await page.click('#startButton');

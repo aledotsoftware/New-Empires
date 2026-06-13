@@ -1,5 +1,5 @@
-const http = require('http');
-const { spawn } = require('child_process');
+const http = await import('http');
+const { spawn } = await import('child_process');
 
 const PORT = 3001;
 process.env.PORT = PORT;

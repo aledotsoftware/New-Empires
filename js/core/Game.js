@@ -2687,7 +2687,7 @@ export class Game {
         const bLen = this.buildings.length;
         for (let i = 0; i < bLen; i++) {
             const b = this.buildings[i];
-            if (b.team === building.team && b.productionQueue) {
+            if (b.team === 'player' && b.productionQueue) {
                 totalQueuedUnits += b.productionQueue.length;
             }
         }
@@ -2749,7 +2749,7 @@ export class Game {
         const bLen = this.buildings.length;
         for (let i = 0; i < bLen; i++) {
             const b = this.buildings[i];
-            if (b.team === building.team && b.productionQueue) {
+            if (b.team === 'player' && b.productionQueue) {
                 totalQueuedUnits += b.productionQueue.length;
             }
         }
@@ -5591,7 +5591,7 @@ export class Game {
                 statusText.style.color = '#ecc94b'; // Yellow/Gold
                 statusText.style.marginBottom = '2px';
                 statusText.style.fontWeight = 'bold';
-                statusText.style.textShadow = '1px 1px 2px black';
+                /* statusText.style.textShadow removed in favor of CSS */
                 statusText.textContent = ` Alzando estructura: ${Math.floor(hpPercent)}%`;
                 hpContainer.appendChild(statusText);
             } else {
@@ -5601,7 +5601,7 @@ export class Game {
                 hpText.style.marginBottom = '2px';
                 hpText.style.fontSize = '0.95rem';
                 hpText.style.fontWeight = '900';
-                hpText.style.textShadow = '1px 1px 2px black';
+                /* hpText.style.textShadow removed in favor of CSS */
                 hpContainer.appendChild(hpText);
             }
 
@@ -6375,23 +6375,12 @@ export class Game {
                     if (!buttonData.enabled && buttonData.error) {
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'tooltip-error';
-                        errorDiv.style.color = 'var(--blood-red-light)';
-                        errorDiv.style.marginTop = '4px';
-                        errorDiv.style.fontSize = '0.75rem';
-                        errorDiv.style.fontWeight = 'bold';
-                        errorDiv.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
                         errorDiv.textContent = ` ${buttonData.error}`;
                         tooltipDiv.appendChild(errorDiv);
                     } else if (!buttonData.enabled && buttonData.cost && !this.canAfford(buttonData.cost)) {
                         // Fallback for legacy items without explicit error
                         const errorDiv = document.createElement('div');
                         errorDiv.className = 'tooltip-error';
-                        errorDiv.style.color = 'var(--blood-red-light)';
-                        errorDiv.style.marginTop = '4px';
-                        errorDiv.style.fontSize = '0.75rem';
-                        errorDiv.style.fontWeight = 'bold';
-                        errorDiv.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
-
                         // Palette: Show specific missing resources
                         if (buttonData._missingResources && buttonData._missingResources.length > 0) {
                             // Translate resource names for better UX
@@ -6708,7 +6697,8 @@ export class Game {
 
         // Handle population special case
         if (resourceName === 'population') {
-            element = document.querySelector('.resource-population');
+            if (!this.uiElements.resourcePopulation) this.uiElements.resourcePopulation = document.querySelector('.resource-population');
+            element = this.uiElements.resourcePopulation;
         } else {
             // Find the resource item container for the given resource
             // We look up the counter element first, then get its parent container

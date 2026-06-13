@@ -4785,30 +4785,36 @@ export class Game {
         ctx.fillStyle = '#1a1a2e';
         ctx.fillRect(0, 0, width, height);
 
-        // Resources
-        ctx.fillStyle = '#4a5568';
-        ctx.beginPath();
-
         // BOLT OPTIMIZATION: Use cached length loop and cached grid coords
         const nodesLen = this.resourceNodes.length;
         // Hoist FOW lookups
         const fow = this.fow;
         const invTileSize = fow ? fow.invTileSize : 0;
 
-        for (let i = 0; i < nodesLen; i++) {
-            const node = this.resourceNodes[i];
-            if (node.amount > 0) {
-                // Solo mostrar en el minimapa si la zona ha sido explorada
-                // BOLT OPTIMIZATION: Use cached _gridCol (set at generation)
-                const col = node._gridCol !== undefined ? node._gridCol : (node.x * invTileSize) | 0;
-                const row = node._gridRow !== undefined ? node._gridRow : (node.y * invTileSize) | 0;
+        // Resources rendered by type for tactical clarity
+        const resColors = {
+            wood: '#2f855a',  // Green
+            food: '#dd6b20',  // Orange
+            gold: '#ecc94b',  // Gold
+            stone: '#a0aec0'  // Grey
+        };
 
-                if (!fow || fow.isExplored(col, row)) {
-                    ctx.rect(node.x * scale - 1, node.y * scale - 1, 2, 2);
+        for (const type in resColors) {
+            ctx.fillStyle = resColors[type];
+            ctx.beginPath();
+            for (let i = 0; i < nodesLen; i++) {
+                const node = this.resourceNodes[i];
+                if (node.type === type && node.amount > 0) {
+                    const col = node._gridCol !== undefined ? node._gridCol : (node.x * invTileSize) | 0;
+                    const row = node._gridRow !== undefined ? node._gridRow : (node.y * invTileSize) | 0;
+
+                    if (!fow || fow.isExplored(col, row)) {
+                        ctx.rect(node.x * scale - 1.5, node.y * scale - 1.5, 3, 3);
+                    }
                 }
             }
+            ctx.fill();
         }
-        ctx.fill();
 
         // Buildings
         // BOLT OPTIMIZATION: Use cached length loop and cached grid coords

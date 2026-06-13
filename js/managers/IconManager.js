@@ -5,10 +5,10 @@
 
 export const RESOURCE_ICONS = {
     // Recursos
-    wood: 'assets/icons/Aoe2de_wood.webp',
-    food: 'assets/icons/villager.png',  // Temporal, buscar icono de comida
-    gold: 'assets/icons/Mining_camp_aoe2de.webp',  // Temporal
-    stone: 'assets/icons/Mining_camp_aoe2de.webp',  // Usar mismo hasta tener icono específico
+    wood: 'assets/icons/wood.png',
+    food: 'assets/icons/food.png',
+    gold: 'assets/icons/gold.png',
+    stone: 'assets/icons/stone.png',
 
     // Edificios
     house: 'assets/icons/house.png',
@@ -26,9 +26,9 @@ export const RESOURCE_ICONS = {
     archer: 'assets/icons/archer.png',
 
     // Edades
-    bronzeAge: 'assets/icons/EdadDeBronce_DE.webp',
-    ironAge: 'assets/icons/EdadDeHierro_DE.webp',
-    toolAge: 'assets/icons/EdadDeLasHerramientas_DE.webp'
+    bronzeAge: 'assets/icons/tech_economy.png',
+    ironAge: 'assets/icons/tech_military.png',
+    toolAge: 'assets/icons/science.png'
 };
 
 // Emojis como fallback (si no se carga la imagen)

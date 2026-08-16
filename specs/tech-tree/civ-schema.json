@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Civilization Definition Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición de civilizaciones Data-Driven en New Empires.",
+  "type": "object",
+  "required": [
+    "civilizationId",
+    "name",
+    "description",
+    "passiveBonuses",
+    "startingUnits",
+    "startingBuildings"
+  ],
+  "properties": {
+    "civilizationId": {
+      "type": "string",
+      "description": "Identificador único de la civilización (ej. sumeria, mongoles, romans)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre legible localizado"
+    },
+    "description": {
+      "type": "string",
+      "description": "Resumen histórico y enfoque táctico de la civilización"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Ruta del icono opcional. Por defecto mapea a assets/icons/{civilizationId}.png"
+    },
+    "passiveBonuses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "effects"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["targetType", "stat", "modifierType", "value"],
+              "properties": {
+                "targetType": { "type": "string" },
+                "stat": { "type": "string" },
+                "modifierType": { "type": "string", "enum": ["add", "multiply"] },
+                "value": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "startingUnits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["unitId", "count"],
+        "properties": {
+          "unitId": { "type": "string" },
+          "count": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "startingBuildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["buildingId", "count"],
+        "properties": {
+          "buildingId": { "type": "string" },
+          "count": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

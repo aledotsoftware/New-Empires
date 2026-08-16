@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Unit Definition Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición de unidades Data-Driven por civilización. Por regla de arquitectura, toda unidad posee automáticamente una imagen/icono asociada con su mismo nombre (ej. aldeano -> assets/icons/aldeano.png).",
+  "type": "object",
+  "required": [
+    "id",
+    "civId",
+    "name",
+    "cost",
+    "trainingTime",
+    "baseStats",
+    "tags",
+    "behaviors"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único de la unidad (ej. sumeria_warrior, mongol_cavalry)"
+    },
+    "civId": {
+      "type": "string",
+      "description": "Identificador de la civilización a la que pertenece la unidad"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado legible para la UI"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Ruta relativa del recurso gráfico/icono opcional de anulación. Por defecto, la UI la vincula dinámicamente con la imagen asociada del mismo nombre (ej. aldeano -> assets/icons/aldeano.png)."
+    },
+    "hotkey": {
+      "type": "string",
+      "description": "Tecla de atajo rápida por defecto definida en la data para entrenar o seleccionar esta unidad (ej. Q, W, E, A)"
+    },
+    "cost": {
+      "type": "object",
+      "required": ["wood", "food", "gold", "stone"],
+      "properties": {
+        "wood": { "type": "integer", "minimum": 0 },
+        "food": { "type": "integer", "minimum": 0 },
+        "gold": { "type": "integer", "minimum": 0 },
+        "stone": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "trainingTime": {
+      "type": "number",
+      "minimum": 0.5,
+      "description": "Tiempo necesario de entrenamiento en segundos"
+    },
+    "baseStats": {
+      "type": "object",
+      "required": [
+        "maxHp",
+        "attackDamage",
+        "attackSpeed",
+        "attackRange",
+        "movementSpeed",
+        "visionRadius"
+      ],
+      "properties": {
+        "maxHp": { "type": "integer", "minimum": 1 },
+        "attackDamage": { "type": "integer", "minimum": 0 },
+        "attackSpeed": { "type": "number", "minimum": 0.1 },
+        "attackRange": { "type": "integer", "minimum": 10 },
+        "movementSpeed": { "type": "number", "minimum": 0.1 },
+        "visionRadius": { "type": "integer", "minimum": 50 },
+        "armor": { "type": "integer", "default": 0 }
+      }
+    },
+    "tags": {
+      "type": "object",
+      "required": ["attack_tags", "armor_tags"],
+      "properties": {
+        "attack_tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Etiquetas de tipo de ataque (ej. anti_cavalry, anti_building, piercing, melee, siege)"
+        },
+        "armor_tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Etiquetas de armadura/defensa (ej. unarmored, light_infantry, heavy_cavalry, building_structure)"
+        }
+      }
+    },
+    "behaviors": {
+      "type": "object",
+      "required": ["attackType", "canKite", "canGather", "canHeal"],
+      "properties": {
+        "attackType": {
+          "type": "string",
+          "enum": ["melee", "ranged", "siege", "support_healing", "none"]
+        },
+        "canKite": {
+          "type": "boolean",
+          "description": "Indica si la micro-IA debe activar maniobras de Hit & Run"
+        },
+        "kiteDistanceRatio": {
+          "type": "number",
+          "default": 0.25,
+          "description": "Proporción del rango de ataque al cuadrado a la cual se gatilla el kiting"
+        },
+        "canGather": {
+          "type": "boolean",
+          "description": "Indica si la unidad puede recolectar recursos"
+        },
+        "canHeal": {
+          "type": "boolean",
+          "description": "Indica si la unidad realiza acciones de curación a aliados"
+        },
+        "targetPriorities": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" },
+          "description": "Matriz dinámica de modificadores de puntuación para selección de objetivos por armor_tag enemiga"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: New Empires HTTP Static & Assets Server API
+  description: >
+    Contrato de especificación REST/HTTP para el servidor web de New Empires.
+    Define la entrega de activos estáticos (HTML, JS ES6, CSS, JSON, imágenes, audio),
+    políticas de seguridad, límites de consumo (Rate Limiting) y códigos de estado HTTP.
+  version: 1.2.0
+servers:
+  - url: http://localhost:{port}
+    description: Servidor local de desarrollo y producción
+    variables:
+      port:
+        default: "3000"
+        description: Puerto de escucha del servidor HTTP
+
+paths:
+  /:
+    get:
+      summary: Obtener aplicación web principal (index.html)
+      description: Retorna la página HTML5 principal del juego RTS con las cabeceras de seguridad requeridas.
+      operationId: getRoot
+      responses:
+        '200':
+          description: Documento HTML retornado exitosamente
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: text/html; charset=utf-8
+            Cache-Control:
+              schema:
+                type: string
+                example: no-cache
+            Content-Security-Policy:
+              schema:
+                type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            X-Frame-Options:
+              schema:
+                type: string
+                example: DENY
+          content:
+            text/html:
+              schema:
+                type: string
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+    head:
+      summary: Verificar disponibilidad de la aplicación principal
+      responses:
+        '200':
+          description: Aplicación disponible
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /{filepath}:
+    get:
+      summary: Obtener activo estático del juego
+      description: Entrega archivos de código (JS ES6, CSS), metadatos (JSON, webmanifest) o multimedia (PNG, JPG, WEBP, WAV, MP3, SVG).
+      operationId: getStaticAsset
+      parameters:
+        - name: filepath
+          in: path
+          required: true
+          description: Ruta relativa del recurso solicitado (ej. js/core/Game.js, assets/icons/wood.png)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recurso entregado correctamente
+          headers:
+            Content-Type:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+          content:
+            text/javascript:
+              schema:
+                type: string
+            text/css:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+            application/manifest+json:
+              schema:
+                type: object
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/svg+xml:
+              schema:
+                type: string
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Recurso no encontrado o fuera de los límites del directorio raíz
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 404 Not Found
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+components:
+  responses:
+    TooManyRequests:
+      description: Exceso de peticiones por IP en la ventana de tiempo (Rate Limit Exceeded)
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            example: 60
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: Too Many Requests - Rate Limit Exceeded
+    MethodNotAllowed:
+      description: Método HTTP no permitido (Solo se permiten GET y HEAD)
+      headers:
+        Allow:
+          schema:
+            type: string
+            example: GET, HEAD
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: Method Not Allowed

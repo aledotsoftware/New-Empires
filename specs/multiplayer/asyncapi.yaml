@@ -1,0 +1,157 @@
+asyncapi: 2.6.0
+info:
+  title: New Empires Multiplayer WebSocket API Specification
+  version: 1.1.0
+  description: >
+    Especificación de eventos y canales AsyncAPI v2.6 para la capa multijugador en tiempo real
+    de New Empires sobre WebSockets / Socket.io. Soporta arquitectura de comandos Lockstep,
+    heartbeats ping/pong y sincronización delta de estado.
+
+servers:
+  production:
+    url: ws://localhost:{port}
+    protocol: ws
+    description: Servidor de partidas multijugador en tiempo real
+    variables:
+      port:
+        default: "3000"
+
+channels:
+  room/{roomId}:
+    parameters:
+      roomId:
+        schema:
+          type: string
+          example: room-alpha-99
+    subscribe:
+      summary: Eventos recibidos por los clientes en la sala de partida
+      message:
+        oneOf:
+          - $ref: '#/components/messages/GameStateDelta'
+          - $ref: '#/components/messages/PlayerCommandBroadcast'
+          - $ref: '#/components/messages/HeartbeatPong'
+          - $ref: '#/components/messages/DesyncAlert'
+          - $ref: '#/components/messages/ChatMessage'
+    publish:
+      summary: Comandos enviados por los jugadores al servidor
+      message:
+        oneOf:
+          - $ref: '#/components/messages/PlayerCommand'
+          - $ref: '#/components/messages/HeartbeatPing'
+          - $ref: '#/components/messages/SendChatMessage'
+
+components:
+  messages:
+    PlayerCommand:
+      name: playerCommand
+      title: Comando del Jugador
+      summary: Envío de órdenes de selección, movimiento, ataque o construcción
+      payload:
+        type: object
+        required:
+          - commandId
+          - playerId
+          - type
+          - tick
+        properties:
+          commandId:
+            type: string
+            format: uuid
+          playerId:
+            type: string
+          type:
+            type: string
+            enum: [MOVE, ATTACK, BUILD, TRAIN_UNIT, RESEARCH, CANCEL_TRAINING]
+          tick:
+            type: integer
+            description: Número de tick de simulación en que fue generado el comando
+          payload:
+            type: object
+            description: Parámetros del comando (ej. targetX, targetY, entityIds, buildingType)
+
+    PlayerCommandBroadcast:
+      name: playerCommandBroadcast
+      title: Difusión de Comando
+      summary: Retransmisión del comando a todos los clientes sincronizados en la sala
+      payload:
+        $ref: '#/components/messages/PlayerCommand/payload'
+
+    GameStateDelta:
+      name: gameStateDelta
+      title: Sincronización Delta de Estado
+      summary: Actualización periódica de estado del mapa, recursos y simulación
+      payload:
+        type: object
+        required:
+          - tick
+          - crc32Checksum
+          - entities
+        properties:
+          tick:
+            type: integer
+          crc32Checksum:
+            type: string
+            description: Hash de integridad de simulación para detección de desync
+          entities:
+            type: array
+            items:
+              type: object
+              properties:
+                id: { type: string }
+                x: { type: number }
+                y: { type: number }
+                hp: { type: integer }
+                state: { type: string }
+
+    HeartbeatPing:
+      name: heartbeatPing
+      title: Ping de Latencia
+      payload:
+        type: object
+        required: [clientTime]
+        properties:
+          clientTime: { type: integer }
+
+    HeartbeatPong:
+      name: heartbeatPong
+      title: Respuesta Pong
+      payload:
+        type: object
+        required: [clientTime, serverTime]
+        properties:
+          clientTime: { type: integer }
+          serverTime: { type: integer }
+
+    DesyncAlert:
+      name: desyncAlert
+      title: Alerta de Desincronización
+      payload:
+        type: object
+        required: [tick, expectedCrc, receivedCrc]
+        properties:
+          tick: { type: integer }
+          expectedCrc: { type: string }
+          receivedCrc: { type: string }
+
+    SendChatMessage:
+      name: sendChatMessage
+      title: Mensaje de Chat Saliente
+      payload:
+        type: object
+        required: [message]
+        properties:
+          message:
+            type: string
+            maxLength: 255
+
+    ChatMessage:
+      name: chatMessage
+      title: Mensaje de Chat Recibido
+      payload:
+        type: object
+        required: [senderId, senderName, message, timestamp]
+        properties:
+          senderId: { type: string }
+          senderName: { type: string }
+          message: { type: string }
+          timestamp: { type: integer }

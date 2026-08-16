@@ -1,1 +1,0 @@
-Improved UI/UX contrast and feedback to reduce player uncertainty during production limit blocks. Replaced repetitive document DOM queries with cached pointers and extracted intensive JS inline CSS modifications into reusable static classes inside medieval-theme.css. Verified modifications via E2E playwright snapshot capture and backend benchmarking.

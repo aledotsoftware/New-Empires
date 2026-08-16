@@ -178,45 +178,40 @@ body.cursor-mine {
 }
 
 /* ==========================================
-   4. COMPONENTES DE MARCO MEDIEVAL
+   4. COMPONENTES DE MARCO MEDIEVAL (MEDIEVAL KINGDOM)
    ========================================== */
 
-/* Marco estilo piedra tallada - Medieval Glassmorphism */
+/* Marco estilo piedra tallada - Medieval Kingdom */
 .frame-stone {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--stone-medium) 70%, rgba(26, 22, 18, 0.8)), color-mix(in srgb, var(--stone-dark) 85%, rgba(0, 0, 0, 0.9)));
-    backdrop-filter: blur(var(--glass-blur-base));
-    -webkit-backdrop-filter: blur(var(--glass-blur-base));
-    border: var(--border-thick) solid var(--stone-light);
+    background: linear-gradient(180deg, #322b22 0%, #1c1712 100%);
+    border: var(--border-thick) solid #524a3a;
     border-radius: var(--radius-medium);
     box-shadow:
-        var(--shadow-medium),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+        0 10px 25px rgba(0, 0, 0, 0.9),
+        inset 0 0 0 1px rgba(212, 175, 55, 0.25),
+        inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* Marco estilo madera - Medieval Glassmorphism */
+/* Marco estilo madera de roble esculpida - Medieval Kingdom */
 .frame-wood {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--wood-medium) 75%, rgba(44, 36, 28, 0.85)), color-mix(in srgb, var(--wood-dark) 90%, rgba(0, 0, 0, 0.9)));
-    backdrop-filter: blur(var(--glass-blur-base));
-    -webkit-backdrop-filter: blur(var(--glass-blur-base));
-    border: var(--border-thick) solid var(--wood-light);
+    background: linear-gradient(180deg, #3c2e21 0%, #1f1710 100%);
+    border: var(--border-thick) solid #5c4d3d;
     border-radius: var(--radius-medium);
     box-shadow:
-        var(--shadow-medium),
+        0 10px 25px rgba(0, 0, 0, 0.9),
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.4);
+        inset 0 -3px 0 rgba(0, 0, 0, 0.7);
 }
 
-/* Marco dorado decorativo - Medieval Glassmorphism */
+/* Marco dorado forjado - Medieval Kingdom */
 .frame-gold {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--stone-dark) 65%, rgba(26, 22, 18, 0.9)), color-mix(in srgb, var(--stone-darkest) 85%, rgba(0, 0, 0, 0.95)));
-    backdrop-filter: blur(var(--glass-blur-heavy));
-    -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
+    background: linear-gradient(180deg, #2a2218 0%, #120e0a 100%);
     border: var(--border-medium) solid var(--civ-theme-primary);
     box-shadow:
         0 0 0 1px var(--civ-theme-primary-dark),
         0 0 20px var(--civ-theme-accent),
-        var(--shadow-medium);
+        0 8px 32px rgba(0, 0, 0, 0.9),
+        inset 0 0 10px rgba(212, 175, 55, 0.2);
 }
 
 /* === TEMAS POR CIVILIZACIÓN === */

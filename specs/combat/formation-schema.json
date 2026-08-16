@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Tactical Formation Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición Data-Driven de formaciones tácticas de combate.",
+  "type": "object",
+  "required": [
+    "formationId",
+    "name",
+    "icon",
+    "spacing",
+    "vanguardTags",
+    "rearGuardTags",
+    "offsetCalculator"
+  ],
+  "properties": {
+    "formationId": {
+      "type": "string",
+      "description": "Identificador único de la formación (ej. line, column, box, wedge, circle, staggered, flank)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado de la formación táctica"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Ruta del icono de la formación (mapea a assets/icons/{formationId}.png)"
+    },
+    "spacing": {
+      "type": "number",
+      "minimum": 10.0,
+      "description": "Distancia en píxeles entre posiciones de la grilla táctica"
+    },
+    "vanguardTags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Etiquetas de armadura/ataque priorizadas para la primera línea (ej. ['melee', 'heavy_cavalry', 'unarmored'])"
+    },
+    "rearGuardTags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Etiquetas priorizadas para la segunda línea o centro protegido (ej. ['piercing', 'ranged', 'support_healing'])"
+    },
+    "offsetCalculator": {
+      "type": "object",
+      "required": ["pattern"],
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "enum": ["grid_matrix", "linear_row", "single_column", "concentric_circle", "v_shape_wedge", "split_flanks"]
+        },
+        "spreadMultiplier": { "type": "number", "default": 1.0 }
+      }
+    }
+  }
+}

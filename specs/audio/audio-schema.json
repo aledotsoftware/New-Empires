@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Audio & Sound Event Schema",
+  "description": "Contrato de esquema JSON obligatorio para el catálogo Data-Driven de efectos de sonido, alertas y música por bioma.",
+  "type": "object",
+  "required": [
+    "eventId",
+    "category",
+    "soundFiles"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Identificador del evento sonoro (ej. unit_select, attack_swing, gather_gold, building_complete, alert_pop)"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["ui", "combat", "economy", "ambient", "music", "alerts"]
+    },
+    "soundFiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Rutas de archivos de audio para selección aleatoria/variabilidad (ej. ['assets/sounds/sword1.wav', 'assets/sounds/sword2.wav'])"
+    },
+    "volume": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 1.0
+    },
+    "pitchJitter": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 0.5,
+      "default": 0.05,
+      "description": "Variación aleatoria de tono para prevenir monotonía auditiva"
+    },
+    "synthFallback": {
+      "type": "object",
+      "description": "Parámetros del sintetizador Web Audio API si el archivo MP3/WAV no está cargado",
+      "properties": {
+        "frequency": { "type": "number" },
+        "type": { "type": "string", "enum": ["sine", "square", "sawtooth", "triangle"] },
+        "duration": { "type": "number" }
+      }
+    }
+  }
+}

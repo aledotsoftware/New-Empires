@@ -1,61 +1,23 @@
 # ===========================================
-# New Empires - Docker Compose for Dockploy
-# Strategy Game - Node.js Static Server
+# New Empires - Local Docker Compose
+# RTS Game - Node.js Static Server
 # ===========================================
 
 services:
-  newempire-pss-txn-01:
+  game:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: newempire-pss-txn-01
+    container_name: new-empires
     restart: unless-stopped
-
-    # Publish port to host
     ports:
-      - "8099:8099"
-
-    # Environment variables
+      - "3005:3000"
     environment:
       - NODE_ENV=production
-      - PORT=8099
-
-    # Healthcheck
+      - PORT=3000
     healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8099/" ]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:3000/ || exit 1" ]
+      interval: 15s
+      timeout: 5s
       retries: 3
-      start_period: 10s
-
-    # Resources
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 64M
-
-    # Logging
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-    # Labels for Dockploy/Traefik
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.newempire-pss-txn-01.rule=Host(`newempire-pss-txn-01.tudexnetworks.com`)"
-      - "traefik.http.routers.newempire-pss-txn-01.entrypoints=web"
-      - "traefik.http.routers.newempire-pss-txn-01.priority=100"
-      - "traefik.http.services.newempire-pss-txn-01.loadbalancer.server.port=8099"
-
-    networks:
-      - dokploy-network
-
-networks:
-  dokploy-network:
-    external: true
+      start_period: 3s

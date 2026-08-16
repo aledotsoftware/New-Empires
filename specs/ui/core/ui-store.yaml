@@ -1,0 +1,135 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: UI Global State Store Subscription Contract
+description: >
+  Contrato de datos expuestos por el motor del juego hacia la capa de interfaz de usuario.
+  La UI se suscribe de manera reactiva a este esquema sin mutar directamente el motor.
+
+type: object
+required:
+  - gameStatus
+  - resources
+  - population
+  - selection
+  - productionQueue
+  - activeAge
+  - audioEvents
+  - notifications
+
+properties:
+  gameStatus:
+    type: object
+    required: [isPaused, isGameOver, winner, gameTimeSeconds]
+    properties:
+      isPaused:
+        type: boolean
+      isGameOver:
+        type: boolean
+      winner:
+        type: string
+        enum: [player, enemy, null]
+      gameTimeSeconds:
+        type: number
+        description: Tiempo de partida transcurrido en segundos
+
+  resources:
+    type: object
+    required: [wood, food, gold, stone]
+    properties:
+      wood: { type: integer }
+      food: { type: integer }
+      gold: { type: integer }
+      stone: { type: integer }
+
+  population:
+    type: object
+    required: [current, max, limit]
+    properties:
+      current:
+        type: integer
+        description: Número de unidades vivas actuales
+      max:
+        type: integer
+        description: Capacidad soportada por viviendas construidas
+      limit:
+        type: integer
+        description: Límite absoluto configurado (ej. 200)
+
+  selection:
+    type: object
+    required: [count, primaryEntity, entityType, selectionList]
+    properties:
+      count:
+        type: integer
+      primaryEntity:
+        type: object
+        nullable: true
+        properties:
+          id: { type: string }
+          name: { type: string }
+          type: { type: string }
+          hp: { type: integer }
+          maxHp: { type: integer }
+          attackDamage: { type: integer }
+          attackRange: { type: integer }
+          armor: { type: integer }
+          icon: { type: string }
+          state: { type: string }
+      entityType:
+        type: string
+        enum: [single_unit, multiple_units, single_building, resource_node, null]
+      selectionList:
+        type: array
+        items:
+          type: object
+          properties:
+            id: { type: string }
+            type: { type: string }
+            hp: { type: integer }
+
+  productionQueue:
+    type: object
+    required: [buildingId, items, activeProgressRatio]
+    properties:
+      buildingId:
+        type: string
+        nullable: true
+      items:
+        type: array
+        items:
+          type: object
+          properties:
+            id: { type: string }
+            unitType: { type: string }
+            icon: { type: string }
+            progress: { type: number }
+      activeProgressRatio:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+
+  activeAge:
+    type: object
+    required: [id, name, level]
+    properties:
+      id: { type: string }
+      name: { type: string }
+      level: { type: integer }
+
+  audioEvents:
+    type: array
+    items:
+      type: object
+      required: [type, soundName]
+      properties:
+        type: { type: string, enum: [ui_click, alert_pop, alert_attack, gather, build_complete] }
+        soundName: { type: string }
+
+  notifications:
+    type: array
+    items:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [info, warning, combat, resource_empty] }
+        message: { type: string }
+        timestamp: { type: integer }

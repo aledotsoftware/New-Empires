@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Resource Definition Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición de tipos de recursos Data-Driven. Toda recurso se vincula automáticamente con una imagen del mismo nombre (ej. wood -> assets/icons/wood.png).",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "baseGatherRate",
+    "baseMaxCarry",
+    "category"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único del recurso (ej. wood, food, gold, stone, iron, faith, oil)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado legible para la UI"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Ruta del icono opcional. Por defecto se vincula automáticamente a assets/icons/{id}.png"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color hexadecimal/HSL temático de representación en UI"
+    },
+    "baseGatherRate": {
+      "type": "number",
+      "minimum": 0.1,
+      "description": "Tasa base de recolección en unidades por segundo"
+    },
+    "baseMaxCarry": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Capacidad máxima de carga por defecto antes de requerir depósito"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["primary_economic", "secondary_strategic", "rare_special"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Texto explicativo para tooltips de interfaz"
+    }
+  }
+}

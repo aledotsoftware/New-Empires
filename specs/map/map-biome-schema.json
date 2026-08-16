@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Map Biome Generation Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición de biomas y parámetros de generación procedural de mapa.",
+  "type": "object",
+  "required": [
+    "biomeId",
+    "name",
+    "baseTerrainId",
+    "terrainDistribution",
+    "resourceDensity",
+    "decorations"
+  ],
+  "properties": {
+    "biomeId": {
+      "type": "string",
+      "description": "Identificador del bioma de mapa (ej. temperate_grassland, desert_oasis, tundra_snow, volcanic_wasteland)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado del bioma"
+    },
+    "baseTerrainId": {
+      "type": "string",
+      "description": "ID del terreno dominante (ej. grassland)"
+    },
+    "ambientMusic": {
+      "type": "string",
+      "description": "Identificador del evento o pista de música ambiental de fondo"
+    },
+    "terrainDistribution": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["terrainId", "coveragePercentage"],
+        "properties": {
+          "terrainId": { "type": "string" },
+          "coveragePercentage": { "type": "number", "minimum": 0.0, "maximum": 100.0 }
+        }
+      }
+    },
+    "resourceDensity": {
+      "type": "object",
+      "required": ["woodClusters", "goldMines", "stoneMines", "foodSources"],
+      "properties": {
+        "woodClusters": { "type": "integer", "minimum": 0 },
+        "goldMines": { "type": "integer", "minimum": 0 },
+        "stoneMines": { "type": "integer", "minimum": 0 },
+        "foodSources": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "decorations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["decorId", "density"],
+        "properties": {
+          "decorId": { "type": "string" },
+          "density": { "type": "number" }
+        }
+      }
+    }
+  }
+}

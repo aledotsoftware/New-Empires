@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Building Definition Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición de edificios Data-Driven por civilización. Por regla de arquitectura, todo edificio posee automáticamente una imagen/icono asociada con su mismo nombre (ej. casa -> assets/icons/casa.png).",
+  "type": "object",
+  "required": [
+    "id",
+    "civId",
+    "name",
+    "size",
+    "constructionTime",
+    "cost",
+    "baseStats",
+    "tags",
+    "functions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único del edificio (ej. sumeria_barracks, roman_house)"
+    },
+    "civId": {
+      "type": "string",
+      "description": "Identificador de la civilización a la que pertenece el edificio"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado legible para la UI"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Ruta relativa del recurso gráfico/icono opcional de anulación. Por defecto, la UI la vincula dinámicamente con la imagen asociada del mismo nombre (ej. casa -> assets/icons/casa.png)."
+    },
+    "hotkey": {
+      "type": "string",
+      "description": "Tecla de atajo rápida por defecto definida en la data para construir o seleccionar esta estructura (ej. B, H, U)"
+    },
+    "size": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "minimum": 1, "description": "Ancho en tiles de 32px" },
+        "height": { "type": "integer", "minimum": 1, "description": "Alto en tiles de 32px" }
+      }
+    },
+    "constructionTime": {
+      "type": "number",
+      "minimum": 1.0,
+      "description": "Tiempo base de construcción en segundos por 1 aldeano"
+    },
+    "cost": {
+      "type": "object",
+      "required": ["wood", "food", "gold", "stone"],
+      "properties": {
+        "wood": { "type": "integer", "minimum": 0, "description": "Costo de Madera" },
+        "food": { "type": "integer", "minimum": 0, "description": "Costo de Comida" },
+        "gold": { "type": "integer", "minimum": 0, "description": "Costo de Oro" },
+        "stone": { "type": "integer", "minimum": 0, "description": "Costo de Piedra" }
+      }
+    },
+    "baseStats": {
+      "type": "object",
+      "required": ["maxHp", "visionRadius"],
+      "properties": {
+        "maxHp": { "type": "integer", "minimum": 10, "description": "Puntos de vida máximos de la estructura" },
+        "armor": { "type": "integer", "default": 0, "description": "Armadura estática defensiva" },
+        "visionRadius": { "type": "integer", "minimum": 50, "description": "Radio de visión en píxeles" },
+        "attackDamage": { "type": "integer", "default": 0, "description": "Daño de ataque (para edificios defensivos)" },
+        "attackRange": { "type": "integer", "default": 0, "description": "Alcance de ataque (para edificios defensivos)" }
+      }
+    },
+    "tags": {
+      "type": "object",
+      "required": ["armor_tags", "functional_tags"],
+      "properties": {
+        "armor_tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Etiquetas defensivas (ej. building_structure, wood_structure, stone_structure, fortified)"
+        },
+        "functional_tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Etiquetas de función (ej. town_center, military_barracks, storage_dropoff, housing, market)"
+        }
+      }
+    },
+    "functions": {
+      "type": "object",
+      "required": ["populationHousing", "trainsUnits", "researchesTechs", "storageTypes"],
+      "properties": {
+        "populationHousing": {
+          "type": "integer",
+          "default": 0,
+          "description": "Capacidad de población que aporta el edificio (ej. +5 para casa)"
+        },
+        "trainsUnits": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lista de IDs de unidades entrenables en este edificio"
+        },
+        "researchesTechs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lista de IDs de tecnologías investigables en este edificio"
+        },
+        "storageTypes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Recursos aceptados para depósito (ej. ['wood', 'food', 'gold', 'stone'])"
+        }
+      }
+    }
+  }
+}

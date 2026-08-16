@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Technology Definition Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición de tecnologías e investigaciones Data-Driven.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "category",
+    "ageLevel",
+    "researchTime",
+    "cost",
+    "prerequisites",
+    "effects"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único de la tecnología (ej. iron_working, crop_rotation)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado legible para la UI"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Ruta del icono opcional. Por defecto mapea a assets/icons/{id}.png"
+    },
+    "hotkey": {
+      "type": "string",
+      "description": "Tecla de atajo rápida por defecto definida en la data para investigar esta tecnología (ej. T, R, U)"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["tools", "agriculture", "economy", "architecture", "military", "defense", "culture"]
+    },
+    "ageLevel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "description": "Nivel de edad histórica requerida"
+    },
+    "researchTime": {
+      "type": "number",
+      "minimum": 1.0,
+      "description": "Tiempo de investigación en segundos"
+    },
+    "cost": {
+      "type": "object",
+      "required": ["wood", "food", "gold", "stone"],
+      "properties": {
+        "wood": { "type": "integer", "minimum": 0 },
+        "food": { "type": "integer", "minimum": 0 },
+        "gold": { "type": "integer", "minimum": 0 },
+        "stone": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Lista de IDs de tecnologías requeridas previamente"
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["targetType", "stat", "modifierType", "value"],
+        "properties": {
+          "targetType": { "type": "string", "description": "Tag de unidad/edificio objetivo o 'all'" },
+          "stat": { "type": "string", "description": "Atributo afectado (ej. attackDamage, maxHp, gatherRate, armor)" },
+          "modifierType": { "type": "string", "enum": ["add", "multiply"] },
+          "value": { "type": "number" }
+        }
+      }
+    }
+  }
+}

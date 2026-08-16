@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dynamic Terrain Definition Schema",
+  "description": "Contrato de esquema JSON obligatorio para la definición Data-Driven de tipos de terreno, fricción, transitabilidad y bonificaciones.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "color",
+    "buildable",
+    "impassable",
+    "movementSpeedMultiplier",
+    "constructionSpeedMultiplier",
+    "combatModifiers"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único del terreno (ej. grassland, forest, water, mountain, hill, desert, swamp, snow)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre localizado legible para la UI"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color hexadecimal de representación en minimapa y renderizado"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Textura/icono opcional del terreno (mapea por defecto a assets/terrains/{id}.png)"
+    },
+    "buildable": {
+      "type": "boolean",
+      "description": "Indica si se pueden colocar cimientos de edificios sobre este terreno"
+    },
+    "impassable": {
+      "type": "boolean",
+      "description": "Indica si es infranqueable para unidades terrestres"
+    },
+    "requiresBoat": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indica si se requiere unidad acuática para transitar"
+    },
+    "movementSpeedMultiplier": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "description": "Multiplicador de velocidad de movimiento (ej. 0.6 = -40% velocidad)"
+    },
+    "constructionSpeedMultiplier": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 2.0,
+      "description": "Multiplicador de velocidad de construcción de cimientos"
+    },
+    "combatModifiers": {
+      "type": "object",
+      "description": "Bonificaciones cruzadas de combate aplicadas a unidades sobre este terreno",
+      "properties": {
+        "defenseMultiplier": { "type": "number", "default": 1.0 },
+        "attackMultiplierByTag": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Multiplicador de ataque filtrado por attack_tag de la unidad (ej. archer_range: 1.2 en colina)"
+        }
+      }
+    },
+    "yieldsResources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tipos de recursos que pueden spawnear sobre este terreno"
+    }
+  }
+}

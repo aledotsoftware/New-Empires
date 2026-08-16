@@ -2695,6 +2695,7 @@ export class Game {
         if (!this.populationManager.canAddPopulation(1, totalQueuedUnits)) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
             this.flashResource('population');
+            if (soundManager) soundManager.playError();
             return;
         }
 
@@ -2757,6 +2758,7 @@ export class Game {
         if (!this.populationManager.canAddPopulation(1, totalQueuedUnits)) {
             this.showNotification('Límite de población alcanzado. Construye más casas.', 'error');
             this.flashResource('population');
+            if (soundManager) soundManager.playError();
             return;
         }
 

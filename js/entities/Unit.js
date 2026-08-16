@@ -464,21 +464,28 @@ export class Unit extends Entity {
         if (distSq <= attackRangeSq && this.attackCooldown <= 0) {
             let damage = this.attackDamage;
 
-            if (target.defense && target.defense > 1) {
-                damage /= target.defense;
-            }
+            // 1. Matriz de Combate Data-Driven por Tags (unit-schema.json & building-schema.json)
+            let tagMultiplier = 1.0;
+            const attackTags = this.tags?.attack_tags || [this.type || 'melee'];
+            const armorTags = target.tags?.armor_tags || (target.isBuilding ? ['building_structure'] : [target.type || 'unarmored']);
 
-            // Combat Triangle / Bonus System
-            // Usamos baseType de la unidad (ej. kamayuk es spearman) si type original no está mapeado
+            if (attackTags.includes('anti_cavalry') && armorTags.includes('cavalry')) tagMultiplier *= 2.0;
+            if (attackTags.includes('anti_building') && armorTags.includes('building_structure')) tagMultiplier *= 2.5;
+            if (attackTags.includes('piercing') && armorTags.includes('unarmored')) tagMultiplier *= 1.25;
+            if (attackTags.includes('siege_damage') && armorTags.includes('stone_structure')) tagMultiplier *= 3.0;
+
+            // Combat Triangle / Fallback por tipos
             const myType = COMBAT_BONUSES[this.type] ? this.type : (this.baseType || this.type);
             const targetRealType = target.isBuilding ? 'building' : target.type;
             const targetType = COMBAT_BONUSES[targetRealType] ? targetRealType : (target.baseType || targetRealType);
 
-            if (COMBAT_BONUSES[myType]) {
-                if (COMBAT_BONUSES[myType][targetType]) {
-                    damage *= COMBAT_BONUSES[myType][targetType];
-                }
+            if (COMBAT_BONUSES[myType] && COMBAT_BONUSES[myType][targetType]) {
+                tagMultiplier *= COMBAT_BONUSES[myType][targetType];
             }
+
+            damage *= tagMultiplier;
+            const defenderArmor = target.armor || 0;
+            damage = Math.max(1, Math.floor(damage - defenderArmor));
 
             // Aplicar bonificaciones de terreno si el juego está disponible
             if (game && game.terrainMap) {

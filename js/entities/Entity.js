@@ -54,12 +54,18 @@ export class Entity {
     }
 
     loadIcon() {
-        if (!this.type) return;
+        if (!this.type && !this.id) return;
 
-        // If this.icon is a specific path (not a generic name), use it as the key
-        const loadKey = (this.icon && (this.icon.includes('/') || this.icon.includes('.'))) ? this.icon : this.type;
-        
-        const preloadedImage = assetLoader.getImage(loadKey);
+        // Convención implícita Data-Driven de imagen por nombre:
+        // Si icon se omite o no es una ruta explícita, se vincula automáticamente a assets/icons/{id|type}.png
+        let iconPath = this.icon;
+        if (!iconPath) {
+            const nameKey = (this.id || this.type || '').toLowerCase();
+            iconPath = `assets/icons/${nameKey}.png`;
+        }
+
+        const loadKey = (iconPath.includes('/') || iconPath.includes('.')) ? iconPath : `assets/icons/${iconPath}.png`;
+        const preloadedImage = assetLoader.getImage(loadKey) || assetLoader.getImage(this.type);
         if (preloadedImage) {
             this.image = preloadedImage;
         }

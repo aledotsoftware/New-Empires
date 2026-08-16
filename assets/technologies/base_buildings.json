@@ -1,18 +1,20 @@
 {
     "metadata": {
-        "version": "1.0.0",
-        "description": "Edificios base del juego - Pueden ser renombrados por cada civilizacion"
+        "version": "1.1.0",
+        "description": "Edificios base del juego - Especificación Data-Driven (building-schema.json)"
     },
     "buildings": [
         {
             "id": "house",
             "baseName": "Casa",
-            "baseIcon": "assets/icons/house.png",
             "baseDescription": "Proporciona espacio de poblacion.",
             "type": "housing",
-            "cost": {
-                "wood": 30
+            "hotkey": "H",
+            "tags": {
+                "armor_tags": ["building_structure", "wood_structure"],
+                "functional_tags": ["population_housing"]
             },
+            "cost": { "wood": 30, "food": 0, "gold": 0, "stone": 0 },
             "buildTime": 10,
             "maxHp": 500,
             "size": 30,
@@ -22,152 +24,135 @@
         {
             "id": "townCenter",
             "baseName": "Centro Urbano",
-            "baseIcon": "assets/icons/townCenter.png",
             "baseDescription": "Centro administrativo y productivo de la civilizacion.",
             "type": "production",
-            "cost": {
-                "wood": 275,
-                "stone": 100
+            "hotkey": "H",
+            "tags": {
+                "armor_tags": ["building_structure", "stone_structure", "fortified"],
+                "functional_tags": ["main_headquarters", "storage_all", "military_barracks"]
             },
+            "cost": { "wood": 275, "food": 0, "gold": 0, "stone": 100 },
             "buildTime": 60,
             "maxHp": 2000,
             "size": 60,
             "populationProvided": 0,
             "availableFromAge": 1,
-            "canProduce": [
-                "villager"
-            ],
-            "canResearch": [
-                "generalTechnologies"
-            ]
+            "canProduce": ["villager"],
+            "canResearch": ["generalTechnologies"]
         },
         {
             "id": "barracks",
             "baseName": "Cuartel",
-            "baseIcon": "assets/icons/barracks.png",
             "baseDescription": "Entrena unidades militares terrestres.",
             "type": "military",
-            "cost": {
-                "wood": 175
+            "hotkey": "B",
+            "tags": {
+                "armor_tags": ["building_structure", "wood_structure"],
+                "functional_tags": ["military_barracks"]
             },
+            "cost": { "wood": 175, "food": 0, "gold": 0, "stone": 0 },
             "buildTime": 30,
             "maxHp": 1200,
             "size": 50,
             "populationProvided": 0,
             "availableFromAge": 3,
-            "canProduce": [
-                "warrior",
-                "archer"
-            ],
-            "canResearch": [
-                "militaryTechnologies"
-            ]
+            "canProduce": ["warrior", "archer", "spearman", "cavalry"],
+            "canResearch": ["militaryTechnologies"]
         },
         {
             "id": "storage",
             "baseName": "Deposito",
-            "baseIcon": "assets/icons/storage.png",
             "baseDescription": "Almacena recursos y permite investigar tecnologias economicas.",
             "type": "economy",
-            "cost": {
-                "wood": 100
+            "hotkey": "S",
+            "tags": {
+                "armor_tags": ["building_structure", "wood_structure"],
+                "functional_tags": ["storage_all", "storage_dropoff"]
             },
+            "cost": { "wood": 100, "food": 0, "gold": 0, "stone": 0 },
             "buildTime": 20,
             "maxHp": 800,
             "size": 40,
             "populationProvided": 0,
             "availableFromAge": 1,
             "canProduce": [],
-            "canResearch": [
-                "economicTechnologies"
-            ]
+            "canResearch": ["economicTechnologies"]
         },
         {
             "id": "storageWood",
             "baseName": "Deposito de Madera",
-            "baseIcon": "assets/icons/storageWood.png",
             "baseDescription": "Almacena recursos y permite investigar tecnologias economicas.",
             "type": "economy",
-            "cost": {
-                "wood": 100,
-                "stone": 50
+            "hotkey": "W",
+            "tags": {
+                "armor_tags": ["building_structure", "wood_structure"],
+                "functional_tags": ["storage_wood", "storage_dropoff"]
             },
+            "cost": { "wood": 100, "food": 0, "gold": 0, "stone": 50 },
             "buildTime": 20,
             "maxHp": 800,
             "size": 40,
             "populationProvided": 0,
             "availableFromAge": 1,
             "canProduce": [],
-            "canResearch": [
-                "economicTechnologies"
-            ]
+            "canResearch": ["economicTechnologies"]
         },
         {
             "id": "market",
             "baseName": "Mercado",
-            "baseIcon": "assets/icons/market.png",
             "baseDescription": "Permite comerciar recursos.",
             "type": "economy",
-            "cost": {
-                "wood": 150,
-                "stone": 50
+            "hotkey": "M",
+            "tags": {
+                "armor_tags": ["building_structure", "wood_structure"],
+                "functional_tags": ["market_trade"]
             },
+            "cost": { "wood": 150, "food": 0, "gold": 0, "stone": 50 },
             "buildTime": 25,
             "maxHp": 1000,
             "size": 45,
             "populationProvided": 0,
             "availableFromAge": 12,
-            "canProduce": [
-                "trader"
-            ],
-            "canResearch": [
-                "tradeTechnologies"
-            ]
+            "canProduce": ["trader"],
+            "canResearch": ["tradeTechnologies"]
         },
         {
             "id": "temple",
             "baseName": "Templo",
-            "baseIcon": "assets/icons/temple.png",
             "baseDescription": "Centro religioso y cultural.",
             "type": "culture",
-            "cost": {
-                "wood": 200,
-                "gold": 100
+            "hotkey": "T",
+            "tags": {
+                "armor_tags": ["building_structure", "stone_structure"],
+                "functional_tags": ["religious_temple"]
             },
+            "cost": { "wood": 200, "food": 0, "gold": 100, "stone": 0 },
             "buildTime": 40,
             "maxHp": 1500,
             "size": 55,
             "populationProvided": 0,
             "availableFromAge": 14,
-            "canProduce": [
-                "priest"
-            ],
-            "canResearch": [
-                "culturalTechnologies"
-            ]
+            "canProduce": ["priest"],
+            "canResearch": ["culturalTechnologies"]
         },
         {
             "id": "workshop",
             "baseName": "Taller",
-            "baseIcon": "assets/icons/workshop.png",
             "baseDescription": "Produce maquinaria de asedio.",
             "type": "military",
-            "cost": {
-                "wood": 200,
-                "gold": 50
+            "hotkey": "K",
+            "tags": {
+                "armor_tags": ["building_structure", "wood_structure"],
+                "functional_tags": ["siege_workshop"]
             },
+            "cost": { "wood": 200, "food": 0, "gold": 50, "stone": 0 },
             "buildTime": 35,
             "maxHp": 1100,
             "size": 50,
             "populationProvided": 0,
             "availableFromAge": 22,
-            "canProduce": [
-                "batteringRam",
-                "catapult"
-            ],
-            "canResearch": [
-                "siegeTechnologies"
-            ]
+            "canProduce": ["batteringRam", "catapult"],
+            "canResearch": ["siegeTechnologies"]
         }
     ]
 }

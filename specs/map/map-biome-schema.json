@@ -32,31 +32,64 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["terrainId", "coveragePercentage"],
+        "required": [
+          "terrainId",
+          "coveragePercentage"
+        ],
         "properties": {
-          "terrainId": { "type": "string" },
-          "coveragePercentage": { "type": "number", "minimum": 0.0, "maximum": 100.0 }
+          "terrainId": {
+            "type": "string"
+          },
+          "coveragePercentage": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 100.0
+          }
         }
       }
     },
     "resourceDensity": {
       "type": "object",
-      "required": ["woodClusters", "goldMines", "stoneMines", "foodSources"],
+      "required": [
+        "woodClusters",
+        "goldMines",
+        "stoneMines",
+        "foodSources"
+      ],
       "properties": {
-        "woodClusters": { "type": "integer", "minimum": 0 },
-        "goldMines": { "type": "integer", "minimum": 0 },
-        "stoneMines": { "type": "integer", "minimum": 0 },
-        "foodSources": { "type": "integer", "minimum": 0 }
+        "woodClusters": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "goldMines": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stoneMines": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "foodSources": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "decorations": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["decorId", "density"],
+        "required": [
+          "decorId",
+          "density"
+        ],
         "properties": {
-          "decorId": { "type": "string" },
-          "density": { "type": "number" }
+          "decorId": {
+            "type": "string"
+          },
+          "density": {
+            "type": "number"
+          }
         }
       }
     }

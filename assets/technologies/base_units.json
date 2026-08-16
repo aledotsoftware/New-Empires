@@ -1,18 +1,20 @@
 {
     "metadata": {
-        "version": "1.0.0",
-        "description": "Unidades base del juego - Pueden ser renombradas por cada civilizacion"
+        "version": "1.1.0",
+        "description": "Unidades base del juego - Especificación Data-Driven (unit-schema.json)"
     },
     "units": [
         {
             "id": "villager",
             "baseName": "Aldeano",
-            "baseIcon": "assets/icons/villager.png",
             "baseDescription": "Recolecta recursos y construye edificios.",
             "type": "civilian",
-            "cost": {
-                "food": 50
+            "hotkey": "V",
+            "tags": {
+                "attack_tags": ["melee", "civilian"],
+                "armor_tags": ["unarmored", "civilian"]
             },
+            "cost": { "wood": 0, "food": 50, "gold": 0, "stone": 0 },
             "trainTime": 10,
             "maxHp": 50,
             "attackDamage": 3,
@@ -22,22 +24,19 @@
             "lineOfSight": 4,
             "populationCost": 1,
             "availableFromAge": 1,
-            "abilities": [
-                "gather",
-                "build",
-                "attack"
-            ]
+            "abilities": ["gather", "build", "attack"]
         },
         {
             "id": "warrior",
             "baseName": "Guerrero",
-            "baseIcon": "assets/icons/warrior.png",
             "baseDescription": "Unidad de infanteria basica.",
             "type": "melee",
-            "cost": {
-                "food": 60,
-                "gold": 20
+            "hotkey": "Q",
+            "tags": {
+                "attack_tags": ["melee", "infantry"],
+                "armor_tags": ["infantry", "medium_armor"]
             },
+            "cost": { "wood": 0, "food": 60, "gold": 20, "stone": 0 },
             "trainTime": 15,
             "maxHp": 100,
             "attackDamage": 10,
@@ -47,21 +46,19 @@
             "lineOfSight": 5,
             "populationCost": 1,
             "availableFromAge": 3,
-            "abilities": [
-                "attack"
-            ]
+            "abilities": ["attack"]
         },
         {
             "id": "archer",
             "baseName": "Arquero",
-            "baseIcon": "assets/icons/archer.png",
             "baseDescription": "Unidad de rango basica.",
             "type": "ranged",
-            "cost": {
-                "food": 30,
-                "wood": 25,
-                "gold": 15
+            "hotkey": "W",
+            "tags": {
+                "attack_tags": ["piercing", "ranged"],
+                "armor_tags": ["unarmored", "ranged"]
             },
+            "cost": { "wood": 25, "food": 30, "gold": 15, "stone": 0 },
             "trainTime": 12,
             "maxHp": 60,
             "attackDamage": 8,
@@ -71,20 +68,19 @@
             "lineOfSight": 6,
             "populationCost": 1,
             "availableFromAge": 3,
-            "abilities": [
-                "attack"
-            ]
+            "abilities": ["attack"]
         },
         {
             "id": "cavalry",
             "baseName": "Caballeria",
-            "baseIcon": "assets/icons/warrior.png",
             "baseDescription": "Unidad montada rapida.",
             "type": "cavalry",
-            "cost": {
-                "food": 80,
-                "gold": 40
+            "hotkey": "E",
+            "tags": {
+                "attack_tags": ["melee", "cavalry_charge"],
+                "armor_tags": ["cavalry", "heavy_armor"]
             },
+            "cost": { "wood": 0, "food": 80, "gold": 40, "stone": 0 },
             "trainTime": 20,
             "maxHp": 120,
             "attackDamage": 12,
@@ -94,21 +90,19 @@
             "lineOfSight": 6,
             "populationCost": 2,
             "availableFromAge": 17,
-            "abilities": [
-                "attack",
-                "charge"
-            ]
+            "abilities": ["attack", "charge"]
         },
         {
             "id": "spearman",
             "baseName": "Lancero",
-            "baseIcon": "assets/icons/warrior.png",
             "baseDescription": "Infanteria con lanza, efectiva contra caballeria.",
             "type": "melee",
-            "cost": {
-                "food": 50,
-                "wood": 30
+            "hotkey": "R",
+            "tags": {
+                "attack_tags": ["anti_cavalry", "piercing"],
+                "armor_tags": ["infantry", "unarmored"]
             },
+            "cost": { "wood": 30, "food": 50, "gold": 0, "stone": 0 },
             "trainTime": 14,
             "maxHp": 90,
             "attackDamage": 9,
@@ -118,22 +112,19 @@
             "lineOfSight": 5,
             "populationCost": 1,
             "availableFromAge": 10,
-            "abilities": [
-                "attack"
-            ],
-            "bonusVs": {
-                "cavalry": 2.0
-            }
+            "abilities": ["attack"]
         },
         {
             "id": "scout",
             "baseName": "Explorador",
-            "baseIcon": "assets/icons/villager.png",
             "baseDescription": "Unidad rapida de exploracion.",
             "type": "cavalry",
-            "cost": {
-                "food": 60
+            "hotkey": "S",
+            "tags": {
+                "attack_tags": ["scout_recon"],
+                "armor_tags": ["cavalry", "light_armor"]
             },
+            "cost": { "wood": 0, "food": 60, "gold": 0, "stone": 0 },
             "trainTime": 10,
             "maxHp": 70,
             "attackDamage": 5,
@@ -143,21 +134,19 @@
             "lineOfSight": 10,
             "populationCost": 1,
             "availableFromAge": 8,
-            "abilities": [
-                "scout",
-                "attack"
-            ]
+            "abilities": ["scout", "attack"]
         },
         {
             "id": "priest",
             "baseName": "Sacerdote",
-            "baseIcon": "assets/icons/villager.png",
             "baseDescription": "Unidad de soporte que cura y convierte.",
             "type": "support",
-            "cost": {
-                "food": 100,
-                "gold": 100
+            "hotkey": "T",
+            "tags": {
+                "attack_tags": ["conversion_faith"],
+                "armor_tags": ["cloth_robe", "support"]
             },
+            "cost": { "wood": 0, "food": 100, "gold": 100, "stone": 0 },
             "trainTime": 30,
             "maxHp": 50,
             "attackDamage": 0,
@@ -167,21 +156,19 @@
             "lineOfSight": 7,
             "populationCost": 1,
             "availableFromAge": 14,
-            "abilities": [
-                "heal",
-                "convert"
-            ]
+            "abilities": ["heal", "convert"]
         },
         {
             "id": "trader",
             "baseName": "Comerciante",
-            "baseIcon": "assets/icons/gold.png",
             "baseDescription": "Genera oro mediante rutas comerciales.",
             "type": "civilian",
-            "cost": {
-                "food": 70,
-                "wood": 50
+            "hotkey": "C",
+            "tags": {
+                "attack_tags": ["none"],
+                "armor_tags": ["civilian", "unarmored"]
             },
+            "cost": { "wood": 50, "food": 70, "gold": 0, "stone": 0 },
             "trainTime": 25,
             "maxHp": 60,
             "attackDamage": 0,
@@ -191,9 +178,7 @@
             "lineOfSight": 5,
             "populationCost": 1,
             "availableFromAge": 12,
-            "abilities": [
-                "trade"
-            ]
+            "abilities": ["trade"]
         }
     ]
 }
